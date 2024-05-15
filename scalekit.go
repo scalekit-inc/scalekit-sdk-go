@@ -41,13 +41,15 @@ type scalekit struct {
 }
 
 type AuthorizationUrlOptions struct {
-	ConnectionId   string
-	OrganizationId string
-	Scopes         []string
-	State          string
-	Nonce          string
-	DomainHint     string
-	LoginHint      string
+	ConnectionId        string
+	OrganizationId      string
+	Scopes              []string
+	State               string
+	Nonce               string
+	DomainHint          string
+	LoginHint           string
+	CodeChallenge       string
+	CodeChallengeMethod string
 }
 
 type AuthenticationOptions struct {
@@ -142,6 +144,12 @@ func (s *scalekit) GetAuthorizationUrl(redirectUri string, options Authorization
 	}
 	if options.OrganizationId != "" {
 		qs.Set("organization_id", options.OrganizationId)
+	}
+	if options.CodeChallenge != "" {
+		qs.Set("code_challenge", options.CodeChallenge)
+	}
+	if options.CodeChallengeMethod != "" {
+		qs.Set("code_challenge_method", options.CodeChallengeMethod)
 	}
 
 	url, err := url.Parse(fmt.Sprintf("%s/%s", s.coreClient.envUrl, authorizeEndpoint))
