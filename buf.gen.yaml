@@ -1,0 +1,23 @@
+version: v1
+managed:
+  enabled: true
+  go_package_prefix:
+    default: "github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc"
+    except:
+      - buf.build/googleapis/googleapis
+      - buf.build/grpc-ecosystem/grpc-gateway
+      - buf.build/bufbuild/protovalidate
+plugins:
+  - plugin: go
+    opt: paths=source_relative
+    out: pkg/grpc
+  - plugin: connect-go
+    opt: paths=source_relative
+    out: pkg/grpc
+    
+types:
+  include:
+    - scalekit.v1.errdetails
+    - scalekit.v1.connections
+    - scalekit.v1.domains
+    - scalekit.v1.organizations
