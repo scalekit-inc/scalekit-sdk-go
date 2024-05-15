@@ -38,10 +38,13 @@ func main() {
   )
 
   // Use the sc object to interact with the Scalekit API
-  authUrl, _ := sc.GetAuthorizationUrl("https://acme-corp.com/redirect-uri", AuthorizationUrlOptions{
-		State: "state",
-		ConnectionId:   "connection_id",
-	})
+  authUrl, _ := sc.GetAuthorizationUrl(
+		"https://acme-corp.com/redirect-uri",
+		scalekit.AuthorizationUrlOptions{
+			State: "state",
+			ConnectionId: "con_123456789",
+		},
+	)
 }
 
 ```
