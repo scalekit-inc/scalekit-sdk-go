@@ -2,12 +2,12 @@ package scalekit
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 	"strings"
 
 	"github.com/go-jose/go-jose/v4"
-	"github.com/go-oauth2/oauth2/v4/errors"
 )
 
 const authorizeEndpoint = "oauth/authorize"
@@ -33,7 +33,7 @@ type Scalekit interface {
 	ValidateAccessToken(accessToken string) (bool, error)
 }
 
-type scalekit struct {
+type scalekitClient struct {
 	coreClient   *coreClient
 	connection   Connection
 	domain       Domain
@@ -94,9 +94,9 @@ type Identity struct {
 	ProviderRawAttributes string `json:"provider_raw_attributes"`
 }
 
-func NewScalekit(envUrl, clientId, clientSecret string) Scalekit {
+func NewScalekitClient(envUrl, clientId, clientSecret string) Scalekit {
 	coreClient := newCoreClient(envUrl, clientId, clientSecret)
-	return &scalekit{
+	return &scalekitClient{
 		coreClient:   coreClient,
 		connection:   newConnectionClient(coreClient),
 		domain:       newDomainClient(coreClient),
@@ -104,20 +104,20 @@ func NewScalekit(envUrl, clientId, clientSecret string) Scalekit {
 	}
 }
 
-func (s *scalekit) Connection() Connection {
+func (s *scalekitClient) Connection() Connection {
 	return s.connection
 }
 
-func (s *scalekit) Domain() Domain {
+func (s *scalekitClient) Domain() Domain {
 	return s.domain
 }
 
-func (s *scalekit) Organization() Organization {
+func (s *scalekitClient) Organization() Organization {
 	return s.organization
 }
 
-func (s *scalekit) GetAuthorizationUrl(redirectUri string, options AuthorizationUrlOptions) (*url.URL, error) {
-	scopes := []string{"openid", "profile"}
+func (s *scalekitClient) GetAuthorizationUrl(redirectUri string, options AuthorizationUrlOptions) (*url.URL, error) {
+	scopes := []string{"openid", "profile", "email"}
 	if options.Scopes != nil {
 		scopes = options.Scopes[:]
 	}
@@ -152,15 +152,16 @@ func (s *scalekit) GetAuthorizationUrl(redirectUri string, options Authorization
 		qs.Set("code_challenge_method", options.CodeChallengeMethod)
 	}
 
-	url, err := url.Parse(fmt.Sprintf("%s/%s", s.coreClient.envUrl, authorizeEndpoint))
+	parsedUrl, err := url.Parse(fmt.Sprintf("%s/%s", s.coreClient.envUrl, authorizeEndpoint))
 	if err != nil {
 		return nil, err
 	}
-	url.RawQuery = qs.Encode()
-	return url, nil
+	parsedUrl.RawQuery = qs.Encode()
+
+	return parsedUrl, nil
 }
 
-func (s *scalekit) AuthenticateWithCode(
+func (s *scalekitClient) AuthenticateWithCode(
 	code string,
 	redirectUri string,
 	options AuthenticationOptions,
@@ -199,7 +200,7 @@ func (s *scalekit) AuthenticateWithCode(
 	}, nil
 }
 
-func (s *scalekit) ValidateAccessToken(accessToken string) (bool, error) {
+func (s *scalekitClient) ValidateAccessToken(accessToken string) (bool, error) {
 	err := s.coreClient.getJwks()
 	if err != nil {
 		return false, err
