@@ -9,11 +9,14 @@ import (
 
 type ListConnectionsResponse = connectionsv1.ListConnectionsResponse
 type GetConnectionResponse = connectionsv1.GetConnectionResponse
+type ToggleConnectionResponse = connectionsv1.ToggleConnectionResponse
 
 type Connection interface {
 	GetConnection(ctx context.Context, id string, organizationId string) (*GetConnectionResponse, error)
 	ListConnectionsByDomain(ctx context.Context, domain string) (*ListConnectionsResponse, error)
 	ListConnections(ctx context.Context, organizationId string) (*ListConnectionsResponse, error)
+	EnableConnection(ctx context.Context, organizationId string, id string) (*ToggleConnectionResponse, error)
+	DisableConnection(ctx context.Context, organizationId string, id string) (*ToggleConnectionResponse, error)
 }
 
 type connection struct {
@@ -28,7 +31,7 @@ func newConnectionClient(coreClient *coreClient) Connection {
 	}
 }
 
-func (c *connection) GetConnection(ctx context.Context, id string, organizationId string) (*GetConnectionResponse, error) {
+func (c *connection) GetConnection(ctx context.Context, organizationId string, id string) (*GetConnectionResponse, error) {
 	return newConnectExecuter(
 		c.coreClient,
 		c.client.GetConnection,
@@ -59,6 +62,32 @@ func (c *connection) ListConnections(ctx context.Context, organizationId string)
 		c.client.ListConnections,
 		&connectionsv1.ListConnectionsRequest{
 			Identities: &connectionsv1.ListConnectionsRequest_OrganizationId{
+				OrganizationId: organizationId,
+			},
+		},
+	).exec(ctx)
+}
+
+func (c *connection) EnableConnection(ctx context.Context, organizationId string, id string) (*ToggleConnectionResponse, error) {
+	return newConnectExecuter(
+		c.coreClient,
+		c.client.EnableConnection,
+		&connectionsv1.ToggleConnectionRequest{
+			Id: id,
+			Identities: &connectionsv1.ToggleConnectionRequest_OrganizationId{
+				OrganizationId: organizationId,
+			},
+		},
+	).exec(ctx)
+}
+
+func (c *connection) DisableConnection(ctx context.Context, organizationId string, id string) (*ToggleConnectionResponse, error) {
+	return newConnectExecuter(
+		c.coreClient,
+		c.client.DisableConnection,
+		&connectionsv1.ToggleConnectionRequest{
+			Id: id,
+			Identities: &connectionsv1.ToggleConnectionRequest_OrganizationId{
 				OrganizationId: organizationId,
 			},
 		},
