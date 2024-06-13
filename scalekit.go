@@ -60,6 +60,7 @@ type AuthenticationResponse struct {
 	User        User
 	IdToken     string
 	AccessToken string
+	ExpiresIn   int
 }
 
 type IdTokenClaims struct {
@@ -125,7 +126,7 @@ func (s *scalekitClient) GetAuthorizationUrl(redirectUri string, options Authori
 	qs.Set("response_type", "code")
 	qs.Set("client_id", s.coreClient.clientId)
 	qs.Set("redirect_uri", redirectUri)
-	qs.Set("scope", strings.Join(scopes[:], " "))
+	qs.Set("scope", strings.Join(scopes, " "))
 	if options.State != "" {
 		qs.Set("state", options.State)
 	}
@@ -178,13 +179,13 @@ func (s *scalekitClient) AuthenticateWithCode(
 	if options.CodeVerifier != "" {
 		qs.Add("code_verifier", options.CodeVerifier)
 	}
-	responseData, err := s.coreClient.authenticate(qs)
+	authResp, err := s.coreClient.authenticate(qs)
 	if err != nil {
 		return nil, err
 	}
 
 	var claims IdTokenClaims
-	jws, err := jose.ParseSigned(responseData.IdToken, []jose.SignatureAlgorithm{jose.RS256})
+	jws, err := jose.ParseSigned(authResp.IdToken, []jose.SignatureAlgorithm{jose.RS256})
 	if err != nil {
 		return nil, err
 	}
@@ -195,8 +196,9 @@ func (s *scalekitClient) AuthenticateWithCode(
 
 	return &AuthenticationResponse{
 		User:        claims,
-		IdToken:     responseData.IdToken,
-		AccessToken: responseData.AccessToken,
+		IdToken:     authResp.IdToken,
+		AccessToken: authResp.AccessToken,
+		ExpiresIn:   authResp.ExpiresIn,
 	}, nil
 }
 
