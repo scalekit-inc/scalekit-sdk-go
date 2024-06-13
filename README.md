@@ -117,7 +117,12 @@ Fully functional sample applications written using some popular web application 
 
 ## API Reference
 
-See the [Scalekit API docs](https://docs.scalekit.com) for more information about the API and authentication.
+Refer to our [API reference docs](https://docs.scalekit.com/apis) for detailed information about all our API endpoints and their usage.
+
+## More Information
+
+- Quickstart Guide to implement Single Sign-on in your application: [SSO Quickstart Guide](https://docs.scalekit.com)
+- Understand Single Sign-on basics: [SSO Basics](https://docs.scalekit.com/best-practices/single-sign-on)
 
 ## License
 
