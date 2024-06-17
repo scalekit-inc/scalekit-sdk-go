@@ -108,7 +108,7 @@ func main() {
 }
 ```
 
-## Sample Apps
+## Example Apps
 
 Fully functional sample applications written using some popular web application frameworks and Scalekit SDK. Feel free to clone the repo and run them locally
 
