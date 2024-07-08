@@ -50,6 +50,7 @@ type AuthorizationUrlOptions struct {
 	LoginHint           string
 	CodeChallenge       string
 	CodeChallengeMethod string
+	Provider            string
 }
 
 type AuthenticationOptions struct {
@@ -151,6 +152,9 @@ func (s *scalekitClient) GetAuthorizationUrl(redirectUri string, options Authori
 	}
 	if options.CodeChallengeMethod != "" {
 		qs.Set("code_challenge_method", options.CodeChallengeMethod)
+	}
+	if options.Provider != "" {
+		qs.Set("provider", options.Provider)
 	}
 
 	parsedUrl, err := url.Parse(fmt.Sprintf("%s/%s", s.coreClient.envUrl, authorizeEndpoint))
