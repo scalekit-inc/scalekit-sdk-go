@@ -49,9 +49,9 @@ func (h *httpError) Error() string {
 }
 
 func (h *headerInterceptor) RoundTrip(r *http.Request) (*http.Response, error) {
-	r.Header.Add("User-Agent", h.client.userAgent)
-	r.Header.Add("X-Sdk-Version", h.client.sdkVersion)
-	r.Header.Add("X-Api-Version", h.client.apiVersion)
+	r.Header.Add("user-agent", h.client.userAgent)
+	r.Header.Add("x-sdk-version", h.client.sdkVersion)
+	r.Header.Add("x-api-version", h.client.apiVersion)
 	if h.client.accessToken != nil {
 		r.Header.Add("Authorization", fmt.Sprintf("Bearer %s", *h.client.accessToken))
 	}
