@@ -36,10 +36,8 @@ func (c *connection) GetConnection(ctx context.Context, organizationId string, i
 		c.coreClient,
 		c.client.GetConnection,
 		&connectionsv1.GetConnectionRequest{
-			Id: id,
-			Identities: &connectionsv1.GetConnectionRequest_OrganizationId{
-				OrganizationId: organizationId,
-			},
+			Id:             id,
+			OrganizationId: organizationId,
 		},
 	).exec(ctx)
 }
@@ -49,9 +47,7 @@ func (c *connection) ListConnectionsByDomain(ctx context.Context, domain string)
 		c.coreClient,
 		c.client.ListConnections,
 		&connectionsv1.ListConnectionsRequest{
-			Identities: &connectionsv1.ListConnectionsRequest_Domain{
-				Domain: domain,
-			},
+			Domain: &domain,
 		},
 	).exec(ctx)
 }
@@ -61,9 +57,7 @@ func (c *connection) ListConnections(ctx context.Context, organizationId string)
 		c.coreClient,
 		c.client.ListConnections,
 		&connectionsv1.ListConnectionsRequest{
-			Identities: &connectionsv1.ListConnectionsRequest_OrganizationId{
-				OrganizationId: organizationId,
-			},
+			OrganizationId: &organizationId,
 		},
 	).exec(ctx)
 }
@@ -73,10 +67,8 @@ func (c *connection) EnableConnection(ctx context.Context, organizationId string
 		c.coreClient,
 		c.client.EnableConnection,
 		&connectionsv1.ToggleConnectionRequest{
-			Id: id,
-			Identities: &connectionsv1.ToggleConnectionRequest_OrganizationId{
-				OrganizationId: organizationId,
-			},
+			Id:             id,
+			OrganizationId: organizationId,
 		},
 	).exec(ctx)
 }
@@ -86,10 +78,8 @@ func (c *connection) DisableConnection(ctx context.Context, organizationId strin
 		c.coreClient,
 		c.client.DisableConnection,
 		&connectionsv1.ToggleConnectionRequest{
-			Id: id,
-			Identities: &connectionsv1.ToggleConnectionRequest_OrganizationId{
-				OrganizationId: organizationId,
-			},
+			Id:             id,
+			OrganizationId: organizationId,
 		},
 	).exec(ctx)
 }

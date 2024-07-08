@@ -34,24 +34,45 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
+	// ConnectionServiceGetProvidersProcedure is the fully-qualified name of the ConnectionService's
+	// GetProviders RPC.
+	ConnectionServiceGetProvidersProcedure = "/scalekit.v1.connections.ConnectionService/GetProviders"
+	// ConnectionServiceCreateEnvironmentConnectionProcedure is the fully-qualified name of the
+	// ConnectionService's CreateEnvironmentConnection RPC.
+	ConnectionServiceCreateEnvironmentConnectionProcedure = "/scalekit.v1.connections.ConnectionService/CreateEnvironmentConnection"
 	// ConnectionServiceCreateConnectionProcedure is the fully-qualified name of the ConnectionService's
 	// CreateConnection RPC.
 	ConnectionServiceCreateConnectionProcedure = "/scalekit.v1.connections.ConnectionService/CreateConnection"
+	// ConnectionServiceGetEnvironmentConnectionProcedure is the fully-qualified name of the
+	// ConnectionService's GetEnvironmentConnection RPC.
+	ConnectionServiceGetEnvironmentConnectionProcedure = "/scalekit.v1.connections.ConnectionService/GetEnvironmentConnection"
 	// ConnectionServiceGetConnectionProcedure is the fully-qualified name of the ConnectionService's
 	// GetConnection RPC.
 	ConnectionServiceGetConnectionProcedure = "/scalekit.v1.connections.ConnectionService/GetConnection"
 	// ConnectionServiceListConnectionsProcedure is the fully-qualified name of the ConnectionService's
 	// ListConnections RPC.
 	ConnectionServiceListConnectionsProcedure = "/scalekit.v1.connections.ConnectionService/ListConnections"
+	// ConnectionServiceUpdateEnvironmentConnectionProcedure is the fully-qualified name of the
+	// ConnectionService's UpdateEnvironmentConnection RPC.
+	ConnectionServiceUpdateEnvironmentConnectionProcedure = "/scalekit.v1.connections.ConnectionService/UpdateEnvironmentConnection"
 	// ConnectionServiceUpdateConnectionProcedure is the fully-qualified name of the ConnectionService's
 	// UpdateConnection RPC.
 	ConnectionServiceUpdateConnectionProcedure = "/scalekit.v1.connections.ConnectionService/UpdateConnection"
+	// ConnectionServiceDeleteEnvironmentConnectionProcedure is the fully-qualified name of the
+	// ConnectionService's DeleteEnvironmentConnection RPC.
+	ConnectionServiceDeleteEnvironmentConnectionProcedure = "/scalekit.v1.connections.ConnectionService/DeleteEnvironmentConnection"
 	// ConnectionServiceDeleteConnectionProcedure is the fully-qualified name of the ConnectionService's
 	// DeleteConnection RPC.
 	ConnectionServiceDeleteConnectionProcedure = "/scalekit.v1.connections.ConnectionService/DeleteConnection"
+	// ConnectionServiceEnableEnvironmentConnectionProcedure is the fully-qualified name of the
+	// ConnectionService's EnableEnvironmentConnection RPC.
+	ConnectionServiceEnableEnvironmentConnectionProcedure = "/scalekit.v1.connections.ConnectionService/EnableEnvironmentConnection"
 	// ConnectionServiceEnableConnectionProcedure is the fully-qualified name of the ConnectionService's
 	// EnableConnection RPC.
 	ConnectionServiceEnableConnectionProcedure = "/scalekit.v1.connections.ConnectionService/EnableConnection"
+	// ConnectionServiceDisableEnvironmentConnectionProcedure is the fully-qualified name of the
+	// ConnectionService's DisableEnvironmentConnection RPC.
+	ConnectionServiceDisableEnvironmentConnectionProcedure = "/scalekit.v1.connections.ConnectionService/DisableEnvironmentConnection"
 	// ConnectionServiceDisableConnectionProcedure is the fully-qualified name of the
 	// ConnectionService's DisableConnection RPC.
 	ConnectionServiceDisableConnectionProcedure = "/scalekit.v1.connections.ConnectionService/DisableConnection"
@@ -59,24 +80,38 @@ const (
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
 var (
-	connectionServiceServiceDescriptor                 = connections.File_scalekit_v1_connections_connections_proto.Services().ByName("ConnectionService")
-	connectionServiceCreateConnectionMethodDescriptor  = connectionServiceServiceDescriptor.Methods().ByName("CreateConnection")
-	connectionServiceGetConnectionMethodDescriptor     = connectionServiceServiceDescriptor.Methods().ByName("GetConnection")
-	connectionServiceListConnectionsMethodDescriptor   = connectionServiceServiceDescriptor.Methods().ByName("ListConnections")
-	connectionServiceUpdateConnectionMethodDescriptor  = connectionServiceServiceDescriptor.Methods().ByName("UpdateConnection")
-	connectionServiceDeleteConnectionMethodDescriptor  = connectionServiceServiceDescriptor.Methods().ByName("DeleteConnection")
-	connectionServiceEnableConnectionMethodDescriptor  = connectionServiceServiceDescriptor.Methods().ByName("EnableConnection")
-	connectionServiceDisableConnectionMethodDescriptor = connectionServiceServiceDescriptor.Methods().ByName("DisableConnection")
+	connectionServiceServiceDescriptor                            = connections.File_scalekit_v1_connections_connections_proto.Services().ByName("ConnectionService")
+	connectionServiceGetProvidersMethodDescriptor                 = connectionServiceServiceDescriptor.Methods().ByName("GetProviders")
+	connectionServiceCreateEnvironmentConnectionMethodDescriptor  = connectionServiceServiceDescriptor.Methods().ByName("CreateEnvironmentConnection")
+	connectionServiceCreateConnectionMethodDescriptor             = connectionServiceServiceDescriptor.Methods().ByName("CreateConnection")
+	connectionServiceGetEnvironmentConnectionMethodDescriptor     = connectionServiceServiceDescriptor.Methods().ByName("GetEnvironmentConnection")
+	connectionServiceGetConnectionMethodDescriptor                = connectionServiceServiceDescriptor.Methods().ByName("GetConnection")
+	connectionServiceListConnectionsMethodDescriptor              = connectionServiceServiceDescriptor.Methods().ByName("ListConnections")
+	connectionServiceUpdateEnvironmentConnectionMethodDescriptor  = connectionServiceServiceDescriptor.Methods().ByName("UpdateEnvironmentConnection")
+	connectionServiceUpdateConnectionMethodDescriptor             = connectionServiceServiceDescriptor.Methods().ByName("UpdateConnection")
+	connectionServiceDeleteEnvironmentConnectionMethodDescriptor  = connectionServiceServiceDescriptor.Methods().ByName("DeleteEnvironmentConnection")
+	connectionServiceDeleteConnectionMethodDescriptor             = connectionServiceServiceDescriptor.Methods().ByName("DeleteConnection")
+	connectionServiceEnableEnvironmentConnectionMethodDescriptor  = connectionServiceServiceDescriptor.Methods().ByName("EnableEnvironmentConnection")
+	connectionServiceEnableConnectionMethodDescriptor             = connectionServiceServiceDescriptor.Methods().ByName("EnableConnection")
+	connectionServiceDisableEnvironmentConnectionMethodDescriptor = connectionServiceServiceDescriptor.Methods().ByName("DisableEnvironmentConnection")
+	connectionServiceDisableConnectionMethodDescriptor            = connectionServiceServiceDescriptor.Methods().ByName("DisableConnection")
 )
 
 // ConnectionServiceClient is a client for the scalekit.v1.connections.ConnectionService service.
 type ConnectionServiceClient interface {
+	GetProviders(context.Context, *connect.Request[connections.GetProvidersRequest]) (*connect.Response[connections.GetProvidersResponse], error)
+	CreateEnvironmentConnection(context.Context, *connect.Request[connections.CreateEnvironmentConnectionRequest]) (*connect.Response[connections.CreateConnectionResponse], error)
 	CreateConnection(context.Context, *connect.Request[connections.CreateConnectionRequest]) (*connect.Response[connections.CreateConnectionResponse], error)
+	GetEnvironmentConnection(context.Context, *connect.Request[connections.GetEnvironmentConnectionRequest]) (*connect.Response[connections.GetConnectionResponse], error)
 	GetConnection(context.Context, *connect.Request[connections.GetConnectionRequest]) (*connect.Response[connections.GetConnectionResponse], error)
 	ListConnections(context.Context, *connect.Request[connections.ListConnectionsRequest]) (*connect.Response[connections.ListConnectionsResponse], error)
+	UpdateEnvironmentConnection(context.Context, *connect.Request[connections.UpdateEnvironmentConnectionRequest]) (*connect.Response[connections.UpdateConnectionResponse], error)
 	UpdateConnection(context.Context, *connect.Request[connections.UpdateConnectionRequest]) (*connect.Response[connections.UpdateConnectionResponse], error)
+	DeleteEnvironmentConnection(context.Context, *connect.Request[connections.DeleteEnvironmentConnectionRequest]) (*connect.Response[emptypb.Empty], error)
 	DeleteConnection(context.Context, *connect.Request[connections.DeleteConnectionRequest]) (*connect.Response[emptypb.Empty], error)
+	EnableEnvironmentConnection(context.Context, *connect.Request[connections.ToggleEnvironmentConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error)
 	EnableConnection(context.Context, *connect.Request[connections.ToggleConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error)
+	DisableEnvironmentConnection(context.Context, *connect.Request[connections.ToggleEnvironmentConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error)
 	DisableConnection(context.Context, *connect.Request[connections.ToggleConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error)
 }
 
@@ -90,10 +125,28 @@ type ConnectionServiceClient interface {
 func NewConnectionServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) ConnectionServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &connectionServiceClient{
+		getProviders: connect.NewClient[connections.GetProvidersRequest, connections.GetProvidersResponse](
+			httpClient,
+			baseURL+ConnectionServiceGetProvidersProcedure,
+			connect.WithSchema(connectionServiceGetProvidersMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+		createEnvironmentConnection: connect.NewClient[connections.CreateEnvironmentConnectionRequest, connections.CreateConnectionResponse](
+			httpClient,
+			baseURL+ConnectionServiceCreateEnvironmentConnectionProcedure,
+			connect.WithSchema(connectionServiceCreateEnvironmentConnectionMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 		createConnection: connect.NewClient[connections.CreateConnectionRequest, connections.CreateConnectionResponse](
 			httpClient,
 			baseURL+ConnectionServiceCreateConnectionProcedure,
 			connect.WithSchema(connectionServiceCreateConnectionMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+		getEnvironmentConnection: connect.NewClient[connections.GetEnvironmentConnectionRequest, connections.GetConnectionResponse](
+			httpClient,
+			baseURL+ConnectionServiceGetEnvironmentConnectionProcedure,
+			connect.WithSchema(connectionServiceGetEnvironmentConnectionMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
 		getConnection: connect.NewClient[connections.GetConnectionRequest, connections.GetConnectionResponse](
@@ -108,10 +161,22 @@ func NewConnectionServiceClient(httpClient connect.HTTPClient, baseURL string, o
 			connect.WithSchema(connectionServiceListConnectionsMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		updateEnvironmentConnection: connect.NewClient[connections.UpdateEnvironmentConnectionRequest, connections.UpdateConnectionResponse](
+			httpClient,
+			baseURL+ConnectionServiceUpdateEnvironmentConnectionProcedure,
+			connect.WithSchema(connectionServiceUpdateEnvironmentConnectionMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 		updateConnection: connect.NewClient[connections.UpdateConnectionRequest, connections.UpdateConnectionResponse](
 			httpClient,
 			baseURL+ConnectionServiceUpdateConnectionProcedure,
 			connect.WithSchema(connectionServiceUpdateConnectionMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+		deleteEnvironmentConnection: connect.NewClient[connections.DeleteEnvironmentConnectionRequest, emptypb.Empty](
+			httpClient,
+			baseURL+ConnectionServiceDeleteEnvironmentConnectionProcedure,
+			connect.WithSchema(connectionServiceDeleteEnvironmentConnectionMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
 		deleteConnection: connect.NewClient[connections.DeleteConnectionRequest, emptypb.Empty](
@@ -120,10 +185,22 @@ func NewConnectionServiceClient(httpClient connect.HTTPClient, baseURL string, o
 			connect.WithSchema(connectionServiceDeleteConnectionMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		enableEnvironmentConnection: connect.NewClient[connections.ToggleEnvironmentConnectionRequest, connections.ToggleConnectionResponse](
+			httpClient,
+			baseURL+ConnectionServiceEnableEnvironmentConnectionProcedure,
+			connect.WithSchema(connectionServiceEnableEnvironmentConnectionMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 		enableConnection: connect.NewClient[connections.ToggleConnectionRequest, connections.ToggleConnectionResponse](
 			httpClient,
 			baseURL+ConnectionServiceEnableConnectionProcedure,
 			connect.WithSchema(connectionServiceEnableConnectionMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+		disableEnvironmentConnection: connect.NewClient[connections.ToggleEnvironmentConnectionRequest, connections.ToggleConnectionResponse](
+			httpClient,
+			baseURL+ConnectionServiceDisableEnvironmentConnectionProcedure,
+			connect.WithSchema(connectionServiceDisableEnvironmentConnectionMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
 		disableConnection: connect.NewClient[connections.ToggleConnectionRequest, connections.ToggleConnectionResponse](
@@ -137,18 +214,42 @@ func NewConnectionServiceClient(httpClient connect.HTTPClient, baseURL string, o
 
 // connectionServiceClient implements ConnectionServiceClient.
 type connectionServiceClient struct {
-	createConnection  *connect.Client[connections.CreateConnectionRequest, connections.CreateConnectionResponse]
-	getConnection     *connect.Client[connections.GetConnectionRequest, connections.GetConnectionResponse]
-	listConnections   *connect.Client[connections.ListConnectionsRequest, connections.ListConnectionsResponse]
-	updateConnection  *connect.Client[connections.UpdateConnectionRequest, connections.UpdateConnectionResponse]
-	deleteConnection  *connect.Client[connections.DeleteConnectionRequest, emptypb.Empty]
-	enableConnection  *connect.Client[connections.ToggleConnectionRequest, connections.ToggleConnectionResponse]
-	disableConnection *connect.Client[connections.ToggleConnectionRequest, connections.ToggleConnectionResponse]
+	getProviders                 *connect.Client[connections.GetProvidersRequest, connections.GetProvidersResponse]
+	createEnvironmentConnection  *connect.Client[connections.CreateEnvironmentConnectionRequest, connections.CreateConnectionResponse]
+	createConnection             *connect.Client[connections.CreateConnectionRequest, connections.CreateConnectionResponse]
+	getEnvironmentConnection     *connect.Client[connections.GetEnvironmentConnectionRequest, connections.GetConnectionResponse]
+	getConnection                *connect.Client[connections.GetConnectionRequest, connections.GetConnectionResponse]
+	listConnections              *connect.Client[connections.ListConnectionsRequest, connections.ListConnectionsResponse]
+	updateEnvironmentConnection  *connect.Client[connections.UpdateEnvironmentConnectionRequest, connections.UpdateConnectionResponse]
+	updateConnection             *connect.Client[connections.UpdateConnectionRequest, connections.UpdateConnectionResponse]
+	deleteEnvironmentConnection  *connect.Client[connections.DeleteEnvironmentConnectionRequest, emptypb.Empty]
+	deleteConnection             *connect.Client[connections.DeleteConnectionRequest, emptypb.Empty]
+	enableEnvironmentConnection  *connect.Client[connections.ToggleEnvironmentConnectionRequest, connections.ToggleConnectionResponse]
+	enableConnection             *connect.Client[connections.ToggleConnectionRequest, connections.ToggleConnectionResponse]
+	disableEnvironmentConnection *connect.Client[connections.ToggleEnvironmentConnectionRequest, connections.ToggleConnectionResponse]
+	disableConnection            *connect.Client[connections.ToggleConnectionRequest, connections.ToggleConnectionResponse]
+}
+
+// GetProviders calls scalekit.v1.connections.ConnectionService.GetProviders.
+func (c *connectionServiceClient) GetProviders(ctx context.Context, req *connect.Request[connections.GetProvidersRequest]) (*connect.Response[connections.GetProvidersResponse], error) {
+	return c.getProviders.CallUnary(ctx, req)
+}
+
+// CreateEnvironmentConnection calls
+// scalekit.v1.connections.ConnectionService.CreateEnvironmentConnection.
+func (c *connectionServiceClient) CreateEnvironmentConnection(ctx context.Context, req *connect.Request[connections.CreateEnvironmentConnectionRequest]) (*connect.Response[connections.CreateConnectionResponse], error) {
+	return c.createEnvironmentConnection.CallUnary(ctx, req)
 }
 
 // CreateConnection calls scalekit.v1.connections.ConnectionService.CreateConnection.
 func (c *connectionServiceClient) CreateConnection(ctx context.Context, req *connect.Request[connections.CreateConnectionRequest]) (*connect.Response[connections.CreateConnectionResponse], error) {
 	return c.createConnection.CallUnary(ctx, req)
+}
+
+// GetEnvironmentConnection calls
+// scalekit.v1.connections.ConnectionService.GetEnvironmentConnection.
+func (c *connectionServiceClient) GetEnvironmentConnection(ctx context.Context, req *connect.Request[connections.GetEnvironmentConnectionRequest]) (*connect.Response[connections.GetConnectionResponse], error) {
+	return c.getEnvironmentConnection.CallUnary(ctx, req)
 }
 
 // GetConnection calls scalekit.v1.connections.ConnectionService.GetConnection.
@@ -161,9 +262,21 @@ func (c *connectionServiceClient) ListConnections(ctx context.Context, req *conn
 	return c.listConnections.CallUnary(ctx, req)
 }
 
+// UpdateEnvironmentConnection calls
+// scalekit.v1.connections.ConnectionService.UpdateEnvironmentConnection.
+func (c *connectionServiceClient) UpdateEnvironmentConnection(ctx context.Context, req *connect.Request[connections.UpdateEnvironmentConnectionRequest]) (*connect.Response[connections.UpdateConnectionResponse], error) {
+	return c.updateEnvironmentConnection.CallUnary(ctx, req)
+}
+
 // UpdateConnection calls scalekit.v1.connections.ConnectionService.UpdateConnection.
 func (c *connectionServiceClient) UpdateConnection(ctx context.Context, req *connect.Request[connections.UpdateConnectionRequest]) (*connect.Response[connections.UpdateConnectionResponse], error) {
 	return c.updateConnection.CallUnary(ctx, req)
+}
+
+// DeleteEnvironmentConnection calls
+// scalekit.v1.connections.ConnectionService.DeleteEnvironmentConnection.
+func (c *connectionServiceClient) DeleteEnvironmentConnection(ctx context.Context, req *connect.Request[connections.DeleteEnvironmentConnectionRequest]) (*connect.Response[emptypb.Empty], error) {
+	return c.deleteEnvironmentConnection.CallUnary(ctx, req)
 }
 
 // DeleteConnection calls scalekit.v1.connections.ConnectionService.DeleteConnection.
@@ -171,9 +284,21 @@ func (c *connectionServiceClient) DeleteConnection(ctx context.Context, req *con
 	return c.deleteConnection.CallUnary(ctx, req)
 }
 
+// EnableEnvironmentConnection calls
+// scalekit.v1.connections.ConnectionService.EnableEnvironmentConnection.
+func (c *connectionServiceClient) EnableEnvironmentConnection(ctx context.Context, req *connect.Request[connections.ToggleEnvironmentConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error) {
+	return c.enableEnvironmentConnection.CallUnary(ctx, req)
+}
+
 // EnableConnection calls scalekit.v1.connections.ConnectionService.EnableConnection.
 func (c *connectionServiceClient) EnableConnection(ctx context.Context, req *connect.Request[connections.ToggleConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error) {
 	return c.enableConnection.CallUnary(ctx, req)
+}
+
+// DisableEnvironmentConnection calls
+// scalekit.v1.connections.ConnectionService.DisableEnvironmentConnection.
+func (c *connectionServiceClient) DisableEnvironmentConnection(ctx context.Context, req *connect.Request[connections.ToggleEnvironmentConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error) {
+	return c.disableEnvironmentConnection.CallUnary(ctx, req)
 }
 
 // DisableConnection calls scalekit.v1.connections.ConnectionService.DisableConnection.
@@ -184,12 +309,19 @@ func (c *connectionServiceClient) DisableConnection(ctx context.Context, req *co
 // ConnectionServiceHandler is an implementation of the scalekit.v1.connections.ConnectionService
 // service.
 type ConnectionServiceHandler interface {
+	GetProviders(context.Context, *connect.Request[connections.GetProvidersRequest]) (*connect.Response[connections.GetProvidersResponse], error)
+	CreateEnvironmentConnection(context.Context, *connect.Request[connections.CreateEnvironmentConnectionRequest]) (*connect.Response[connections.CreateConnectionResponse], error)
 	CreateConnection(context.Context, *connect.Request[connections.CreateConnectionRequest]) (*connect.Response[connections.CreateConnectionResponse], error)
+	GetEnvironmentConnection(context.Context, *connect.Request[connections.GetEnvironmentConnectionRequest]) (*connect.Response[connections.GetConnectionResponse], error)
 	GetConnection(context.Context, *connect.Request[connections.GetConnectionRequest]) (*connect.Response[connections.GetConnectionResponse], error)
 	ListConnections(context.Context, *connect.Request[connections.ListConnectionsRequest]) (*connect.Response[connections.ListConnectionsResponse], error)
+	UpdateEnvironmentConnection(context.Context, *connect.Request[connections.UpdateEnvironmentConnectionRequest]) (*connect.Response[connections.UpdateConnectionResponse], error)
 	UpdateConnection(context.Context, *connect.Request[connections.UpdateConnectionRequest]) (*connect.Response[connections.UpdateConnectionResponse], error)
+	DeleteEnvironmentConnection(context.Context, *connect.Request[connections.DeleteEnvironmentConnectionRequest]) (*connect.Response[emptypb.Empty], error)
 	DeleteConnection(context.Context, *connect.Request[connections.DeleteConnectionRequest]) (*connect.Response[emptypb.Empty], error)
+	EnableEnvironmentConnection(context.Context, *connect.Request[connections.ToggleEnvironmentConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error)
 	EnableConnection(context.Context, *connect.Request[connections.ToggleConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error)
+	DisableEnvironmentConnection(context.Context, *connect.Request[connections.ToggleEnvironmentConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error)
 	DisableConnection(context.Context, *connect.Request[connections.ToggleConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error)
 }
 
@@ -199,10 +331,28 @@ type ConnectionServiceHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewConnectionServiceHandler(svc ConnectionServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	connectionServiceGetProvidersHandler := connect.NewUnaryHandler(
+		ConnectionServiceGetProvidersProcedure,
+		svc.GetProviders,
+		connect.WithSchema(connectionServiceGetProvidersMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	connectionServiceCreateEnvironmentConnectionHandler := connect.NewUnaryHandler(
+		ConnectionServiceCreateEnvironmentConnectionProcedure,
+		svc.CreateEnvironmentConnection,
+		connect.WithSchema(connectionServiceCreateEnvironmentConnectionMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	connectionServiceCreateConnectionHandler := connect.NewUnaryHandler(
 		ConnectionServiceCreateConnectionProcedure,
 		svc.CreateConnection,
 		connect.WithSchema(connectionServiceCreateConnectionMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	connectionServiceGetEnvironmentConnectionHandler := connect.NewUnaryHandler(
+		ConnectionServiceGetEnvironmentConnectionProcedure,
+		svc.GetEnvironmentConnection,
+		connect.WithSchema(connectionServiceGetEnvironmentConnectionMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
 	connectionServiceGetConnectionHandler := connect.NewUnaryHandler(
@@ -217,10 +367,22 @@ func NewConnectionServiceHandler(svc ConnectionServiceHandler, opts ...connect.H
 		connect.WithSchema(connectionServiceListConnectionsMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	connectionServiceUpdateEnvironmentConnectionHandler := connect.NewUnaryHandler(
+		ConnectionServiceUpdateEnvironmentConnectionProcedure,
+		svc.UpdateEnvironmentConnection,
+		connect.WithSchema(connectionServiceUpdateEnvironmentConnectionMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	connectionServiceUpdateConnectionHandler := connect.NewUnaryHandler(
 		ConnectionServiceUpdateConnectionProcedure,
 		svc.UpdateConnection,
 		connect.WithSchema(connectionServiceUpdateConnectionMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	connectionServiceDeleteEnvironmentConnectionHandler := connect.NewUnaryHandler(
+		ConnectionServiceDeleteEnvironmentConnectionProcedure,
+		svc.DeleteEnvironmentConnection,
+		connect.WithSchema(connectionServiceDeleteEnvironmentConnectionMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
 	connectionServiceDeleteConnectionHandler := connect.NewUnaryHandler(
@@ -229,10 +391,22 @@ func NewConnectionServiceHandler(svc ConnectionServiceHandler, opts ...connect.H
 		connect.WithSchema(connectionServiceDeleteConnectionMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	connectionServiceEnableEnvironmentConnectionHandler := connect.NewUnaryHandler(
+		ConnectionServiceEnableEnvironmentConnectionProcedure,
+		svc.EnableEnvironmentConnection,
+		connect.WithSchema(connectionServiceEnableEnvironmentConnectionMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	connectionServiceEnableConnectionHandler := connect.NewUnaryHandler(
 		ConnectionServiceEnableConnectionProcedure,
 		svc.EnableConnection,
 		connect.WithSchema(connectionServiceEnableConnectionMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	connectionServiceDisableEnvironmentConnectionHandler := connect.NewUnaryHandler(
+		ConnectionServiceDisableEnvironmentConnectionProcedure,
+		svc.DisableEnvironmentConnection,
+		connect.WithSchema(connectionServiceDisableEnvironmentConnectionMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
 	connectionServiceDisableConnectionHandler := connect.NewUnaryHandler(
@@ -243,18 +417,32 @@ func NewConnectionServiceHandler(svc ConnectionServiceHandler, opts ...connect.H
 	)
 	return "/scalekit.v1.connections.ConnectionService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
+		case ConnectionServiceGetProvidersProcedure:
+			connectionServiceGetProvidersHandler.ServeHTTP(w, r)
+		case ConnectionServiceCreateEnvironmentConnectionProcedure:
+			connectionServiceCreateEnvironmentConnectionHandler.ServeHTTP(w, r)
 		case ConnectionServiceCreateConnectionProcedure:
 			connectionServiceCreateConnectionHandler.ServeHTTP(w, r)
+		case ConnectionServiceGetEnvironmentConnectionProcedure:
+			connectionServiceGetEnvironmentConnectionHandler.ServeHTTP(w, r)
 		case ConnectionServiceGetConnectionProcedure:
 			connectionServiceGetConnectionHandler.ServeHTTP(w, r)
 		case ConnectionServiceListConnectionsProcedure:
 			connectionServiceListConnectionsHandler.ServeHTTP(w, r)
+		case ConnectionServiceUpdateEnvironmentConnectionProcedure:
+			connectionServiceUpdateEnvironmentConnectionHandler.ServeHTTP(w, r)
 		case ConnectionServiceUpdateConnectionProcedure:
 			connectionServiceUpdateConnectionHandler.ServeHTTP(w, r)
+		case ConnectionServiceDeleteEnvironmentConnectionProcedure:
+			connectionServiceDeleteEnvironmentConnectionHandler.ServeHTTP(w, r)
 		case ConnectionServiceDeleteConnectionProcedure:
 			connectionServiceDeleteConnectionHandler.ServeHTTP(w, r)
+		case ConnectionServiceEnableEnvironmentConnectionProcedure:
+			connectionServiceEnableEnvironmentConnectionHandler.ServeHTTP(w, r)
 		case ConnectionServiceEnableConnectionProcedure:
 			connectionServiceEnableConnectionHandler.ServeHTTP(w, r)
+		case ConnectionServiceDisableEnvironmentConnectionProcedure:
+			connectionServiceDisableEnvironmentConnectionHandler.ServeHTTP(w, r)
 		case ConnectionServiceDisableConnectionProcedure:
 			connectionServiceDisableConnectionHandler.ServeHTTP(w, r)
 		default:
@@ -266,8 +454,20 @@ func NewConnectionServiceHandler(svc ConnectionServiceHandler, opts ...connect.H
 // UnimplementedConnectionServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedConnectionServiceHandler struct{}
 
+func (UnimplementedConnectionServiceHandler) GetProviders(context.Context, *connect.Request[connections.GetProvidersRequest]) (*connect.Response[connections.GetProvidersResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.GetProviders is not implemented"))
+}
+
+func (UnimplementedConnectionServiceHandler) CreateEnvironmentConnection(context.Context, *connect.Request[connections.CreateEnvironmentConnectionRequest]) (*connect.Response[connections.CreateConnectionResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.CreateEnvironmentConnection is not implemented"))
+}
+
 func (UnimplementedConnectionServiceHandler) CreateConnection(context.Context, *connect.Request[connections.CreateConnectionRequest]) (*connect.Response[connections.CreateConnectionResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.CreateConnection is not implemented"))
+}
+
+func (UnimplementedConnectionServiceHandler) GetEnvironmentConnection(context.Context, *connect.Request[connections.GetEnvironmentConnectionRequest]) (*connect.Response[connections.GetConnectionResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.GetEnvironmentConnection is not implemented"))
 }
 
 func (UnimplementedConnectionServiceHandler) GetConnection(context.Context, *connect.Request[connections.GetConnectionRequest]) (*connect.Response[connections.GetConnectionResponse], error) {
@@ -278,16 +478,32 @@ func (UnimplementedConnectionServiceHandler) ListConnections(context.Context, *c
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.ListConnections is not implemented"))
 }
 
+func (UnimplementedConnectionServiceHandler) UpdateEnvironmentConnection(context.Context, *connect.Request[connections.UpdateEnvironmentConnectionRequest]) (*connect.Response[connections.UpdateConnectionResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.UpdateEnvironmentConnection is not implemented"))
+}
+
 func (UnimplementedConnectionServiceHandler) UpdateConnection(context.Context, *connect.Request[connections.UpdateConnectionRequest]) (*connect.Response[connections.UpdateConnectionResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.UpdateConnection is not implemented"))
+}
+
+func (UnimplementedConnectionServiceHandler) DeleteEnvironmentConnection(context.Context, *connect.Request[connections.DeleteEnvironmentConnectionRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.DeleteEnvironmentConnection is not implemented"))
 }
 
 func (UnimplementedConnectionServiceHandler) DeleteConnection(context.Context, *connect.Request[connections.DeleteConnectionRequest]) (*connect.Response[emptypb.Empty], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.DeleteConnection is not implemented"))
 }
 
+func (UnimplementedConnectionServiceHandler) EnableEnvironmentConnection(context.Context, *connect.Request[connections.ToggleEnvironmentConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.EnableEnvironmentConnection is not implemented"))
+}
+
 func (UnimplementedConnectionServiceHandler) EnableConnection(context.Context, *connect.Request[connections.ToggleConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.EnableConnection is not implemented"))
+}
+
+func (UnimplementedConnectionServiceHandler) DisableEnvironmentConnection(context.Context, *connect.Request[connections.ToggleEnvironmentConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.DisableEnvironmentConnection is not implemented"))
 }
 
 func (UnimplementedConnectionServiceHandler) DisableConnection(context.Context, *connect.Request[connections.ToggleConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error) {
