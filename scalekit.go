@@ -2,12 +2,12 @@ package scalekit
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 	"strings"
 
 	"github.com/go-jose/go-jose/v4"
-	"github.com/go-oauth2/oauth2/v4/errors"
 )
 
 const authorizeEndpoint = "oauth/authorize"
@@ -33,7 +33,7 @@ type Scalekit interface {
 	ValidateAccessToken(accessToken string) (bool, error)
 }
 
-type scalekit struct {
+type scalekitClient struct {
 	coreClient   *coreClient
 	connection   Connection
 	domain       Domain
@@ -50,6 +50,7 @@ type AuthorizationUrlOptions struct {
 	LoginHint           string
 	CodeChallenge       string
 	CodeChallengeMethod string
+	Provider            string
 }
 
 type AuthenticationOptions struct {
@@ -60,6 +61,7 @@ type AuthenticationResponse struct {
 	User        User
 	IdToken     string
 	AccessToken string
+	ExpiresIn   int
 }
 
 type IdTokenClaims struct {
@@ -94,9 +96,9 @@ type Identity struct {
 	ProviderRawAttributes string `json:"provider_raw_attributes"`
 }
 
-func NewScalekit(envUrl, clientId, clientSecret string) Scalekit {
+func NewScalekitClient(envUrl, clientId, clientSecret string) Scalekit {
 	coreClient := newCoreClient(envUrl, clientId, clientSecret)
-	return &scalekit{
+	return &scalekitClient{
 		coreClient:   coreClient,
 		connection:   newConnectionClient(coreClient),
 		domain:       newDomainClient(coreClient),
@@ -104,20 +106,20 @@ func NewScalekit(envUrl, clientId, clientSecret string) Scalekit {
 	}
 }
 
-func (s *scalekit) Connection() Connection {
+func (s *scalekitClient) Connection() Connection {
 	return s.connection
 }
 
-func (s *scalekit) Domain() Domain {
+func (s *scalekitClient) Domain() Domain {
 	return s.domain
 }
 
-func (s *scalekit) Organization() Organization {
+func (s *scalekitClient) Organization() Organization {
 	return s.organization
 }
 
-func (s *scalekit) GetAuthorizationUrl(redirectUri string, options AuthorizationUrlOptions) (*url.URL, error) {
-	scopes := []string{"openid", "profile"}
+func (s *scalekitClient) GetAuthorizationUrl(redirectUri string, options AuthorizationUrlOptions) (*url.URL, error) {
+	scopes := []string{"openid", "profile", "email"}
 	if options.Scopes != nil {
 		scopes = options.Scopes[:]
 	}
@@ -125,7 +127,7 @@ func (s *scalekit) GetAuthorizationUrl(redirectUri string, options Authorization
 	qs.Set("response_type", "code")
 	qs.Set("client_id", s.coreClient.clientId)
 	qs.Set("redirect_uri", redirectUri)
-	qs.Set("scope", strings.Join(scopes[:], " "))
+	qs.Set("scope", strings.Join(scopes, " "))
 	if options.State != "" {
 		qs.Set("state", options.State)
 	}
@@ -151,16 +153,20 @@ func (s *scalekit) GetAuthorizationUrl(redirectUri string, options Authorization
 	if options.CodeChallengeMethod != "" {
 		qs.Set("code_challenge_method", options.CodeChallengeMethod)
 	}
+	if options.Provider != "" {
+		qs.Set("provider", options.Provider)
+	}
 
-	url, err := url.Parse(fmt.Sprintf("%s/%s", s.coreClient.envUrl, authorizeEndpoint))
+	parsedUrl, err := url.Parse(fmt.Sprintf("%s/%s", s.coreClient.envUrl, authorizeEndpoint))
 	if err != nil {
 		return nil, err
 	}
-	url.RawQuery = qs.Encode()
-	return url, nil
+	parsedUrl.RawQuery = qs.Encode()
+
+	return parsedUrl, nil
 }
 
-func (s *scalekit) AuthenticateWithCode(
+func (s *scalekitClient) AuthenticateWithCode(
 	code string,
 	redirectUri string,
 	options AuthenticationOptions,
@@ -177,13 +183,13 @@ func (s *scalekit) AuthenticateWithCode(
 	if options.CodeVerifier != "" {
 		qs.Add("code_verifier", options.CodeVerifier)
 	}
-	responseData, err := s.coreClient.authenticate(qs)
+	authResp, err := s.coreClient.authenticate(qs)
 	if err != nil {
 		return nil, err
 	}
 
 	var claims IdTokenClaims
-	jws, err := jose.ParseSigned(responseData.IdToken, []jose.SignatureAlgorithm{jose.RS256})
+	jws, err := jose.ParseSigned(authResp.IdToken, []jose.SignatureAlgorithm{jose.RS256})
 	if err != nil {
 		return nil, err
 	}
@@ -194,12 +200,13 @@ func (s *scalekit) AuthenticateWithCode(
 
 	return &AuthenticationResponse{
 		User:        claims,
-		IdToken:     responseData.IdToken,
-		AccessToken: responseData.AccessToken,
+		IdToken:     authResp.IdToken,
+		AccessToken: authResp.AccessToken,
+		ExpiresIn:   authResp.ExpiresIn,
 	}, nil
 }
 
-func (s *scalekit) ValidateAccessToken(accessToken string) (bool, error) {
+func (s *scalekitClient) ValidateAccessToken(accessToken string) (bool, error) {
 	err := s.coreClient.getJwks()
 	if err != nil {
 		return false, err

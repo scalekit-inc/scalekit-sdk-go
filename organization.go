@@ -17,13 +17,17 @@ type CreateOrganizationOptions struct {
 	ExternalId string
 }
 
+type UpdateOrganization = organizationsv1.UpdateOrganization
+
 type Organization interface {
 	CreateOrganization(ctx context.Context, name string, options CreateOrganizationOptions) (*CreateOrganizationResponse, error)
 	ListOrganization(ctx context.Context) (*ListOrganizationsResponse, error)
 	GetOrganization(ctx context.Context, id string) (*GetOrganizationResponse, error)
 	GetOrganizationByExternalId(ctx context.Context, externalId string) (*GetOrganizationResponse, error)
-	UpdateOrganization(ctx context.Context, id string, organization *organizationsv1.UpdateOrganization) (*UpdateOrganizationResponse, error)
-	UpdateOrganizationByExternalId(ctx context.Context, externalId string, organization *organizationsv1.UpdateOrganization) (*UpdateOrganizationResponse, error)
+	UpdateOrganization(ctx context.Context, id string, organization *UpdateOrganization) (*UpdateOrganizationResponse, error)
+	UpdateOrganizationByExternalId(ctx context.Context, externalId string, organization *UpdateOrganization) (*UpdateOrganizationResponse, error)
+	DeleteOrganization(ctx context.Context, id string) error
+	GeneratePortalLink(ctx context.Context, organizationId string) (*Link, error)
 }
 
 type organization struct {
@@ -83,7 +87,7 @@ func (o *organization) GetOrganizationByExternalId(ctx context.Context, external
 	).exec(ctx)
 }
 
-func (o *organization) UpdateOrganization(ctx context.Context, id string, organization *organizationsv1.UpdateOrganization) (*UpdateOrganizationResponse, error) {
+func (o *organization) UpdateOrganization(ctx context.Context, id string, organization *UpdateOrganization) (*UpdateOrganizationResponse, error) {
 	return newConnectExecuter(
 		o.coreClient,
 		o.client.UpdateOrganization,
@@ -96,7 +100,7 @@ func (o *organization) UpdateOrganization(ctx context.Context, id string, organi
 	).exec(ctx)
 }
 
-func (o *organization) UpdateOrganizationByExternalId(ctx context.Context, externalId string, organization *organizationsv1.UpdateOrganization) (*UpdateOrganizationResponse, error) {
+func (o *organization) UpdateOrganizationByExternalId(ctx context.Context, externalId string, organization *UpdateOrganization) (*UpdateOrganizationResponse, error) {
 	return newConnectExecuter(
 		o.coreClient,
 		o.client.UpdateOrganization,
@@ -109,6 +113,20 @@ func (o *organization) UpdateOrganizationByExternalId(ctx context.Context, exter
 	).exec(ctx)
 }
 
+func (o *organization) DeleteOrganization(ctx context.Context, id string) error {
+	_, err := newConnectExecuter(
+		o.coreClient,
+		o.client.DeleteOrganization,
+		&organizationsv1.DeleteOrganizationRequest{
+			Identities: &organizationsv1.DeleteOrganizationRequest_Id{
+				Id: id,
+			},
+		},
+	).exec(ctx)
+
+	return err
+}
+
 func (o *organization) GeneratePortalLink(ctx context.Context, organizationId string) (*Link, error) {
 	resp, err := newConnectExecuter(
 		o.coreClient,
@@ -119,4 +137,16 @@ func (o *organization) GeneratePortalLink(ctx context.Context, organizationId st
 	).exec(ctx)
 
 	return resp.Link, err
+}
+
+func (o *organization) GetPortalLinks(ctx context.Context, organizationId string) ([]*Link, error) {
+	resp, err := newConnectExecuter(
+		o.coreClient,
+		o.client.GetPortalLinks,
+		&organizationsv1.GetPortalLinkRequest{
+			Id: organizationId,
+		},
+	).exec(ctx)
+
+	return resp.Links, err
 }

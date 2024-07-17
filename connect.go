@@ -47,9 +47,9 @@ func newHeaderInterceptor(c *coreClient) connect.UnaryInterceptorFunc {
 			req connect.AnyRequest,
 		) (connect.AnyResponse, error) {
 			if req.Spec().IsClient {
-				req.Header().Set("User-Agent", c.userAgent)
-				req.Header().Set("X-Sdk-Version", c.sdkVersion)
-				req.Header().Set("X-Api-Version", c.apiVersion)
+				req.Header().Set("user-agent", c.userAgent)
+				req.Header().Set("x-sdk-version", c.sdkVersion)
+				req.Header().Set("x-api-version", c.apiVersion)
 				if c.accessToken != nil {
 					req.Header().Set(
 						"Authorization",
