@@ -12,7 +12,7 @@ type GetConnectionResponse = connectionsv1.GetConnectionResponse
 type ToggleConnectionResponse = connectionsv1.ToggleConnectionResponse
 
 type Connection interface {
-	GetConnection(ctx context.Context, id string, organizationId string) (*GetConnectionResponse, error)
+	GetConnection(ctx context.Context, organizationId string, id string) (*GetConnectionResponse, error)
 	ListConnectionsByDomain(ctx context.Context, domain string) (*ListConnectionsResponse, error)
 	ListConnections(ctx context.Context, organizationId string) (*ListConnectionsResponse, error)
 	EnableConnection(ctx context.Context, organizationId string, id string) (*ToggleConnectionResponse, error)

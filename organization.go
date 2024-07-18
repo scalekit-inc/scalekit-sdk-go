@@ -12,22 +12,24 @@ type GetOrganizationResponse = organizationsv1.GetOrganizationResponse
 type CreateOrganizationResponse = organizationsv1.CreateOrganizationResponse
 type UpdateOrganizationResponse = organizationsv1.UpdateOrganizationResponse
 type Link = organizationsv1.Link
+type UpdateOrganization = organizationsv1.UpdateOrganization
+type ListOrganizationOptions = organizationsv1.ListOrganizationsRequest
 
 type CreateOrganizationOptions struct {
 	ExternalId string
 }
 
-type UpdateOrganization = organizationsv1.UpdateOrganization
-
 type Organization interface {
 	CreateOrganization(ctx context.Context, name string, options CreateOrganizationOptions) (*CreateOrganizationResponse, error)
-	ListOrganization(ctx context.Context) (*ListOrganizationsResponse, error)
+	ListOrganization(ctx context.Context, options *ListOrganizationOptions) (*ListOrganizationsResponse, error)
 	GetOrganization(ctx context.Context, id string) (*GetOrganizationResponse, error)
 	GetOrganizationByExternalId(ctx context.Context, externalId string) (*GetOrganizationResponse, error)
 	UpdateOrganization(ctx context.Context, id string, organization *UpdateOrganization) (*UpdateOrganizationResponse, error)
 	UpdateOrganizationByExternalId(ctx context.Context, externalId string, organization *UpdateOrganization) (*UpdateOrganizationResponse, error)
 	DeleteOrganization(ctx context.Context, id string) error
 	GeneratePortalLink(ctx context.Context, organizationId string) (*Link, error)
+	GetPortalLinks(ctx context.Context, organizationId string) ([]*Link, error)
+	DeletePortalLink(ctx context.Context, organizationId string, linkId string) error
 }
 
 type organization struct {
@@ -55,11 +57,14 @@ func (o *organization) CreateOrganization(ctx context.Context, name string, opti
 	).exec(ctx)
 }
 
-func (o *organization) ListOrganization(ctx context.Context) (*ListOrganizationsResponse, error) {
+func (o *organization) ListOrganization(ctx context.Context, options *ListOrganizationOptions) (*ListOrganizationsResponse, error) {
 	return newConnectExecuter(
 		o.coreClient,
 		o.client.ListOrganization,
-		&organizationsv1.ListOrganizationsRequest{},
+		&organizationsv1.ListOrganizationsRequest{
+			PageSize:  options.PageSize,
+			PageToken: options.PageToken,
+		},
 	).exec(ctx)
 }
 
@@ -149,4 +154,17 @@ func (o *organization) GetPortalLinks(ctx context.Context, organizationId string
 	).exec(ctx)
 
 	return resp.Links, err
+}
+
+func (o *organization) DeletePortalLink(ctx context.Context, organizationId string, linkId string) error {
+	_, err := newConnectExecuter(
+		o.coreClient,
+		o.client.DeletePortalLinkByID,
+		&organizationsv1.DeletePortalLinkByIdRequest{
+			Id:     organizationId,
+			LinkId: linkId,
+		},
+	).exec(ctx)
+
+	return err
 }
