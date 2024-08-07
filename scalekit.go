@@ -30,6 +30,9 @@ type Scalekit interface {
 		redirectUri string,
 		options AuthenticationOptions,
 	) (*AuthenticationResponse, error)
+	GetIdpInitiatedLoginClaims(
+		idpInitiateLoginToken string,
+	) (*IdpInitiatedLoginClaims, error)
 	ValidateAccessToken(accessToken string) (bool, error)
 }
 
