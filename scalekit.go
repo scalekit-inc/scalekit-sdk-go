@@ -100,7 +100,6 @@ type IdpInitiatedLoginClaims struct {
 	ConnectionID   string `json:"connection_id"`
 	OrganizationID string `json:"organization_id"`
 	LoginHint      string `json:"login_hint"`
-	Domain         string `json:"domain"`
 	RelayState     string `json:"relay_state"`
 }
 
