@@ -96,6 +96,14 @@ type Identity struct {
 	ProviderRawAttributes string `json:"provider_raw_attributes"`
 }
 
+type IdpInitiatedLoginClaims struct {
+	ConnectionID   string `json:"connection_id"`
+	OrganizationID string `json:"organization_id"`
+	LoginHint      string `json:"login_hint"`
+	Domain         string `json:"domain"`
+	RelayState     string `json:"relay_state"`
+}
+
 func NewScalekitClient(envUrl, clientId, clientSecret string) Scalekit {
 	coreClient := newCoreClient(envUrl, clientId, clientSecret)
 	return &scalekitClient{
@@ -206,19 +214,41 @@ func (s *scalekitClient) AuthenticateWithCode(
 	}, nil
 }
 
+func (s *scalekitClient) GetIdpInitiatedLoginClaims(
+	idpInitiateLoginToken string,
+) (*IdpInitiatedLoginClaims, error) {
+	jwt, err := s.VerifyJwtToken(idpInitiateLoginToken)
+	if err != nil {
+		return nil, err
+	}
+	var idpInitiatedLoginClaims IdpInitiatedLoginClaims
+	err = json.Unmarshal(jwt, &idpInitiatedLoginClaims)
+	if err != nil {
+		return nil, err
+	}
+	return &idpInitiatedLoginClaims, nil
+}
+
 func (s *scalekitClient) ValidateAccessToken(accessToken string) (bool, error) {
+	_, err := s.VerifyJwtToken(accessToken)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func (s *scalekitClient) VerifyJwtToken(token string) ([]byte, error) {
 	err := s.coreClient.getJwks()
 	if err != nil {
-		return false, err
+		return nil, err
 	}
-	jws, err := jose.ParseSigned(accessToken, []jose.SignatureAlgorithm{jose.RS256})
+	jws, err := jose.ParseSigned(token, []jose.SignatureAlgorithm{jose.RS256})
 	if err != nil {
-		return false, err
+		return nil, err
 	}
-	_, err = jws.Verify(s.coreClient.jsonWebKeySet)
+	jwt, err := jws.Verify(s.coreClient.jsonWebKeySet)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
-
-	return true, nil
+	return jwt, nil
 }
