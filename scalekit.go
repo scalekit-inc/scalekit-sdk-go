@@ -30,6 +30,7 @@ type Scalekit interface {
 		redirectUri string,
 		options AuthenticationOptions,
 	) (*AuthenticationResponse, error)
+	GetIdpInitiatedLoginClaims(idpInitiateLoginToken string) (*IdpInitiatedLoginClaims, error)
 	ValidateAccessToken(accessToken string) (bool, error)
 }
 
@@ -85,6 +86,14 @@ type IdTokenClaims struct {
 	Metadata            string     `json:"metadata"`
 }
 
+type accessTokenClaims struct {
+	Sub string `json:"sub"`
+	Iss string `json:"iss"`
+	Aud string `json:"aud"`
+	Iat int    `json:"iat"`
+	Exp int    `json:"exp"`
+}
+
 type User = IdTokenClaims
 
 type Identity struct {
@@ -94,6 +103,13 @@ type Identity struct {
 	ProviderName          string `json:"provider_name"`
 	Social                bool   `json:"social"`
 	ProviderRawAttributes string `json:"provider_raw_attributes"`
+}
+
+type IdpInitiatedLoginClaims struct {
+	ConnectionID   string  `json:"connection_id"`
+	OrganizationID string  `json:"organization_id"`
+	LoginHint      string  `json:"login_hint"`
+	RelayState     *string `json:"relay_state"`
 }
 
 func NewScalekitClient(envUrl, clientId, clientSecret string) Scalekit {
@@ -187,38 +203,49 @@ func (s *scalekitClient) AuthenticateWithCode(
 	if err != nil {
 		return nil, err
 	}
-
-	var claims IdTokenClaims
-	jws, err := jose.ParseSigned(authResp.IdToken, []jose.SignatureAlgorithm{jose.RS256})
-	if err != nil {
-		return nil, err
-	}
-	err = json.Unmarshal(jws.UnsafePayloadWithoutVerification(), &claims)
+	claims, err := validateToken[IdTokenClaims](authResp.IdToken, s.coreClient.getJwks)
 	if err != nil {
 		return nil, err
 	}
 
 	return &AuthenticationResponse{
-		User:        claims,
+		User:        *claims,
 		IdToken:     authResp.IdToken,
 		AccessToken: authResp.AccessToken,
 		ExpiresIn:   authResp.ExpiresIn,
 	}, nil
 }
 
+func (s *scalekitClient) GetIdpInitiatedLoginClaims(idpInitiateLoginToken string) (*IdpInitiatedLoginClaims, error) {
+	return validateToken[IdpInitiatedLoginClaims](idpInitiateLoginToken, s.coreClient.getJwks)
+}
+
 func (s *scalekitClient) ValidateAccessToken(accessToken string) (bool, error) {
-	err := s.coreClient.getJwks()
+	_, err := validateToken[accessTokenClaims](accessToken, s.coreClient.getJwks)
 	if err != nil {
 		return false, err
 	}
-	jws, err := jose.ParseSigned(accessToken, []jose.SignatureAlgorithm{jose.RS256})
+	return true, nil
+}
+
+func validateToken[T interface{}](token string, jwksFn func() (*jose.JSONWebKeySet, error)) (*T, error) {
+	var claims T
+	keySet, err := jwksFn()
 	if err != nil {
-		return false, err
+		return nil, err
 	}
-	_, err = jws.Verify(s.coreClient.jsonWebKeySet)
+	jws, err := jose.ParseSigned(token, []jose.SignatureAlgorithm{jose.RS256})
 	if err != nil {
-		return false, err
+		return nil, err
+	}
+	jwt, err := jws.Verify(keySet)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(jwt, &claims)
+	if err != nil {
+		return nil, err
 	}
 
-	return true, nil
+	return &claims, nil
 }
