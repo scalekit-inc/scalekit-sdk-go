@@ -35,14 +35,14 @@ Initialize the Scalekit client using the appropriate credentials. Refer code sam
 import "github.com/scalekit-inc/scalekit-sdk-go"
 
 func main() {
-  sc := scalekit.NewScalekit(
+  scalekitClient := scalekit.NewScalekit(
     "<SCALEKIT_ENV_URL>",
     "<SCALEKIT_CLIENT_ID>",
     "<SCALEKIT_CLIENT_SECRET>",
   )
 
   // Use the sc object to interact with the Scalekit API
-  authUrl, _ := sc.GetAuthorizationUrl(
+  authUrl, _ := scalekitClient.GetAuthorizationUrl(
     "https://acme-corp.com/redirect-uri",
     scalekit.AuthorizationUrlOptions{
       State: "state",
@@ -78,7 +78,7 @@ func main() {
 
   // Get the authorization URL and redirect the user to the IdP login page
   http.HandleFunc("/auth/login", func(w http.ResponseWriter, r *http.Request) {
-    authUrl, _ := sc.GetAuthorizationUrl(
+    authUrl, _ := scalekitClient.GetAuthorizationUrl(
       redirectUri,
       scalekit.AuthorizationUrlOptions{
         State: "state",
@@ -93,7 +93,7 @@ func main() {
     code := r.URL.Query().Get("code")
     state := r.URL.Query().Get("state")
 
-    authResp, _ := sc.AuthenticateWithCode(code, redirectUri)
+    authResp, _ := scalekitClient.AuthenticateWithCode(code, redirectUri)
 
     http.SetCookie(w, &http.Cookie{
       Name: "access_token",
