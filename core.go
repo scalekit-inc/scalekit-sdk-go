@@ -129,9 +129,9 @@ func (c *coreClient) authenticate(requestData url.Values) (*authenticationRespon
 	return &responseData, nil
 }
 
-func (c *coreClient) getJwks() error {
+func (c *coreClient) getJwks() (*jose.JSONWebKeySet, error) {
 	if c.jsonWebKeySet != nil {
-		return nil
+		return c.jsonWebKeySet, nil
 	}
 	request, err := http.NewRequest(
 		http.MethodGet,
@@ -139,19 +139,19 @@ func (c *coreClient) getJwks() error {
 		nil,
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	response, err := c.httpClient.Do(request)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer response.Body.Close()
 	var responseData jose.JSONWebKeySet
 	err = json.NewDecoder(response.Body).Decode(&responseData)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	c.jsonWebKeySet = &responseData
 
-	return nil
+	return &responseData, nil
 }
