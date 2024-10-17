@@ -10,8 +10,10 @@ import (
 )
 
 type ListDirectoriesResponse = directoriesv1.ListDirectoriesResponse
+type GetDirectoryResponse = directoriesv1.GetDirectoryResponse
 type ListDirectoryUsersResponse = directoriesv1.ListDirectoryUsersResponse
 type ListDirectoryGroupsResponse = directoriesv1.ListDirectoryGroupsResponse
+type ToggleDirectoryResponse = directoriesv1.ToggleDirectoryResponse
 
 type ListDirectoryUsersOptions struct {
 	PageSize         uint32
@@ -56,6 +58,17 @@ func (d *directory) ListDirectories(ctx context.Context, organizationId string) 
 	).exec(ctx)
 }
 
+func (d *directory) GetDirectory(ctx context.Context, organizationId string, directoryId string) (*GetDirectoryResponse, error) {
+	return newConnectExecuter(
+		d.coreClient,
+		d.client.GetDirectory,
+		&directoriesv1.GetDirectoryRequest{
+			OrganizationId: organizationId,
+			Id:             directoryId,
+		},
+	).exec(ctx)
+}
+
 func (d *directory) ListDirectoryUsers(ctx context.Context, organizationId string, directoryId string, options *ListDirectoryUsersOptions) (*ListDirectoryUsersResponse, error) {
 	requestData := &directoriesv1.ListDirectoryUsersRequest{
 		OrganizationId: organizationId,
@@ -96,5 +109,27 @@ func (d *directory) ListDirectoryGroups(ctx context.Context, organizationId stri
 		d.coreClient,
 		d.client.ListDirectoryGroups,
 		requestData,
+	).exec(ctx)
+}
+
+func (d *directory) EnableDirectory(ctx context.Context, organizationId string, directoryId string) (*ToggleDirectoryResponse, error) {
+	return newConnectExecuter(
+		d.coreClient,
+		d.client.EnableDirectory,
+		&directoriesv1.ToggleDirectoryRequest{
+			OrganizationId: organizationId,
+			Id:             directoryId,
+		},
+	).exec(ctx)
+}
+
+func (d *directory) DisableDirectory(ctx context.Context, organizationId string, directoryId string) (*ToggleDirectoryResponse, error) {
+	return newConnectExecuter(
+		d.coreClient,
+		d.client.DisableDirectory,
+		&directoriesv1.ToggleDirectoryRequest{
+			OrganizationId: organizationId,
+			Id:             directoryId,
+		},
 	).exec(ctx)
 }
