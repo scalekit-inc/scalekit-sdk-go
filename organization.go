@@ -14,6 +14,13 @@ type UpdateOrganizationResponse = organizationsv1.UpdateOrganizationResponse
 type Link = organizationsv1.Link
 type UpdateOrganization = organizationsv1.UpdateOrganization
 type ListOrganizationOptions = organizationsv1.ListOrganizationsRequest
+type OrganizationSettings struct {
+	Features []Feature
+}
+type Feature struct {
+	Name    string
+	Enabled bool
+}
 
 type CreateOrganizationOptions struct {
 	ExternalId string
@@ -30,6 +37,7 @@ type Organization interface {
 	GeneratePortalLink(ctx context.Context, organizationId string) (*Link, error)
 	GetPortalLinks(ctx context.Context, organizationId string) ([]*Link, error)
 	DeletePortalLink(ctx context.Context, organizationId string, linkId string) error
+	UpdateOrganizationSettings(ctx context.Context, id string, settings OrganizationSettings) (*GetOrganizationResponse, error)
 }
 
 type organization struct {
@@ -167,4 +175,25 @@ func (o *organization) DeletePortalLink(ctx context.Context, organizationId stri
 	).exec(ctx)
 
 	return err
+}
+
+func (o *organization) UpdateOrganizationSettings(ctx context.Context, id string, settings OrganizationSettings) (*GetOrganizationResponse, error) {
+	request := &organizationsv1.UpdateOrganizationSettingsRequest{
+		Id: id,
+		Settings: &organizationsv1.OrganizationSettings{
+			Features: []*organizationsv1.OrganizationSettingsFeature{},
+		},
+	}
+	for _, feature := range settings.Features {
+		request.Settings.Features = append(request.Settings.Features, &organizationsv1.OrganizationSettingsFeature{
+			Name:    feature.Name,
+			Enabled: feature.Enabled,
+		})
+	}
+
+	return newConnectExecuter(
+		o.coreClient,
+		o.client.UpdateOrganizationSettings,
+		request,
+	).exec(ctx)
 }
