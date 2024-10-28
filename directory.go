@@ -51,7 +51,7 @@ func newDirectoryClient(coreClient *coreClient) Directory {
 func (d *directory) ListDirectories(ctx context.Context, organizationId string) (*ListDirectoriesResponse, error) {
 	return newConnectExecuter(
 		d.coreClient,
-		d.client.ListDirectory,
+		d.client.ListDirectories,
 		&directoriesv1.ListDirectoriesRequest{
 			OrganizationId: organizationId,
 		},
