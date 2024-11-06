@@ -2,6 +2,7 @@ package scalekit
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	directoriesv1 "github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/directories"
@@ -34,6 +35,7 @@ type Directory interface {
 	ListDirectories(ctx context.Context, organizationId string) (*ListDirectoriesResponse, error)
 	ListDirectoryUsers(ctx context.Context, organizationId string, directoryId string, options *ListDirectoryUsersOptions) (*ListDirectoryUsersResponse, error)
 	ListDirectoryGroups(ctx context.Context, organizationId string, directoryId string, options *ListDirectoryGroupsOptions) (*ListDirectoryGroupsResponse, error)
+	GetDirectoryByOrganizationId(ctx context.Context, organizationId string) (*GetDirectoryResponse, error)
 }
 
 type directory struct {
@@ -132,4 +134,18 @@ func (d *directory) DisableDirectory(ctx context.Context, organizationId string,
 			Id:             directoryId,
 		},
 	).exec(ctx)
+}
+
+func (d *directory) GetDirectoryByOrganizationId(ctx context.Context, organizationId string) (*GetDirectoryResponse, error) {
+	listDirectories, err := d.ListDirectories(ctx, organizationId)
+	if err != nil {
+		return nil, err
+	}
+	if len(listDirectories.Directories) == 0 {
+		return nil, errors.New("directory does not exist for organization")
+	}
+	response := &GetDirectoryResponse{
+		Directory: listDirectories.Directories[0],
+	}
+	return response, nil
 }
