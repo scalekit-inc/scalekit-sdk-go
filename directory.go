@@ -35,7 +35,7 @@ type Directory interface {
 	ListDirectories(ctx context.Context, organizationId string) (*ListDirectoriesResponse, error)
 	ListDirectoryUsers(ctx context.Context, organizationId string, directoryId string, options *ListDirectoryUsersOptions) (*ListDirectoryUsersResponse, error)
 	ListDirectoryGroups(ctx context.Context, organizationId string, directoryId string, options *ListDirectoryGroupsOptions) (*ListDirectoryGroupsResponse, error)
-	GetDirectoryByOrganizationId(ctx context.Context, organizationId string) (*GetDirectoryResponse, error)
+	GetPrimaryDirectoryByOrganizationId(ctx context.Context, organizationId string) (*GetDirectoryResponse, error)
 }
 
 type directory struct {
@@ -136,7 +136,7 @@ func (d *directory) DisableDirectory(ctx context.Context, organizationId string,
 	).exec(ctx)
 }
 
-func (d *directory) GetDirectoryByOrganizationId(ctx context.Context, organizationId string) (*GetDirectoryResponse, error) {
+func (d *directory) GetPrimaryDirectoryByOrganizationId(ctx context.Context, organizationId string) (*GetDirectoryResponse, error) {
 	listDirectories, err := d.ListDirectories(ctx, organizationId)
 	if err != nil {
 		return nil, err
