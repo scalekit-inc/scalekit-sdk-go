@@ -36,6 +36,8 @@ type Directory interface {
 	ListDirectoryUsers(ctx context.Context, organizationId string, directoryId string, options *ListDirectoryUsersOptions) (*ListDirectoryUsersResponse, error)
 	ListDirectoryGroups(ctx context.Context, organizationId string, directoryId string, options *ListDirectoryGroupsOptions) (*ListDirectoryGroupsResponse, error)
 	GetPrimaryDirectoryByOrganizationId(ctx context.Context, organizationId string) (*GetDirectoryResponse, error)
+	EnableDirectory(ctx context.Context, organizationId string, directoryId string) (*ToggleDirectoryResponse, error)
+	DisableDirectory(ctx context.Context, organizationId string, directoryId string) (*ToggleDirectoryResponse, error)
 }
 
 type directory struct {
