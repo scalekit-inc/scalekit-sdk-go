@@ -38,6 +38,7 @@ type Directory interface {
 	GetPrimaryDirectoryByOrganizationId(ctx context.Context, organizationId string) (*GetDirectoryResponse, error)
 	EnableDirectory(ctx context.Context, organizationId string, directoryId string) (*ToggleDirectoryResponse, error)
 	DisableDirectory(ctx context.Context, organizationId string, directoryId string) (*ToggleDirectoryResponse, error)
+	GetDirectory(ctx context.Context, organizationId string, directoryId string) (*GetDirectoryResponse, error)
 }
 
 type directory struct {
