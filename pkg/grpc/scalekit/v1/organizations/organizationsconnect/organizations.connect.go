@@ -64,21 +64,25 @@ const (
 	// OrganizationServiceGetPortalLinksProcedure is the fully-qualified name of the
 	// OrganizationService's GetPortalLinks RPC.
 	OrganizationServiceGetPortalLinksProcedure = "/scalekit.v1.organizations.OrganizationService/GetPortalLinks"
+	// OrganizationServiceUpdateOrganizationSettingsProcedure is the fully-qualified name of the
+	// OrganizationService's UpdateOrganizationSettings RPC.
+	OrganizationServiceUpdateOrganizationSettingsProcedure = "/scalekit.v1.organizations.OrganizationService/UpdateOrganizationSettings"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
 var (
-	organizationServiceServiceDescriptor                    = organizations.File_scalekit_v1_organizations_organizations_proto.Services().ByName("OrganizationService")
-	organizationServiceCreateOrganizationMethodDescriptor   = organizationServiceServiceDescriptor.Methods().ByName("CreateOrganization")
-	organizationServiceUpdateOrganizationMethodDescriptor   = organizationServiceServiceDescriptor.Methods().ByName("UpdateOrganization")
-	organizationServiceGetOrganizationMethodDescriptor      = organizationServiceServiceDescriptor.Methods().ByName("GetOrganization")
-	organizationServiceListOrganizationMethodDescriptor     = organizationServiceServiceDescriptor.Methods().ByName("ListOrganization")
-	organizationServiceSearchOrganizationMethodDescriptor   = organizationServiceServiceDescriptor.Methods().ByName("SearchOrganization")
-	organizationServiceDeleteOrganizationMethodDescriptor   = organizationServiceServiceDescriptor.Methods().ByName("DeleteOrganization")
-	organizationServiceGeneratePortalLinkMethodDescriptor   = organizationServiceServiceDescriptor.Methods().ByName("GeneratePortalLink")
-	organizationServiceDeletePortalLinkMethodDescriptor     = organizationServiceServiceDescriptor.Methods().ByName("DeletePortalLink")
-	organizationServiceDeletePortalLinkByIDMethodDescriptor = organizationServiceServiceDescriptor.Methods().ByName("DeletePortalLinkByID")
-	organizationServiceGetPortalLinksMethodDescriptor       = organizationServiceServiceDescriptor.Methods().ByName("GetPortalLinks")
+	organizationServiceServiceDescriptor                          = organizations.File_scalekit_v1_organizations_organizations_proto.Services().ByName("OrganizationService")
+	organizationServiceCreateOrganizationMethodDescriptor         = organizationServiceServiceDescriptor.Methods().ByName("CreateOrganization")
+	organizationServiceUpdateOrganizationMethodDescriptor         = organizationServiceServiceDescriptor.Methods().ByName("UpdateOrganization")
+	organizationServiceGetOrganizationMethodDescriptor            = organizationServiceServiceDescriptor.Methods().ByName("GetOrganization")
+	organizationServiceListOrganizationMethodDescriptor           = organizationServiceServiceDescriptor.Methods().ByName("ListOrganization")
+	organizationServiceSearchOrganizationMethodDescriptor         = organizationServiceServiceDescriptor.Methods().ByName("SearchOrganization")
+	organizationServiceDeleteOrganizationMethodDescriptor         = organizationServiceServiceDescriptor.Methods().ByName("DeleteOrganization")
+	organizationServiceGeneratePortalLinkMethodDescriptor         = organizationServiceServiceDescriptor.Methods().ByName("GeneratePortalLink")
+	organizationServiceDeletePortalLinkMethodDescriptor           = organizationServiceServiceDescriptor.Methods().ByName("DeletePortalLink")
+	organizationServiceDeletePortalLinkByIDMethodDescriptor       = organizationServiceServiceDescriptor.Methods().ByName("DeletePortalLinkByID")
+	organizationServiceGetPortalLinksMethodDescriptor             = organizationServiceServiceDescriptor.Methods().ByName("GetPortalLinks")
+	organizationServiceUpdateOrganizationSettingsMethodDescriptor = organizationServiceServiceDescriptor.Methods().ByName("UpdateOrganizationSettings")
 )
 
 // OrganizationServiceClient is a client for the scalekit.v1.organizations.OrganizationService
@@ -97,6 +101,7 @@ type OrganizationServiceClient interface {
 	DeletePortalLink(context.Context, *connect.Request[organizations.DeletePortalLinkRequest]) (*connect.Response[emptypb.Empty], error)
 	DeletePortalLinkByID(context.Context, *connect.Request[organizations.DeletePortalLinkByIdRequest]) (*connect.Response[emptypb.Empty], error)
 	GetPortalLinks(context.Context, *connect.Request[organizations.GetPortalLinkRequest]) (*connect.Response[organizations.GetPortalLinksResponse], error)
+	UpdateOrganizationSettings(context.Context, *connect.Request[organizations.UpdateOrganizationSettingsRequest]) (*connect.Response[organizations.GetOrganizationResponse], error)
 }
 
 // NewOrganizationServiceClient constructs a client for the
@@ -170,21 +175,28 @@ func NewOrganizationServiceClient(httpClient connect.HTTPClient, baseURL string,
 			connect.WithSchema(organizationServiceGetPortalLinksMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		updateOrganizationSettings: connect.NewClient[organizations.UpdateOrganizationSettingsRequest, organizations.GetOrganizationResponse](
+			httpClient,
+			baseURL+OrganizationServiceUpdateOrganizationSettingsProcedure,
+			connect.WithSchema(organizationServiceUpdateOrganizationSettingsMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // organizationServiceClient implements OrganizationServiceClient.
 type organizationServiceClient struct {
-	createOrganization   *connect.Client[organizations.CreateOrganizationRequest, organizations.CreateOrganizationResponse]
-	updateOrganization   *connect.Client[organizations.UpdateOrganizationRequest, organizations.UpdateOrganizationResponse]
-	getOrganization      *connect.Client[organizations.GetOrganizationRequest, organizations.GetOrganizationResponse]
-	listOrganization     *connect.Client[organizations.ListOrganizationsRequest, organizations.ListOrganizationsResponse]
-	searchOrganization   *connect.Client[organizations.SearchOrganizationsRequest, organizations.SearchOrganizationsResponse]
-	deleteOrganization   *connect.Client[organizations.DeleteOrganizationRequest, emptypb.Empty]
-	generatePortalLink   *connect.Client[organizations.GeneratePortalLinkRequest, organizations.GeneratePortalLinkResponse]
-	deletePortalLink     *connect.Client[organizations.DeletePortalLinkRequest, emptypb.Empty]
-	deletePortalLinkByID *connect.Client[organizations.DeletePortalLinkByIdRequest, emptypb.Empty]
-	getPortalLinks       *connect.Client[organizations.GetPortalLinkRequest, organizations.GetPortalLinksResponse]
+	createOrganization         *connect.Client[organizations.CreateOrganizationRequest, organizations.CreateOrganizationResponse]
+	updateOrganization         *connect.Client[organizations.UpdateOrganizationRequest, organizations.UpdateOrganizationResponse]
+	getOrganization            *connect.Client[organizations.GetOrganizationRequest, organizations.GetOrganizationResponse]
+	listOrganization           *connect.Client[organizations.ListOrganizationsRequest, organizations.ListOrganizationsResponse]
+	searchOrganization         *connect.Client[organizations.SearchOrganizationsRequest, organizations.SearchOrganizationsResponse]
+	deleteOrganization         *connect.Client[organizations.DeleteOrganizationRequest, emptypb.Empty]
+	generatePortalLink         *connect.Client[organizations.GeneratePortalLinkRequest, organizations.GeneratePortalLinkResponse]
+	deletePortalLink           *connect.Client[organizations.DeletePortalLinkRequest, emptypb.Empty]
+	deletePortalLinkByID       *connect.Client[organizations.DeletePortalLinkByIdRequest, emptypb.Empty]
+	getPortalLinks             *connect.Client[organizations.GetPortalLinkRequest, organizations.GetPortalLinksResponse]
+	updateOrganizationSettings *connect.Client[organizations.UpdateOrganizationSettingsRequest, organizations.GetOrganizationResponse]
 }
 
 // CreateOrganization calls scalekit.v1.organizations.OrganizationService.CreateOrganization.
@@ -237,6 +249,12 @@ func (c *organizationServiceClient) GetPortalLinks(ctx context.Context, req *con
 	return c.getPortalLinks.CallUnary(ctx, req)
 }
 
+// UpdateOrganizationSettings calls
+// scalekit.v1.organizations.OrganizationService.UpdateOrganizationSettings.
+func (c *organizationServiceClient) UpdateOrganizationSettings(ctx context.Context, req *connect.Request[organizations.UpdateOrganizationSettingsRequest]) (*connect.Response[organizations.GetOrganizationResponse], error) {
+	return c.updateOrganizationSettings.CallUnary(ctx, req)
+}
+
 // OrganizationServiceHandler is an implementation of the
 // scalekit.v1.organizations.OrganizationService service.
 type OrganizationServiceHandler interface {
@@ -253,6 +271,7 @@ type OrganizationServiceHandler interface {
 	DeletePortalLink(context.Context, *connect.Request[organizations.DeletePortalLinkRequest]) (*connect.Response[emptypb.Empty], error)
 	DeletePortalLinkByID(context.Context, *connect.Request[organizations.DeletePortalLinkByIdRequest]) (*connect.Response[emptypb.Empty], error)
 	GetPortalLinks(context.Context, *connect.Request[organizations.GetPortalLinkRequest]) (*connect.Response[organizations.GetPortalLinksResponse], error)
+	UpdateOrganizationSettings(context.Context, *connect.Request[organizations.UpdateOrganizationSettingsRequest]) (*connect.Response[organizations.GetOrganizationResponse], error)
 }
 
 // NewOrganizationServiceHandler builds an HTTP handler from the service implementation. It returns
@@ -321,6 +340,12 @@ func NewOrganizationServiceHandler(svc OrganizationServiceHandler, opts ...conne
 		connect.WithSchema(organizationServiceGetPortalLinksMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	organizationServiceUpdateOrganizationSettingsHandler := connect.NewUnaryHandler(
+		OrganizationServiceUpdateOrganizationSettingsProcedure,
+		svc.UpdateOrganizationSettings,
+		connect.WithSchema(organizationServiceUpdateOrganizationSettingsMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/scalekit.v1.organizations.OrganizationService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case OrganizationServiceCreateOrganizationProcedure:
@@ -343,6 +368,8 @@ func NewOrganizationServiceHandler(svc OrganizationServiceHandler, opts ...conne
 			organizationServiceDeletePortalLinkByIDHandler.ServeHTTP(w, r)
 		case OrganizationServiceGetPortalLinksProcedure:
 			organizationServiceGetPortalLinksHandler.ServeHTTP(w, r)
+		case OrganizationServiceUpdateOrganizationSettingsProcedure:
+			organizationServiceUpdateOrganizationSettingsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -390,4 +417,8 @@ func (UnimplementedOrganizationServiceHandler) DeletePortalLinkByID(context.Cont
 
 func (UnimplementedOrganizationServiceHandler) GetPortalLinks(context.Context, *connect.Request[organizations.GetPortalLinkRequest]) (*connect.Response[organizations.GetPortalLinksResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.organizations.OrganizationService.GetPortalLinks is not implemented"))
+}
+
+func (UnimplementedOrganizationServiceHandler) UpdateOrganizationSettings(context.Context, *connect.Request[organizations.UpdateOrganizationSettingsRequest]) (*connect.Response[organizations.GetOrganizationResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.organizations.OrganizationService.UpdateOrganizationSettings is not implemented"))
 }

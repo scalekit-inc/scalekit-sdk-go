@@ -1,11 +1,15 @@
 package scalekit
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/go-jose/go-jose/v4"
 )
@@ -18,10 +22,14 @@ const (
 	GrantTypeClientCredentials GrantType = "client_credentials"
 )
 
+var webhookToleranceInSeconds = 5 * time.Minute
+var webhookSignatureVersion = "v1"
+
 type GrantType = string
 
 type Scalekit interface {
 	Connection() Connection
+	Directory() Directory
 	Domain() Domain
 	Organization() Organization
 	GetAuthorizationUrl(redirectUri string, options AuthorizationUrlOptions) (*url.URL, error)
@@ -32,6 +40,7 @@ type Scalekit interface {
 	) (*AuthenticationResponse, error)
 	GetIdpInitiatedLoginClaims(idpInitiateLoginToken string) (*IdpInitiatedLoginClaims, error)
 	ValidateAccessToken(accessToken string) (bool, error)
+	VerifyWebhookPayload(secret string, headers map[string]string, payload []byte) (bool, error)
 }
 
 type scalekitClient struct {
@@ -39,6 +48,7 @@ type scalekitClient struct {
 	connection   Connection
 	domain       Domain
 	organization Organization
+	directory    Directory
 }
 
 type AuthorizationUrlOptions struct {
@@ -117,6 +127,7 @@ func NewScalekitClient(envUrl, clientId, clientSecret string) Scalekit {
 	return &scalekitClient{
 		coreClient:   coreClient,
 		connection:   newConnectionClient(coreClient),
+		directory:    newDirectoryClient(coreClient),
 		domain:       newDomainClient(coreClient),
 		organization: newOrganizationClient(coreClient),
 	}
@@ -124,6 +135,10 @@ func NewScalekitClient(envUrl, clientId, clientSecret string) Scalekit {
 
 func (s *scalekitClient) Connection() Connection {
 	return s.connection
+}
+
+func (s *scalekitClient) Directory() Directory {
+	return s.directory
 }
 
 func (s *scalekitClient) Domain() Domain {
@@ -228,6 +243,67 @@ func (s *scalekitClient) ValidateAccessToken(accessToken string) (bool, error) {
 	return true, nil
 }
 
+func (s *scalekitClient) VerifyWebhookPayload(
+	secret string,
+	headers map[string]string,
+	payload []byte,
+) (bool, error) {
+	webhookId := headers["webhook-id"]
+	webhookTimestamp := headers["webhook-timestamp"]
+	webhookSignature := headers["webhook-signature"]
+	if webhookId == "" || webhookTimestamp == "" || webhookSignature == "" {
+		return false, errors.New("Missing required headers")
+	}
+	secretParts := strings.Split(secret, "_")
+	if len(secretParts) < 2 {
+		return false, errors.New("Invalid secret")
+	}
+	secretBytes, err := base64.StdEncoding.DecodeString(secretParts[1])
+	if err != nil {
+		return false, err
+	}
+	timestamp, err := verifyTimestamp(webhookTimestamp)
+	if err != nil {
+		return false, err
+	}
+	data := fmt.Sprintf("%s.%d.%s", webhookId, timestamp.Unix(), payload)
+	computedSignature := computeSignature(secretBytes, data)
+	recievedSignatures := strings.Split(webhookSignature, " ")
+	for _, versionedSignature := range recievedSignatures {
+		signatureParts := strings.Split(versionedSignature, ",")
+		if len(signatureParts) < 2 {
+			continue
+		}
+		version := signatureParts[0]
+		signature := signatureParts[1]
+		if version != webhookSignatureVersion {
+			continue
+		}
+		if hmac.Equal([]byte(signature), []byte(computedSignature)) {
+			return true, nil
+		}
+	}
+
+	return false, errors.New("Invalid signature")
+}
+
+func verifyTimestamp(timestampStr string) (*time.Time, error) {
+	now := time.Now()
+	timestamp, err := time.Parse(time.RFC3339, timestampStr)
+	if err != nil {
+		return nil, err
+	}
+	if now.Sub(timestamp) > webhookToleranceInSeconds {
+		return nil, errors.New("Message timestamp too old")
+	}
+	if timestamp.Unix() > now.Add(webhookToleranceInSeconds).Unix() {
+		return nil, errors.New("Message timestamp too new")
+
+	}
+
+	return &timestamp, nil
+}
+
 func validateToken[T interface{}](token string, jwksFn func() (*jose.JSONWebKeySet, error)) (*T, error) {
 	var claims T
 	keySet, err := jwksFn()
@@ -248,4 +324,12 @@ func validateToken[T interface{}](token string, jwksFn func() (*jose.JSONWebKeyS
 	}
 
 	return &claims, nil
+}
+
+func computeSignature(secret []byte, data string) string {
+	hash := hmac.New(sha256.New, secret)
+	hash.Write([]byte(data))
+	signature := hash.Sum(nil)
+
+	return base64.StdEncoding.EncodeToString(signature)
 }
