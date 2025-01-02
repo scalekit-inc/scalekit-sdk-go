@@ -35,8 +35,6 @@ type Organization interface {
 	UpdateOrganizationByExternalId(ctx context.Context, externalId string, organization *UpdateOrganization) (*UpdateOrganizationResponse, error)
 	DeleteOrganization(ctx context.Context, id string) error
 	GeneratePortalLink(ctx context.Context, organizationId string) (*Link, error)
-	GetPortalLinks(ctx context.Context, organizationId string) ([]*Link, error)
-	DeletePortalLink(ctx context.Context, organizationId string, linkId string) error
 	UpdateOrganizationSettings(ctx context.Context, id string, settings OrganizationSettings) (*GetOrganizationResponse, error)
 }
 
@@ -150,31 +148,6 @@ func (o *organization) GeneratePortalLink(ctx context.Context, organizationId st
 	).exec(ctx)
 
 	return resp.Link, err
-}
-
-func (o *organization) GetPortalLinks(ctx context.Context, organizationId string) ([]*Link, error) {
-	resp, err := newConnectExecuter(
-		o.coreClient,
-		o.client.GetPortalLinks,
-		&organizationsv1.GetPortalLinkRequest{
-			Id: organizationId,
-		},
-	).exec(ctx)
-
-	return resp.Links, err
-}
-
-func (o *organization) DeletePortalLink(ctx context.Context, organizationId string, linkId string) error {
-	_, err := newConnectExecuter(
-		o.coreClient,
-		o.client.DeletePortalLinkByID,
-		&organizationsv1.DeletePortalLinkByIdRequest{
-			Id:     organizationId,
-			LinkId: linkId,
-		},
-	).exec(ctx)
-
-	return err
 }
 
 func (o *organization) UpdateOrganizationSettings(ctx context.Context, id string, settings OrganizationSettings) (*GetOrganizationResponse, error) {
