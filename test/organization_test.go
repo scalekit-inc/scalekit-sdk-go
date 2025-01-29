@@ -19,6 +19,9 @@ func TestOrganizations(t *testing.T) {
 
 	createdOrganization, err := client.Organization().CreateOrganization(context.Background(), organizationName, scalekit.CreateOrganizationOptions{
 		ExternalId: externalId,
+		Metadata: map[string]string{
+			"key": "value",
+		},
 	})
 	assert.NoError(t, err)
 
