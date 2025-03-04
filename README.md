@@ -61,7 +61,7 @@ Before integrating the Scalekit Go SDK, ensure your development environment meet
 | --------- | ------- |
 | Go        | 1.22+   |
 
-> **Note:** This requirement guarantees compatibility with the modules and dependencies used by this SDK. Always use the latest stable.
+> **Note:** Go 1.22+ provides the essential features required by this SDK. For optimal performance and security, consider using the latest stable release.
 
 
 ## Examples - SSO with Go HTTP Server
