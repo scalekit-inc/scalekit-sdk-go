@@ -53,6 +53,17 @@ func main() {
 
 ```
 
+##### Minimum Requirements
+
+Before integrating the Scalekit Go SDK, ensure your development environment meets these requirements:
+
+| Component | Version |
+| --------- | ------- |
+| Go        | 1.22+   |
+
+> **Note:** Go 1.22+ provides the essential features required by this SDK. For optimal performance and security, consider using the latest stable release.
+
+
 ## Examples - SSO with Go HTTP Server
 
 Below is a simple code sample that showcases how to implement Single Sign-on using Scalekit SDK
