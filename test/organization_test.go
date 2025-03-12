@@ -141,7 +141,7 @@ func TestUpdateOrganizationSettings(t *testing.T) {
 }
 
 func TestCreateWithMetadata(t *testing.T) {
-	organizationName := "Tested from Sdk"
+	organizationName := "Tested from GO Sdk"
 
 	externalId := fmt.Sprintf("test-%d", time.Now().Unix())
 
