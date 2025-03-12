@@ -2,7 +2,6 @@ package scalekit
 
 import (
 	"context"
-
 	connectionsv1 "github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/connections"
 	"github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/connections/connectionsconnect"
 )
@@ -43,21 +42,25 @@ func (c *connection) GetConnection(ctx context.Context, organizationId string, i
 }
 
 func (c *connection) ListConnectionsByDomain(ctx context.Context, domain string) (*ListConnectionsResponse, error) {
+	include := "all"
 	return newConnectExecuter(
 		c.coreClient,
 		c.client.ListConnections,
 		&connectionsv1.ListConnectionsRequest{
-			Domain: &domain,
+			Domain:  &domain,
+			Include: &include,
 		},
 	).exec(ctx)
 }
 
 func (c *connection) ListConnections(ctx context.Context, organizationId string) (*ListConnectionsResponse, error) {
+	include := "all"
 	return newConnectExecuter(
 		c.coreClient,
 		c.client.ListConnections,
 		&connectionsv1.ListConnectionsRequest{
 			OrganizationId: &organizationId,
+			Include:        &include,
 		},
 	).exec(ctx)
 }
