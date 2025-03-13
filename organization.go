@@ -24,6 +24,7 @@ type Feature struct {
 
 type CreateOrganizationOptions struct {
 	ExternalId string
+	Metadata   map[string]string
 }
 
 type Organization interface {
@@ -58,6 +59,7 @@ func (o *organization) CreateOrganization(ctx context.Context, name string, opti
 			Organization: &organizationsv1.CreateOrganization{
 				DisplayName: name,
 				ExternalId:  &options.ExternalId,
+				Metadata:    options.Metadata,
 			},
 		},
 	).exec(ctx)

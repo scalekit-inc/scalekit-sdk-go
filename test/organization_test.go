@@ -139,3 +139,20 @@ func TestUpdateOrganizationSettings(t *testing.T) {
 	assert.False(t, updatedOrganization.Organization.Settings.Features[0].Enabled)
 	assert.False(t, updatedOrganization.Organization.Settings.Features[1].Enabled)
 }
+
+func TestCreateWithMetadata(t *testing.T) {
+	organizationName := "Tested from GO Sdk"
+
+	externalId := fmt.Sprintf("test-%d", time.Now().Unix())
+
+	createdOrganization, err := client.Organization().CreateOrganization(context.Background(), organizationName, scalekit.CreateOrganizationOptions{
+		ExternalId: externalId,
+		Metadata: map[string]string{
+			"meta_key": "meta_val",
+		},
+	})
+	assert.NoError(t, err)
+
+	assert.Equal(t, organizationName, createdOrganization.Organization.DisplayName)
+	assert.Equal(t, createdOrganization.Organization.Metadata["meta_key"], "meta_val")
+}
