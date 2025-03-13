@@ -9,6 +9,14 @@ import (
 type ListConnectionsResponse = connectionsv1.ListConnectionsResponse
 type GetConnectionResponse = connectionsv1.GetConnectionResponse
 type ToggleConnectionResponse = connectionsv1.ToggleConnectionResponse
+type CreateConnectionResponse = connectionsv1.CreateConnectionResponse
+type ConnectionProvider = connectionsv1.ConnectionProvider
+type ConnectionType = connectionsv1.ConnectionType
+
+type CreateConnectionOptions struct {
+	Provider ConnectionProvider
+	Type     ConnectionType
+}
 
 type Connection interface {
 	GetConnection(ctx context.Context, organizationId string, id string) (*GetConnectionResponse, error)
@@ -16,6 +24,8 @@ type Connection interface {
 	ListConnections(ctx context.Context, organizationId string) (*ListConnectionsResponse, error)
 	EnableConnection(ctx context.Context, organizationId string, id string) (*ToggleConnectionResponse, error)
 	DisableConnection(ctx context.Context, organizationId string, id string) (*ToggleConnectionResponse, error)
+	DeleteConnection(ctx context.Context, organizationId string, id string) error
+	CreateConnection(ctx context.Context, organizationId string, options CreateConnectionOptions) (*CreateConnectionResponse, error)
 }
 
 type connection struct {
@@ -83,6 +93,32 @@ func (c *connection) DisableConnection(ctx context.Context, organizationId strin
 		&connectionsv1.ToggleConnectionRequest{
 			Id:             id,
 			OrganizationId: organizationId,
+		},
+	).exec(ctx)
+}
+
+func (c *connection) DeleteConnection(ctx context.Context, organizationId string, id string) error {
+	_, err := newConnectExecuter(
+		c.coreClient,
+		c.client.DeleteConnection,
+		&connectionsv1.DeleteConnectionRequest{
+			Id:             id,
+			OrganizationId: organizationId,
+		},
+	).exec(ctx)
+	return err
+}
+
+func (c *connection) CreateConnection(ctx context.Context, organizationId string, options CreateConnectionOptions) (*CreateConnectionResponse, error) {
+	return newConnectExecuter(
+		c.coreClient,
+		c.client.CreateConnection,
+		&connectionsv1.CreateConnectionRequest{
+			OrganizationId: organizationId,
+			Connection: &connectionsv1.CreateConnection{
+				Provider: options.Provider,
+				Type:     options.Type,
+			},
 		},
 	).exec(ctx)
 }
