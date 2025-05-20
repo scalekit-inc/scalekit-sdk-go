@@ -76,25 +76,9 @@ const (
 	// ConnectionServiceDisableConnectionProcedure is the fully-qualified name of the
 	// ConnectionService's DisableConnection RPC.
 	ConnectionServiceDisableConnectionProcedure = "/scalekit.v1.connections.ConnectionService/DisableConnection"
-)
-
-// These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
-var (
-	connectionServiceServiceDescriptor                            = connections.File_scalekit_v1_connections_connections_proto.Services().ByName("ConnectionService")
-	connectionServiceGetProvidersMethodDescriptor                 = connectionServiceServiceDescriptor.Methods().ByName("GetProviders")
-	connectionServiceCreateEnvironmentConnectionMethodDescriptor  = connectionServiceServiceDescriptor.Methods().ByName("CreateEnvironmentConnection")
-	connectionServiceCreateConnectionMethodDescriptor             = connectionServiceServiceDescriptor.Methods().ByName("CreateConnection")
-	connectionServiceGetEnvironmentConnectionMethodDescriptor     = connectionServiceServiceDescriptor.Methods().ByName("GetEnvironmentConnection")
-	connectionServiceGetConnectionMethodDescriptor                = connectionServiceServiceDescriptor.Methods().ByName("GetConnection")
-	connectionServiceListConnectionsMethodDescriptor              = connectionServiceServiceDescriptor.Methods().ByName("ListConnections")
-	connectionServiceUpdateEnvironmentConnectionMethodDescriptor  = connectionServiceServiceDescriptor.Methods().ByName("UpdateEnvironmentConnection")
-	connectionServiceUpdateConnectionMethodDescriptor             = connectionServiceServiceDescriptor.Methods().ByName("UpdateConnection")
-	connectionServiceDeleteEnvironmentConnectionMethodDescriptor  = connectionServiceServiceDescriptor.Methods().ByName("DeleteEnvironmentConnection")
-	connectionServiceDeleteConnectionMethodDescriptor             = connectionServiceServiceDescriptor.Methods().ByName("DeleteConnection")
-	connectionServiceEnableEnvironmentConnectionMethodDescriptor  = connectionServiceServiceDescriptor.Methods().ByName("EnableEnvironmentConnection")
-	connectionServiceEnableConnectionMethodDescriptor             = connectionServiceServiceDescriptor.Methods().ByName("EnableConnection")
-	connectionServiceDisableEnvironmentConnectionMethodDescriptor = connectionServiceServiceDescriptor.Methods().ByName("DisableEnvironmentConnection")
-	connectionServiceDisableConnectionMethodDescriptor            = connectionServiceServiceDescriptor.Methods().ByName("DisableConnection")
+	// ConnectionServiceGetConnectionTestResultProcedure is the fully-qualified name of the
+	// ConnectionService's GetConnectionTestResult RPC.
+	ConnectionServiceGetConnectionTestResultProcedure = "/scalekit.v1.connections.ConnectionService/GetConnectionTestResult"
 )
 
 // ConnectionServiceClient is a client for the scalekit.v1.connections.ConnectionService service.
@@ -113,6 +97,7 @@ type ConnectionServiceClient interface {
 	EnableConnection(context.Context, *connect.Request[connections.ToggleConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error)
 	DisableEnvironmentConnection(context.Context, *connect.Request[connections.ToggleEnvironmentConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error)
 	DisableConnection(context.Context, *connect.Request[connections.ToggleConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error)
+	GetConnectionTestResult(context.Context, *connect.Request[connections.GetConnectionTestResultRequest]) (*connect.Response[connections.GetConnectionTestResultResponse], error)
 }
 
 // NewConnectionServiceClient constructs a client for the scalekit.v1.connections.ConnectionService
@@ -124,89 +109,96 @@ type ConnectionServiceClient interface {
 // http://api.acme.com or https://acme.com/grpc).
 func NewConnectionServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) ConnectionServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	connectionServiceMethods := connections.File_scalekit_v1_connections_connections_proto.Services().ByName("ConnectionService").Methods()
 	return &connectionServiceClient{
 		getProviders: connect.NewClient[connections.GetProvidersRequest, connections.GetProvidersResponse](
 			httpClient,
 			baseURL+ConnectionServiceGetProvidersProcedure,
-			connect.WithSchema(connectionServiceGetProvidersMethodDescriptor),
+			connect.WithSchema(connectionServiceMethods.ByName("GetProviders")),
 			connect.WithClientOptions(opts...),
 		),
 		createEnvironmentConnection: connect.NewClient[connections.CreateEnvironmentConnectionRequest, connections.CreateConnectionResponse](
 			httpClient,
 			baseURL+ConnectionServiceCreateEnvironmentConnectionProcedure,
-			connect.WithSchema(connectionServiceCreateEnvironmentConnectionMethodDescriptor),
+			connect.WithSchema(connectionServiceMethods.ByName("CreateEnvironmentConnection")),
 			connect.WithClientOptions(opts...),
 		),
 		createConnection: connect.NewClient[connections.CreateConnectionRequest, connections.CreateConnectionResponse](
 			httpClient,
 			baseURL+ConnectionServiceCreateConnectionProcedure,
-			connect.WithSchema(connectionServiceCreateConnectionMethodDescriptor),
+			connect.WithSchema(connectionServiceMethods.ByName("CreateConnection")),
 			connect.WithClientOptions(opts...),
 		),
 		getEnvironmentConnection: connect.NewClient[connections.GetEnvironmentConnectionRequest, connections.GetConnectionResponse](
 			httpClient,
 			baseURL+ConnectionServiceGetEnvironmentConnectionProcedure,
-			connect.WithSchema(connectionServiceGetEnvironmentConnectionMethodDescriptor),
+			connect.WithSchema(connectionServiceMethods.ByName("GetEnvironmentConnection")),
 			connect.WithClientOptions(opts...),
 		),
 		getConnection: connect.NewClient[connections.GetConnectionRequest, connections.GetConnectionResponse](
 			httpClient,
 			baseURL+ConnectionServiceGetConnectionProcedure,
-			connect.WithSchema(connectionServiceGetConnectionMethodDescriptor),
+			connect.WithSchema(connectionServiceMethods.ByName("GetConnection")),
 			connect.WithClientOptions(opts...),
 		),
 		listConnections: connect.NewClient[connections.ListConnectionsRequest, connections.ListConnectionsResponse](
 			httpClient,
 			baseURL+ConnectionServiceListConnectionsProcedure,
-			connect.WithSchema(connectionServiceListConnectionsMethodDescriptor),
+			connect.WithSchema(connectionServiceMethods.ByName("ListConnections")),
 			connect.WithClientOptions(opts...),
 		),
 		updateEnvironmentConnection: connect.NewClient[connections.UpdateEnvironmentConnectionRequest, connections.UpdateConnectionResponse](
 			httpClient,
 			baseURL+ConnectionServiceUpdateEnvironmentConnectionProcedure,
-			connect.WithSchema(connectionServiceUpdateEnvironmentConnectionMethodDescriptor),
+			connect.WithSchema(connectionServiceMethods.ByName("UpdateEnvironmentConnection")),
 			connect.WithClientOptions(opts...),
 		),
 		updateConnection: connect.NewClient[connections.UpdateConnectionRequest, connections.UpdateConnectionResponse](
 			httpClient,
 			baseURL+ConnectionServiceUpdateConnectionProcedure,
-			connect.WithSchema(connectionServiceUpdateConnectionMethodDescriptor),
+			connect.WithSchema(connectionServiceMethods.ByName("UpdateConnection")),
 			connect.WithClientOptions(opts...),
 		),
 		deleteEnvironmentConnection: connect.NewClient[connections.DeleteEnvironmentConnectionRequest, emptypb.Empty](
 			httpClient,
 			baseURL+ConnectionServiceDeleteEnvironmentConnectionProcedure,
-			connect.WithSchema(connectionServiceDeleteEnvironmentConnectionMethodDescriptor),
+			connect.WithSchema(connectionServiceMethods.ByName("DeleteEnvironmentConnection")),
 			connect.WithClientOptions(opts...),
 		),
 		deleteConnection: connect.NewClient[connections.DeleteConnectionRequest, emptypb.Empty](
 			httpClient,
 			baseURL+ConnectionServiceDeleteConnectionProcedure,
-			connect.WithSchema(connectionServiceDeleteConnectionMethodDescriptor),
+			connect.WithSchema(connectionServiceMethods.ByName("DeleteConnection")),
 			connect.WithClientOptions(opts...),
 		),
 		enableEnvironmentConnection: connect.NewClient[connections.ToggleEnvironmentConnectionRequest, connections.ToggleConnectionResponse](
 			httpClient,
 			baseURL+ConnectionServiceEnableEnvironmentConnectionProcedure,
-			connect.WithSchema(connectionServiceEnableEnvironmentConnectionMethodDescriptor),
+			connect.WithSchema(connectionServiceMethods.ByName("EnableEnvironmentConnection")),
 			connect.WithClientOptions(opts...),
 		),
 		enableConnection: connect.NewClient[connections.ToggleConnectionRequest, connections.ToggleConnectionResponse](
 			httpClient,
 			baseURL+ConnectionServiceEnableConnectionProcedure,
-			connect.WithSchema(connectionServiceEnableConnectionMethodDescriptor),
+			connect.WithSchema(connectionServiceMethods.ByName("EnableConnection")),
 			connect.WithClientOptions(opts...),
 		),
 		disableEnvironmentConnection: connect.NewClient[connections.ToggleEnvironmentConnectionRequest, connections.ToggleConnectionResponse](
 			httpClient,
 			baseURL+ConnectionServiceDisableEnvironmentConnectionProcedure,
-			connect.WithSchema(connectionServiceDisableEnvironmentConnectionMethodDescriptor),
+			connect.WithSchema(connectionServiceMethods.ByName("DisableEnvironmentConnection")),
 			connect.WithClientOptions(opts...),
 		),
 		disableConnection: connect.NewClient[connections.ToggleConnectionRequest, connections.ToggleConnectionResponse](
 			httpClient,
 			baseURL+ConnectionServiceDisableConnectionProcedure,
-			connect.WithSchema(connectionServiceDisableConnectionMethodDescriptor),
+			connect.WithSchema(connectionServiceMethods.ByName("DisableConnection")),
+			connect.WithClientOptions(opts...),
+		),
+		getConnectionTestResult: connect.NewClient[connections.GetConnectionTestResultRequest, connections.GetConnectionTestResultResponse](
+			httpClient,
+			baseURL+ConnectionServiceGetConnectionTestResultProcedure,
+			connect.WithSchema(connectionServiceMethods.ByName("GetConnectionTestResult")),
 			connect.WithClientOptions(opts...),
 		),
 	}
@@ -228,6 +220,7 @@ type connectionServiceClient struct {
 	enableConnection             *connect.Client[connections.ToggleConnectionRequest, connections.ToggleConnectionResponse]
 	disableEnvironmentConnection *connect.Client[connections.ToggleEnvironmentConnectionRequest, connections.ToggleConnectionResponse]
 	disableConnection            *connect.Client[connections.ToggleConnectionRequest, connections.ToggleConnectionResponse]
+	getConnectionTestResult      *connect.Client[connections.GetConnectionTestResultRequest, connections.GetConnectionTestResultResponse]
 }
 
 // GetProviders calls scalekit.v1.connections.ConnectionService.GetProviders.
@@ -306,6 +299,11 @@ func (c *connectionServiceClient) DisableConnection(ctx context.Context, req *co
 	return c.disableConnection.CallUnary(ctx, req)
 }
 
+// GetConnectionTestResult calls scalekit.v1.connections.ConnectionService.GetConnectionTestResult.
+func (c *connectionServiceClient) GetConnectionTestResult(ctx context.Context, req *connect.Request[connections.GetConnectionTestResultRequest]) (*connect.Response[connections.GetConnectionTestResultResponse], error) {
+	return c.getConnectionTestResult.CallUnary(ctx, req)
+}
+
 // ConnectionServiceHandler is an implementation of the scalekit.v1.connections.ConnectionService
 // service.
 type ConnectionServiceHandler interface {
@@ -323,6 +321,7 @@ type ConnectionServiceHandler interface {
 	EnableConnection(context.Context, *connect.Request[connections.ToggleConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error)
 	DisableEnvironmentConnection(context.Context, *connect.Request[connections.ToggleEnvironmentConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error)
 	DisableConnection(context.Context, *connect.Request[connections.ToggleConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error)
+	GetConnectionTestResult(context.Context, *connect.Request[connections.GetConnectionTestResultRequest]) (*connect.Response[connections.GetConnectionTestResultResponse], error)
 }
 
 // NewConnectionServiceHandler builds an HTTP handler from the service implementation. It returns
@@ -331,88 +330,95 @@ type ConnectionServiceHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewConnectionServiceHandler(svc ConnectionServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	connectionServiceMethods := connections.File_scalekit_v1_connections_connections_proto.Services().ByName("ConnectionService").Methods()
 	connectionServiceGetProvidersHandler := connect.NewUnaryHandler(
 		ConnectionServiceGetProvidersProcedure,
 		svc.GetProviders,
-		connect.WithSchema(connectionServiceGetProvidersMethodDescriptor),
+		connect.WithSchema(connectionServiceMethods.ByName("GetProviders")),
 		connect.WithHandlerOptions(opts...),
 	)
 	connectionServiceCreateEnvironmentConnectionHandler := connect.NewUnaryHandler(
 		ConnectionServiceCreateEnvironmentConnectionProcedure,
 		svc.CreateEnvironmentConnection,
-		connect.WithSchema(connectionServiceCreateEnvironmentConnectionMethodDescriptor),
+		connect.WithSchema(connectionServiceMethods.ByName("CreateEnvironmentConnection")),
 		connect.WithHandlerOptions(opts...),
 	)
 	connectionServiceCreateConnectionHandler := connect.NewUnaryHandler(
 		ConnectionServiceCreateConnectionProcedure,
 		svc.CreateConnection,
-		connect.WithSchema(connectionServiceCreateConnectionMethodDescriptor),
+		connect.WithSchema(connectionServiceMethods.ByName("CreateConnection")),
 		connect.WithHandlerOptions(opts...),
 	)
 	connectionServiceGetEnvironmentConnectionHandler := connect.NewUnaryHandler(
 		ConnectionServiceGetEnvironmentConnectionProcedure,
 		svc.GetEnvironmentConnection,
-		connect.WithSchema(connectionServiceGetEnvironmentConnectionMethodDescriptor),
+		connect.WithSchema(connectionServiceMethods.ByName("GetEnvironmentConnection")),
 		connect.WithHandlerOptions(opts...),
 	)
 	connectionServiceGetConnectionHandler := connect.NewUnaryHandler(
 		ConnectionServiceGetConnectionProcedure,
 		svc.GetConnection,
-		connect.WithSchema(connectionServiceGetConnectionMethodDescriptor),
+		connect.WithSchema(connectionServiceMethods.ByName("GetConnection")),
 		connect.WithHandlerOptions(opts...),
 	)
 	connectionServiceListConnectionsHandler := connect.NewUnaryHandler(
 		ConnectionServiceListConnectionsProcedure,
 		svc.ListConnections,
-		connect.WithSchema(connectionServiceListConnectionsMethodDescriptor),
+		connect.WithSchema(connectionServiceMethods.ByName("ListConnections")),
 		connect.WithHandlerOptions(opts...),
 	)
 	connectionServiceUpdateEnvironmentConnectionHandler := connect.NewUnaryHandler(
 		ConnectionServiceUpdateEnvironmentConnectionProcedure,
 		svc.UpdateEnvironmentConnection,
-		connect.WithSchema(connectionServiceUpdateEnvironmentConnectionMethodDescriptor),
+		connect.WithSchema(connectionServiceMethods.ByName("UpdateEnvironmentConnection")),
 		connect.WithHandlerOptions(opts...),
 	)
 	connectionServiceUpdateConnectionHandler := connect.NewUnaryHandler(
 		ConnectionServiceUpdateConnectionProcedure,
 		svc.UpdateConnection,
-		connect.WithSchema(connectionServiceUpdateConnectionMethodDescriptor),
+		connect.WithSchema(connectionServiceMethods.ByName("UpdateConnection")),
 		connect.WithHandlerOptions(opts...),
 	)
 	connectionServiceDeleteEnvironmentConnectionHandler := connect.NewUnaryHandler(
 		ConnectionServiceDeleteEnvironmentConnectionProcedure,
 		svc.DeleteEnvironmentConnection,
-		connect.WithSchema(connectionServiceDeleteEnvironmentConnectionMethodDescriptor),
+		connect.WithSchema(connectionServiceMethods.ByName("DeleteEnvironmentConnection")),
 		connect.WithHandlerOptions(opts...),
 	)
 	connectionServiceDeleteConnectionHandler := connect.NewUnaryHandler(
 		ConnectionServiceDeleteConnectionProcedure,
 		svc.DeleteConnection,
-		connect.WithSchema(connectionServiceDeleteConnectionMethodDescriptor),
+		connect.WithSchema(connectionServiceMethods.ByName("DeleteConnection")),
 		connect.WithHandlerOptions(opts...),
 	)
 	connectionServiceEnableEnvironmentConnectionHandler := connect.NewUnaryHandler(
 		ConnectionServiceEnableEnvironmentConnectionProcedure,
 		svc.EnableEnvironmentConnection,
-		connect.WithSchema(connectionServiceEnableEnvironmentConnectionMethodDescriptor),
+		connect.WithSchema(connectionServiceMethods.ByName("EnableEnvironmentConnection")),
 		connect.WithHandlerOptions(opts...),
 	)
 	connectionServiceEnableConnectionHandler := connect.NewUnaryHandler(
 		ConnectionServiceEnableConnectionProcedure,
 		svc.EnableConnection,
-		connect.WithSchema(connectionServiceEnableConnectionMethodDescriptor),
+		connect.WithSchema(connectionServiceMethods.ByName("EnableConnection")),
 		connect.WithHandlerOptions(opts...),
 	)
 	connectionServiceDisableEnvironmentConnectionHandler := connect.NewUnaryHandler(
 		ConnectionServiceDisableEnvironmentConnectionProcedure,
 		svc.DisableEnvironmentConnection,
-		connect.WithSchema(connectionServiceDisableEnvironmentConnectionMethodDescriptor),
+		connect.WithSchema(connectionServiceMethods.ByName("DisableEnvironmentConnection")),
 		connect.WithHandlerOptions(opts...),
 	)
 	connectionServiceDisableConnectionHandler := connect.NewUnaryHandler(
 		ConnectionServiceDisableConnectionProcedure,
 		svc.DisableConnection,
-		connect.WithSchema(connectionServiceDisableConnectionMethodDescriptor),
+		connect.WithSchema(connectionServiceMethods.ByName("DisableConnection")),
+		connect.WithHandlerOptions(opts...),
+	)
+	connectionServiceGetConnectionTestResultHandler := connect.NewUnaryHandler(
+		ConnectionServiceGetConnectionTestResultProcedure,
+		svc.GetConnectionTestResult,
+		connect.WithSchema(connectionServiceMethods.ByName("GetConnectionTestResult")),
 		connect.WithHandlerOptions(opts...),
 	)
 	return "/scalekit.v1.connections.ConnectionService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -445,6 +451,8 @@ func NewConnectionServiceHandler(svc ConnectionServiceHandler, opts ...connect.H
 			connectionServiceDisableEnvironmentConnectionHandler.ServeHTTP(w, r)
 		case ConnectionServiceDisableConnectionProcedure:
 			connectionServiceDisableConnectionHandler.ServeHTTP(w, r)
+		case ConnectionServiceGetConnectionTestResultProcedure:
+			connectionServiceGetConnectionTestResultHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -508,4 +516,8 @@ func (UnimplementedConnectionServiceHandler) DisableEnvironmentConnection(contex
 
 func (UnimplementedConnectionServiceHandler) DisableConnection(context.Context, *connect.Request[connections.ToggleConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.DisableConnection is not implemented"))
+}
+
+func (UnimplementedConnectionServiceHandler) GetConnectionTestResult(context.Context, *connect.Request[connections.GetConnectionTestResultRequest]) (*connect.Response[connections.GetConnectionTestResultResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.GetConnectionTestResult is not implemented"))
 }

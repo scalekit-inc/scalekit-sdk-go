@@ -181,3 +181,4 @@ build/**
 tags
 
 __debug_bin*
+/.history

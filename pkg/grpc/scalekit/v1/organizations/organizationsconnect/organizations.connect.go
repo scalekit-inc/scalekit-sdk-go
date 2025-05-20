@@ -67,22 +67,18 @@ const (
 	// OrganizationServiceUpdateOrganizationSettingsProcedure is the fully-qualified name of the
 	// OrganizationService's UpdateOrganizationSettings RPC.
 	OrganizationServiceUpdateOrganizationSettingsProcedure = "/scalekit.v1.organizations.OrganizationService/UpdateOrganizationSettings"
-)
-
-// These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
-var (
-	organizationServiceServiceDescriptor                          = organizations.File_scalekit_v1_organizations_organizations_proto.Services().ByName("OrganizationService")
-	organizationServiceCreateOrganizationMethodDescriptor         = organizationServiceServiceDescriptor.Methods().ByName("CreateOrganization")
-	organizationServiceUpdateOrganizationMethodDescriptor         = organizationServiceServiceDescriptor.Methods().ByName("UpdateOrganization")
-	organizationServiceGetOrganizationMethodDescriptor            = organizationServiceServiceDescriptor.Methods().ByName("GetOrganization")
-	organizationServiceListOrganizationMethodDescriptor           = organizationServiceServiceDescriptor.Methods().ByName("ListOrganization")
-	organizationServiceSearchOrganizationMethodDescriptor         = organizationServiceServiceDescriptor.Methods().ByName("SearchOrganization")
-	organizationServiceDeleteOrganizationMethodDescriptor         = organizationServiceServiceDescriptor.Methods().ByName("DeleteOrganization")
-	organizationServiceGeneratePortalLinkMethodDescriptor         = organizationServiceServiceDescriptor.Methods().ByName("GeneratePortalLink")
-	organizationServiceDeletePortalLinkMethodDescriptor           = organizationServiceServiceDescriptor.Methods().ByName("DeletePortalLink")
-	organizationServiceDeletePortalLinkByIDMethodDescriptor       = organizationServiceServiceDescriptor.Methods().ByName("DeletePortalLinkByID")
-	organizationServiceGetPortalLinksMethodDescriptor             = organizationServiceServiceDescriptor.Methods().ByName("GetPortalLinks")
-	organizationServiceUpdateOrganizationSettingsMethodDescriptor = organizationServiceServiceDescriptor.Methods().ByName("UpdateOrganizationSettings")
+	// OrganizationServiceCreateOrganizationSessionSettingsProcedure is the fully-qualified name of the
+	// OrganizationService's CreateOrganizationSessionSettings RPC.
+	OrganizationServiceCreateOrganizationSessionSettingsProcedure = "/scalekit.v1.organizations.OrganizationService/CreateOrganizationSessionSettings"
+	// OrganizationServiceGetOrganizationSessionSettingsProcedure is the fully-qualified name of the
+	// OrganizationService's GetOrganizationSessionSettings RPC.
+	OrganizationServiceGetOrganizationSessionSettingsProcedure = "/scalekit.v1.organizations.OrganizationService/GetOrganizationSessionSettings"
+	// OrganizationServiceUpdateOrganizationSessionSettingsProcedure is the fully-qualified name of the
+	// OrganizationService's UpdateOrganizationSessionSettings RPC.
+	OrganizationServiceUpdateOrganizationSessionSettingsProcedure = "/scalekit.v1.organizations.OrganizationService/UpdateOrganizationSessionSettings"
+	// OrganizationServiceDeleteOrganizationSessionSettingsProcedure is the fully-qualified name of the
+	// OrganizationService's DeleteOrganizationSessionSettings RPC.
+	OrganizationServiceDeleteOrganizationSessionSettingsProcedure = "/scalekit.v1.organizations.OrganizationService/DeleteOrganizationSessionSettings"
 )
 
 // OrganizationServiceClient is a client for the scalekit.v1.organizations.OrganizationService
@@ -102,6 +98,10 @@ type OrganizationServiceClient interface {
 	DeletePortalLinkByID(context.Context, *connect.Request[organizations.DeletePortalLinkByIdRequest]) (*connect.Response[emptypb.Empty], error)
 	GetPortalLinks(context.Context, *connect.Request[organizations.GetPortalLinkRequest]) (*connect.Response[organizations.GetPortalLinksResponse], error)
 	UpdateOrganizationSettings(context.Context, *connect.Request[organizations.UpdateOrganizationSettingsRequest]) (*connect.Response[organizations.GetOrganizationResponse], error)
+	CreateOrganizationSessionSettings(context.Context, *connect.Request[organizations.CreateOrganizationSessionSettingsRequest]) (*connect.Response[organizations.CreateOrganizationSessionSettingsResponse], error)
+	GetOrganizationSessionSettings(context.Context, *connect.Request[organizations.GetOrganizationSessionSettingsRequest]) (*connect.Response[organizations.GetOrganizationSessionSettingsResponse], error)
+	UpdateOrganizationSessionSettings(context.Context, *connect.Request[organizations.UpdateOrganizationSessionSettingsRequest]) (*connect.Response[organizations.UpdateOrganizationSessionSettingsResponse], error)
+	DeleteOrganizationSessionSettings(context.Context, *connect.Request[organizations.DeleteOrganizationSessionSettingsRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewOrganizationServiceClient constructs a client for the
@@ -114,71 +114,96 @@ type OrganizationServiceClient interface {
 // http://api.acme.com or https://acme.com/grpc).
 func NewOrganizationServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) OrganizationServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	organizationServiceMethods := organizations.File_scalekit_v1_organizations_organizations_proto.Services().ByName("OrganizationService").Methods()
 	return &organizationServiceClient{
 		createOrganization: connect.NewClient[organizations.CreateOrganizationRequest, organizations.CreateOrganizationResponse](
 			httpClient,
 			baseURL+OrganizationServiceCreateOrganizationProcedure,
-			connect.WithSchema(organizationServiceCreateOrganizationMethodDescriptor),
+			connect.WithSchema(organizationServiceMethods.ByName("CreateOrganization")),
 			connect.WithClientOptions(opts...),
 		),
 		updateOrganization: connect.NewClient[organizations.UpdateOrganizationRequest, organizations.UpdateOrganizationResponse](
 			httpClient,
 			baseURL+OrganizationServiceUpdateOrganizationProcedure,
-			connect.WithSchema(organizationServiceUpdateOrganizationMethodDescriptor),
+			connect.WithSchema(organizationServiceMethods.ByName("UpdateOrganization")),
 			connect.WithClientOptions(opts...),
 		),
 		getOrganization: connect.NewClient[organizations.GetOrganizationRequest, organizations.GetOrganizationResponse](
 			httpClient,
 			baseURL+OrganizationServiceGetOrganizationProcedure,
-			connect.WithSchema(organizationServiceGetOrganizationMethodDescriptor),
+			connect.WithSchema(organizationServiceMethods.ByName("GetOrganization")),
 			connect.WithClientOptions(opts...),
 		),
 		listOrganization: connect.NewClient[organizations.ListOrganizationsRequest, organizations.ListOrganizationsResponse](
 			httpClient,
 			baseURL+OrganizationServiceListOrganizationProcedure,
-			connect.WithSchema(organizationServiceListOrganizationMethodDescriptor),
+			connect.WithSchema(organizationServiceMethods.ByName("ListOrganization")),
 			connect.WithClientOptions(opts...),
 		),
 		searchOrganization: connect.NewClient[organizations.SearchOrganizationsRequest, organizations.SearchOrganizationsResponse](
 			httpClient,
 			baseURL+OrganizationServiceSearchOrganizationProcedure,
-			connect.WithSchema(organizationServiceSearchOrganizationMethodDescriptor),
+			connect.WithSchema(organizationServiceMethods.ByName("SearchOrganization")),
 			connect.WithClientOptions(opts...),
 		),
 		deleteOrganization: connect.NewClient[organizations.DeleteOrganizationRequest, emptypb.Empty](
 			httpClient,
 			baseURL+OrganizationServiceDeleteOrganizationProcedure,
-			connect.WithSchema(organizationServiceDeleteOrganizationMethodDescriptor),
+			connect.WithSchema(organizationServiceMethods.ByName("DeleteOrganization")),
 			connect.WithClientOptions(opts...),
 		),
 		generatePortalLink: connect.NewClient[organizations.GeneratePortalLinkRequest, organizations.GeneratePortalLinkResponse](
 			httpClient,
 			baseURL+OrganizationServiceGeneratePortalLinkProcedure,
-			connect.WithSchema(organizationServiceGeneratePortalLinkMethodDescriptor),
+			connect.WithSchema(organizationServiceMethods.ByName("GeneratePortalLink")),
 			connect.WithClientOptions(opts...),
 		),
 		deletePortalLink: connect.NewClient[organizations.DeletePortalLinkRequest, emptypb.Empty](
 			httpClient,
 			baseURL+OrganizationServiceDeletePortalLinkProcedure,
-			connect.WithSchema(organizationServiceDeletePortalLinkMethodDescriptor),
+			connect.WithSchema(organizationServiceMethods.ByName("DeletePortalLink")),
 			connect.WithClientOptions(opts...),
 		),
 		deletePortalLinkByID: connect.NewClient[organizations.DeletePortalLinkByIdRequest, emptypb.Empty](
 			httpClient,
 			baseURL+OrganizationServiceDeletePortalLinkByIDProcedure,
-			connect.WithSchema(organizationServiceDeletePortalLinkByIDMethodDescriptor),
+			connect.WithSchema(organizationServiceMethods.ByName("DeletePortalLinkByID")),
 			connect.WithClientOptions(opts...),
 		),
 		getPortalLinks: connect.NewClient[organizations.GetPortalLinkRequest, organizations.GetPortalLinksResponse](
 			httpClient,
 			baseURL+OrganizationServiceGetPortalLinksProcedure,
-			connect.WithSchema(organizationServiceGetPortalLinksMethodDescriptor),
+			connect.WithSchema(organizationServiceMethods.ByName("GetPortalLinks")),
 			connect.WithClientOptions(opts...),
 		),
 		updateOrganizationSettings: connect.NewClient[organizations.UpdateOrganizationSettingsRequest, organizations.GetOrganizationResponse](
 			httpClient,
 			baseURL+OrganizationServiceUpdateOrganizationSettingsProcedure,
-			connect.WithSchema(organizationServiceUpdateOrganizationSettingsMethodDescriptor),
+			connect.WithSchema(organizationServiceMethods.ByName("UpdateOrganizationSettings")),
+			connect.WithClientOptions(opts...),
+		),
+		createOrganizationSessionSettings: connect.NewClient[organizations.CreateOrganizationSessionSettingsRequest, organizations.CreateOrganizationSessionSettingsResponse](
+			httpClient,
+			baseURL+OrganizationServiceCreateOrganizationSessionSettingsProcedure,
+			connect.WithSchema(organizationServiceMethods.ByName("CreateOrganizationSessionSettings")),
+			connect.WithClientOptions(opts...),
+		),
+		getOrganizationSessionSettings: connect.NewClient[organizations.GetOrganizationSessionSettingsRequest, organizations.GetOrganizationSessionSettingsResponse](
+			httpClient,
+			baseURL+OrganizationServiceGetOrganizationSessionSettingsProcedure,
+			connect.WithSchema(organizationServiceMethods.ByName("GetOrganizationSessionSettings")),
+			connect.WithClientOptions(opts...),
+		),
+		updateOrganizationSessionSettings: connect.NewClient[organizations.UpdateOrganizationSessionSettingsRequest, organizations.UpdateOrganizationSessionSettingsResponse](
+			httpClient,
+			baseURL+OrganizationServiceUpdateOrganizationSessionSettingsProcedure,
+			connect.WithSchema(organizationServiceMethods.ByName("UpdateOrganizationSessionSettings")),
+			connect.WithClientOptions(opts...),
+		),
+		deleteOrganizationSessionSettings: connect.NewClient[organizations.DeleteOrganizationSessionSettingsRequest, emptypb.Empty](
+			httpClient,
+			baseURL+OrganizationServiceDeleteOrganizationSessionSettingsProcedure,
+			connect.WithSchema(organizationServiceMethods.ByName("DeleteOrganizationSessionSettings")),
 			connect.WithClientOptions(opts...),
 		),
 	}
@@ -186,17 +211,21 @@ func NewOrganizationServiceClient(httpClient connect.HTTPClient, baseURL string,
 
 // organizationServiceClient implements OrganizationServiceClient.
 type organizationServiceClient struct {
-	createOrganization         *connect.Client[organizations.CreateOrganizationRequest, organizations.CreateOrganizationResponse]
-	updateOrganization         *connect.Client[organizations.UpdateOrganizationRequest, organizations.UpdateOrganizationResponse]
-	getOrganization            *connect.Client[organizations.GetOrganizationRequest, organizations.GetOrganizationResponse]
-	listOrganization           *connect.Client[organizations.ListOrganizationsRequest, organizations.ListOrganizationsResponse]
-	searchOrganization         *connect.Client[organizations.SearchOrganizationsRequest, organizations.SearchOrganizationsResponse]
-	deleteOrganization         *connect.Client[organizations.DeleteOrganizationRequest, emptypb.Empty]
-	generatePortalLink         *connect.Client[organizations.GeneratePortalLinkRequest, organizations.GeneratePortalLinkResponse]
-	deletePortalLink           *connect.Client[organizations.DeletePortalLinkRequest, emptypb.Empty]
-	deletePortalLinkByID       *connect.Client[organizations.DeletePortalLinkByIdRequest, emptypb.Empty]
-	getPortalLinks             *connect.Client[organizations.GetPortalLinkRequest, organizations.GetPortalLinksResponse]
-	updateOrganizationSettings *connect.Client[organizations.UpdateOrganizationSettingsRequest, organizations.GetOrganizationResponse]
+	createOrganization                *connect.Client[organizations.CreateOrganizationRequest, organizations.CreateOrganizationResponse]
+	updateOrganization                *connect.Client[organizations.UpdateOrganizationRequest, organizations.UpdateOrganizationResponse]
+	getOrganization                   *connect.Client[organizations.GetOrganizationRequest, organizations.GetOrganizationResponse]
+	listOrganization                  *connect.Client[organizations.ListOrganizationsRequest, organizations.ListOrganizationsResponse]
+	searchOrganization                *connect.Client[organizations.SearchOrganizationsRequest, organizations.SearchOrganizationsResponse]
+	deleteOrganization                *connect.Client[organizations.DeleteOrganizationRequest, emptypb.Empty]
+	generatePortalLink                *connect.Client[organizations.GeneratePortalLinkRequest, organizations.GeneratePortalLinkResponse]
+	deletePortalLink                  *connect.Client[organizations.DeletePortalLinkRequest, emptypb.Empty]
+	deletePortalLinkByID              *connect.Client[organizations.DeletePortalLinkByIdRequest, emptypb.Empty]
+	getPortalLinks                    *connect.Client[organizations.GetPortalLinkRequest, organizations.GetPortalLinksResponse]
+	updateOrganizationSettings        *connect.Client[organizations.UpdateOrganizationSettingsRequest, organizations.GetOrganizationResponse]
+	createOrganizationSessionSettings *connect.Client[organizations.CreateOrganizationSessionSettingsRequest, organizations.CreateOrganizationSessionSettingsResponse]
+	getOrganizationSessionSettings    *connect.Client[organizations.GetOrganizationSessionSettingsRequest, organizations.GetOrganizationSessionSettingsResponse]
+	updateOrganizationSessionSettings *connect.Client[organizations.UpdateOrganizationSessionSettingsRequest, organizations.UpdateOrganizationSessionSettingsResponse]
+	deleteOrganizationSessionSettings *connect.Client[organizations.DeleteOrganizationSessionSettingsRequest, emptypb.Empty]
 }
 
 // CreateOrganization calls scalekit.v1.organizations.OrganizationService.CreateOrganization.
@@ -255,6 +284,30 @@ func (c *organizationServiceClient) UpdateOrganizationSettings(ctx context.Conte
 	return c.updateOrganizationSettings.CallUnary(ctx, req)
 }
 
+// CreateOrganizationSessionSettings calls
+// scalekit.v1.organizations.OrganizationService.CreateOrganizationSessionSettings.
+func (c *organizationServiceClient) CreateOrganizationSessionSettings(ctx context.Context, req *connect.Request[organizations.CreateOrganizationSessionSettingsRequest]) (*connect.Response[organizations.CreateOrganizationSessionSettingsResponse], error) {
+	return c.createOrganizationSessionSettings.CallUnary(ctx, req)
+}
+
+// GetOrganizationSessionSettings calls
+// scalekit.v1.organizations.OrganizationService.GetOrganizationSessionSettings.
+func (c *organizationServiceClient) GetOrganizationSessionSettings(ctx context.Context, req *connect.Request[organizations.GetOrganizationSessionSettingsRequest]) (*connect.Response[organizations.GetOrganizationSessionSettingsResponse], error) {
+	return c.getOrganizationSessionSettings.CallUnary(ctx, req)
+}
+
+// UpdateOrganizationSessionSettings calls
+// scalekit.v1.organizations.OrganizationService.UpdateOrganizationSessionSettings.
+func (c *organizationServiceClient) UpdateOrganizationSessionSettings(ctx context.Context, req *connect.Request[organizations.UpdateOrganizationSessionSettingsRequest]) (*connect.Response[organizations.UpdateOrganizationSessionSettingsResponse], error) {
+	return c.updateOrganizationSessionSettings.CallUnary(ctx, req)
+}
+
+// DeleteOrganizationSessionSettings calls
+// scalekit.v1.organizations.OrganizationService.DeleteOrganizationSessionSettings.
+func (c *organizationServiceClient) DeleteOrganizationSessionSettings(ctx context.Context, req *connect.Request[organizations.DeleteOrganizationSessionSettingsRequest]) (*connect.Response[emptypb.Empty], error) {
+	return c.deleteOrganizationSessionSettings.CallUnary(ctx, req)
+}
+
 // OrganizationServiceHandler is an implementation of the
 // scalekit.v1.organizations.OrganizationService service.
 type OrganizationServiceHandler interface {
@@ -272,6 +325,10 @@ type OrganizationServiceHandler interface {
 	DeletePortalLinkByID(context.Context, *connect.Request[organizations.DeletePortalLinkByIdRequest]) (*connect.Response[emptypb.Empty], error)
 	GetPortalLinks(context.Context, *connect.Request[organizations.GetPortalLinkRequest]) (*connect.Response[organizations.GetPortalLinksResponse], error)
 	UpdateOrganizationSettings(context.Context, *connect.Request[organizations.UpdateOrganizationSettingsRequest]) (*connect.Response[organizations.GetOrganizationResponse], error)
+	CreateOrganizationSessionSettings(context.Context, *connect.Request[organizations.CreateOrganizationSessionSettingsRequest]) (*connect.Response[organizations.CreateOrganizationSessionSettingsResponse], error)
+	GetOrganizationSessionSettings(context.Context, *connect.Request[organizations.GetOrganizationSessionSettingsRequest]) (*connect.Response[organizations.GetOrganizationSessionSettingsResponse], error)
+	UpdateOrganizationSessionSettings(context.Context, *connect.Request[organizations.UpdateOrganizationSessionSettingsRequest]) (*connect.Response[organizations.UpdateOrganizationSessionSettingsResponse], error)
+	DeleteOrganizationSessionSettings(context.Context, *connect.Request[organizations.DeleteOrganizationSessionSettingsRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewOrganizationServiceHandler builds an HTTP handler from the service implementation. It returns
@@ -280,70 +337,95 @@ type OrganizationServiceHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewOrganizationServiceHandler(svc OrganizationServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	organizationServiceMethods := organizations.File_scalekit_v1_organizations_organizations_proto.Services().ByName("OrganizationService").Methods()
 	organizationServiceCreateOrganizationHandler := connect.NewUnaryHandler(
 		OrganizationServiceCreateOrganizationProcedure,
 		svc.CreateOrganization,
-		connect.WithSchema(organizationServiceCreateOrganizationMethodDescriptor),
+		connect.WithSchema(organizationServiceMethods.ByName("CreateOrganization")),
 		connect.WithHandlerOptions(opts...),
 	)
 	organizationServiceUpdateOrganizationHandler := connect.NewUnaryHandler(
 		OrganizationServiceUpdateOrganizationProcedure,
 		svc.UpdateOrganization,
-		connect.WithSchema(organizationServiceUpdateOrganizationMethodDescriptor),
+		connect.WithSchema(organizationServiceMethods.ByName("UpdateOrganization")),
 		connect.WithHandlerOptions(opts...),
 	)
 	organizationServiceGetOrganizationHandler := connect.NewUnaryHandler(
 		OrganizationServiceGetOrganizationProcedure,
 		svc.GetOrganization,
-		connect.WithSchema(organizationServiceGetOrganizationMethodDescriptor),
+		connect.WithSchema(organizationServiceMethods.ByName("GetOrganization")),
 		connect.WithHandlerOptions(opts...),
 	)
 	organizationServiceListOrganizationHandler := connect.NewUnaryHandler(
 		OrganizationServiceListOrganizationProcedure,
 		svc.ListOrganization,
-		connect.WithSchema(organizationServiceListOrganizationMethodDescriptor),
+		connect.WithSchema(organizationServiceMethods.ByName("ListOrganization")),
 		connect.WithHandlerOptions(opts...),
 	)
 	organizationServiceSearchOrganizationHandler := connect.NewUnaryHandler(
 		OrganizationServiceSearchOrganizationProcedure,
 		svc.SearchOrganization,
-		connect.WithSchema(organizationServiceSearchOrganizationMethodDescriptor),
+		connect.WithSchema(organizationServiceMethods.ByName("SearchOrganization")),
 		connect.WithHandlerOptions(opts...),
 	)
 	organizationServiceDeleteOrganizationHandler := connect.NewUnaryHandler(
 		OrganizationServiceDeleteOrganizationProcedure,
 		svc.DeleteOrganization,
-		connect.WithSchema(organizationServiceDeleteOrganizationMethodDescriptor),
+		connect.WithSchema(organizationServiceMethods.ByName("DeleteOrganization")),
 		connect.WithHandlerOptions(opts...),
 	)
 	organizationServiceGeneratePortalLinkHandler := connect.NewUnaryHandler(
 		OrganizationServiceGeneratePortalLinkProcedure,
 		svc.GeneratePortalLink,
-		connect.WithSchema(organizationServiceGeneratePortalLinkMethodDescriptor),
+		connect.WithSchema(organizationServiceMethods.ByName("GeneratePortalLink")),
 		connect.WithHandlerOptions(opts...),
 	)
 	organizationServiceDeletePortalLinkHandler := connect.NewUnaryHandler(
 		OrganizationServiceDeletePortalLinkProcedure,
 		svc.DeletePortalLink,
-		connect.WithSchema(organizationServiceDeletePortalLinkMethodDescriptor),
+		connect.WithSchema(organizationServiceMethods.ByName("DeletePortalLink")),
 		connect.WithHandlerOptions(opts...),
 	)
 	organizationServiceDeletePortalLinkByIDHandler := connect.NewUnaryHandler(
 		OrganizationServiceDeletePortalLinkByIDProcedure,
 		svc.DeletePortalLinkByID,
-		connect.WithSchema(organizationServiceDeletePortalLinkByIDMethodDescriptor),
+		connect.WithSchema(organizationServiceMethods.ByName("DeletePortalLinkByID")),
 		connect.WithHandlerOptions(opts...),
 	)
 	organizationServiceGetPortalLinksHandler := connect.NewUnaryHandler(
 		OrganizationServiceGetPortalLinksProcedure,
 		svc.GetPortalLinks,
-		connect.WithSchema(organizationServiceGetPortalLinksMethodDescriptor),
+		connect.WithSchema(organizationServiceMethods.ByName("GetPortalLinks")),
 		connect.WithHandlerOptions(opts...),
 	)
 	organizationServiceUpdateOrganizationSettingsHandler := connect.NewUnaryHandler(
 		OrganizationServiceUpdateOrganizationSettingsProcedure,
 		svc.UpdateOrganizationSettings,
-		connect.WithSchema(organizationServiceUpdateOrganizationSettingsMethodDescriptor),
+		connect.WithSchema(organizationServiceMethods.ByName("UpdateOrganizationSettings")),
+		connect.WithHandlerOptions(opts...),
+	)
+	organizationServiceCreateOrganizationSessionSettingsHandler := connect.NewUnaryHandler(
+		OrganizationServiceCreateOrganizationSessionSettingsProcedure,
+		svc.CreateOrganizationSessionSettings,
+		connect.WithSchema(organizationServiceMethods.ByName("CreateOrganizationSessionSettings")),
+		connect.WithHandlerOptions(opts...),
+	)
+	organizationServiceGetOrganizationSessionSettingsHandler := connect.NewUnaryHandler(
+		OrganizationServiceGetOrganizationSessionSettingsProcedure,
+		svc.GetOrganizationSessionSettings,
+		connect.WithSchema(organizationServiceMethods.ByName("GetOrganizationSessionSettings")),
+		connect.WithHandlerOptions(opts...),
+	)
+	organizationServiceUpdateOrganizationSessionSettingsHandler := connect.NewUnaryHandler(
+		OrganizationServiceUpdateOrganizationSessionSettingsProcedure,
+		svc.UpdateOrganizationSessionSettings,
+		connect.WithSchema(organizationServiceMethods.ByName("UpdateOrganizationSessionSettings")),
+		connect.WithHandlerOptions(opts...),
+	)
+	organizationServiceDeleteOrganizationSessionSettingsHandler := connect.NewUnaryHandler(
+		OrganizationServiceDeleteOrganizationSessionSettingsProcedure,
+		svc.DeleteOrganizationSessionSettings,
+		connect.WithSchema(organizationServiceMethods.ByName("DeleteOrganizationSessionSettings")),
 		connect.WithHandlerOptions(opts...),
 	)
 	return "/scalekit.v1.organizations.OrganizationService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -370,6 +452,14 @@ func NewOrganizationServiceHandler(svc OrganizationServiceHandler, opts ...conne
 			organizationServiceGetPortalLinksHandler.ServeHTTP(w, r)
 		case OrganizationServiceUpdateOrganizationSettingsProcedure:
 			organizationServiceUpdateOrganizationSettingsHandler.ServeHTTP(w, r)
+		case OrganizationServiceCreateOrganizationSessionSettingsProcedure:
+			organizationServiceCreateOrganizationSessionSettingsHandler.ServeHTTP(w, r)
+		case OrganizationServiceGetOrganizationSessionSettingsProcedure:
+			organizationServiceGetOrganizationSessionSettingsHandler.ServeHTTP(w, r)
+		case OrganizationServiceUpdateOrganizationSessionSettingsProcedure:
+			organizationServiceUpdateOrganizationSessionSettingsHandler.ServeHTTP(w, r)
+		case OrganizationServiceDeleteOrganizationSessionSettingsProcedure:
+			organizationServiceDeleteOrganizationSessionSettingsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -421,4 +511,20 @@ func (UnimplementedOrganizationServiceHandler) GetPortalLinks(context.Context, *
 
 func (UnimplementedOrganizationServiceHandler) UpdateOrganizationSettings(context.Context, *connect.Request[organizations.UpdateOrganizationSettingsRequest]) (*connect.Response[organizations.GetOrganizationResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.organizations.OrganizationService.UpdateOrganizationSettings is not implemented"))
+}
+
+func (UnimplementedOrganizationServiceHandler) CreateOrganizationSessionSettings(context.Context, *connect.Request[organizations.CreateOrganizationSessionSettingsRequest]) (*connect.Response[organizations.CreateOrganizationSessionSettingsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.organizations.OrganizationService.CreateOrganizationSessionSettings is not implemented"))
+}
+
+func (UnimplementedOrganizationServiceHandler) GetOrganizationSessionSettings(context.Context, *connect.Request[organizations.GetOrganizationSessionSettingsRequest]) (*connect.Response[organizations.GetOrganizationSessionSettingsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.organizations.OrganizationService.GetOrganizationSessionSettings is not implemented"))
+}
+
+func (UnimplementedOrganizationServiceHandler) UpdateOrganizationSessionSettings(context.Context, *connect.Request[organizations.UpdateOrganizationSessionSettingsRequest]) (*connect.Response[organizations.UpdateOrganizationSessionSettingsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.organizations.OrganizationService.UpdateOrganizationSessionSettings is not implemented"))
+}
+
+func (UnimplementedOrganizationServiceHandler) DeleteOrganizationSessionSettings(context.Context, *connect.Request[organizations.DeleteOrganizationSessionSettingsRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.organizations.OrganizationService.DeleteOrganizationSessionSettings is not implemented"))
 }
