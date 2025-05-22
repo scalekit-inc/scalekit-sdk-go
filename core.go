@@ -29,9 +29,10 @@ type coreClient struct {
 }
 
 type authenticationResponse struct {
-	IdToken     string `json:"id_token"`
-	AccessToken string `json:"access_token"`
-	ExpiresIn   int    `json:"expires_in"`
+	IdToken      string `json:"id_token"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	ExpiresIn    int    `json:"expires_in"`
 }
 
 type headerInterceptor struct {

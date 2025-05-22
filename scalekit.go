@@ -41,7 +41,7 @@ type Scalekit interface {
 	GetIdpInitiatedLoginClaims(idpInitiateLoginToken string) (*IdpInitiatedLoginClaims, error)
 	ValidateAccessToken(accessToken string) (bool, error)
 	VerifyWebhookPayload(secret string, headers map[string]string, payload []byte) (bool, error)
-	RefreshToken(refreshToken string) (*AuthenticationResponse, error)
+	RefreshToken(refreshToken string) (*TokenResponse, error)
 }
 
 type scalekitClient struct {
@@ -121,6 +121,12 @@ type IdpInitiatedLoginClaims struct {
 	OrganizationID string  `json:"organization_id"`
 	LoginHint      string  `json:"login_hint"`
 	RelayState     *string `json:"relay_state"`
+}
+
+type TokenResponse struct {
+	AccessToken  string
+	RefreshToken string
+	ExpiresIn    int
 }
 
 func NewScalekitClient(envUrl, clientId, clientSecret string) Scalekit {
@@ -335,7 +341,7 @@ func computeSignature(secret []byte, data string) string {
 	return base64.StdEncoding.EncodeToString(signature)
 }
 
-func (s *scalekitClient) RefreshToken(refreshToken string) (*AuthenticationResponse, error) {
+func (s *scalekitClient) RefreshToken(refreshToken string) (*TokenResponse, error) {
 	if refreshToken == "" {
 		return nil, errors.New("refresh token is required")
 	}
@@ -351,15 +357,9 @@ func (s *scalekitClient) RefreshToken(refreshToken string) (*AuthenticationRespo
 		return nil, err
 	}
 
-	claims, err := validateToken[IdTokenClaims](authResp.IdToken, s.coreClient.getJwks)
-	if err != nil {
-		return nil, err
-	}
-
-	return &AuthenticationResponse{
-		User:        *claims,
-		IdToken:     authResp.IdToken,
-		AccessToken: authResp.AccessToken,
-		ExpiresIn:   authResp.ExpiresIn,
+	return &TokenResponse{
+		AccessToken:  authResp.AccessToken,
+		RefreshToken: authResp.RefreshToken,
+		ExpiresIn:    authResp.ExpiresIn,
 	}, nil
 }
