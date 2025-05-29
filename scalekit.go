@@ -15,6 +15,7 @@ import (
 )
 
 const authorizeEndpoint = "oauth/authorize"
+const logoutEndpoint = "end_session"
 
 const (
 	GrantTypeAuthorizationCode GrantType = "authorization_code"
@@ -32,6 +33,7 @@ type Scalekit interface {
 	Directory() Directory
 	Domain() Domain
 	Organization() Organization
+	User() UserService
 	GetAuthorizationUrl(redirectUri string, options AuthorizationUrlOptions) (*url.URL, error)
 	AuthenticateWithCode(
 		code string,
@@ -41,6 +43,8 @@ type Scalekit interface {
 	GetIdpInitiatedLoginClaims(idpInitiateLoginToken string) (*IdpInitiatedLoginClaims, error)
 	ValidateAccessToken(accessToken string) (bool, error)
 	VerifyWebhookPayload(secret string, headers map[string]string, payload []byte) (bool, error)
+	RefreshToken(refreshToken string) (*TokenResponse, error)
+	GetLogoutUrl(options LogoutUrlOptions) (*url.URL, error)
 }
 
 type scalekitClient struct {
@@ -49,6 +53,7 @@ type scalekitClient struct {
 	domain       Domain
 	organization Organization
 	directory    Directory
+	user         UserService
 }
 
 type AuthorizationUrlOptions struct {
@@ -62,6 +67,7 @@ type AuthorizationUrlOptions struct {
 	CodeChallenge       string
 	CodeChallengeMethod string
 	Provider            string
+	Prompt              string
 }
 
 type AuthenticationOptions struct {
@@ -122,6 +128,18 @@ type IdpInitiatedLoginClaims struct {
 	RelayState     *string `json:"relay_state"`
 }
 
+type TokenResponse struct {
+	AccessToken  string
+	RefreshToken string
+	ExpiresIn    int
+}
+
+type LogoutUrlOptions struct {
+	IdTokenHint           string
+	PostLogoutRedirectUri string
+	State                 string
+}
+
 func NewScalekitClient(envUrl, clientId, clientSecret string) Scalekit {
 	coreClient := newCoreClient(envUrl, clientId, clientSecret)
 	return &scalekitClient{
@@ -130,6 +148,7 @@ func NewScalekitClient(envUrl, clientId, clientSecret string) Scalekit {
 		directory:    newDirectoryClient(coreClient),
 		domain:       newDomainClient(coreClient),
 		organization: newOrganizationClient(coreClient),
+		user:         newUserClient(coreClient),
 	}
 }
 
@@ -147,6 +166,10 @@ func (s *scalekitClient) Domain() Domain {
 
 func (s *scalekitClient) Organization() Organization {
 	return s.organization
+}
+
+func (s *scalekitClient) User() UserService {
+	return s.user
 }
 
 func (s *scalekitClient) GetAuthorizationUrl(redirectUri string, options AuthorizationUrlOptions) (*url.URL, error) {
@@ -186,6 +209,9 @@ func (s *scalekitClient) GetAuthorizationUrl(redirectUri string, options Authori
 	}
 	if options.Provider != "" {
 		qs.Set("provider", options.Provider)
+	}
+	if options.Prompt != "" {
+		qs.Set("prompt", options.Prompt)
 	}
 
 	parsedUrl, err := url.Parse(fmt.Sprintf("%s/%s", s.coreClient.envUrl, authorizeEndpoint))
@@ -234,7 +260,6 @@ func (s *scalekitClient) AuthenticateWithCode(
 func (s *scalekitClient) GetIdpInitiatedLoginClaims(idpInitiateLoginToken string) (*IdpInitiatedLoginClaims, error) {
 	return validateToken[IdpInitiatedLoginClaims](idpInitiateLoginToken, s.coreClient.getJwks)
 }
-
 func (s *scalekitClient) ValidateAccessToken(accessToken string) (bool, error) {
 	_, err := validateToken[accessTokenClaims](accessToken, s.coreClient.getJwks)
 	if err != nil {
@@ -323,6 +348,25 @@ func validateToken[T interface{}](token string, jwksFn func() (*jose.JSONWebKeyS
 		return nil, err
 	}
 
+	// Check token expiration
+	var rawClaims map[string]interface{}
+	err = json.Unmarshal(jwt, &rawClaims)
+	if err != nil {
+		return nil, err
+	}
+
+	if exp, ok := rawClaims["exp"]; ok {
+		expFloat, ok := exp.(float64)
+		if !ok {
+			return nil, errors.New("invalid exp claim format")
+		}
+
+		expTime := int64(expFloat)
+		if time.Now().Unix() >= expTime {
+			return nil, errors.New("token has expired")
+		}
+	}
+
 	return &claims, nil
 }
 
@@ -332,4 +376,51 @@ func computeSignature(secret []byte, data string) string {
 	signature := hash.Sum(nil)
 
 	return base64.StdEncoding.EncodeToString(signature)
+}
+
+func (s *scalekitClient) RefreshToken(refreshToken string) (*TokenResponse, error) {
+	if refreshToken == "" {
+		return nil, errors.New("refresh token is required")
+	}
+
+	qs := url.Values{}
+	qs.Add("refresh_token", refreshToken)
+	qs.Add("grant_type", GrantTypeRefreshToken)
+	qs.Add("client_id", s.coreClient.clientId)
+	qs.Add("client_secret", s.coreClient.clientSecret)
+
+	authResp, err := s.coreClient.authenticate(qs)
+	if err != nil {
+		return nil, err
+	}
+
+	return &TokenResponse{
+		AccessToken:  authResp.AccessToken,
+		RefreshToken: authResp.RefreshToken,
+		ExpiresIn:    authResp.ExpiresIn,
+	}, nil
+}
+
+func (s *scalekitClient) GetLogoutUrl(options LogoutUrlOptions) (*url.URL, error) {
+	qs := url.Values{}
+
+	if options.IdTokenHint != "" {
+		qs.Set("id_token_hint", options.IdTokenHint)
+	}
+
+	if options.PostLogoutRedirectUri != "" {
+		qs.Set("post_logout_redirect_uri", options.PostLogoutRedirectUri)
+	}
+
+	if options.State != "" {
+		qs.Set("state", options.State)
+	}
+
+	parsedUrl, err := url.Parse(fmt.Sprintf("%s/%s", s.coreClient.envUrl, logoutEndpoint))
+	if err != nil {
+		return nil, err
+	}
+	parsedUrl.RawQuery = qs.Encode()
+
+	return parsedUrl, nil
 }
