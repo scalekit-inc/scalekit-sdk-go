@@ -41,6 +41,7 @@ type Scalekit interface {
 	GetIdpInitiatedLoginClaims(idpInitiateLoginToken string) (*IdpInitiatedLoginClaims, error)
 	ValidateAccessToken(accessToken string) (bool, error)
 	VerifyWebhookPayload(secret string, headers map[string]string, payload []byte) (bool, error)
+	GetAccessToken(accessToken string) (*AccessTokenClaims, error)
 }
 
 type scalekitClient struct {
@@ -94,14 +95,40 @@ type IdTokenClaims struct {
 	UpdatedAt           string     `json:"updated_at"`
 	Identities          []Identity `json:"identities"`
 	Metadata            string     `json:"metadata"`
+	Claims              Claims     `json:"-"`
 }
 
-type accessTokenClaims struct {
-	Sub string `json:"sub"`
-	Iss string `json:"iss"`
-	Aud string `json:"aud"`
-	Iat int    `json:"iat"`
-	Exp int    `json:"exp"`
+type Audience []string
+
+type AccessTokenClaims struct {
+	Sub      string   `json:"sub"`
+	Iss      string   `json:"iss"`
+	Audience Audience `json:"aud,omitempty"`
+	Iat      int      `json:"iat"`
+	Exp      int      `json:"exp"`
+	Claims   Claims   `json:"-"`
+}
+
+func (a *AccessTokenClaims) UnmarshalJSON(data []byte) error {
+	// Alias is used to avoid infinite recursion during unmarshalling
+	type Alias AccessTokenClaims
+	aux := &struct {
+		*Alias
+	}{
+		Alias: (*Alias)(a),
+	}
+
+	if err := json.Unmarshal(data, aux); err != nil {
+		return err
+	}
+
+	var temp map[string]interface{}
+	if err := json.Unmarshal(data, &temp); err != nil {
+		return err
+	}
+
+	a.Claims = temp
+	return nil
 }
 
 type User = IdTokenClaims
@@ -120,6 +147,29 @@ type IdpInitiatedLoginClaims struct {
 	OrganizationID string  `json:"organization_id"`
 	LoginHint      string  `json:"login_hint"`
 	RelayState     *string `json:"relay_state"`
+}
+
+type Claims map[string]interface{}
+
+func (i *IdTokenClaims) UnmarshalJSON(data []byte) error {
+	// Alias is used to avoid infinite recursion during unmarshalling
+	type Alias IdTokenClaims
+	aux := &struct {
+		*Alias
+	}{
+		Alias: (*Alias)(i),
+	}
+
+	if err := json.Unmarshal(data, aux); err != nil {
+		return err
+	}
+
+	var temp map[string]interface{}
+	if err := json.Unmarshal(data, &temp); err != nil {
+		return err
+	}
+	i.Claims = temp
+	return nil
 }
 
 func NewScalekitClient(envUrl, clientId, clientSecret string) Scalekit {
@@ -235,8 +285,16 @@ func (s *scalekitClient) GetIdpInitiatedLoginClaims(idpInitiateLoginToken string
 	return validateToken[IdpInitiatedLoginClaims](idpInitiateLoginToken, s.coreClient.getJwks)
 }
 
+func (s *scalekitClient) GetAccessToken(accessToken string) (*AccessTokenClaims, error) {
+	at, err := validateToken[AccessTokenClaims](accessToken, s.coreClient.getJwks)
+	if err != nil {
+		return nil, err
+	}
+	return at, nil
+}
+
 func (s *scalekitClient) ValidateAccessToken(accessToken string) (bool, error) {
-	_, err := validateToken[accessTokenClaims](accessToken, s.coreClient.getJwks)
+	_, err := validateToken[AccessTokenClaims](accessToken, s.coreClient.getJwks)
 	if err != nil {
 		return false, err
 	}
@@ -322,7 +380,6 @@ func validateToken[T interface{}](token string, jwksFn func() (*jose.JSONWebKeyS
 	if err != nil {
 		return nil, err
 	}
-
 	return &claims, nil
 }
 
