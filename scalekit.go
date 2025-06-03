@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -347,18 +348,17 @@ func (s *scalekitClient) VerifyWebhookPayload(
 
 func verifyTimestamp(timestampStr string) (*time.Time, error) {
 	now := time.Now()
-	timestamp, err := time.Parse(time.RFC3339, timestampStr)
+	unixTimestamp, err := strconv.ParseInt(timestampStr, 10, 64)
 	if err != nil {
 		return nil, err
 	}
+	timestamp := time.Unix(unixTimestamp, 0)
 	if now.Sub(timestamp) > webhookToleranceInSeconds {
 		return nil, errors.New("Message timestamp too old")
 	}
 	if timestamp.Unix() > now.Add(webhookToleranceInSeconds).Unix() {
 		return nil, errors.New("Message timestamp too new")
-
 	}
-
 	return &timestamp, nil
 }
 
