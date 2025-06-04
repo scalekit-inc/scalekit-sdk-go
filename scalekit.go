@@ -23,8 +23,10 @@ const (
 	GrantTypeClientCredentials GrantType = "client_credentials"
 )
 
-var webhookToleranceInSeconds = 5 * time.Minute
-var webhookSignatureVersion = "v1"
+var (
+	webhookToleranceInSeconds = 5 * time.Minute
+	webhookSignatureVersion   = "v1"
+)
 
 type GrantType = string
 

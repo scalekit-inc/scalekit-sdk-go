@@ -15,7 +15,6 @@ import (
 )
 
 func TestAuthenticateWithCode(t *testing.T) {
-
 	tests := []struct {
 		name     string
 		req      func() (string, string, scalekit.AuthenticationOptions)
