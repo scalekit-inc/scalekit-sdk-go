@@ -79,6 +79,12 @@ type AuthenticationResponse struct {
 	ExpiresIn   int
 }
 
+type (
+	Claims  map[string]interface{}
+	idAlias IdTokenClaims
+	atAlias AccessTokenClaims
+)
+
 type IdTokenClaims struct {
 	Id                  string     `json:"sub"`
 	Username            string     `json:"preferred_username"`
@@ -99,6 +105,10 @@ type IdTokenClaims struct {
 	Identities          []Identity `json:"identities"`
 	Metadata            string     `json:"metadata"`
 	Claims              Claims     `json:"-"`
+}
+
+func (i *IdTokenClaims) UnmarshalJSON(data []byte) error {
+	return unmarshalJson(data, (*idAlias)(i), &i.Claims)
 }
 
 type Audience []string
@@ -132,16 +142,6 @@ type IdpInitiatedLoginClaims struct {
 	OrganizationID string  `json:"organization_id"`
 	LoginHint      string  `json:"login_hint"`
 	RelayState     *string `json:"relay_state"`
-}
-
-type (
-	Claims  map[string]interface{}
-	idAlias IdTokenClaims
-	atAlias AccessTokenClaims
-)
-
-func (i *IdTokenClaims) UnmarshalJSON(data []byte) error {
-	return unmarshalJson(data, (*idAlias)(i), &i.Claims)
 }
 
 func NewScalekitClient(envUrl, clientId, clientSecret string) Scalekit {
