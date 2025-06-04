@@ -118,7 +118,7 @@ func TestGetAccessToken(t *testing.T) {
 			defer server.Close()
 
 			client := scalekit.NewScalekitClient(server.URL, "client_id", "client_secret")
-			token, err := client.GetAccessToken(tt.token)
+			token, err := client.GetAccessTokenClaims(tt.token)
 			tt.assertFn(t, token, err)
 		})
 	}

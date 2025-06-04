@@ -44,7 +44,7 @@ type Scalekit interface {
 	GetIdpInitiatedLoginClaims(idpInitiateLoginToken string) (*IdpInitiatedLoginClaims, error)
 	ValidateAccessToken(accessToken string) (bool, error)
 	VerifyWebhookPayload(secret string, headers map[string]string, payload []byte) (bool, error)
-	GetAccessToken(accessToken string) (*AccessTokenClaims, error)
+	GetAccessTokenClaims(accessToken string) (*AccessTokenClaims, error)
 }
 
 type scalekitClient struct {
@@ -113,25 +113,7 @@ type AccessTokenClaims struct {
 }
 
 func (a *AccessTokenClaims) UnmarshalJSON(data []byte) error {
-	// Alias is used to avoid infinite recursion during unmarshalling
-	type Alias AccessTokenClaims
-	aux := &struct {
-		*Alias
-	}{
-		Alias: (*Alias)(a),
-	}
-
-	if err := json.Unmarshal(data, aux); err != nil {
-		return err
-	}
-
-	var temp map[string]interface{}
-	if err := json.Unmarshal(data, &temp); err != nil {
-		return err
-	}
-
-	a.Claims = temp
-	return nil
+	return unmarshalJson(data, (*atAlias)(a), &a.Claims)
 }
 
 type User = IdTokenClaims
@@ -152,27 +134,14 @@ type IdpInitiatedLoginClaims struct {
 	RelayState     *string `json:"relay_state"`
 }
 
-type Claims map[string]interface{}
+type (
+	Claims  map[string]interface{}
+	idAlias IdTokenClaims
+	atAlias AccessTokenClaims
+)
 
 func (i *IdTokenClaims) UnmarshalJSON(data []byte) error {
-	// Alias is used to avoid infinite recursion during unmarshalling
-	type Alias IdTokenClaims
-	aux := &struct {
-		*Alias
-	}{
-		Alias: (*Alias)(i),
-	}
-
-	if err := json.Unmarshal(data, aux); err != nil {
-		return err
-	}
-
-	var temp map[string]interface{}
-	if err := json.Unmarshal(data, &temp); err != nil {
-		return err
-	}
-	i.Claims = temp
-	return nil
+	return unmarshalJson(data, (*idAlias)(i), &i.Claims)
 }
 
 func NewScalekitClient(envUrl, clientId, clientSecret string) Scalekit {
@@ -288,7 +257,7 @@ func (s *scalekitClient) GetIdpInitiatedLoginClaims(idpInitiateLoginToken string
 	return ValidateToken[IdpInitiatedLoginClaims](idpInitiateLoginToken, s.coreClient.GetJwks)
 }
 
-func (s *scalekitClient) GetAccessToken(accessToken string) (*AccessTokenClaims, error) {
+func (s *scalekitClient) GetAccessTokenClaims(accessToken string) (*AccessTokenClaims, error) {
 	at, err := ValidateToken[AccessTokenClaims](accessToken, s.coreClient.GetJwks)
 	if err != nil {
 		return nil, err
@@ -391,4 +360,14 @@ func computeSignature(secret []byte, data string) string {
 	signature := hash.Sum(nil)
 
 	return base64.StdEncoding.EncodeToString(signature)
+}
+
+func unmarshalJson(data []byte, types ...any) error {
+	for _, cType := range types {
+		err := json.Unmarshal(data, cType)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
