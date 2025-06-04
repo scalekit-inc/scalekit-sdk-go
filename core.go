@@ -12,9 +12,11 @@ import (
 	"github.com/go-jose/go-jose/v4"
 )
 
-const tokenEndpoint = "oauth/token"
-const jwksEndpoint = "keys"
-const sdkVersion = "Scalekit-Go/v1.0.4"
+const (
+	tokenEndpoint = "oauth/token"
+	jwksEndpoint  = "keys"
+	sdkVersion    = "Scalekit-Go/v1.0.5"
+)
 
 type coreClient struct {
 	envUrl        string
@@ -69,7 +71,7 @@ func (h *headerInterceptor) RoundTrip(r *http.Request) (*http.Response, error) {
 
 func newCoreClient(envUrl, clientId, clientSecret string) *coreClient {
 	sdkVersion := sdkVersion
-	apiVersion := "20240430"
+	apiVersion := "20250604"
 	client := &coreClient{
 		sdkVersion:   sdkVersion,
 		apiVersion:   apiVersion,
