@@ -271,7 +271,7 @@ func (s *scalekitClient) AuthenticateWithCode(
 	if err != nil {
 		return nil, err
 	}
-	claims, err := validateToken[IdTokenClaims](authResp.IdToken, s.coreClient.getJwks)
+	claims, err := ValidateToken[IdTokenClaims](authResp.IdToken, s.coreClient.GetJwks)
 	if err != nil {
 		return nil, err
 	}
@@ -285,11 +285,11 @@ func (s *scalekitClient) AuthenticateWithCode(
 }
 
 func (s *scalekitClient) GetIdpInitiatedLoginClaims(idpInitiateLoginToken string) (*IdpInitiatedLoginClaims, error) {
-	return validateToken[IdpInitiatedLoginClaims](idpInitiateLoginToken, s.coreClient.getJwks)
+	return ValidateToken[IdpInitiatedLoginClaims](idpInitiateLoginToken, s.coreClient.GetJwks)
 }
 
 func (s *scalekitClient) GetAccessToken(accessToken string) (*AccessTokenClaims, error) {
-	at, err := validateToken[AccessTokenClaims](accessToken, s.coreClient.getJwks)
+	at, err := ValidateToken[AccessTokenClaims](accessToken, s.coreClient.GetJwks)
 	if err != nil {
 		return nil, err
 	}
@@ -297,7 +297,7 @@ func (s *scalekitClient) GetAccessToken(accessToken string) (*AccessTokenClaims,
 }
 
 func (s *scalekitClient) ValidateAccessToken(accessToken string) (bool, error) {
-	_, err := validateToken[AccessTokenClaims](accessToken, s.coreClient.getJwks)
+	_, err := ValidateToken[AccessTokenClaims](accessToken, s.coreClient.GetJwks)
 	if err != nil {
 		return false, err
 	}
@@ -364,7 +364,7 @@ func verifyTimestamp(timestampStr string) (*time.Time, error) {
 	return &timestamp, nil
 }
 
-func validateToken[T interface{}](token string, jwksFn func() (*jose.JSONWebKeySet, error)) (*T, error) {
+func ValidateToken[T interface{}](token string, jwksFn func() (*jose.JSONWebKeySet, error)) (*T, error) {
 	var claims T
 	keySet, err := jwksFn()
 	if err != nil {

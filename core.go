@@ -132,7 +132,7 @@ func (c *coreClient) authenticate(requestData url.Values) (*authenticationRespon
 	return &responseData, nil
 }
 
-func (c *coreClient) getJwks() (*jose.JSONWebKeySet, error) {
+func (c *coreClient) GetJwks() (*jose.JSONWebKeySet, error) {
 	if c.jsonWebKeySet != nil {
 		return c.jsonWebKeySet, nil
 	}
