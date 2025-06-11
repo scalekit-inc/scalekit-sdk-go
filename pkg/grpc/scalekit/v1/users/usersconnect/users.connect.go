@@ -34,29 +34,53 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
-	// UserServiceCreateUserProcedure is the fully-qualified name of the UserService's CreateUser RPC.
-	UserServiceCreateUserProcedure = "/scalekit.v1.users.UserService/CreateUser"
-	// UserServiceUpdateUserProcedure is the fully-qualified name of the UserService's UpdateUser RPC.
-	UserServiceUpdateUserProcedure = "/scalekit.v1.users.UserService/UpdateUser"
 	// UserServiceGetUserProcedure is the fully-qualified name of the UserService's GetUser RPC.
 	UserServiceGetUserProcedure = "/scalekit.v1.users.UserService/GetUser"
 	// UserServiceListUsersProcedure is the fully-qualified name of the UserService's ListUsers RPC.
 	UserServiceListUsersProcedure = "/scalekit.v1.users.UserService/ListUsers"
+	// UserServiceSearchUsersProcedure is the fully-qualified name of the UserService's SearchUsers RPC.
+	UserServiceSearchUsersProcedure = "/scalekit.v1.users.UserService/SearchUsers"
+	// UserServiceSearchOrganizationUsersProcedure is the fully-qualified name of the UserService's
+	// SearchOrganizationUsers RPC.
+	UserServiceSearchOrganizationUsersProcedure = "/scalekit.v1.users.UserService/SearchOrganizationUsers"
+	// UserServiceUpdateUserProcedure is the fully-qualified name of the UserService's UpdateUser RPC.
+	UserServiceUpdateUserProcedure = "/scalekit.v1.users.UserService/UpdateUser"
 	// UserServiceDeleteUserProcedure is the fully-qualified name of the UserService's DeleteUser RPC.
 	UserServiceDeleteUserProcedure = "/scalekit.v1.users.UserService/DeleteUser"
-	// UserServiceAddUserToOrganizationProcedure is the fully-qualified name of the UserService's
-	// AddUserToOrganization RPC.
-	UserServiceAddUserToOrganizationProcedure = "/scalekit.v1.users.UserService/AddUserToOrganization"
+	// UserServiceCreateMembershipProcedure is the fully-qualified name of the UserService's
+	// CreateMembership RPC.
+	UserServiceCreateMembershipProcedure = "/scalekit.v1.users.UserService/CreateMembership"
+	// UserServiceDeleteMembershipProcedure is the fully-qualified name of the UserService's
+	// DeleteMembership RPC.
+	UserServiceDeleteMembershipProcedure = "/scalekit.v1.users.UserService/DeleteMembership"
+	// UserServiceUpdateMembershipProcedure is the fully-qualified name of the UserService's
+	// UpdateMembership RPC.
+	UserServiceUpdateMembershipProcedure = "/scalekit.v1.users.UserService/UpdateMembership"
+	// UserServiceCreateUserAndMembershipProcedure is the fully-qualified name of the UserService's
+	// CreateUserAndMembership RPC.
+	UserServiceCreateUserAndMembershipProcedure = "/scalekit.v1.users.UserService/CreateUserAndMembership"
+	// UserServiceListOrganizationUsersProcedure is the fully-qualified name of the UserService's
+	// ListOrganizationUsers RPC.
+	UserServiceListOrganizationUsersProcedure = "/scalekit.v1.users.UserService/ListOrganizationUsers"
 )
 
 // UserServiceClient is a client for the scalekit.v1.users.UserService service.
 type UserServiceClient interface {
-	CreateUser(context.Context, *connect.Request[users.CreateUserRequest]) (*connect.Response[users.CreateUserResponse], error)
-	UpdateUser(context.Context, *connect.Request[users.UpdateUserRequest]) (*connect.Response[users.UpdateUserResponse], error)
+	// Users
 	GetUser(context.Context, *connect.Request[users.GetUserRequest]) (*connect.Response[users.GetUserResponse], error)
-	ListUsers(context.Context, *connect.Request[users.ListUserRequest]) (*connect.Response[users.ListUserResponse], error)
+	ListUsers(context.Context, *connect.Request[users.ListUsersRequest]) (*connect.Response[users.ListUsersResponse], error)
+	SearchUsers(context.Context, *connect.Request[users.SearchUsersRequest]) (*connect.Response[users.SearchUsersResponse], error)
+	SearchOrganizationUsers(context.Context, *connect.Request[users.SearchOrganizationUsersRequest]) (*connect.Response[users.SearchOrganizationUsersResponse], error)
+	UpdateUser(context.Context, *connect.Request[users.UpdateUserRequest]) (*connect.Response[users.UpdateUserResponse], error)
 	DeleteUser(context.Context, *connect.Request[users.DeleteUserRequest]) (*connect.Response[emptypb.Empty], error)
-	AddUserToOrganization(context.Context, *connect.Request[users.AddUserRequest]) (*connect.Response[users.AddUserResponse], error)
+	// Memberships
+	CreateMembership(context.Context, *connect.Request[users.CreateMembershipRequest]) (*connect.Response[users.CreateMembershipResponse], error)
+	// TODO Check cascade behaviour currently its ignored
+	DeleteMembership(context.Context, *connect.Request[users.DeleteMembershipRequest]) (*connect.Response[emptypb.Empty], error)
+	UpdateMembership(context.Context, *connect.Request[users.UpdateMembershipRequest]) (*connect.Response[users.UpdateMembershipResponse], error)
+	CreateUserAndMembership(context.Context, *connect.Request[users.CreateUserAndMembershipRequest]) (*connect.Response[users.CreateUserAndMembershipResponse], error)
+	// only memberships of the organization
+	ListOrganizationUsers(context.Context, *connect.Request[users.ListOrganizationUsersRequest]) (*connect.Response[users.ListOrganizationUsersResponse], error)
 }
 
 // NewUserServiceClient constructs a client for the scalekit.v1.users.UserService service. By
@@ -70,10 +94,28 @@ func NewUserServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 	baseURL = strings.TrimRight(baseURL, "/")
 	userServiceMethods := users.File_scalekit_v1_users_users_proto.Services().ByName("UserService").Methods()
 	return &userServiceClient{
-		createUser: connect.NewClient[users.CreateUserRequest, users.CreateUserResponse](
+		getUser: connect.NewClient[users.GetUserRequest, users.GetUserResponse](
 			httpClient,
-			baseURL+UserServiceCreateUserProcedure,
-			connect.WithSchema(userServiceMethods.ByName("CreateUser")),
+			baseURL+UserServiceGetUserProcedure,
+			connect.WithSchema(userServiceMethods.ByName("GetUser")),
+			connect.WithClientOptions(opts...),
+		),
+		listUsers: connect.NewClient[users.ListUsersRequest, users.ListUsersResponse](
+			httpClient,
+			baseURL+UserServiceListUsersProcedure,
+			connect.WithSchema(userServiceMethods.ByName("ListUsers")),
+			connect.WithClientOptions(opts...),
+		),
+		searchUsers: connect.NewClient[users.SearchUsersRequest, users.SearchUsersResponse](
+			httpClient,
+			baseURL+UserServiceSearchUsersProcedure,
+			connect.WithSchema(userServiceMethods.ByName("SearchUsers")),
+			connect.WithClientOptions(opts...),
+		),
+		searchOrganizationUsers: connect.NewClient[users.SearchOrganizationUsersRequest, users.SearchOrganizationUsersResponse](
+			httpClient,
+			baseURL+UserServiceSearchOrganizationUsersProcedure,
+			connect.WithSchema(userServiceMethods.ByName("SearchOrganizationUsers")),
 			connect.WithClientOptions(opts...),
 		),
 		updateUser: connect.NewClient[users.UpdateUserRequest, users.UpdateUserResponse](
@@ -82,28 +124,40 @@ func NewUserServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(userServiceMethods.ByName("UpdateUser")),
 			connect.WithClientOptions(opts...),
 		),
-		getUser: connect.NewClient[users.GetUserRequest, users.GetUserResponse](
-			httpClient,
-			baseURL+UserServiceGetUserProcedure,
-			connect.WithSchema(userServiceMethods.ByName("GetUser")),
-			connect.WithClientOptions(opts...),
-		),
-		listUsers: connect.NewClient[users.ListUserRequest, users.ListUserResponse](
-			httpClient,
-			baseURL+UserServiceListUsersProcedure,
-			connect.WithSchema(userServiceMethods.ByName("ListUsers")),
-			connect.WithClientOptions(opts...),
-		),
 		deleteUser: connect.NewClient[users.DeleteUserRequest, emptypb.Empty](
 			httpClient,
 			baseURL+UserServiceDeleteUserProcedure,
 			connect.WithSchema(userServiceMethods.ByName("DeleteUser")),
 			connect.WithClientOptions(opts...),
 		),
-		addUserToOrganization: connect.NewClient[users.AddUserRequest, users.AddUserResponse](
+		createMembership: connect.NewClient[users.CreateMembershipRequest, users.CreateMembershipResponse](
 			httpClient,
-			baseURL+UserServiceAddUserToOrganizationProcedure,
-			connect.WithSchema(userServiceMethods.ByName("AddUserToOrganization")),
+			baseURL+UserServiceCreateMembershipProcedure,
+			connect.WithSchema(userServiceMethods.ByName("CreateMembership")),
+			connect.WithClientOptions(opts...),
+		),
+		deleteMembership: connect.NewClient[users.DeleteMembershipRequest, emptypb.Empty](
+			httpClient,
+			baseURL+UserServiceDeleteMembershipProcedure,
+			connect.WithSchema(userServiceMethods.ByName("DeleteMembership")),
+			connect.WithClientOptions(opts...),
+		),
+		updateMembership: connect.NewClient[users.UpdateMembershipRequest, users.UpdateMembershipResponse](
+			httpClient,
+			baseURL+UserServiceUpdateMembershipProcedure,
+			connect.WithSchema(userServiceMethods.ByName("UpdateMembership")),
+			connect.WithClientOptions(opts...),
+		),
+		createUserAndMembership: connect.NewClient[users.CreateUserAndMembershipRequest, users.CreateUserAndMembershipResponse](
+			httpClient,
+			baseURL+UserServiceCreateUserAndMembershipProcedure,
+			connect.WithSchema(userServiceMethods.ByName("CreateUserAndMembership")),
+			connect.WithClientOptions(opts...),
+		),
+		listOrganizationUsers: connect.NewClient[users.ListOrganizationUsersRequest, users.ListOrganizationUsersResponse](
+			httpClient,
+			baseURL+UserServiceListOrganizationUsersProcedure,
+			connect.WithSchema(userServiceMethods.ByName("ListOrganizationUsers")),
 			connect.WithClientOptions(opts...),
 		),
 	}
@@ -111,22 +165,17 @@ func NewUserServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 
 // userServiceClient implements UserServiceClient.
 type userServiceClient struct {
-	createUser            *connect.Client[users.CreateUserRequest, users.CreateUserResponse]
-	updateUser            *connect.Client[users.UpdateUserRequest, users.UpdateUserResponse]
-	getUser               *connect.Client[users.GetUserRequest, users.GetUserResponse]
-	listUsers             *connect.Client[users.ListUserRequest, users.ListUserResponse]
-	deleteUser            *connect.Client[users.DeleteUserRequest, emptypb.Empty]
-	addUserToOrganization *connect.Client[users.AddUserRequest, users.AddUserResponse]
-}
-
-// CreateUser calls scalekit.v1.users.UserService.CreateUser.
-func (c *userServiceClient) CreateUser(ctx context.Context, req *connect.Request[users.CreateUserRequest]) (*connect.Response[users.CreateUserResponse], error) {
-	return c.createUser.CallUnary(ctx, req)
-}
-
-// UpdateUser calls scalekit.v1.users.UserService.UpdateUser.
-func (c *userServiceClient) UpdateUser(ctx context.Context, req *connect.Request[users.UpdateUserRequest]) (*connect.Response[users.UpdateUserResponse], error) {
-	return c.updateUser.CallUnary(ctx, req)
+	getUser                 *connect.Client[users.GetUserRequest, users.GetUserResponse]
+	listUsers               *connect.Client[users.ListUsersRequest, users.ListUsersResponse]
+	searchUsers             *connect.Client[users.SearchUsersRequest, users.SearchUsersResponse]
+	searchOrganizationUsers *connect.Client[users.SearchOrganizationUsersRequest, users.SearchOrganizationUsersResponse]
+	updateUser              *connect.Client[users.UpdateUserRequest, users.UpdateUserResponse]
+	deleteUser              *connect.Client[users.DeleteUserRequest, emptypb.Empty]
+	createMembership        *connect.Client[users.CreateMembershipRequest, users.CreateMembershipResponse]
+	deleteMembership        *connect.Client[users.DeleteMembershipRequest, emptypb.Empty]
+	updateMembership        *connect.Client[users.UpdateMembershipRequest, users.UpdateMembershipResponse]
+	createUserAndMembership *connect.Client[users.CreateUserAndMembershipRequest, users.CreateUserAndMembershipResponse]
+	listOrganizationUsers   *connect.Client[users.ListOrganizationUsersRequest, users.ListOrganizationUsersResponse]
 }
 
 // GetUser calls scalekit.v1.users.UserService.GetUser.
@@ -135,8 +184,23 @@ func (c *userServiceClient) GetUser(ctx context.Context, req *connect.Request[us
 }
 
 // ListUsers calls scalekit.v1.users.UserService.ListUsers.
-func (c *userServiceClient) ListUsers(ctx context.Context, req *connect.Request[users.ListUserRequest]) (*connect.Response[users.ListUserResponse], error) {
+func (c *userServiceClient) ListUsers(ctx context.Context, req *connect.Request[users.ListUsersRequest]) (*connect.Response[users.ListUsersResponse], error) {
 	return c.listUsers.CallUnary(ctx, req)
+}
+
+// SearchUsers calls scalekit.v1.users.UserService.SearchUsers.
+func (c *userServiceClient) SearchUsers(ctx context.Context, req *connect.Request[users.SearchUsersRequest]) (*connect.Response[users.SearchUsersResponse], error) {
+	return c.searchUsers.CallUnary(ctx, req)
+}
+
+// SearchOrganizationUsers calls scalekit.v1.users.UserService.SearchOrganizationUsers.
+func (c *userServiceClient) SearchOrganizationUsers(ctx context.Context, req *connect.Request[users.SearchOrganizationUsersRequest]) (*connect.Response[users.SearchOrganizationUsersResponse], error) {
+	return c.searchOrganizationUsers.CallUnary(ctx, req)
+}
+
+// UpdateUser calls scalekit.v1.users.UserService.UpdateUser.
+func (c *userServiceClient) UpdateUser(ctx context.Context, req *connect.Request[users.UpdateUserRequest]) (*connect.Response[users.UpdateUserResponse], error) {
+	return c.updateUser.CallUnary(ctx, req)
 }
 
 // DeleteUser calls scalekit.v1.users.UserService.DeleteUser.
@@ -144,19 +208,48 @@ func (c *userServiceClient) DeleteUser(ctx context.Context, req *connect.Request
 	return c.deleteUser.CallUnary(ctx, req)
 }
 
-// AddUserToOrganization calls scalekit.v1.users.UserService.AddUserToOrganization.
-func (c *userServiceClient) AddUserToOrganization(ctx context.Context, req *connect.Request[users.AddUserRequest]) (*connect.Response[users.AddUserResponse], error) {
-	return c.addUserToOrganization.CallUnary(ctx, req)
+// CreateMembership calls scalekit.v1.users.UserService.CreateMembership.
+func (c *userServiceClient) CreateMembership(ctx context.Context, req *connect.Request[users.CreateMembershipRequest]) (*connect.Response[users.CreateMembershipResponse], error) {
+	return c.createMembership.CallUnary(ctx, req)
+}
+
+// DeleteMembership calls scalekit.v1.users.UserService.DeleteMembership.
+func (c *userServiceClient) DeleteMembership(ctx context.Context, req *connect.Request[users.DeleteMembershipRequest]) (*connect.Response[emptypb.Empty], error) {
+	return c.deleteMembership.CallUnary(ctx, req)
+}
+
+// UpdateMembership calls scalekit.v1.users.UserService.UpdateMembership.
+func (c *userServiceClient) UpdateMembership(ctx context.Context, req *connect.Request[users.UpdateMembershipRequest]) (*connect.Response[users.UpdateMembershipResponse], error) {
+	return c.updateMembership.CallUnary(ctx, req)
+}
+
+// CreateUserAndMembership calls scalekit.v1.users.UserService.CreateUserAndMembership.
+func (c *userServiceClient) CreateUserAndMembership(ctx context.Context, req *connect.Request[users.CreateUserAndMembershipRequest]) (*connect.Response[users.CreateUserAndMembershipResponse], error) {
+	return c.createUserAndMembership.CallUnary(ctx, req)
+}
+
+// ListOrganizationUsers calls scalekit.v1.users.UserService.ListOrganizationUsers.
+func (c *userServiceClient) ListOrganizationUsers(ctx context.Context, req *connect.Request[users.ListOrganizationUsersRequest]) (*connect.Response[users.ListOrganizationUsersResponse], error) {
+	return c.listOrganizationUsers.CallUnary(ctx, req)
 }
 
 // UserServiceHandler is an implementation of the scalekit.v1.users.UserService service.
 type UserServiceHandler interface {
-	CreateUser(context.Context, *connect.Request[users.CreateUserRequest]) (*connect.Response[users.CreateUserResponse], error)
-	UpdateUser(context.Context, *connect.Request[users.UpdateUserRequest]) (*connect.Response[users.UpdateUserResponse], error)
+	// Users
 	GetUser(context.Context, *connect.Request[users.GetUserRequest]) (*connect.Response[users.GetUserResponse], error)
-	ListUsers(context.Context, *connect.Request[users.ListUserRequest]) (*connect.Response[users.ListUserResponse], error)
+	ListUsers(context.Context, *connect.Request[users.ListUsersRequest]) (*connect.Response[users.ListUsersResponse], error)
+	SearchUsers(context.Context, *connect.Request[users.SearchUsersRequest]) (*connect.Response[users.SearchUsersResponse], error)
+	SearchOrganizationUsers(context.Context, *connect.Request[users.SearchOrganizationUsersRequest]) (*connect.Response[users.SearchOrganizationUsersResponse], error)
+	UpdateUser(context.Context, *connect.Request[users.UpdateUserRequest]) (*connect.Response[users.UpdateUserResponse], error)
 	DeleteUser(context.Context, *connect.Request[users.DeleteUserRequest]) (*connect.Response[emptypb.Empty], error)
-	AddUserToOrganization(context.Context, *connect.Request[users.AddUserRequest]) (*connect.Response[users.AddUserResponse], error)
+	// Memberships
+	CreateMembership(context.Context, *connect.Request[users.CreateMembershipRequest]) (*connect.Response[users.CreateMembershipResponse], error)
+	// TODO Check cascade behaviour currently its ignored
+	DeleteMembership(context.Context, *connect.Request[users.DeleteMembershipRequest]) (*connect.Response[emptypb.Empty], error)
+	UpdateMembership(context.Context, *connect.Request[users.UpdateMembershipRequest]) (*connect.Response[users.UpdateMembershipResponse], error)
+	CreateUserAndMembership(context.Context, *connect.Request[users.CreateUserAndMembershipRequest]) (*connect.Response[users.CreateUserAndMembershipResponse], error)
+	// only memberships of the organization
+	ListOrganizationUsers(context.Context, *connect.Request[users.ListOrganizationUsersRequest]) (*connect.Response[users.ListOrganizationUsersResponse], error)
 }
 
 // NewUserServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -166,18 +259,6 @@ type UserServiceHandler interface {
 // and JSON codecs. They also support gzip compression.
 func NewUserServiceHandler(svc UserServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
 	userServiceMethods := users.File_scalekit_v1_users_users_proto.Services().ByName("UserService").Methods()
-	userServiceCreateUserHandler := connect.NewUnaryHandler(
-		UserServiceCreateUserProcedure,
-		svc.CreateUser,
-		connect.WithSchema(userServiceMethods.ByName("CreateUser")),
-		connect.WithHandlerOptions(opts...),
-	)
-	userServiceUpdateUserHandler := connect.NewUnaryHandler(
-		UserServiceUpdateUserProcedure,
-		svc.UpdateUser,
-		connect.WithSchema(userServiceMethods.ByName("UpdateUser")),
-		connect.WithHandlerOptions(opts...),
-	)
 	userServiceGetUserHandler := connect.NewUnaryHandler(
 		UserServiceGetUserProcedure,
 		svc.GetUser,
@@ -190,32 +271,84 @@ func NewUserServiceHandler(svc UserServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(userServiceMethods.ByName("ListUsers")),
 		connect.WithHandlerOptions(opts...),
 	)
+	userServiceSearchUsersHandler := connect.NewUnaryHandler(
+		UserServiceSearchUsersProcedure,
+		svc.SearchUsers,
+		connect.WithSchema(userServiceMethods.ByName("SearchUsers")),
+		connect.WithHandlerOptions(opts...),
+	)
+	userServiceSearchOrganizationUsersHandler := connect.NewUnaryHandler(
+		UserServiceSearchOrganizationUsersProcedure,
+		svc.SearchOrganizationUsers,
+		connect.WithSchema(userServiceMethods.ByName("SearchOrganizationUsers")),
+		connect.WithHandlerOptions(opts...),
+	)
+	userServiceUpdateUserHandler := connect.NewUnaryHandler(
+		UserServiceUpdateUserProcedure,
+		svc.UpdateUser,
+		connect.WithSchema(userServiceMethods.ByName("UpdateUser")),
+		connect.WithHandlerOptions(opts...),
+	)
 	userServiceDeleteUserHandler := connect.NewUnaryHandler(
 		UserServiceDeleteUserProcedure,
 		svc.DeleteUser,
 		connect.WithSchema(userServiceMethods.ByName("DeleteUser")),
 		connect.WithHandlerOptions(opts...),
 	)
-	userServiceAddUserToOrganizationHandler := connect.NewUnaryHandler(
-		UserServiceAddUserToOrganizationProcedure,
-		svc.AddUserToOrganization,
-		connect.WithSchema(userServiceMethods.ByName("AddUserToOrganization")),
+	userServiceCreateMembershipHandler := connect.NewUnaryHandler(
+		UserServiceCreateMembershipProcedure,
+		svc.CreateMembership,
+		connect.WithSchema(userServiceMethods.ByName("CreateMembership")),
+		connect.WithHandlerOptions(opts...),
+	)
+	userServiceDeleteMembershipHandler := connect.NewUnaryHandler(
+		UserServiceDeleteMembershipProcedure,
+		svc.DeleteMembership,
+		connect.WithSchema(userServiceMethods.ByName("DeleteMembership")),
+		connect.WithHandlerOptions(opts...),
+	)
+	userServiceUpdateMembershipHandler := connect.NewUnaryHandler(
+		UserServiceUpdateMembershipProcedure,
+		svc.UpdateMembership,
+		connect.WithSchema(userServiceMethods.ByName("UpdateMembership")),
+		connect.WithHandlerOptions(opts...),
+	)
+	userServiceCreateUserAndMembershipHandler := connect.NewUnaryHandler(
+		UserServiceCreateUserAndMembershipProcedure,
+		svc.CreateUserAndMembership,
+		connect.WithSchema(userServiceMethods.ByName("CreateUserAndMembership")),
+		connect.WithHandlerOptions(opts...),
+	)
+	userServiceListOrganizationUsersHandler := connect.NewUnaryHandler(
+		UserServiceListOrganizationUsersProcedure,
+		svc.ListOrganizationUsers,
+		connect.WithSchema(userServiceMethods.ByName("ListOrganizationUsers")),
 		connect.WithHandlerOptions(opts...),
 	)
 	return "/scalekit.v1.users.UserService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case UserServiceCreateUserProcedure:
-			userServiceCreateUserHandler.ServeHTTP(w, r)
-		case UserServiceUpdateUserProcedure:
-			userServiceUpdateUserHandler.ServeHTTP(w, r)
 		case UserServiceGetUserProcedure:
 			userServiceGetUserHandler.ServeHTTP(w, r)
 		case UserServiceListUsersProcedure:
 			userServiceListUsersHandler.ServeHTTP(w, r)
+		case UserServiceSearchUsersProcedure:
+			userServiceSearchUsersHandler.ServeHTTP(w, r)
+		case UserServiceSearchOrganizationUsersProcedure:
+			userServiceSearchOrganizationUsersHandler.ServeHTTP(w, r)
+		case UserServiceUpdateUserProcedure:
+			userServiceUpdateUserHandler.ServeHTTP(w, r)
 		case UserServiceDeleteUserProcedure:
 			userServiceDeleteUserHandler.ServeHTTP(w, r)
-		case UserServiceAddUserToOrganizationProcedure:
-			userServiceAddUserToOrganizationHandler.ServeHTTP(w, r)
+		case UserServiceCreateMembershipProcedure:
+			userServiceCreateMembershipHandler.ServeHTTP(w, r)
+		case UserServiceDeleteMembershipProcedure:
+			userServiceDeleteMembershipHandler.ServeHTTP(w, r)
+		case UserServiceUpdateMembershipProcedure:
+			userServiceUpdateMembershipHandler.ServeHTTP(w, r)
+		case UserServiceCreateUserAndMembershipProcedure:
+			userServiceCreateUserAndMembershipHandler.ServeHTTP(w, r)
+		case UserServiceListOrganizationUsersProcedure:
+			userServiceListOrganizationUsersHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -225,26 +358,46 @@ func NewUserServiceHandler(svc UserServiceHandler, opts ...connect.HandlerOption
 // UnimplementedUserServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedUserServiceHandler struct{}
 
-func (UnimplementedUserServiceHandler) CreateUser(context.Context, *connect.Request[users.CreateUserRequest]) (*connect.Response[users.CreateUserResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.users.UserService.CreateUser is not implemented"))
+func (UnimplementedUserServiceHandler) GetUser(context.Context, *connect.Request[users.GetUserRequest]) (*connect.Response[users.GetUserResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.users.UserService.GetUser is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) ListUsers(context.Context, *connect.Request[users.ListUsersRequest]) (*connect.Response[users.ListUsersResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.users.UserService.ListUsers is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) SearchUsers(context.Context, *connect.Request[users.SearchUsersRequest]) (*connect.Response[users.SearchUsersResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.users.UserService.SearchUsers is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) SearchOrganizationUsers(context.Context, *connect.Request[users.SearchOrganizationUsersRequest]) (*connect.Response[users.SearchOrganizationUsersResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.users.UserService.SearchOrganizationUsers is not implemented"))
 }
 
 func (UnimplementedUserServiceHandler) UpdateUser(context.Context, *connect.Request[users.UpdateUserRequest]) (*connect.Response[users.UpdateUserResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.users.UserService.UpdateUser is not implemented"))
 }
 
-func (UnimplementedUserServiceHandler) GetUser(context.Context, *connect.Request[users.GetUserRequest]) (*connect.Response[users.GetUserResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.users.UserService.GetUser is not implemented"))
-}
-
-func (UnimplementedUserServiceHandler) ListUsers(context.Context, *connect.Request[users.ListUserRequest]) (*connect.Response[users.ListUserResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.users.UserService.ListUsers is not implemented"))
-}
-
 func (UnimplementedUserServiceHandler) DeleteUser(context.Context, *connect.Request[users.DeleteUserRequest]) (*connect.Response[emptypb.Empty], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.users.UserService.DeleteUser is not implemented"))
 }
 
-func (UnimplementedUserServiceHandler) AddUserToOrganization(context.Context, *connect.Request[users.AddUserRequest]) (*connect.Response[users.AddUserResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.users.UserService.AddUserToOrganization is not implemented"))
+func (UnimplementedUserServiceHandler) CreateMembership(context.Context, *connect.Request[users.CreateMembershipRequest]) (*connect.Response[users.CreateMembershipResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.users.UserService.CreateMembership is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) DeleteMembership(context.Context, *connect.Request[users.DeleteMembershipRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.users.UserService.DeleteMembership is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) UpdateMembership(context.Context, *connect.Request[users.UpdateMembershipRequest]) (*connect.Response[users.UpdateMembershipResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.users.UserService.UpdateMembership is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) CreateUserAndMembership(context.Context, *connect.Request[users.CreateUserAndMembershipRequest]) (*connect.Response[users.CreateUserAndMembershipResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.users.UserService.CreateUserAndMembership is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) ListOrganizationUsers(context.Context, *connect.Request[users.ListOrganizationUsersRequest]) (*connect.Response[users.ListOrganizationUsersResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.users.UserService.ListOrganizationUsers is not implemented"))
 }

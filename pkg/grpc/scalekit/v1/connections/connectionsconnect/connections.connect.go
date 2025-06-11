@@ -52,6 +52,12 @@ const (
 	// ConnectionServiceListConnectionsProcedure is the fully-qualified name of the ConnectionService's
 	// ListConnections RPC.
 	ConnectionServiceListConnectionsProcedure = "/scalekit.v1.connections.ConnectionService/ListConnections"
+	// ConnectionServiceListOrganizationConnectionsProcedure is the fully-qualified name of the
+	// ConnectionService's ListOrganizationConnections RPC.
+	ConnectionServiceListOrganizationConnectionsProcedure = "/scalekit.v1.connections.ConnectionService/ListOrganizationConnections"
+	// ConnectionServiceSearchOrganizationConnectionsProcedure is the fully-qualified name of the
+	// ConnectionService's SearchOrganizationConnections RPC.
+	ConnectionServiceSearchOrganizationConnectionsProcedure = "/scalekit.v1.connections.ConnectionService/SearchOrganizationConnections"
 	// ConnectionServiceUpdateEnvironmentConnectionProcedure is the fully-qualified name of the
 	// ConnectionService's UpdateEnvironmentConnection RPC.
 	ConnectionServiceUpdateEnvironmentConnectionProcedure = "/scalekit.v1.connections.ConnectionService/UpdateEnvironmentConnection"
@@ -89,6 +95,8 @@ type ConnectionServiceClient interface {
 	GetEnvironmentConnection(context.Context, *connect.Request[connections.GetEnvironmentConnectionRequest]) (*connect.Response[connections.GetConnectionResponse], error)
 	GetConnection(context.Context, *connect.Request[connections.GetConnectionRequest]) (*connect.Response[connections.GetConnectionResponse], error)
 	ListConnections(context.Context, *connect.Request[connections.ListConnectionsRequest]) (*connect.Response[connections.ListConnectionsResponse], error)
+	ListOrganizationConnections(context.Context, *connect.Request[connections.ListOrganizationConnectionsRequest]) (*connect.Response[connections.ListOrganizationConnectionsResponse], error)
+	SearchOrganizationConnections(context.Context, *connect.Request[connections.SearchOrganizationConnectionsRequest]) (*connect.Response[connections.SearchOrganizationConnectionsResponse], error)
 	UpdateEnvironmentConnection(context.Context, *connect.Request[connections.UpdateEnvironmentConnectionRequest]) (*connect.Response[connections.UpdateConnectionResponse], error)
 	UpdateConnection(context.Context, *connect.Request[connections.UpdateConnectionRequest]) (*connect.Response[connections.UpdateConnectionResponse], error)
 	DeleteEnvironmentConnection(context.Context, *connect.Request[connections.DeleteEnvironmentConnectionRequest]) (*connect.Response[emptypb.Empty], error)
@@ -145,6 +153,18 @@ func NewConnectionServiceClient(httpClient connect.HTTPClient, baseURL string, o
 			httpClient,
 			baseURL+ConnectionServiceListConnectionsProcedure,
 			connect.WithSchema(connectionServiceMethods.ByName("ListConnections")),
+			connect.WithClientOptions(opts...),
+		),
+		listOrganizationConnections: connect.NewClient[connections.ListOrganizationConnectionsRequest, connections.ListOrganizationConnectionsResponse](
+			httpClient,
+			baseURL+ConnectionServiceListOrganizationConnectionsProcedure,
+			connect.WithSchema(connectionServiceMethods.ByName("ListOrganizationConnections")),
+			connect.WithClientOptions(opts...),
+		),
+		searchOrganizationConnections: connect.NewClient[connections.SearchOrganizationConnectionsRequest, connections.SearchOrganizationConnectionsResponse](
+			httpClient,
+			baseURL+ConnectionServiceSearchOrganizationConnectionsProcedure,
+			connect.WithSchema(connectionServiceMethods.ByName("SearchOrganizationConnections")),
 			connect.WithClientOptions(opts...),
 		),
 		updateEnvironmentConnection: connect.NewClient[connections.UpdateEnvironmentConnectionRequest, connections.UpdateConnectionResponse](
@@ -206,21 +226,23 @@ func NewConnectionServiceClient(httpClient connect.HTTPClient, baseURL string, o
 
 // connectionServiceClient implements ConnectionServiceClient.
 type connectionServiceClient struct {
-	getProviders                 *connect.Client[connections.GetProvidersRequest, connections.GetProvidersResponse]
-	createEnvironmentConnection  *connect.Client[connections.CreateEnvironmentConnectionRequest, connections.CreateConnectionResponse]
-	createConnection             *connect.Client[connections.CreateConnectionRequest, connections.CreateConnectionResponse]
-	getEnvironmentConnection     *connect.Client[connections.GetEnvironmentConnectionRequest, connections.GetConnectionResponse]
-	getConnection                *connect.Client[connections.GetConnectionRequest, connections.GetConnectionResponse]
-	listConnections              *connect.Client[connections.ListConnectionsRequest, connections.ListConnectionsResponse]
-	updateEnvironmentConnection  *connect.Client[connections.UpdateEnvironmentConnectionRequest, connections.UpdateConnectionResponse]
-	updateConnection             *connect.Client[connections.UpdateConnectionRequest, connections.UpdateConnectionResponse]
-	deleteEnvironmentConnection  *connect.Client[connections.DeleteEnvironmentConnectionRequest, emptypb.Empty]
-	deleteConnection             *connect.Client[connections.DeleteConnectionRequest, emptypb.Empty]
-	enableEnvironmentConnection  *connect.Client[connections.ToggleEnvironmentConnectionRequest, connections.ToggleConnectionResponse]
-	enableConnection             *connect.Client[connections.ToggleConnectionRequest, connections.ToggleConnectionResponse]
-	disableEnvironmentConnection *connect.Client[connections.ToggleEnvironmentConnectionRequest, connections.ToggleConnectionResponse]
-	disableConnection            *connect.Client[connections.ToggleConnectionRequest, connections.ToggleConnectionResponse]
-	getConnectionTestResult      *connect.Client[connections.GetConnectionTestResultRequest, connections.GetConnectionTestResultResponse]
+	getProviders                  *connect.Client[connections.GetProvidersRequest, connections.GetProvidersResponse]
+	createEnvironmentConnection   *connect.Client[connections.CreateEnvironmentConnectionRequest, connections.CreateConnectionResponse]
+	createConnection              *connect.Client[connections.CreateConnectionRequest, connections.CreateConnectionResponse]
+	getEnvironmentConnection      *connect.Client[connections.GetEnvironmentConnectionRequest, connections.GetConnectionResponse]
+	getConnection                 *connect.Client[connections.GetConnectionRequest, connections.GetConnectionResponse]
+	listConnections               *connect.Client[connections.ListConnectionsRequest, connections.ListConnectionsResponse]
+	listOrganizationConnections   *connect.Client[connections.ListOrganizationConnectionsRequest, connections.ListOrganizationConnectionsResponse]
+	searchOrganizationConnections *connect.Client[connections.SearchOrganizationConnectionsRequest, connections.SearchOrganizationConnectionsResponse]
+	updateEnvironmentConnection   *connect.Client[connections.UpdateEnvironmentConnectionRequest, connections.UpdateConnectionResponse]
+	updateConnection              *connect.Client[connections.UpdateConnectionRequest, connections.UpdateConnectionResponse]
+	deleteEnvironmentConnection   *connect.Client[connections.DeleteEnvironmentConnectionRequest, emptypb.Empty]
+	deleteConnection              *connect.Client[connections.DeleteConnectionRequest, emptypb.Empty]
+	enableEnvironmentConnection   *connect.Client[connections.ToggleEnvironmentConnectionRequest, connections.ToggleConnectionResponse]
+	enableConnection              *connect.Client[connections.ToggleConnectionRequest, connections.ToggleConnectionResponse]
+	disableEnvironmentConnection  *connect.Client[connections.ToggleEnvironmentConnectionRequest, connections.ToggleConnectionResponse]
+	disableConnection             *connect.Client[connections.ToggleConnectionRequest, connections.ToggleConnectionResponse]
+	getConnectionTestResult       *connect.Client[connections.GetConnectionTestResultRequest, connections.GetConnectionTestResultResponse]
 }
 
 // GetProviders calls scalekit.v1.connections.ConnectionService.GetProviders.
@@ -253,6 +275,18 @@ func (c *connectionServiceClient) GetConnection(ctx context.Context, req *connec
 // ListConnections calls scalekit.v1.connections.ConnectionService.ListConnections.
 func (c *connectionServiceClient) ListConnections(ctx context.Context, req *connect.Request[connections.ListConnectionsRequest]) (*connect.Response[connections.ListConnectionsResponse], error) {
 	return c.listConnections.CallUnary(ctx, req)
+}
+
+// ListOrganizationConnections calls
+// scalekit.v1.connections.ConnectionService.ListOrganizationConnections.
+func (c *connectionServiceClient) ListOrganizationConnections(ctx context.Context, req *connect.Request[connections.ListOrganizationConnectionsRequest]) (*connect.Response[connections.ListOrganizationConnectionsResponse], error) {
+	return c.listOrganizationConnections.CallUnary(ctx, req)
+}
+
+// SearchOrganizationConnections calls
+// scalekit.v1.connections.ConnectionService.SearchOrganizationConnections.
+func (c *connectionServiceClient) SearchOrganizationConnections(ctx context.Context, req *connect.Request[connections.SearchOrganizationConnectionsRequest]) (*connect.Response[connections.SearchOrganizationConnectionsResponse], error) {
+	return c.searchOrganizationConnections.CallUnary(ctx, req)
 }
 
 // UpdateEnvironmentConnection calls
@@ -313,6 +347,8 @@ type ConnectionServiceHandler interface {
 	GetEnvironmentConnection(context.Context, *connect.Request[connections.GetEnvironmentConnectionRequest]) (*connect.Response[connections.GetConnectionResponse], error)
 	GetConnection(context.Context, *connect.Request[connections.GetConnectionRequest]) (*connect.Response[connections.GetConnectionResponse], error)
 	ListConnections(context.Context, *connect.Request[connections.ListConnectionsRequest]) (*connect.Response[connections.ListConnectionsResponse], error)
+	ListOrganizationConnections(context.Context, *connect.Request[connections.ListOrganizationConnectionsRequest]) (*connect.Response[connections.ListOrganizationConnectionsResponse], error)
+	SearchOrganizationConnections(context.Context, *connect.Request[connections.SearchOrganizationConnectionsRequest]) (*connect.Response[connections.SearchOrganizationConnectionsResponse], error)
 	UpdateEnvironmentConnection(context.Context, *connect.Request[connections.UpdateEnvironmentConnectionRequest]) (*connect.Response[connections.UpdateConnectionResponse], error)
 	UpdateConnection(context.Context, *connect.Request[connections.UpdateConnectionRequest]) (*connect.Response[connections.UpdateConnectionResponse], error)
 	DeleteEnvironmentConnection(context.Context, *connect.Request[connections.DeleteEnvironmentConnectionRequest]) (*connect.Response[emptypb.Empty], error)
@@ -365,6 +401,18 @@ func NewConnectionServiceHandler(svc ConnectionServiceHandler, opts ...connect.H
 		ConnectionServiceListConnectionsProcedure,
 		svc.ListConnections,
 		connect.WithSchema(connectionServiceMethods.ByName("ListConnections")),
+		connect.WithHandlerOptions(opts...),
+	)
+	connectionServiceListOrganizationConnectionsHandler := connect.NewUnaryHandler(
+		ConnectionServiceListOrganizationConnectionsProcedure,
+		svc.ListOrganizationConnections,
+		connect.WithSchema(connectionServiceMethods.ByName("ListOrganizationConnections")),
+		connect.WithHandlerOptions(opts...),
+	)
+	connectionServiceSearchOrganizationConnectionsHandler := connect.NewUnaryHandler(
+		ConnectionServiceSearchOrganizationConnectionsProcedure,
+		svc.SearchOrganizationConnections,
+		connect.WithSchema(connectionServiceMethods.ByName("SearchOrganizationConnections")),
 		connect.WithHandlerOptions(opts...),
 	)
 	connectionServiceUpdateEnvironmentConnectionHandler := connect.NewUnaryHandler(
@@ -435,6 +483,10 @@ func NewConnectionServiceHandler(svc ConnectionServiceHandler, opts ...connect.H
 			connectionServiceGetConnectionHandler.ServeHTTP(w, r)
 		case ConnectionServiceListConnectionsProcedure:
 			connectionServiceListConnectionsHandler.ServeHTTP(w, r)
+		case ConnectionServiceListOrganizationConnectionsProcedure:
+			connectionServiceListOrganizationConnectionsHandler.ServeHTTP(w, r)
+		case ConnectionServiceSearchOrganizationConnectionsProcedure:
+			connectionServiceSearchOrganizationConnectionsHandler.ServeHTTP(w, r)
 		case ConnectionServiceUpdateEnvironmentConnectionProcedure:
 			connectionServiceUpdateEnvironmentConnectionHandler.ServeHTTP(w, r)
 		case ConnectionServiceUpdateConnectionProcedure:
@@ -484,6 +536,14 @@ func (UnimplementedConnectionServiceHandler) GetConnection(context.Context, *con
 
 func (UnimplementedConnectionServiceHandler) ListConnections(context.Context, *connect.Request[connections.ListConnectionsRequest]) (*connect.Response[connections.ListConnectionsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.ListConnections is not implemented"))
+}
+
+func (UnimplementedConnectionServiceHandler) ListOrganizationConnections(context.Context, *connect.Request[connections.ListOrganizationConnectionsRequest]) (*connect.Response[connections.ListOrganizationConnectionsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.ListOrganizationConnections is not implemented"))
+}
+
+func (UnimplementedConnectionServiceHandler) SearchOrganizationConnections(context.Context, *connect.Request[connections.SearchOrganizationConnectionsRequest]) (*connect.Response[connections.SearchOrganizationConnectionsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.SearchOrganizationConnections is not implemented"))
 }
 
 func (UnimplementedConnectionServiceHandler) UpdateEnvironmentConnection(context.Context, *connect.Request[connections.UpdateEnvironmentConnectionRequest]) (*connect.Response[connections.UpdateConnectionResponse], error) {
