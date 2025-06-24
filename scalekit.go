@@ -103,11 +103,11 @@ type IdTokenClaims struct {
 }
 
 type accessTokenClaims struct {
-	Sub string `json:"sub"`
-	Iss string `json:"iss"`
-	Aud string `json:"aud"`
-	Iat int    `json:"iat"`
-	Exp int    `json:"exp"`
+	Sub string   `json:"sub"`
+	Iss string   `json:"iss"`
+	Aud []string `json:"aud"`
+	Iat int      `json:"iat"`
+	Exp int      `json:"exp"`
 }
 
 type User = IdTokenClaims
