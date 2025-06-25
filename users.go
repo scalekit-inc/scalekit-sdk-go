@@ -22,12 +22,12 @@ type ListUsersOptions struct {
 }
 
 type UserService interface {
-	CreateUserAndMembership(ctx context.Context, organizationId string, user *usersv1.CreateUser, sendActivationEmail bool) (*CreateUserAndMembershipResponse, error)
+	CreateUserAndMembership(ctx context.Context, organizationId string, user *usersv1.CreateUser, sendInvitationEmail bool) (*CreateUserAndMembershipResponse, error)
 	UpdateUser(ctx context.Context, userId string, updateUser *usersv1.UpdateUser) (*UpdateUserResponse, error)
 	GetUser(ctx context.Context, userId string) (*GetUserResponse, error)
 	ListOrganizationUsers(ctx context.Context, organizationId string, options *ListUsersOptions) (*ListOrganizationUsersResponse, error)
 	DeleteUser(ctx context.Context, userId string) error
-	CreateMembership(ctx context.Context, organizationId string, userId string, membership *usersv1.CreateMembership, sendActivationEmail bool) (*CreateMembershipResponse, error)
+	CreateMembership(ctx context.Context, organizationId string, userId string, membership *usersv1.CreateMembership, sendInvitationEmail bool) (*CreateMembershipResponse, error)
 	UpdateMembership(ctx context.Context, organizationId string, userId string, membership *usersv1.UpdateMembership) (*UpdateMembershipResponse, error)
 	DeleteMembership(ctx context.Context, organizationId string, userId string, cascade bool) error
 }
@@ -46,14 +46,14 @@ func newUserClient(coreClient *coreClient) UserService {
 }
 
 // CreateUserAndMembership creates a new user with membership in the organization
-func (u *userService) CreateUserAndMembership(ctx context.Context, organizationId string, user *usersv1.CreateUser, sendActivationEmail bool) (*CreateUserAndMembershipResponse, error) {
+func (u *userService) CreateUserAndMembership(ctx context.Context, organizationId string, user *usersv1.CreateUser, sendInvitationEmail bool) (*CreateUserAndMembershipResponse, error) {
 	return newConnectExecuter(
 		u.coreClient,
 		u.client.CreateUserAndMembership,
 		&usersv1.CreateUserAndMembershipRequest{
 			OrganizationId:      organizationId,
 			User:                user,
-			SendActivationEmail: sendActivationEmail,
+			SendInvitationEmail: &sendInvitationEmail,
 		},
 	).exec(ctx)
 }
@@ -115,11 +115,11 @@ func (u *userService) DeleteUser(ctx context.Context, userId string) error {
 }
 
 // CreateMembership creates a membership for a user in an organization
-func (u *userService) CreateMembership(ctx context.Context, organizationId string, userId string, membership *usersv1.CreateMembership, sendActivationEmail bool) (*CreateMembershipResponse, error) {
+func (u *userService) CreateMembership(ctx context.Context, organizationId string, userId string, membership *usersv1.CreateMembership, sendInvitationEmail bool) (*CreateMembershipResponse, error) {
 	request := &usersv1.CreateMembershipRequest{
 		OrganizationId:      organizationId,
 		Membership:          membership,
-		SendActivationEmail: sendActivationEmail,
+		SendInvitationEmail: &sendInvitationEmail,
 	}
 	request.Identities = &usersv1.CreateMembershipRequest_Id{Id: userId}
 
