@@ -15,7 +15,7 @@ import (
 )
 
 const authorizeEndpoint = "oauth/authorize"
-const logoutEndpoint = "end_session"
+const logoutEndpoint = "oidc/logout"
 
 const (
 	GrantTypeAuthorizationCode GrantType = "authorization_code"
