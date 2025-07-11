@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -23,8 +24,10 @@ const (
 	GrantTypeClientCredentials GrantType = "client_credentials"
 )
 
-var webhookToleranceInSeconds = 5 * time.Minute
-var webhookSignatureVersion = "v1"
+var (
+	webhookToleranceInSeconds = 5 * time.Minute
+	webhookSignatureVersion   = "v1"
+)
 
 type GrantType = string
 
@@ -45,6 +48,7 @@ type Scalekit interface {
 	VerifyWebhookPayload(secret string, headers map[string]string, payload []byte) (bool, error)
 	RefreshAccessToken(refreshToken string) (*TokenResponse, error)
 	GetLogoutUrl(options LogoutUrlOptions) (*url.URL, error)
+	GetAccessTokenClaims(accessToken string) (*AccessTokenClaims, error)
 }
 
 type scalekitClient struct {
@@ -81,6 +85,12 @@ type AuthenticationResponse struct {
 	ExpiresIn   int
 }
 
+type (
+	Claims  map[string]interface{}
+	idAlias IdTokenClaims
+	atAlias AccessTokenClaims
+)
+
 type IdTokenClaims struct {
 	Id                  string     `json:"sub"`
 	Username            string     `json:"preferred_username"`
@@ -100,14 +110,26 @@ type IdTokenClaims struct {
 	UpdatedAt           string     `json:"updated_at"`
 	Identities          []Identity `json:"identities"`
 	Metadata            string     `json:"metadata"`
+	Claims              Claims     `json:"-"`
 }
 
-type accessTokenClaims struct {
-	Sub string   `json:"sub"`
-	Iss string   `json:"iss"`
-	Aud []string `json:"aud"`
-	Iat int      `json:"iat"`
-	Exp int      `json:"exp"`
+func (i *IdTokenClaims) UnmarshalJSON(data []byte) error {
+	return unmarshalJson(data, (*idAlias)(i), &i.Claims)
+}
+
+type Audience []string
+
+type AccessTokenClaims struct {
+	Sub      string   `json:"sub"`
+	Iss      string   `json:"iss"`
+	Audience Audience `json:"aud,omitempty"`
+	Iat      int      `json:"iat"`
+	Exp      int      `json:"exp"`
+	Claims   Claims   `json:"-"`
+}
+
+func (a *AccessTokenClaims) UnmarshalJSON(data []byte) error {
+	return unmarshalJson(data, (*atAlias)(a), &a.Claims)
 }
 
 type User = IdTokenClaims
@@ -244,7 +266,7 @@ func (s *scalekitClient) AuthenticateWithCode(
 	if err != nil {
 		return nil, err
 	}
-	claims, err := validateToken[IdTokenClaims](authResp.IdToken, s.coreClient.getJwks)
+	claims, err := ValidateToken[IdTokenClaims](authResp.IdToken, s.coreClient.GetJwks)
 	if err != nil {
 		return nil, err
 	}
@@ -258,10 +280,19 @@ func (s *scalekitClient) AuthenticateWithCode(
 }
 
 func (s *scalekitClient) GetIdpInitiatedLoginClaims(idpInitiateLoginToken string) (*IdpInitiatedLoginClaims, error) {
-	return validateToken[IdpInitiatedLoginClaims](idpInitiateLoginToken, s.coreClient.getJwks)
+	return ValidateToken[IdpInitiatedLoginClaims](idpInitiateLoginToken, s.coreClient.GetJwks)
 }
+
+func (s *scalekitClient) GetAccessTokenClaims(accessToken string) (*AccessTokenClaims, error) {
+	at, err := ValidateToken[AccessTokenClaims](accessToken, s.coreClient.GetJwks)
+	if err != nil {
+		return nil, err
+	}
+	return at, nil
+}
+
 func (s *scalekitClient) ValidateAccessToken(accessToken string) (bool, error) {
-	_, err := validateToken[accessTokenClaims](accessToken, s.coreClient.getJwks)
+	_, err := ValidateToken[AccessTokenClaims](accessToken, s.coreClient.GetJwks)
 	if err != nil {
 		return false, err
 	}
@@ -314,22 +345,21 @@ func (s *scalekitClient) VerifyWebhookPayload(
 
 func verifyTimestamp(timestampStr string) (*time.Time, error) {
 	now := time.Now()
-	timestamp, err := time.Parse(time.RFC3339, timestampStr)
+	unixTimestamp, err := strconv.ParseInt(timestampStr, 10, 64)
 	if err != nil {
 		return nil, err
 	}
+	timestamp := time.Unix(unixTimestamp, 0)
 	if now.Sub(timestamp) > webhookToleranceInSeconds {
 		return nil, errors.New("Message timestamp too old")
 	}
 	if timestamp.Unix() > now.Add(webhookToleranceInSeconds).Unix() {
 		return nil, errors.New("Message timestamp too new")
-
 	}
-
 	return &timestamp, nil
 }
 
-func validateToken[T interface{}](token string, jwksFn func() (*jose.JSONWebKeySet, error)) (*T, error) {
+func ValidateToken[T interface{}](token string, jwksFn func() (*jose.JSONWebKeySet, error)) (*T, error) {
 	var claims T
 	keySet, err := jwksFn()
 	if err != nil {
@@ -423,4 +453,14 @@ func (s *scalekitClient) GetLogoutUrl(options LogoutUrlOptions) (*url.URL, error
 	parsedUrl.RawQuery = qs.Encode()
 
 	return parsedUrl, nil
+}
+
+func unmarshalJson(data []byte, types ...any) error {
+	for _, cType := range types {
+		err := json.Unmarshal(data, cType)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

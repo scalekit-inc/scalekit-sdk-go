@@ -35,7 +35,7 @@ Initialize the Scalekit client using the appropriate credentials. Refer code sam
 import "github.com/scalekit-inc/scalekit-sdk-go"
 
 func main() {
-  scalekitClient := scalekit.NewScalekit(
+  scalekitClient := scalekit.NewScalekitClient(
     "<SCALEKIT_ENV_URL>",
     "<SCALEKIT_CLIENT_ID>",
     "<SCALEKIT_CLIENT_SECRET>",
