@@ -10,6 +10,7 @@ import (
 	errors "errors"
 	domains "github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/domains"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
+	wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
 	http "net/http"
 	strings "strings"
 )
@@ -40,6 +41,9 @@ const (
 	// DomainServiceUpdateDomainProcedure is the fully-qualified name of the DomainService's
 	// UpdateDomain RPC.
 	DomainServiceUpdateDomainProcedure = "/scalekit.v1.domains.DomainService/UpdateDomain"
+	// DomainServiceVerifyDomainProcedure is the fully-qualified name of the DomainService's
+	// VerifyDomain RPC.
+	DomainServiceVerifyDomainProcedure = "/scalekit.v1.domains.DomainService/VerifyDomain"
 	// DomainServiceGetDomainProcedure is the fully-qualified name of the DomainService's GetDomain RPC.
 	DomainServiceGetDomainProcedure = "/scalekit.v1.domains.DomainService/GetDomain"
 	// DomainServiceDeleteDomainProcedure is the fully-qualified name of the DomainService's
@@ -53,21 +57,11 @@ const (
 	DomainServiceListAuthorizedDomainsProcedure = "/scalekit.v1.domains.DomainService/ListAuthorizedDomains"
 )
 
-// These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
-var (
-	domainServiceServiceDescriptor                     = domains.File_scalekit_v1_domains_domains_proto.Services().ByName("DomainService")
-	domainServiceCreateDomainMethodDescriptor          = domainServiceServiceDescriptor.Methods().ByName("CreateDomain")
-	domainServiceUpdateDomainMethodDescriptor          = domainServiceServiceDescriptor.Methods().ByName("UpdateDomain")
-	domainServiceGetDomainMethodDescriptor             = domainServiceServiceDescriptor.Methods().ByName("GetDomain")
-	domainServiceDeleteDomainMethodDescriptor          = domainServiceServiceDescriptor.Methods().ByName("DeleteDomain")
-	domainServiceListDomainsMethodDescriptor           = domainServiceServiceDescriptor.Methods().ByName("ListDomains")
-	domainServiceListAuthorizedDomainsMethodDescriptor = domainServiceServiceDescriptor.Methods().ByName("ListAuthorizedDomains")
-)
-
 // DomainServiceClient is a client for the scalekit.v1.domains.DomainService service.
 type DomainServiceClient interface {
 	CreateDomain(context.Context, *connect.Request[domains.CreateDomainRequest]) (*connect.Response[domains.CreateDomainResponse], error)
 	UpdateDomain(context.Context, *connect.Request[domains.UpdateDomainRequest]) (*connect.Response[domains.UpdateDomainResponse], error)
+	VerifyDomain(context.Context, *connect.Request[domains.VerifyDomainRequest]) (*connect.Response[wrapperspb.BoolValue], error)
 	GetDomain(context.Context, *connect.Request[domains.GetDomainRequest]) (*connect.Response[domains.GetDomainResponse], error)
 	DeleteDomain(context.Context, *connect.Request[domains.DeleteDomainRequest]) (*connect.Response[emptypb.Empty], error)
 	ListDomains(context.Context, *connect.Request[domains.ListDomainRequest]) (*connect.Response[domains.ListDomainResponse], error)
@@ -83,41 +77,48 @@ type DomainServiceClient interface {
 // http://api.acme.com or https://acme.com/grpc).
 func NewDomainServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) DomainServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	domainServiceMethods := domains.File_scalekit_v1_domains_domains_proto.Services().ByName("DomainService").Methods()
 	return &domainServiceClient{
 		createDomain: connect.NewClient[domains.CreateDomainRequest, domains.CreateDomainResponse](
 			httpClient,
 			baseURL+DomainServiceCreateDomainProcedure,
-			connect.WithSchema(domainServiceCreateDomainMethodDescriptor),
+			connect.WithSchema(domainServiceMethods.ByName("CreateDomain")),
 			connect.WithClientOptions(opts...),
 		),
 		updateDomain: connect.NewClient[domains.UpdateDomainRequest, domains.UpdateDomainResponse](
 			httpClient,
 			baseURL+DomainServiceUpdateDomainProcedure,
-			connect.WithSchema(domainServiceUpdateDomainMethodDescriptor),
+			connect.WithSchema(domainServiceMethods.ByName("UpdateDomain")),
+			connect.WithClientOptions(opts...),
+		),
+		verifyDomain: connect.NewClient[domains.VerifyDomainRequest, wrapperspb.BoolValue](
+			httpClient,
+			baseURL+DomainServiceVerifyDomainProcedure,
+			connect.WithSchema(domainServiceMethods.ByName("VerifyDomain")),
 			connect.WithClientOptions(opts...),
 		),
 		getDomain: connect.NewClient[domains.GetDomainRequest, domains.GetDomainResponse](
 			httpClient,
 			baseURL+DomainServiceGetDomainProcedure,
-			connect.WithSchema(domainServiceGetDomainMethodDescriptor),
+			connect.WithSchema(domainServiceMethods.ByName("GetDomain")),
 			connect.WithClientOptions(opts...),
 		),
 		deleteDomain: connect.NewClient[domains.DeleteDomainRequest, emptypb.Empty](
 			httpClient,
 			baseURL+DomainServiceDeleteDomainProcedure,
-			connect.WithSchema(domainServiceDeleteDomainMethodDescriptor),
+			connect.WithSchema(domainServiceMethods.ByName("DeleteDomain")),
 			connect.WithClientOptions(opts...),
 		),
 		listDomains: connect.NewClient[domains.ListDomainRequest, domains.ListDomainResponse](
 			httpClient,
 			baseURL+DomainServiceListDomainsProcedure,
-			connect.WithSchema(domainServiceListDomainsMethodDescriptor),
+			connect.WithSchema(domainServiceMethods.ByName("ListDomains")),
 			connect.WithClientOptions(opts...),
 		),
 		listAuthorizedDomains: connect.NewClient[domains.ListAuthorizedDomainRequest, domains.ListAuthorizedDomainResponse](
 			httpClient,
 			baseURL+DomainServiceListAuthorizedDomainsProcedure,
-			connect.WithSchema(domainServiceListAuthorizedDomainsMethodDescriptor),
+			connect.WithSchema(domainServiceMethods.ByName("ListAuthorizedDomains")),
 			connect.WithClientOptions(opts...),
 		),
 	}
@@ -127,6 +128,7 @@ func NewDomainServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 type domainServiceClient struct {
 	createDomain          *connect.Client[domains.CreateDomainRequest, domains.CreateDomainResponse]
 	updateDomain          *connect.Client[domains.UpdateDomainRequest, domains.UpdateDomainResponse]
+	verifyDomain          *connect.Client[domains.VerifyDomainRequest, wrapperspb.BoolValue]
 	getDomain             *connect.Client[domains.GetDomainRequest, domains.GetDomainResponse]
 	deleteDomain          *connect.Client[domains.DeleteDomainRequest, emptypb.Empty]
 	listDomains           *connect.Client[domains.ListDomainRequest, domains.ListDomainResponse]
@@ -141,6 +143,11 @@ func (c *domainServiceClient) CreateDomain(ctx context.Context, req *connect.Req
 // UpdateDomain calls scalekit.v1.domains.DomainService.UpdateDomain.
 func (c *domainServiceClient) UpdateDomain(ctx context.Context, req *connect.Request[domains.UpdateDomainRequest]) (*connect.Response[domains.UpdateDomainResponse], error) {
 	return c.updateDomain.CallUnary(ctx, req)
+}
+
+// VerifyDomain calls scalekit.v1.domains.DomainService.VerifyDomain.
+func (c *domainServiceClient) VerifyDomain(ctx context.Context, req *connect.Request[domains.VerifyDomainRequest]) (*connect.Response[wrapperspb.BoolValue], error) {
+	return c.verifyDomain.CallUnary(ctx, req)
 }
 
 // GetDomain calls scalekit.v1.domains.DomainService.GetDomain.
@@ -167,6 +174,7 @@ func (c *domainServiceClient) ListAuthorizedDomains(ctx context.Context, req *co
 type DomainServiceHandler interface {
 	CreateDomain(context.Context, *connect.Request[domains.CreateDomainRequest]) (*connect.Response[domains.CreateDomainResponse], error)
 	UpdateDomain(context.Context, *connect.Request[domains.UpdateDomainRequest]) (*connect.Response[domains.UpdateDomainResponse], error)
+	VerifyDomain(context.Context, *connect.Request[domains.VerifyDomainRequest]) (*connect.Response[wrapperspb.BoolValue], error)
 	GetDomain(context.Context, *connect.Request[domains.GetDomainRequest]) (*connect.Response[domains.GetDomainResponse], error)
 	DeleteDomain(context.Context, *connect.Request[domains.DeleteDomainRequest]) (*connect.Response[emptypb.Empty], error)
 	ListDomains(context.Context, *connect.Request[domains.ListDomainRequest]) (*connect.Response[domains.ListDomainResponse], error)
@@ -179,40 +187,47 @@ type DomainServiceHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewDomainServiceHandler(svc DomainServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	domainServiceMethods := domains.File_scalekit_v1_domains_domains_proto.Services().ByName("DomainService").Methods()
 	domainServiceCreateDomainHandler := connect.NewUnaryHandler(
 		DomainServiceCreateDomainProcedure,
 		svc.CreateDomain,
-		connect.WithSchema(domainServiceCreateDomainMethodDescriptor),
+		connect.WithSchema(domainServiceMethods.ByName("CreateDomain")),
 		connect.WithHandlerOptions(opts...),
 	)
 	domainServiceUpdateDomainHandler := connect.NewUnaryHandler(
 		DomainServiceUpdateDomainProcedure,
 		svc.UpdateDomain,
-		connect.WithSchema(domainServiceUpdateDomainMethodDescriptor),
+		connect.WithSchema(domainServiceMethods.ByName("UpdateDomain")),
+		connect.WithHandlerOptions(opts...),
+	)
+	domainServiceVerifyDomainHandler := connect.NewUnaryHandler(
+		DomainServiceVerifyDomainProcedure,
+		svc.VerifyDomain,
+		connect.WithSchema(domainServiceMethods.ByName("VerifyDomain")),
 		connect.WithHandlerOptions(opts...),
 	)
 	domainServiceGetDomainHandler := connect.NewUnaryHandler(
 		DomainServiceGetDomainProcedure,
 		svc.GetDomain,
-		connect.WithSchema(domainServiceGetDomainMethodDescriptor),
+		connect.WithSchema(domainServiceMethods.ByName("GetDomain")),
 		connect.WithHandlerOptions(opts...),
 	)
 	domainServiceDeleteDomainHandler := connect.NewUnaryHandler(
 		DomainServiceDeleteDomainProcedure,
 		svc.DeleteDomain,
-		connect.WithSchema(domainServiceDeleteDomainMethodDescriptor),
+		connect.WithSchema(domainServiceMethods.ByName("DeleteDomain")),
 		connect.WithHandlerOptions(opts...),
 	)
 	domainServiceListDomainsHandler := connect.NewUnaryHandler(
 		DomainServiceListDomainsProcedure,
 		svc.ListDomains,
-		connect.WithSchema(domainServiceListDomainsMethodDescriptor),
+		connect.WithSchema(domainServiceMethods.ByName("ListDomains")),
 		connect.WithHandlerOptions(opts...),
 	)
 	domainServiceListAuthorizedDomainsHandler := connect.NewUnaryHandler(
 		DomainServiceListAuthorizedDomainsProcedure,
 		svc.ListAuthorizedDomains,
-		connect.WithSchema(domainServiceListAuthorizedDomainsMethodDescriptor),
+		connect.WithSchema(domainServiceMethods.ByName("ListAuthorizedDomains")),
 		connect.WithHandlerOptions(opts...),
 	)
 	return "/scalekit.v1.domains.DomainService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -221,6 +236,8 @@ func NewDomainServiceHandler(svc DomainServiceHandler, opts ...connect.HandlerOp
 			domainServiceCreateDomainHandler.ServeHTTP(w, r)
 		case DomainServiceUpdateDomainProcedure:
 			domainServiceUpdateDomainHandler.ServeHTTP(w, r)
+		case DomainServiceVerifyDomainProcedure:
+			domainServiceVerifyDomainHandler.ServeHTTP(w, r)
 		case DomainServiceGetDomainProcedure:
 			domainServiceGetDomainHandler.ServeHTTP(w, r)
 		case DomainServiceDeleteDomainProcedure:
@@ -244,6 +261,10 @@ func (UnimplementedDomainServiceHandler) CreateDomain(context.Context, *connect.
 
 func (UnimplementedDomainServiceHandler) UpdateDomain(context.Context, *connect.Request[domains.UpdateDomainRequest]) (*connect.Response[domains.UpdateDomainResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.domains.DomainService.UpdateDomain is not implemented"))
+}
+
+func (UnimplementedDomainServiceHandler) VerifyDomain(context.Context, *connect.Request[domains.VerifyDomainRequest]) (*connect.Response[wrapperspb.BoolValue], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.domains.DomainService.VerifyDomain is not implemented"))
 }
 
 func (UnimplementedDomainServiceHandler) GetDomain(context.Context, *connect.Request[domains.GetDomainRequest]) (*connect.Response[domains.GetDomainResponse], error) {

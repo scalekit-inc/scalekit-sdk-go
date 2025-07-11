@@ -12,6 +12,7 @@ var (
 	testOrg        string
 	testConnection string
 	testDirectory  string
+	testOrg2       string
 )
 
 func TestMain(m *testing.M) {
@@ -21,6 +22,7 @@ func TestMain(m *testing.M) {
 	apiSecret := os.Getenv("SCALEKIT_CLIENT_SECRET")
 	domain = os.Getenv("TEST_DOMAIN")
 	testOrg = os.Getenv("TEST_ORGANIZATION")
+	testOrg2 = os.Getenv("TEST_ORGANIZATION_2")
 	testConnection = os.Getenv("TEST_CONNECTION")
 	testDirectory = os.Getenv("TEST_DIRECTORY")
 

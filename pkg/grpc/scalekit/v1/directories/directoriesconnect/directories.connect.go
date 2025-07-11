@@ -9,6 +9,7 @@ import (
 	context "context"
 	errors "errors"
 	directories "github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/directories"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
 	strings "strings"
 )
@@ -36,9 +37,15 @@ const (
 	// DirectoryServiceCreateDirectoryProcedure is the fully-qualified name of the DirectoryService's
 	// CreateDirectory RPC.
 	DirectoryServiceCreateDirectoryProcedure = "/scalekit.v1.directories.DirectoryService/CreateDirectory"
+	// DirectoryServiceDeleteDirectoryProcedure is the fully-qualified name of the DirectoryService's
+	// DeleteDirectory RPC.
+	DirectoryServiceDeleteDirectoryProcedure = "/scalekit.v1.directories.DirectoryService/DeleteDirectory"
 	// DirectoryServiceUpdateDirectoryProcedure is the fully-qualified name of the DirectoryService's
 	// UpdateDirectory RPC.
 	DirectoryServiceUpdateDirectoryProcedure = "/scalekit.v1.directories.DirectoryService/UpdateDirectory"
+	// DirectoryServiceAssignGroupsForDirectoryProcedure is the fully-qualified name of the
+	// DirectoryService's AssignGroupsForDirectory RPC.
+	DirectoryServiceAssignGroupsForDirectoryProcedure = "/scalekit.v1.directories.DirectoryService/AssignGroupsForDirectory"
 	// DirectoryServiceAssignRolesProcedure is the fully-qualified name of the DirectoryService's
 	// AssignRoles RPC.
 	DirectoryServiceAssignRolesProcedure = "/scalekit.v1.directories.DirectoryService/AssignRoles"
@@ -63,35 +70,26 @@ const (
 	// DirectoryServiceListDirectoryGroupsProcedure is the fully-qualified name of the
 	// DirectoryService's ListDirectoryGroups RPC.
 	DirectoryServiceListDirectoryGroupsProcedure = "/scalekit.v1.directories.DirectoryService/ListDirectoryGroups"
+	// DirectoryServiceListDirectoryGroupsSummaryProcedure is the fully-qualified name of the
+	// DirectoryService's ListDirectoryGroupsSummary RPC.
+	DirectoryServiceListDirectoryGroupsSummaryProcedure = "/scalekit.v1.directories.DirectoryService/ListDirectoryGroupsSummary"
 	// DirectoryServiceCreateDirectorySecretProcedure is the fully-qualified name of the
 	// DirectoryService's CreateDirectorySecret RPC.
 	DirectoryServiceCreateDirectorySecretProcedure = "/scalekit.v1.directories.DirectoryService/CreateDirectorySecret"
 	// DirectoryServiceRegenerateDirectorySecretProcedure is the fully-qualified name of the
 	// DirectoryService's RegenerateDirectorySecret RPC.
 	DirectoryServiceRegenerateDirectorySecretProcedure = "/scalekit.v1.directories.DirectoryService/RegenerateDirectorySecret"
-)
-
-// These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
-var (
-	directoryServiceServiceDescriptor                         = directories.File_scalekit_v1_directories_directories_proto.Services().ByName("DirectoryService")
-	directoryServiceCreateDirectoryMethodDescriptor           = directoryServiceServiceDescriptor.Methods().ByName("CreateDirectory")
-	directoryServiceUpdateDirectoryMethodDescriptor           = directoryServiceServiceDescriptor.Methods().ByName("UpdateDirectory")
-	directoryServiceAssignRolesMethodDescriptor               = directoryServiceServiceDescriptor.Methods().ByName("AssignRoles")
-	directoryServiceUpdateAttributesMethodDescriptor          = directoryServiceServiceDescriptor.Methods().ByName("UpdateAttributes")
-	directoryServiceGetDirectoryMethodDescriptor              = directoryServiceServiceDescriptor.Methods().ByName("GetDirectory")
-	directoryServiceListDirectoriesMethodDescriptor           = directoryServiceServiceDescriptor.Methods().ByName("ListDirectories")
-	directoryServiceEnableDirectoryMethodDescriptor           = directoryServiceServiceDescriptor.Methods().ByName("EnableDirectory")
-	directoryServiceDisableDirectoryMethodDescriptor          = directoryServiceServiceDescriptor.Methods().ByName("DisableDirectory")
-	directoryServiceListDirectoryUsersMethodDescriptor        = directoryServiceServiceDescriptor.Methods().ByName("ListDirectoryUsers")
-	directoryServiceListDirectoryGroupsMethodDescriptor       = directoryServiceServiceDescriptor.Methods().ByName("ListDirectoryGroups")
-	directoryServiceCreateDirectorySecretMethodDescriptor     = directoryServiceServiceDescriptor.Methods().ByName("CreateDirectorySecret")
-	directoryServiceRegenerateDirectorySecretMethodDescriptor = directoryServiceServiceDescriptor.Methods().ByName("RegenerateDirectorySecret")
+	// DirectoryServiceTriggerDirectorySyncProcedure is the fully-qualified name of the
+	// DirectoryService's TriggerDirectorySync RPC.
+	DirectoryServiceTriggerDirectorySyncProcedure = "/scalekit.v1.directories.DirectoryService/TriggerDirectorySync"
 )
 
 // DirectoryServiceClient is a client for the scalekit.v1.directories.DirectoryService service.
 type DirectoryServiceClient interface {
 	CreateDirectory(context.Context, *connect.Request[directories.CreateDirectoryRequest]) (*connect.Response[directories.CreateDirectoryResponse], error)
+	DeleteDirectory(context.Context, *connect.Request[directories.DeleteDirectoryRequest]) (*connect.Response[emptypb.Empty], error)
 	UpdateDirectory(context.Context, *connect.Request[directories.UpdateDirectoryRequest]) (*connect.Response[directories.UpdateDirectoryResponse], error)
+	AssignGroupsForDirectory(context.Context, *connect.Request[directories.AssignGroupsForDirectoryRequest]) (*connect.Response[emptypb.Empty], error)
 	AssignRoles(context.Context, *connect.Request[directories.AssignRolesRequest]) (*connect.Response[directories.AssignRolesResponse], error)
 	UpdateAttributes(context.Context, *connect.Request[directories.UpdateAttributesRequest]) (*connect.Response[directories.UpdateAttributesResponse], error)
 	GetDirectory(context.Context, *connect.Request[directories.GetDirectoryRequest]) (*connect.Response[directories.GetDirectoryResponse], error)
@@ -100,8 +98,10 @@ type DirectoryServiceClient interface {
 	DisableDirectory(context.Context, *connect.Request[directories.ToggleDirectoryRequest]) (*connect.Response[directories.ToggleDirectoryResponse], error)
 	ListDirectoryUsers(context.Context, *connect.Request[directories.ListDirectoryUsersRequest]) (*connect.Response[directories.ListDirectoryUsersResponse], error)
 	ListDirectoryGroups(context.Context, *connect.Request[directories.ListDirectoryGroupsRequest]) (*connect.Response[directories.ListDirectoryGroupsResponse], error)
+	ListDirectoryGroupsSummary(context.Context, *connect.Request[directories.ListDirectoryGroupsSummaryRequest]) (*connect.Response[directories.ListDirectoryGroupsResponse], error)
 	CreateDirectorySecret(context.Context, *connect.Request[directories.CreateDirectorySecretRequest]) (*connect.Response[directories.CreateDirectorySecretResponse], error)
 	RegenerateDirectorySecret(context.Context, *connect.Request[directories.RegenerateDirectorySecretRequest]) (*connect.Response[directories.RegenerateDirectorySecretResponse], error)
+	TriggerDirectorySync(context.Context, *connect.Request[directories.TriggerDirectorySyncRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewDirectoryServiceClient constructs a client for the scalekit.v1.directories.DirectoryService
@@ -113,77 +113,102 @@ type DirectoryServiceClient interface {
 // http://api.acme.com or https://acme.com/grpc).
 func NewDirectoryServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) DirectoryServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	directoryServiceMethods := directories.File_scalekit_v1_directories_directories_proto.Services().ByName("DirectoryService").Methods()
 	return &directoryServiceClient{
 		createDirectory: connect.NewClient[directories.CreateDirectoryRequest, directories.CreateDirectoryResponse](
 			httpClient,
 			baseURL+DirectoryServiceCreateDirectoryProcedure,
-			connect.WithSchema(directoryServiceCreateDirectoryMethodDescriptor),
+			connect.WithSchema(directoryServiceMethods.ByName("CreateDirectory")),
+			connect.WithClientOptions(opts...),
+		),
+		deleteDirectory: connect.NewClient[directories.DeleteDirectoryRequest, emptypb.Empty](
+			httpClient,
+			baseURL+DirectoryServiceDeleteDirectoryProcedure,
+			connect.WithSchema(directoryServiceMethods.ByName("DeleteDirectory")),
 			connect.WithClientOptions(opts...),
 		),
 		updateDirectory: connect.NewClient[directories.UpdateDirectoryRequest, directories.UpdateDirectoryResponse](
 			httpClient,
 			baseURL+DirectoryServiceUpdateDirectoryProcedure,
-			connect.WithSchema(directoryServiceUpdateDirectoryMethodDescriptor),
+			connect.WithSchema(directoryServiceMethods.ByName("UpdateDirectory")),
+			connect.WithClientOptions(opts...),
+		),
+		assignGroupsForDirectory: connect.NewClient[directories.AssignGroupsForDirectoryRequest, emptypb.Empty](
+			httpClient,
+			baseURL+DirectoryServiceAssignGroupsForDirectoryProcedure,
+			connect.WithSchema(directoryServiceMethods.ByName("AssignGroupsForDirectory")),
 			connect.WithClientOptions(opts...),
 		),
 		assignRoles: connect.NewClient[directories.AssignRolesRequest, directories.AssignRolesResponse](
 			httpClient,
 			baseURL+DirectoryServiceAssignRolesProcedure,
-			connect.WithSchema(directoryServiceAssignRolesMethodDescriptor),
+			connect.WithSchema(directoryServiceMethods.ByName("AssignRoles")),
 			connect.WithClientOptions(opts...),
 		),
 		updateAttributes: connect.NewClient[directories.UpdateAttributesRequest, directories.UpdateAttributesResponse](
 			httpClient,
 			baseURL+DirectoryServiceUpdateAttributesProcedure,
-			connect.WithSchema(directoryServiceUpdateAttributesMethodDescriptor),
+			connect.WithSchema(directoryServiceMethods.ByName("UpdateAttributes")),
 			connect.WithClientOptions(opts...),
 		),
 		getDirectory: connect.NewClient[directories.GetDirectoryRequest, directories.GetDirectoryResponse](
 			httpClient,
 			baseURL+DirectoryServiceGetDirectoryProcedure,
-			connect.WithSchema(directoryServiceGetDirectoryMethodDescriptor),
+			connect.WithSchema(directoryServiceMethods.ByName("GetDirectory")),
 			connect.WithClientOptions(opts...),
 		),
 		listDirectories: connect.NewClient[directories.ListDirectoriesRequest, directories.ListDirectoriesResponse](
 			httpClient,
 			baseURL+DirectoryServiceListDirectoriesProcedure,
-			connect.WithSchema(directoryServiceListDirectoriesMethodDescriptor),
+			connect.WithSchema(directoryServiceMethods.ByName("ListDirectories")),
 			connect.WithClientOptions(opts...),
 		),
 		enableDirectory: connect.NewClient[directories.ToggleDirectoryRequest, directories.ToggleDirectoryResponse](
 			httpClient,
 			baseURL+DirectoryServiceEnableDirectoryProcedure,
-			connect.WithSchema(directoryServiceEnableDirectoryMethodDescriptor),
+			connect.WithSchema(directoryServiceMethods.ByName("EnableDirectory")),
 			connect.WithClientOptions(opts...),
 		),
 		disableDirectory: connect.NewClient[directories.ToggleDirectoryRequest, directories.ToggleDirectoryResponse](
 			httpClient,
 			baseURL+DirectoryServiceDisableDirectoryProcedure,
-			connect.WithSchema(directoryServiceDisableDirectoryMethodDescriptor),
+			connect.WithSchema(directoryServiceMethods.ByName("DisableDirectory")),
 			connect.WithClientOptions(opts...),
 		),
 		listDirectoryUsers: connect.NewClient[directories.ListDirectoryUsersRequest, directories.ListDirectoryUsersResponse](
 			httpClient,
 			baseURL+DirectoryServiceListDirectoryUsersProcedure,
-			connect.WithSchema(directoryServiceListDirectoryUsersMethodDescriptor),
+			connect.WithSchema(directoryServiceMethods.ByName("ListDirectoryUsers")),
 			connect.WithClientOptions(opts...),
 		),
 		listDirectoryGroups: connect.NewClient[directories.ListDirectoryGroupsRequest, directories.ListDirectoryGroupsResponse](
 			httpClient,
 			baseURL+DirectoryServiceListDirectoryGroupsProcedure,
-			connect.WithSchema(directoryServiceListDirectoryGroupsMethodDescriptor),
+			connect.WithSchema(directoryServiceMethods.ByName("ListDirectoryGroups")),
+			connect.WithClientOptions(opts...),
+		),
+		listDirectoryGroupsSummary: connect.NewClient[directories.ListDirectoryGroupsSummaryRequest, directories.ListDirectoryGroupsResponse](
+			httpClient,
+			baseURL+DirectoryServiceListDirectoryGroupsSummaryProcedure,
+			connect.WithSchema(directoryServiceMethods.ByName("ListDirectoryGroupsSummary")),
 			connect.WithClientOptions(opts...),
 		),
 		createDirectorySecret: connect.NewClient[directories.CreateDirectorySecretRequest, directories.CreateDirectorySecretResponse](
 			httpClient,
 			baseURL+DirectoryServiceCreateDirectorySecretProcedure,
-			connect.WithSchema(directoryServiceCreateDirectorySecretMethodDescriptor),
+			connect.WithSchema(directoryServiceMethods.ByName("CreateDirectorySecret")),
 			connect.WithClientOptions(opts...),
 		),
 		regenerateDirectorySecret: connect.NewClient[directories.RegenerateDirectorySecretRequest, directories.RegenerateDirectorySecretResponse](
 			httpClient,
 			baseURL+DirectoryServiceRegenerateDirectorySecretProcedure,
-			connect.WithSchema(directoryServiceRegenerateDirectorySecretMethodDescriptor),
+			connect.WithSchema(directoryServiceMethods.ByName("RegenerateDirectorySecret")),
+			connect.WithClientOptions(opts...),
+		),
+		triggerDirectorySync: connect.NewClient[directories.TriggerDirectorySyncRequest, emptypb.Empty](
+			httpClient,
+			baseURL+DirectoryServiceTriggerDirectorySyncProcedure,
+			connect.WithSchema(directoryServiceMethods.ByName("TriggerDirectorySync")),
 			connect.WithClientOptions(opts...),
 		),
 	}
@@ -191,18 +216,22 @@ func NewDirectoryServiceClient(httpClient connect.HTTPClient, baseURL string, op
 
 // directoryServiceClient implements DirectoryServiceClient.
 type directoryServiceClient struct {
-	createDirectory           *connect.Client[directories.CreateDirectoryRequest, directories.CreateDirectoryResponse]
-	updateDirectory           *connect.Client[directories.UpdateDirectoryRequest, directories.UpdateDirectoryResponse]
-	assignRoles               *connect.Client[directories.AssignRolesRequest, directories.AssignRolesResponse]
-	updateAttributes          *connect.Client[directories.UpdateAttributesRequest, directories.UpdateAttributesResponse]
-	getDirectory              *connect.Client[directories.GetDirectoryRequest, directories.GetDirectoryResponse]
-	listDirectories           *connect.Client[directories.ListDirectoriesRequest, directories.ListDirectoriesResponse]
-	enableDirectory           *connect.Client[directories.ToggleDirectoryRequest, directories.ToggleDirectoryResponse]
-	disableDirectory          *connect.Client[directories.ToggleDirectoryRequest, directories.ToggleDirectoryResponse]
-	listDirectoryUsers        *connect.Client[directories.ListDirectoryUsersRequest, directories.ListDirectoryUsersResponse]
-	listDirectoryGroups       *connect.Client[directories.ListDirectoryGroupsRequest, directories.ListDirectoryGroupsResponse]
-	createDirectorySecret     *connect.Client[directories.CreateDirectorySecretRequest, directories.CreateDirectorySecretResponse]
-	regenerateDirectorySecret *connect.Client[directories.RegenerateDirectorySecretRequest, directories.RegenerateDirectorySecretResponse]
+	createDirectory            *connect.Client[directories.CreateDirectoryRequest, directories.CreateDirectoryResponse]
+	deleteDirectory            *connect.Client[directories.DeleteDirectoryRequest, emptypb.Empty]
+	updateDirectory            *connect.Client[directories.UpdateDirectoryRequest, directories.UpdateDirectoryResponse]
+	assignGroupsForDirectory   *connect.Client[directories.AssignGroupsForDirectoryRequest, emptypb.Empty]
+	assignRoles                *connect.Client[directories.AssignRolesRequest, directories.AssignRolesResponse]
+	updateAttributes           *connect.Client[directories.UpdateAttributesRequest, directories.UpdateAttributesResponse]
+	getDirectory               *connect.Client[directories.GetDirectoryRequest, directories.GetDirectoryResponse]
+	listDirectories            *connect.Client[directories.ListDirectoriesRequest, directories.ListDirectoriesResponse]
+	enableDirectory            *connect.Client[directories.ToggleDirectoryRequest, directories.ToggleDirectoryResponse]
+	disableDirectory           *connect.Client[directories.ToggleDirectoryRequest, directories.ToggleDirectoryResponse]
+	listDirectoryUsers         *connect.Client[directories.ListDirectoryUsersRequest, directories.ListDirectoryUsersResponse]
+	listDirectoryGroups        *connect.Client[directories.ListDirectoryGroupsRequest, directories.ListDirectoryGroupsResponse]
+	listDirectoryGroupsSummary *connect.Client[directories.ListDirectoryGroupsSummaryRequest, directories.ListDirectoryGroupsResponse]
+	createDirectorySecret      *connect.Client[directories.CreateDirectorySecretRequest, directories.CreateDirectorySecretResponse]
+	regenerateDirectorySecret  *connect.Client[directories.RegenerateDirectorySecretRequest, directories.RegenerateDirectorySecretResponse]
+	triggerDirectorySync       *connect.Client[directories.TriggerDirectorySyncRequest, emptypb.Empty]
 }
 
 // CreateDirectory calls scalekit.v1.directories.DirectoryService.CreateDirectory.
@@ -210,9 +239,19 @@ func (c *directoryServiceClient) CreateDirectory(ctx context.Context, req *conne
 	return c.createDirectory.CallUnary(ctx, req)
 }
 
+// DeleteDirectory calls scalekit.v1.directories.DirectoryService.DeleteDirectory.
+func (c *directoryServiceClient) DeleteDirectory(ctx context.Context, req *connect.Request[directories.DeleteDirectoryRequest]) (*connect.Response[emptypb.Empty], error) {
+	return c.deleteDirectory.CallUnary(ctx, req)
+}
+
 // UpdateDirectory calls scalekit.v1.directories.DirectoryService.UpdateDirectory.
 func (c *directoryServiceClient) UpdateDirectory(ctx context.Context, req *connect.Request[directories.UpdateDirectoryRequest]) (*connect.Response[directories.UpdateDirectoryResponse], error) {
 	return c.updateDirectory.CallUnary(ctx, req)
+}
+
+// AssignGroupsForDirectory calls scalekit.v1.directories.DirectoryService.AssignGroupsForDirectory.
+func (c *directoryServiceClient) AssignGroupsForDirectory(ctx context.Context, req *connect.Request[directories.AssignGroupsForDirectoryRequest]) (*connect.Response[emptypb.Empty], error) {
+	return c.assignGroupsForDirectory.CallUnary(ctx, req)
 }
 
 // AssignRoles calls scalekit.v1.directories.DirectoryService.AssignRoles.
@@ -255,6 +294,12 @@ func (c *directoryServiceClient) ListDirectoryGroups(ctx context.Context, req *c
 	return c.listDirectoryGroups.CallUnary(ctx, req)
 }
 
+// ListDirectoryGroupsSummary calls
+// scalekit.v1.directories.DirectoryService.ListDirectoryGroupsSummary.
+func (c *directoryServiceClient) ListDirectoryGroupsSummary(ctx context.Context, req *connect.Request[directories.ListDirectoryGroupsSummaryRequest]) (*connect.Response[directories.ListDirectoryGroupsResponse], error) {
+	return c.listDirectoryGroupsSummary.CallUnary(ctx, req)
+}
+
 // CreateDirectorySecret calls scalekit.v1.directories.DirectoryService.CreateDirectorySecret.
 func (c *directoryServiceClient) CreateDirectorySecret(ctx context.Context, req *connect.Request[directories.CreateDirectorySecretRequest]) (*connect.Response[directories.CreateDirectorySecretResponse], error) {
 	return c.createDirectorySecret.CallUnary(ctx, req)
@@ -266,11 +311,18 @@ func (c *directoryServiceClient) RegenerateDirectorySecret(ctx context.Context, 
 	return c.regenerateDirectorySecret.CallUnary(ctx, req)
 }
 
+// TriggerDirectorySync calls scalekit.v1.directories.DirectoryService.TriggerDirectorySync.
+func (c *directoryServiceClient) TriggerDirectorySync(ctx context.Context, req *connect.Request[directories.TriggerDirectorySyncRequest]) (*connect.Response[emptypb.Empty], error) {
+	return c.triggerDirectorySync.CallUnary(ctx, req)
+}
+
 // DirectoryServiceHandler is an implementation of the scalekit.v1.directories.DirectoryService
 // service.
 type DirectoryServiceHandler interface {
 	CreateDirectory(context.Context, *connect.Request[directories.CreateDirectoryRequest]) (*connect.Response[directories.CreateDirectoryResponse], error)
+	DeleteDirectory(context.Context, *connect.Request[directories.DeleteDirectoryRequest]) (*connect.Response[emptypb.Empty], error)
 	UpdateDirectory(context.Context, *connect.Request[directories.UpdateDirectoryRequest]) (*connect.Response[directories.UpdateDirectoryResponse], error)
+	AssignGroupsForDirectory(context.Context, *connect.Request[directories.AssignGroupsForDirectoryRequest]) (*connect.Response[emptypb.Empty], error)
 	AssignRoles(context.Context, *connect.Request[directories.AssignRolesRequest]) (*connect.Response[directories.AssignRolesResponse], error)
 	UpdateAttributes(context.Context, *connect.Request[directories.UpdateAttributesRequest]) (*connect.Response[directories.UpdateAttributesResponse], error)
 	GetDirectory(context.Context, *connect.Request[directories.GetDirectoryRequest]) (*connect.Response[directories.GetDirectoryResponse], error)
@@ -279,8 +331,10 @@ type DirectoryServiceHandler interface {
 	DisableDirectory(context.Context, *connect.Request[directories.ToggleDirectoryRequest]) (*connect.Response[directories.ToggleDirectoryResponse], error)
 	ListDirectoryUsers(context.Context, *connect.Request[directories.ListDirectoryUsersRequest]) (*connect.Response[directories.ListDirectoryUsersResponse], error)
 	ListDirectoryGroups(context.Context, *connect.Request[directories.ListDirectoryGroupsRequest]) (*connect.Response[directories.ListDirectoryGroupsResponse], error)
+	ListDirectoryGroupsSummary(context.Context, *connect.Request[directories.ListDirectoryGroupsSummaryRequest]) (*connect.Response[directories.ListDirectoryGroupsResponse], error)
 	CreateDirectorySecret(context.Context, *connect.Request[directories.CreateDirectorySecretRequest]) (*connect.Response[directories.CreateDirectorySecretResponse], error)
 	RegenerateDirectorySecret(context.Context, *connect.Request[directories.RegenerateDirectorySecretRequest]) (*connect.Response[directories.RegenerateDirectorySecretResponse], error)
+	TriggerDirectorySync(context.Context, *connect.Request[directories.TriggerDirectorySyncRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewDirectoryServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -289,84 +343,113 @@ type DirectoryServiceHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewDirectoryServiceHandler(svc DirectoryServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	directoryServiceMethods := directories.File_scalekit_v1_directories_directories_proto.Services().ByName("DirectoryService").Methods()
 	directoryServiceCreateDirectoryHandler := connect.NewUnaryHandler(
 		DirectoryServiceCreateDirectoryProcedure,
 		svc.CreateDirectory,
-		connect.WithSchema(directoryServiceCreateDirectoryMethodDescriptor),
+		connect.WithSchema(directoryServiceMethods.ByName("CreateDirectory")),
+		connect.WithHandlerOptions(opts...),
+	)
+	directoryServiceDeleteDirectoryHandler := connect.NewUnaryHandler(
+		DirectoryServiceDeleteDirectoryProcedure,
+		svc.DeleteDirectory,
+		connect.WithSchema(directoryServiceMethods.ByName("DeleteDirectory")),
 		connect.WithHandlerOptions(opts...),
 	)
 	directoryServiceUpdateDirectoryHandler := connect.NewUnaryHandler(
 		DirectoryServiceUpdateDirectoryProcedure,
 		svc.UpdateDirectory,
-		connect.WithSchema(directoryServiceUpdateDirectoryMethodDescriptor),
+		connect.WithSchema(directoryServiceMethods.ByName("UpdateDirectory")),
+		connect.WithHandlerOptions(opts...),
+	)
+	directoryServiceAssignGroupsForDirectoryHandler := connect.NewUnaryHandler(
+		DirectoryServiceAssignGroupsForDirectoryProcedure,
+		svc.AssignGroupsForDirectory,
+		connect.WithSchema(directoryServiceMethods.ByName("AssignGroupsForDirectory")),
 		connect.WithHandlerOptions(opts...),
 	)
 	directoryServiceAssignRolesHandler := connect.NewUnaryHandler(
 		DirectoryServiceAssignRolesProcedure,
 		svc.AssignRoles,
-		connect.WithSchema(directoryServiceAssignRolesMethodDescriptor),
+		connect.WithSchema(directoryServiceMethods.ByName("AssignRoles")),
 		connect.WithHandlerOptions(opts...),
 	)
 	directoryServiceUpdateAttributesHandler := connect.NewUnaryHandler(
 		DirectoryServiceUpdateAttributesProcedure,
 		svc.UpdateAttributes,
-		connect.WithSchema(directoryServiceUpdateAttributesMethodDescriptor),
+		connect.WithSchema(directoryServiceMethods.ByName("UpdateAttributes")),
 		connect.WithHandlerOptions(opts...),
 	)
 	directoryServiceGetDirectoryHandler := connect.NewUnaryHandler(
 		DirectoryServiceGetDirectoryProcedure,
 		svc.GetDirectory,
-		connect.WithSchema(directoryServiceGetDirectoryMethodDescriptor),
+		connect.WithSchema(directoryServiceMethods.ByName("GetDirectory")),
 		connect.WithHandlerOptions(opts...),
 	)
 	directoryServiceListDirectoriesHandler := connect.NewUnaryHandler(
 		DirectoryServiceListDirectoriesProcedure,
 		svc.ListDirectories,
-		connect.WithSchema(directoryServiceListDirectoriesMethodDescriptor),
+		connect.WithSchema(directoryServiceMethods.ByName("ListDirectories")),
 		connect.WithHandlerOptions(opts...),
 	)
 	directoryServiceEnableDirectoryHandler := connect.NewUnaryHandler(
 		DirectoryServiceEnableDirectoryProcedure,
 		svc.EnableDirectory,
-		connect.WithSchema(directoryServiceEnableDirectoryMethodDescriptor),
+		connect.WithSchema(directoryServiceMethods.ByName("EnableDirectory")),
 		connect.WithHandlerOptions(opts...),
 	)
 	directoryServiceDisableDirectoryHandler := connect.NewUnaryHandler(
 		DirectoryServiceDisableDirectoryProcedure,
 		svc.DisableDirectory,
-		connect.WithSchema(directoryServiceDisableDirectoryMethodDescriptor),
+		connect.WithSchema(directoryServiceMethods.ByName("DisableDirectory")),
 		connect.WithHandlerOptions(opts...),
 	)
 	directoryServiceListDirectoryUsersHandler := connect.NewUnaryHandler(
 		DirectoryServiceListDirectoryUsersProcedure,
 		svc.ListDirectoryUsers,
-		connect.WithSchema(directoryServiceListDirectoryUsersMethodDescriptor),
+		connect.WithSchema(directoryServiceMethods.ByName("ListDirectoryUsers")),
 		connect.WithHandlerOptions(opts...),
 	)
 	directoryServiceListDirectoryGroupsHandler := connect.NewUnaryHandler(
 		DirectoryServiceListDirectoryGroupsProcedure,
 		svc.ListDirectoryGroups,
-		connect.WithSchema(directoryServiceListDirectoryGroupsMethodDescriptor),
+		connect.WithSchema(directoryServiceMethods.ByName("ListDirectoryGroups")),
+		connect.WithHandlerOptions(opts...),
+	)
+	directoryServiceListDirectoryGroupsSummaryHandler := connect.NewUnaryHandler(
+		DirectoryServiceListDirectoryGroupsSummaryProcedure,
+		svc.ListDirectoryGroupsSummary,
+		connect.WithSchema(directoryServiceMethods.ByName("ListDirectoryGroupsSummary")),
 		connect.WithHandlerOptions(opts...),
 	)
 	directoryServiceCreateDirectorySecretHandler := connect.NewUnaryHandler(
 		DirectoryServiceCreateDirectorySecretProcedure,
 		svc.CreateDirectorySecret,
-		connect.WithSchema(directoryServiceCreateDirectorySecretMethodDescriptor),
+		connect.WithSchema(directoryServiceMethods.ByName("CreateDirectorySecret")),
 		connect.WithHandlerOptions(opts...),
 	)
 	directoryServiceRegenerateDirectorySecretHandler := connect.NewUnaryHandler(
 		DirectoryServiceRegenerateDirectorySecretProcedure,
 		svc.RegenerateDirectorySecret,
-		connect.WithSchema(directoryServiceRegenerateDirectorySecretMethodDescriptor),
+		connect.WithSchema(directoryServiceMethods.ByName("RegenerateDirectorySecret")),
+		connect.WithHandlerOptions(opts...),
+	)
+	directoryServiceTriggerDirectorySyncHandler := connect.NewUnaryHandler(
+		DirectoryServiceTriggerDirectorySyncProcedure,
+		svc.TriggerDirectorySync,
+		connect.WithSchema(directoryServiceMethods.ByName("TriggerDirectorySync")),
 		connect.WithHandlerOptions(opts...),
 	)
 	return "/scalekit.v1.directories.DirectoryService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case DirectoryServiceCreateDirectoryProcedure:
 			directoryServiceCreateDirectoryHandler.ServeHTTP(w, r)
+		case DirectoryServiceDeleteDirectoryProcedure:
+			directoryServiceDeleteDirectoryHandler.ServeHTTP(w, r)
 		case DirectoryServiceUpdateDirectoryProcedure:
 			directoryServiceUpdateDirectoryHandler.ServeHTTP(w, r)
+		case DirectoryServiceAssignGroupsForDirectoryProcedure:
+			directoryServiceAssignGroupsForDirectoryHandler.ServeHTTP(w, r)
 		case DirectoryServiceAssignRolesProcedure:
 			directoryServiceAssignRolesHandler.ServeHTTP(w, r)
 		case DirectoryServiceUpdateAttributesProcedure:
@@ -383,10 +466,14 @@ func NewDirectoryServiceHandler(svc DirectoryServiceHandler, opts ...connect.Han
 			directoryServiceListDirectoryUsersHandler.ServeHTTP(w, r)
 		case DirectoryServiceListDirectoryGroupsProcedure:
 			directoryServiceListDirectoryGroupsHandler.ServeHTTP(w, r)
+		case DirectoryServiceListDirectoryGroupsSummaryProcedure:
+			directoryServiceListDirectoryGroupsSummaryHandler.ServeHTTP(w, r)
 		case DirectoryServiceCreateDirectorySecretProcedure:
 			directoryServiceCreateDirectorySecretHandler.ServeHTTP(w, r)
 		case DirectoryServiceRegenerateDirectorySecretProcedure:
 			directoryServiceRegenerateDirectorySecretHandler.ServeHTTP(w, r)
+		case DirectoryServiceTriggerDirectorySyncProcedure:
+			directoryServiceTriggerDirectorySyncHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -400,8 +487,16 @@ func (UnimplementedDirectoryServiceHandler) CreateDirectory(context.Context, *co
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.directories.DirectoryService.CreateDirectory is not implemented"))
 }
 
+func (UnimplementedDirectoryServiceHandler) DeleteDirectory(context.Context, *connect.Request[directories.DeleteDirectoryRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.directories.DirectoryService.DeleteDirectory is not implemented"))
+}
+
 func (UnimplementedDirectoryServiceHandler) UpdateDirectory(context.Context, *connect.Request[directories.UpdateDirectoryRequest]) (*connect.Response[directories.UpdateDirectoryResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.directories.DirectoryService.UpdateDirectory is not implemented"))
+}
+
+func (UnimplementedDirectoryServiceHandler) AssignGroupsForDirectory(context.Context, *connect.Request[directories.AssignGroupsForDirectoryRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.directories.DirectoryService.AssignGroupsForDirectory is not implemented"))
 }
 
 func (UnimplementedDirectoryServiceHandler) AssignRoles(context.Context, *connect.Request[directories.AssignRolesRequest]) (*connect.Response[directories.AssignRolesResponse], error) {
@@ -436,10 +531,18 @@ func (UnimplementedDirectoryServiceHandler) ListDirectoryGroups(context.Context,
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.directories.DirectoryService.ListDirectoryGroups is not implemented"))
 }
 
+func (UnimplementedDirectoryServiceHandler) ListDirectoryGroupsSummary(context.Context, *connect.Request[directories.ListDirectoryGroupsSummaryRequest]) (*connect.Response[directories.ListDirectoryGroupsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.directories.DirectoryService.ListDirectoryGroupsSummary is not implemented"))
+}
+
 func (UnimplementedDirectoryServiceHandler) CreateDirectorySecret(context.Context, *connect.Request[directories.CreateDirectorySecretRequest]) (*connect.Response[directories.CreateDirectorySecretResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.directories.DirectoryService.CreateDirectorySecret is not implemented"))
 }
 
 func (UnimplementedDirectoryServiceHandler) RegenerateDirectorySecret(context.Context, *connect.Request[directories.RegenerateDirectorySecretRequest]) (*connect.Response[directories.RegenerateDirectorySecretResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.directories.DirectoryService.RegenerateDirectorySecret is not implemented"))
+}
+
+func (UnimplementedDirectoryServiceHandler) TriggerDirectorySync(context.Context, *connect.Request[directories.TriggerDirectorySyncRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.directories.DirectoryService.TriggerDirectorySync is not implemented"))
 }
