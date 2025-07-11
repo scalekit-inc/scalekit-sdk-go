@@ -358,12 +358,12 @@ func validateToken[T interface{}](token string, jwksFn func() (*jose.JSONWebKeyS
 	if exp, ok := rawClaims["exp"]; ok {
 		expFloat, ok := exp.(float64)
 		if !ok {
-			return nil, errors.New("invalid exp claim format")
+			return nil, ErrInvalidExpClaimFormat
 		}
 
 		expTime := int64(expFloat)
 		if time.Now().Unix() >= expTime {
-			return nil, errors.New("token has expired")
+			return nil, ErrTokenExpired
 		}
 	}
 
@@ -380,7 +380,7 @@ func computeSignature(secret []byte, data string) string {
 
 func (s *scalekitClient) RefreshAccessToken(refreshToken string) (*TokenResponse, error) {
 	if refreshToken == "" {
-		return nil, errors.New("refresh token is required")
+		return nil, ErrRefreshTokenRequired
 	}
 
 	qs := url.Values{}
