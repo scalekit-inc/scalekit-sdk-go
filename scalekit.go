@@ -43,7 +43,7 @@ type Scalekit interface {
 	GetIdpInitiatedLoginClaims(idpInitiateLoginToken string) (*IdpInitiatedLoginClaims, error)
 	ValidateAccessToken(accessToken string) (bool, error)
 	VerifyWebhookPayload(secret string, headers map[string]string, payload []byte) (bool, error)
-	RefreshToken(refreshToken string) (*TokenResponse, error)
+	RefreshAccessToken(refreshToken string) (*TokenResponse, error)
 	GetLogoutUrl(options LogoutUrlOptions) (*url.URL, error)
 }
 
@@ -378,7 +378,7 @@ func computeSignature(secret []byte, data string) string {
 	return base64.StdEncoding.EncodeToString(signature)
 }
 
-func (s *scalekitClient) RefreshToken(refreshToken string) (*TokenResponse, error) {
+func (s *scalekitClient) RefreshAccessToken(refreshToken string) (*TokenResponse, error) {
 	if refreshToken == "" {
 		return nil, errors.New("refresh token is required")
 	}
