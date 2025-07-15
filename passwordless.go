@@ -124,6 +124,10 @@ func (p *passwordlessService) VerifyPasswordlessEmail(ctx context.Context, optio
 
 // ResendPasswordlessEmail resends a passwordless authentication email
 func (p *passwordlessService) ResendPasswordlessEmail(ctx context.Context, authRequestId string) (*SendPasswordlessResponse, error) {
+	if authRequestId == "" {
+		return nil, ErrAuthRequestIdRequired
+	}
+
 	request := &authv1.ResendPasswordlessRequest{
 		AuthRequestId: authRequestId,
 	}
