@@ -40,6 +40,9 @@ func TestSendPasswordlessEmail(t *testing.T) {
 	assert.True(t, response.ExpiresAt > 0)
 	assert.True(t, response.ExpiresIn > 0)
 	assert.NotEmpty(t, response.PasswordlessType)
+
+	// Log the auth request ID for manual testing
+	t.Logf("Auth Request ID: %s", response.AuthRequestId)
 }
 
 func TestResendPasswordlessEmail(t *testing.T) {
