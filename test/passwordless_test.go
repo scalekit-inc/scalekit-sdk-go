@@ -6,26 +6,21 @@ import (
 	"time"
 
 	"github.com/scalekit-inc/scalekit-sdk-go"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestPasswordlessService(t *testing.T) {
+func TestSendPasswordlessEmail(t *testing.T) {
 	if client == nil {
 		t.Skip("Client not initialized, skipping integration test")
 	}
 
-	// Test that the passwordless service is available
 	passwordlessService := client.Passwordless()
-	if passwordlessService == nil {
-		t.Fatal("Passwordless service should not be nil")
-	}
-
-	// Test SendPasswordlessEmail with options
 	ctx := context.Background()
 	email := "dhaneshbabu007@gmail.com"
 	templateType := scalekit.TemplateTypeSignin
 	options := &scalekit.SendPasswordlessOptions{
 		Template:         &templateType,
-		MagiclinkAuthUri: "https://myapp.com/auth/callback", // Now we can pass the string directly!
+		MagiclinkAuthUri: "https://myapp.com/auth/callback",
 		State:            "integration-test-state",
 		ExpiresIn:        1800, // 30 minutes
 		TemplateVariables: map[string]string{
@@ -34,66 +29,155 @@ func TestPasswordlessService(t *testing.T) {
 		},
 	}
 
-	// Test 1: Send passwordless email
-	t.Run("SendPasswordlessEmail", func(t *testing.T) {
-		response, err := passwordlessService.SendPasswordlessEmail(ctx, email, options)
-		if err != nil {
-			t.Logf("SendPasswordlessEmail error: %v", err)
-			return
-		}
+	response, err := passwordlessService.SendPasswordlessEmail(ctx, email, options)
+	if err != nil {
+		return
+	}
 
-		t.Logf("✅ SendPasswordlessEmail successful!")
-		t.Logf("   Auth Request ID: %s", response.AuthRequestId)
-		t.Logf("   Expires At: %d", response.ExpiresAt)
-		t.Logf("   Expires In: %d seconds", response.ExpiresIn)
-		t.Logf("   Passwordless Type: %s", response.PasswordlessType)
+	// Assert response is not nil and contains expected fields
+	assert.NotNil(t, response)
+	assert.NotEmpty(t, response.AuthRequestId)
+	assert.True(t, response.ExpiresAt > 0)
+	assert.True(t, response.ExpiresIn > 0)
+	assert.NotEmpty(t, response.PasswordlessType)
+}
 
-		// Test 2: Resend passwordless email (if we got a valid auth request ID)
-		if response.AuthRequestId != "" {
-			t.Run("ResendPasswordlessEmail", func(t *testing.T) {
-				// Wait a bit before resending to avoid rate limiting
-				time.Sleep(2 * time.Second)
+func TestResendPasswordlessEmail(t *testing.T) {
+	if client == nil {
+		t.Skip("Client not initialized, skipping integration test")
+	}
 
-				resendResponse, err := passwordlessService.ResendPasswordlessEmail(ctx, response.AuthRequestId)
-				if err != nil {
-					t.Logf("ResendPasswordlessEmail error: %v", err)
-					return
-				}
+	passwordlessService := client.Passwordless()
+	ctx := context.Background()
+	email := "dhaneshbabu007@gmail.com"
+	templateType := scalekit.TemplateTypeSignin
+	options := &scalekit.SendPasswordlessOptions{
+		Template:         &templateType,
+		MagiclinkAuthUri: "https://myapp.com/auth/callback",
+		State:            "integration-test-state",
+		ExpiresIn:        1800, // 30 minutes
+		TemplateVariables: map[string]string{
+			"app_name": "Integration Test App",
+			"company":  "Test Company",
+		},
+	}
 
-				t.Logf("✅ ResendPasswordlessEmail successful!")
-				t.Logf("   New Auth Request ID: %s", resendResponse.AuthRequestId)
-				t.Logf("   New Expires At: %d", resendResponse.ExpiresAt)
-				t.Logf("   New Expires In: %d seconds", resendResponse.ExpiresIn)
-			})
-		}
-	})
+	// First send an email to get an auth request ID
+	response, err := passwordlessService.SendPasswordlessEmail(ctx, email, options)
+	if err != nil {
+		t.Skipf("Cannot test resend without first sending: %v", err)
+	}
 
-	// Test 3: Verify with invalid code (this should fail, but we can test the API structure)
-	t.Run("VerifyPasswordlessEmail_InvalidCode", func(t *testing.T) {
-		verifyOptions := &scalekit.VerifyPasswordlessOptions{
-			Code:          "000000", // Invalid code
-			AuthRequestId: "invalid-auth-request-id",
-		}
+	// Assert initial response has required fields
+	assert.NotNil(t, response)
+	assert.NotEmpty(t, response.AuthRequestId)
 
-		_, err := passwordlessService.VerifyPasswordlessEmail(ctx, verifyOptions)
-		if err != nil {
-			t.Logf("✅ VerifyPasswordlessEmail with invalid code failed as expected: %v", err)
-		} else {
-			t.Logf("⚠️  VerifyPasswordlessEmail with invalid code succeeded (unexpected)")
-		}
-	})
+	// Wait a bit before resending to avoid rate limiting
+	time.Sleep(2 * time.Second)
 
-	// Test 4: Verify with invalid link token (this should fail, but we can test the API structure)
-	t.Run("VerifyPasswordlessEmail_InvalidLinkToken", func(t *testing.T) {
-		verifyLinkOptions := &scalekit.VerifyPasswordlessOptions{
-			LinkToken: "invalid-link-token",
-		}
+	resendResponse, err := passwordlessService.ResendPasswordlessEmail(ctx, response.AuthRequestId)
+	if err != nil {
+		return
+	}
 
-		_, err := passwordlessService.VerifyPasswordlessEmail(ctx, verifyLinkOptions)
-		if err != nil {
-			t.Logf("✅ VerifyPasswordlessEmail with invalid link token failed as expected: %v", err)
-		} else {
-			t.Logf("⚠️  VerifyPasswordlessEmail with invalid link token succeeded (unexpected)")
-		}
-	})
+	// Assert resend response is not nil and contains expected fields
+	assert.NotNil(t, resendResponse)
+	assert.NotEmpty(t, resendResponse.AuthRequestId)
+	assert.True(t, resendResponse.ExpiresAt > 0)
+	assert.True(t, resendResponse.ExpiresIn > 0)
+}
+
+func TestVerifyPasswordlessEmail_InvalidCode(t *testing.T) {
+	if client == nil {
+		t.Skip("Client not initialized, skipping integration test")
+	}
+
+	passwordlessService := client.Passwordless()
+	ctx := context.Background()
+	verifyOptions := &scalekit.VerifyPasswordlessOptions{
+		Code:          "000000", // Invalid code
+		AuthRequestId: "invalid-auth-request-id",
+	}
+
+	response, err := passwordlessService.VerifyPasswordlessEmail(ctx, verifyOptions)
+
+	// Assert that verification with invalid code fails as expected
+	assert.Error(t, err)
+	assert.Nil(t, response)
+}
+
+func TestVerifyPasswordlessEmail_InvalidLinkToken(t *testing.T) {
+	if client == nil {
+		t.Skip("Client not initialized, skipping integration test")
+	}
+
+	passwordlessService := client.Passwordless()
+	ctx := context.Background()
+	verifyLinkOptions := &scalekit.VerifyPasswordlessOptions{
+		LinkToken: "invalid-link-token",
+	}
+
+	response, err := passwordlessService.VerifyPasswordlessEmail(ctx, verifyLinkOptions)
+
+	// Assert that verification with invalid link token fails as expected
+	assert.Error(t, err)
+	assert.Nil(t, response)
+}
+
+func TestVerifyPasswordlessEmail_ValidCode(t *testing.T) {
+	if client == nil {
+		t.Skip("Client not initialized, skipping integration test")
+	}
+
+	passwordlessService := client.Passwordless()
+	ctx := context.Background()
+
+	// TODO: Replace with actual valid code and auth request ID from email
+	validCode := "123456"                              // Change this to the actual code from email
+	validAuthRequestId := "auth_request_id_from_email" // Change this to the actual auth request ID from email
+
+	verifyOptions := &scalekit.VerifyPasswordlessOptions{
+		Code:          validCode,
+		AuthRequestId: validAuthRequestId,
+	}
+
+	response, err := passwordlessService.VerifyPasswordlessEmail(ctx, verifyOptions)
+
+	// Assert that verification with valid code succeeds
+	assert.NoError(t, err)
+	assert.NotNil(t, response)
+
+	// Assert response contains expected fields
+	if response != nil {
+		assert.NotEmpty(t, response.Email)
+		assert.NotEmpty(t, response.PasswordlessType)
+	}
+}
+
+func TestVerifyPasswordlessEmail_ValidLinkToken(t *testing.T) {
+	if client == nil {
+		t.Skip("Client not initialized, skipping integration test")
+	}
+
+	passwordlessService := client.Passwordless()
+	ctx := context.Background()
+
+	// TODO: Replace with actual valid link token from email
+	validLinkToken := "link_token_from_email" // Change this to the actual link token from email
+
+	verifyOptions := &scalekit.VerifyPasswordlessOptions{
+		LinkToken: validLinkToken,
+	}
+
+	response, err := passwordlessService.VerifyPasswordlessEmail(ctx, verifyOptions)
+
+	// Assert that verification with valid link token succeeds
+	assert.NoError(t, err)
+	assert.NotNil(t, response)
+
+	// Assert response contains expected fields
+	if response != nil {
+		assert.NotEmpty(t, response.Email)
+		assert.NotEmpty(t, response.PasswordlessType)
+	}
 }
