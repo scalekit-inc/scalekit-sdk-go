@@ -75,6 +75,15 @@ func TestResendPasswordlessEmail(t *testing.T) {
 	assert.NotNil(t, response)
 	assert.NotEmpty(t, response.AuthRequestId)
 
+	verifyCodeResponse, err := passwordlessService.VerifyPasswordlessEmail(ctx, &scalekit.VerifyPasswordlessOptions{
+		Code:          "000000", // Invalid code
+		AuthRequestId: response.AuthRequestId,
+	})
+
+	// Assert that verification with invalid code fails as expected
+	assert.Error(t, err)
+	assert.Nil(t, verifyCodeResponse)
+
 	// Wait a bit before resending to avoid rate limiting
 	time.Sleep(2 * time.Second)
 
