@@ -24,7 +24,7 @@
 ## Installation
 
 ```sh
-go get -u github.com/scalekit-inc/scalekit-sdk-go
+go get -u github.com/scalekit-inc/scalekit-sdk-go/v2
 ```
 
 ## Usage
@@ -32,7 +32,7 @@ go get -u github.com/scalekit-inc/scalekit-sdk-go
 Initialize the Scalekit client using the appropriate credentials. Refer code sample below.
 
 ```go
-import "github.com/scalekit-inc/scalekit-sdk-go"
+import "github.com/scalekit-inc/scalekit-sdk-go/v2"
 
 func main() {
   scalekitClient := scalekit.NewScalekitClient(
@@ -75,7 +75,7 @@ import (
   "fmt"
   "net/http"
 
-  "github.com/scalekit-inc/scalekit-sdk-go"
+  "github.com/scalekit-inc/scalekit-sdk-go/v2"
 )
 
 func main() {

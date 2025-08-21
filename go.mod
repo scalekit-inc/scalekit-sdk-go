@@ -1,4 +1,4 @@
-module github.com/scalekit-inc/scalekit-sdk-go
+module github.com/scalekit-inc/scalekit-sdk-go/v2
 
 go 1.23.0
 
