@@ -34,15 +34,15 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
-	// ConnectionServiceGetProvidersProcedure is the fully-qualified name of the ConnectionService's
-	// GetProviders RPC.
-	ConnectionServiceGetProvidersProcedure = "/scalekit.v1.connections.ConnectionService/GetProviders"
 	// ConnectionServiceCreateEnvironmentConnectionProcedure is the fully-qualified name of the
 	// ConnectionService's CreateEnvironmentConnection RPC.
 	ConnectionServiceCreateEnvironmentConnectionProcedure = "/scalekit.v1.connections.ConnectionService/CreateEnvironmentConnection"
 	// ConnectionServiceCreateConnectionProcedure is the fully-qualified name of the ConnectionService's
 	// CreateConnection RPC.
 	ConnectionServiceCreateConnectionProcedure = "/scalekit.v1.connections.ConnectionService/CreateConnection"
+	// ConnectionServiceAssignDomainsToConnectionProcedure is the fully-qualified name of the
+	// ConnectionService's AssignDomainsToConnection RPC.
+	ConnectionServiceAssignDomainsToConnectionProcedure = "/scalekit.v1.connections.ConnectionService/AssignDomainsToConnection"
 	// ConnectionServiceGetEnvironmentConnectionProcedure is the fully-qualified name of the
 	// ConnectionService's GetEnvironmentConnection RPC.
 	ConnectionServiceGetEnvironmentConnectionProcedure = "/scalekit.v1.connections.ConnectionService/GetEnvironmentConnection"
@@ -85,13 +85,16 @@ const (
 	// ConnectionServiceGetConnectionTestResultProcedure is the fully-qualified name of the
 	// ConnectionService's GetConnectionTestResult RPC.
 	ConnectionServiceGetConnectionTestResultProcedure = "/scalekit.v1.connections.ConnectionService/GetConnectionTestResult"
+	// ConnectionServiceListAppConnectionsProcedure is the fully-qualified name of the
+	// ConnectionService's ListAppConnections RPC.
+	ConnectionServiceListAppConnectionsProcedure = "/scalekit.v1.connections.ConnectionService/ListAppConnections"
 )
 
 // ConnectionServiceClient is a client for the scalekit.v1.connections.ConnectionService service.
 type ConnectionServiceClient interface {
-	GetProviders(context.Context, *connect.Request[connections.GetProvidersRequest]) (*connect.Response[connections.GetProvidersResponse], error)
 	CreateEnvironmentConnection(context.Context, *connect.Request[connections.CreateEnvironmentConnectionRequest]) (*connect.Response[connections.CreateConnectionResponse], error)
 	CreateConnection(context.Context, *connect.Request[connections.CreateConnectionRequest]) (*connect.Response[connections.CreateConnectionResponse], error)
+	AssignDomainsToConnection(context.Context, *connect.Request[connections.AssignDomainsToConnectionRequest]) (*connect.Response[connections.AssignDomainsToConnectionResponse], error)
 	GetEnvironmentConnection(context.Context, *connect.Request[connections.GetEnvironmentConnectionRequest]) (*connect.Response[connections.GetConnectionResponse], error)
 	GetConnection(context.Context, *connect.Request[connections.GetConnectionRequest]) (*connect.Response[connections.GetConnectionResponse], error)
 	ListConnections(context.Context, *connect.Request[connections.ListConnectionsRequest]) (*connect.Response[connections.ListConnectionsResponse], error)
@@ -106,6 +109,7 @@ type ConnectionServiceClient interface {
 	DisableEnvironmentConnection(context.Context, *connect.Request[connections.ToggleEnvironmentConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error)
 	DisableConnection(context.Context, *connect.Request[connections.ToggleConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error)
 	GetConnectionTestResult(context.Context, *connect.Request[connections.GetConnectionTestResultRequest]) (*connect.Response[connections.GetConnectionTestResultResponse], error)
+	ListAppConnections(context.Context, *connect.Request[connections.ListAppConnectionsRequest]) (*connect.Response[connections.ListAppConnectionsResponse], error)
 }
 
 // NewConnectionServiceClient constructs a client for the scalekit.v1.connections.ConnectionService
@@ -119,12 +123,6 @@ func NewConnectionServiceClient(httpClient connect.HTTPClient, baseURL string, o
 	baseURL = strings.TrimRight(baseURL, "/")
 	connectionServiceMethods := connections.File_scalekit_v1_connections_connections_proto.Services().ByName("ConnectionService").Methods()
 	return &connectionServiceClient{
-		getProviders: connect.NewClient[connections.GetProvidersRequest, connections.GetProvidersResponse](
-			httpClient,
-			baseURL+ConnectionServiceGetProvidersProcedure,
-			connect.WithSchema(connectionServiceMethods.ByName("GetProviders")),
-			connect.WithClientOptions(opts...),
-		),
 		createEnvironmentConnection: connect.NewClient[connections.CreateEnvironmentConnectionRequest, connections.CreateConnectionResponse](
 			httpClient,
 			baseURL+ConnectionServiceCreateEnvironmentConnectionProcedure,
@@ -135,6 +133,12 @@ func NewConnectionServiceClient(httpClient connect.HTTPClient, baseURL string, o
 			httpClient,
 			baseURL+ConnectionServiceCreateConnectionProcedure,
 			connect.WithSchema(connectionServiceMethods.ByName("CreateConnection")),
+			connect.WithClientOptions(opts...),
+		),
+		assignDomainsToConnection: connect.NewClient[connections.AssignDomainsToConnectionRequest, connections.AssignDomainsToConnectionResponse](
+			httpClient,
+			baseURL+ConnectionServiceAssignDomainsToConnectionProcedure,
+			connect.WithSchema(connectionServiceMethods.ByName("AssignDomainsToConnection")),
 			connect.WithClientOptions(opts...),
 		),
 		getEnvironmentConnection: connect.NewClient[connections.GetEnvironmentConnectionRequest, connections.GetConnectionResponse](
@@ -221,14 +225,20 @@ func NewConnectionServiceClient(httpClient connect.HTTPClient, baseURL string, o
 			connect.WithSchema(connectionServiceMethods.ByName("GetConnectionTestResult")),
 			connect.WithClientOptions(opts...),
 		),
+		listAppConnections: connect.NewClient[connections.ListAppConnectionsRequest, connections.ListAppConnectionsResponse](
+			httpClient,
+			baseURL+ConnectionServiceListAppConnectionsProcedure,
+			connect.WithSchema(connectionServiceMethods.ByName("ListAppConnections")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // connectionServiceClient implements ConnectionServiceClient.
 type connectionServiceClient struct {
-	getProviders                  *connect.Client[connections.GetProvidersRequest, connections.GetProvidersResponse]
 	createEnvironmentConnection   *connect.Client[connections.CreateEnvironmentConnectionRequest, connections.CreateConnectionResponse]
 	createConnection              *connect.Client[connections.CreateConnectionRequest, connections.CreateConnectionResponse]
+	assignDomainsToConnection     *connect.Client[connections.AssignDomainsToConnectionRequest, connections.AssignDomainsToConnectionResponse]
 	getEnvironmentConnection      *connect.Client[connections.GetEnvironmentConnectionRequest, connections.GetConnectionResponse]
 	getConnection                 *connect.Client[connections.GetConnectionRequest, connections.GetConnectionResponse]
 	listConnections               *connect.Client[connections.ListConnectionsRequest, connections.ListConnectionsResponse]
@@ -243,11 +253,7 @@ type connectionServiceClient struct {
 	disableEnvironmentConnection  *connect.Client[connections.ToggleEnvironmentConnectionRequest, connections.ToggleConnectionResponse]
 	disableConnection             *connect.Client[connections.ToggleConnectionRequest, connections.ToggleConnectionResponse]
 	getConnectionTestResult       *connect.Client[connections.GetConnectionTestResultRequest, connections.GetConnectionTestResultResponse]
-}
-
-// GetProviders calls scalekit.v1.connections.ConnectionService.GetProviders.
-func (c *connectionServiceClient) GetProviders(ctx context.Context, req *connect.Request[connections.GetProvidersRequest]) (*connect.Response[connections.GetProvidersResponse], error) {
-	return c.getProviders.CallUnary(ctx, req)
+	listAppConnections            *connect.Client[connections.ListAppConnectionsRequest, connections.ListAppConnectionsResponse]
 }
 
 // CreateEnvironmentConnection calls
@@ -259,6 +265,12 @@ func (c *connectionServiceClient) CreateEnvironmentConnection(ctx context.Contex
 // CreateConnection calls scalekit.v1.connections.ConnectionService.CreateConnection.
 func (c *connectionServiceClient) CreateConnection(ctx context.Context, req *connect.Request[connections.CreateConnectionRequest]) (*connect.Response[connections.CreateConnectionResponse], error) {
 	return c.createConnection.CallUnary(ctx, req)
+}
+
+// AssignDomainsToConnection calls
+// scalekit.v1.connections.ConnectionService.AssignDomainsToConnection.
+func (c *connectionServiceClient) AssignDomainsToConnection(ctx context.Context, req *connect.Request[connections.AssignDomainsToConnectionRequest]) (*connect.Response[connections.AssignDomainsToConnectionResponse], error) {
+	return c.assignDomainsToConnection.CallUnary(ctx, req)
 }
 
 // GetEnvironmentConnection calls
@@ -338,12 +350,17 @@ func (c *connectionServiceClient) GetConnectionTestResult(ctx context.Context, r
 	return c.getConnectionTestResult.CallUnary(ctx, req)
 }
 
+// ListAppConnections calls scalekit.v1.connections.ConnectionService.ListAppConnections.
+func (c *connectionServiceClient) ListAppConnections(ctx context.Context, req *connect.Request[connections.ListAppConnectionsRequest]) (*connect.Response[connections.ListAppConnectionsResponse], error) {
+	return c.listAppConnections.CallUnary(ctx, req)
+}
+
 // ConnectionServiceHandler is an implementation of the scalekit.v1.connections.ConnectionService
 // service.
 type ConnectionServiceHandler interface {
-	GetProviders(context.Context, *connect.Request[connections.GetProvidersRequest]) (*connect.Response[connections.GetProvidersResponse], error)
 	CreateEnvironmentConnection(context.Context, *connect.Request[connections.CreateEnvironmentConnectionRequest]) (*connect.Response[connections.CreateConnectionResponse], error)
 	CreateConnection(context.Context, *connect.Request[connections.CreateConnectionRequest]) (*connect.Response[connections.CreateConnectionResponse], error)
+	AssignDomainsToConnection(context.Context, *connect.Request[connections.AssignDomainsToConnectionRequest]) (*connect.Response[connections.AssignDomainsToConnectionResponse], error)
 	GetEnvironmentConnection(context.Context, *connect.Request[connections.GetEnvironmentConnectionRequest]) (*connect.Response[connections.GetConnectionResponse], error)
 	GetConnection(context.Context, *connect.Request[connections.GetConnectionRequest]) (*connect.Response[connections.GetConnectionResponse], error)
 	ListConnections(context.Context, *connect.Request[connections.ListConnectionsRequest]) (*connect.Response[connections.ListConnectionsResponse], error)
@@ -358,6 +375,7 @@ type ConnectionServiceHandler interface {
 	DisableEnvironmentConnection(context.Context, *connect.Request[connections.ToggleEnvironmentConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error)
 	DisableConnection(context.Context, *connect.Request[connections.ToggleConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error)
 	GetConnectionTestResult(context.Context, *connect.Request[connections.GetConnectionTestResultRequest]) (*connect.Response[connections.GetConnectionTestResultResponse], error)
+	ListAppConnections(context.Context, *connect.Request[connections.ListAppConnectionsRequest]) (*connect.Response[connections.ListAppConnectionsResponse], error)
 }
 
 // NewConnectionServiceHandler builds an HTTP handler from the service implementation. It returns
@@ -367,12 +385,6 @@ type ConnectionServiceHandler interface {
 // and JSON codecs. They also support gzip compression.
 func NewConnectionServiceHandler(svc ConnectionServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
 	connectionServiceMethods := connections.File_scalekit_v1_connections_connections_proto.Services().ByName("ConnectionService").Methods()
-	connectionServiceGetProvidersHandler := connect.NewUnaryHandler(
-		ConnectionServiceGetProvidersProcedure,
-		svc.GetProviders,
-		connect.WithSchema(connectionServiceMethods.ByName("GetProviders")),
-		connect.WithHandlerOptions(opts...),
-	)
 	connectionServiceCreateEnvironmentConnectionHandler := connect.NewUnaryHandler(
 		ConnectionServiceCreateEnvironmentConnectionProcedure,
 		svc.CreateEnvironmentConnection,
@@ -383,6 +395,12 @@ func NewConnectionServiceHandler(svc ConnectionServiceHandler, opts ...connect.H
 		ConnectionServiceCreateConnectionProcedure,
 		svc.CreateConnection,
 		connect.WithSchema(connectionServiceMethods.ByName("CreateConnection")),
+		connect.WithHandlerOptions(opts...),
+	)
+	connectionServiceAssignDomainsToConnectionHandler := connect.NewUnaryHandler(
+		ConnectionServiceAssignDomainsToConnectionProcedure,
+		svc.AssignDomainsToConnection,
+		connect.WithSchema(connectionServiceMethods.ByName("AssignDomainsToConnection")),
 		connect.WithHandlerOptions(opts...),
 	)
 	connectionServiceGetEnvironmentConnectionHandler := connect.NewUnaryHandler(
@@ -469,14 +487,20 @@ func NewConnectionServiceHandler(svc ConnectionServiceHandler, opts ...connect.H
 		connect.WithSchema(connectionServiceMethods.ByName("GetConnectionTestResult")),
 		connect.WithHandlerOptions(opts...),
 	)
+	connectionServiceListAppConnectionsHandler := connect.NewUnaryHandler(
+		ConnectionServiceListAppConnectionsProcedure,
+		svc.ListAppConnections,
+		connect.WithSchema(connectionServiceMethods.ByName("ListAppConnections")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/scalekit.v1.connections.ConnectionService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case ConnectionServiceGetProvidersProcedure:
-			connectionServiceGetProvidersHandler.ServeHTTP(w, r)
 		case ConnectionServiceCreateEnvironmentConnectionProcedure:
 			connectionServiceCreateEnvironmentConnectionHandler.ServeHTTP(w, r)
 		case ConnectionServiceCreateConnectionProcedure:
 			connectionServiceCreateConnectionHandler.ServeHTTP(w, r)
+		case ConnectionServiceAssignDomainsToConnectionProcedure:
+			connectionServiceAssignDomainsToConnectionHandler.ServeHTTP(w, r)
 		case ConnectionServiceGetEnvironmentConnectionProcedure:
 			connectionServiceGetEnvironmentConnectionHandler.ServeHTTP(w, r)
 		case ConnectionServiceGetConnectionProcedure:
@@ -505,6 +529,8 @@ func NewConnectionServiceHandler(svc ConnectionServiceHandler, opts ...connect.H
 			connectionServiceDisableConnectionHandler.ServeHTTP(w, r)
 		case ConnectionServiceGetConnectionTestResultProcedure:
 			connectionServiceGetConnectionTestResultHandler.ServeHTTP(w, r)
+		case ConnectionServiceListAppConnectionsProcedure:
+			connectionServiceListAppConnectionsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -514,16 +540,16 @@ func NewConnectionServiceHandler(svc ConnectionServiceHandler, opts ...connect.H
 // UnimplementedConnectionServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedConnectionServiceHandler struct{}
 
-func (UnimplementedConnectionServiceHandler) GetProviders(context.Context, *connect.Request[connections.GetProvidersRequest]) (*connect.Response[connections.GetProvidersResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.GetProviders is not implemented"))
-}
-
 func (UnimplementedConnectionServiceHandler) CreateEnvironmentConnection(context.Context, *connect.Request[connections.CreateEnvironmentConnectionRequest]) (*connect.Response[connections.CreateConnectionResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.CreateEnvironmentConnection is not implemented"))
 }
 
 func (UnimplementedConnectionServiceHandler) CreateConnection(context.Context, *connect.Request[connections.CreateConnectionRequest]) (*connect.Response[connections.CreateConnectionResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.CreateConnection is not implemented"))
+}
+
+func (UnimplementedConnectionServiceHandler) AssignDomainsToConnection(context.Context, *connect.Request[connections.AssignDomainsToConnectionRequest]) (*connect.Response[connections.AssignDomainsToConnectionResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.AssignDomainsToConnection is not implemented"))
 }
 
 func (UnimplementedConnectionServiceHandler) GetEnvironmentConnection(context.Context, *connect.Request[connections.GetEnvironmentConnectionRequest]) (*connect.Response[connections.GetConnectionResponse], error) {
@@ -580,4 +606,8 @@ func (UnimplementedConnectionServiceHandler) DisableConnection(context.Context, 
 
 func (UnimplementedConnectionServiceHandler) GetConnectionTestResult(context.Context, *connect.Request[connections.GetConnectionTestResultRequest]) (*connect.Response[connections.GetConnectionTestResultResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.GetConnectionTestResult is not implemented"))
+}
+
+func (UnimplementedConnectionServiceHandler) ListAppConnections(context.Context, *connect.Request[connections.ListAppConnectionsRequest]) (*connect.Response[connections.ListAppConnectionsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.ListAppConnections is not implemented"))
 }
