@@ -30,6 +30,7 @@ type UserService interface {
 	CreateMembership(ctx context.Context, organizationId string, userId string, membership *usersv1.CreateMembership, sendInvitationEmail bool) (*CreateMembershipResponse, error)
 	UpdateMembership(ctx context.Context, organizationId string, userId string, membership *usersv1.UpdateMembership) (*UpdateMembershipResponse, error)
 	DeleteMembership(ctx context.Context, organizationId string, userId string, cascade bool) error
+	ResendInvite(ctx context.Context, organizationId string, userId string) (*usersv1.ResendInviteResponse, error)
 }
 
 type userService struct {
@@ -159,4 +160,18 @@ func (u *userService) DeleteMembership(ctx context.Context, organizationId strin
 		request,
 	).exec(ctx)
 	return err
+}
+
+// ResendInvite resends an invitation email to a user who has a pending invitation
+func (u *userService) ResendInvite(ctx context.Context, organizationId string, userId string) (*usersv1.ResendInviteResponse, error) {
+	request := &usersv1.ResendInviteRequest{
+		OrganizationId: organizationId,
+		Id:             userId,
+	}
+
+	return newConnectExecuter(
+		u.coreClient,
+		u.client.ResendInvite,
+		request,
+	).exec(ctx)
 }

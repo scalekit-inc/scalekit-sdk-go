@@ -62,6 +62,21 @@ const (
 	// UserServiceListOrganizationUsersProcedure is the fully-qualified name of the UserService's
 	// ListOrganizationUsers RPC.
 	UserServiceListOrganizationUsersProcedure = "/scalekit.v1.users.UserService/ListOrganizationUsers"
+	// UserServiceResendInviteProcedure is the fully-qualified name of the UserService's ResendInvite
+	// RPC.
+	UserServiceResendInviteProcedure = "/scalekit.v1.users.UserService/ResendInvite"
+	// UserServiceListUserRolesProcedure is the fully-qualified name of the UserService's ListUserRoles
+	// RPC.
+	UserServiceListUserRolesProcedure = "/scalekit.v1.users.UserService/ListUserRoles"
+	// UserServiceAssignUserRolesProcedure is the fully-qualified name of the UserService's
+	// AssignUserRoles RPC.
+	UserServiceAssignUserRolesProcedure = "/scalekit.v1.users.UserService/AssignUserRoles"
+	// UserServiceRemoveUserRoleProcedure is the fully-qualified name of the UserService's
+	// RemoveUserRole RPC.
+	UserServiceRemoveUserRoleProcedure = "/scalekit.v1.users.UserService/RemoveUserRole"
+	// UserServiceListUserPermissionsProcedure is the fully-qualified name of the UserService's
+	// ListUserPermissions RPC.
+	UserServiceListUserPermissionsProcedure = "/scalekit.v1.users.UserService/ListUserPermissions"
 )
 
 // UserServiceClient is a client for the scalekit.v1.users.UserService service.
@@ -81,6 +96,12 @@ type UserServiceClient interface {
 	CreateUserAndMembership(context.Context, *connect.Request[users.CreateUserAndMembershipRequest]) (*connect.Response[users.CreateUserAndMembershipResponse], error)
 	// only memberships of the organization
 	ListOrganizationUsers(context.Context, *connect.Request[users.ListOrganizationUsersRequest]) (*connect.Response[users.ListOrganizationUsersResponse], error)
+	ResendInvite(context.Context, *connect.Request[users.ResendInviteRequest]) (*connect.Response[users.ResendInviteResponse], error)
+	// User Role Management
+	ListUserRoles(context.Context, *connect.Request[users.ListUserRolesRequest]) (*connect.Response[users.ListUserRolesResponse], error)
+	AssignUserRoles(context.Context, *connect.Request[users.AssignUserRolesRequest]) (*connect.Response[users.AssignUserRolesResponse], error)
+	RemoveUserRole(context.Context, *connect.Request[users.RemoveUserRoleRequest]) (*connect.Response[emptypb.Empty], error)
+	ListUserPermissions(context.Context, *connect.Request[users.ListUserPermissionsRequest]) (*connect.Response[users.ListUserPermissionsResponse], error)
 }
 
 // NewUserServiceClient constructs a client for the scalekit.v1.users.UserService service. By
@@ -160,6 +181,36 @@ func NewUserServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(userServiceMethods.ByName("ListOrganizationUsers")),
 			connect.WithClientOptions(opts...),
 		),
+		resendInvite: connect.NewClient[users.ResendInviteRequest, users.ResendInviteResponse](
+			httpClient,
+			baseURL+UserServiceResendInviteProcedure,
+			connect.WithSchema(userServiceMethods.ByName("ResendInvite")),
+			connect.WithClientOptions(opts...),
+		),
+		listUserRoles: connect.NewClient[users.ListUserRolesRequest, users.ListUserRolesResponse](
+			httpClient,
+			baseURL+UserServiceListUserRolesProcedure,
+			connect.WithSchema(userServiceMethods.ByName("ListUserRoles")),
+			connect.WithClientOptions(opts...),
+		),
+		assignUserRoles: connect.NewClient[users.AssignUserRolesRequest, users.AssignUserRolesResponse](
+			httpClient,
+			baseURL+UserServiceAssignUserRolesProcedure,
+			connect.WithSchema(userServiceMethods.ByName("AssignUserRoles")),
+			connect.WithClientOptions(opts...),
+		),
+		removeUserRole: connect.NewClient[users.RemoveUserRoleRequest, emptypb.Empty](
+			httpClient,
+			baseURL+UserServiceRemoveUserRoleProcedure,
+			connect.WithSchema(userServiceMethods.ByName("RemoveUserRole")),
+			connect.WithClientOptions(opts...),
+		),
+		listUserPermissions: connect.NewClient[users.ListUserPermissionsRequest, users.ListUserPermissionsResponse](
+			httpClient,
+			baseURL+UserServiceListUserPermissionsProcedure,
+			connect.WithSchema(userServiceMethods.ByName("ListUserPermissions")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -176,6 +227,11 @@ type userServiceClient struct {
 	updateMembership        *connect.Client[users.UpdateMembershipRequest, users.UpdateMembershipResponse]
 	createUserAndMembership *connect.Client[users.CreateUserAndMembershipRequest, users.CreateUserAndMembershipResponse]
 	listOrganizationUsers   *connect.Client[users.ListOrganizationUsersRequest, users.ListOrganizationUsersResponse]
+	resendInvite            *connect.Client[users.ResendInviteRequest, users.ResendInviteResponse]
+	listUserRoles           *connect.Client[users.ListUserRolesRequest, users.ListUserRolesResponse]
+	assignUserRoles         *connect.Client[users.AssignUserRolesRequest, users.AssignUserRolesResponse]
+	removeUserRole          *connect.Client[users.RemoveUserRoleRequest, emptypb.Empty]
+	listUserPermissions     *connect.Client[users.ListUserPermissionsRequest, users.ListUserPermissionsResponse]
 }
 
 // GetUser calls scalekit.v1.users.UserService.GetUser.
@@ -233,6 +289,31 @@ func (c *userServiceClient) ListOrganizationUsers(ctx context.Context, req *conn
 	return c.listOrganizationUsers.CallUnary(ctx, req)
 }
 
+// ResendInvite calls scalekit.v1.users.UserService.ResendInvite.
+func (c *userServiceClient) ResendInvite(ctx context.Context, req *connect.Request[users.ResendInviteRequest]) (*connect.Response[users.ResendInviteResponse], error) {
+	return c.resendInvite.CallUnary(ctx, req)
+}
+
+// ListUserRoles calls scalekit.v1.users.UserService.ListUserRoles.
+func (c *userServiceClient) ListUserRoles(ctx context.Context, req *connect.Request[users.ListUserRolesRequest]) (*connect.Response[users.ListUserRolesResponse], error) {
+	return c.listUserRoles.CallUnary(ctx, req)
+}
+
+// AssignUserRoles calls scalekit.v1.users.UserService.AssignUserRoles.
+func (c *userServiceClient) AssignUserRoles(ctx context.Context, req *connect.Request[users.AssignUserRolesRequest]) (*connect.Response[users.AssignUserRolesResponse], error) {
+	return c.assignUserRoles.CallUnary(ctx, req)
+}
+
+// RemoveUserRole calls scalekit.v1.users.UserService.RemoveUserRole.
+func (c *userServiceClient) RemoveUserRole(ctx context.Context, req *connect.Request[users.RemoveUserRoleRequest]) (*connect.Response[emptypb.Empty], error) {
+	return c.removeUserRole.CallUnary(ctx, req)
+}
+
+// ListUserPermissions calls scalekit.v1.users.UserService.ListUserPermissions.
+func (c *userServiceClient) ListUserPermissions(ctx context.Context, req *connect.Request[users.ListUserPermissionsRequest]) (*connect.Response[users.ListUserPermissionsResponse], error) {
+	return c.listUserPermissions.CallUnary(ctx, req)
+}
+
 // UserServiceHandler is an implementation of the scalekit.v1.users.UserService service.
 type UserServiceHandler interface {
 	// Users
@@ -250,6 +331,12 @@ type UserServiceHandler interface {
 	CreateUserAndMembership(context.Context, *connect.Request[users.CreateUserAndMembershipRequest]) (*connect.Response[users.CreateUserAndMembershipResponse], error)
 	// only memberships of the organization
 	ListOrganizationUsers(context.Context, *connect.Request[users.ListOrganizationUsersRequest]) (*connect.Response[users.ListOrganizationUsersResponse], error)
+	ResendInvite(context.Context, *connect.Request[users.ResendInviteRequest]) (*connect.Response[users.ResendInviteResponse], error)
+	// User Role Management
+	ListUserRoles(context.Context, *connect.Request[users.ListUserRolesRequest]) (*connect.Response[users.ListUserRolesResponse], error)
+	AssignUserRoles(context.Context, *connect.Request[users.AssignUserRolesRequest]) (*connect.Response[users.AssignUserRolesResponse], error)
+	RemoveUserRole(context.Context, *connect.Request[users.RemoveUserRoleRequest]) (*connect.Response[emptypb.Empty], error)
+	ListUserPermissions(context.Context, *connect.Request[users.ListUserPermissionsRequest]) (*connect.Response[users.ListUserPermissionsResponse], error)
 }
 
 // NewUserServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -325,6 +412,36 @@ func NewUserServiceHandler(svc UserServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(userServiceMethods.ByName("ListOrganizationUsers")),
 		connect.WithHandlerOptions(opts...),
 	)
+	userServiceResendInviteHandler := connect.NewUnaryHandler(
+		UserServiceResendInviteProcedure,
+		svc.ResendInvite,
+		connect.WithSchema(userServiceMethods.ByName("ResendInvite")),
+		connect.WithHandlerOptions(opts...),
+	)
+	userServiceListUserRolesHandler := connect.NewUnaryHandler(
+		UserServiceListUserRolesProcedure,
+		svc.ListUserRoles,
+		connect.WithSchema(userServiceMethods.ByName("ListUserRoles")),
+		connect.WithHandlerOptions(opts...),
+	)
+	userServiceAssignUserRolesHandler := connect.NewUnaryHandler(
+		UserServiceAssignUserRolesProcedure,
+		svc.AssignUserRoles,
+		connect.WithSchema(userServiceMethods.ByName("AssignUserRoles")),
+		connect.WithHandlerOptions(opts...),
+	)
+	userServiceRemoveUserRoleHandler := connect.NewUnaryHandler(
+		UserServiceRemoveUserRoleProcedure,
+		svc.RemoveUserRole,
+		connect.WithSchema(userServiceMethods.ByName("RemoveUserRole")),
+		connect.WithHandlerOptions(opts...),
+	)
+	userServiceListUserPermissionsHandler := connect.NewUnaryHandler(
+		UserServiceListUserPermissionsProcedure,
+		svc.ListUserPermissions,
+		connect.WithSchema(userServiceMethods.ByName("ListUserPermissions")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/scalekit.v1.users.UserService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case UserServiceGetUserProcedure:
@@ -349,6 +466,16 @@ func NewUserServiceHandler(svc UserServiceHandler, opts ...connect.HandlerOption
 			userServiceCreateUserAndMembershipHandler.ServeHTTP(w, r)
 		case UserServiceListOrganizationUsersProcedure:
 			userServiceListOrganizationUsersHandler.ServeHTTP(w, r)
+		case UserServiceResendInviteProcedure:
+			userServiceResendInviteHandler.ServeHTTP(w, r)
+		case UserServiceListUserRolesProcedure:
+			userServiceListUserRolesHandler.ServeHTTP(w, r)
+		case UserServiceAssignUserRolesProcedure:
+			userServiceAssignUserRolesHandler.ServeHTTP(w, r)
+		case UserServiceRemoveUserRoleProcedure:
+			userServiceRemoveUserRoleHandler.ServeHTTP(w, r)
+		case UserServiceListUserPermissionsProcedure:
+			userServiceListUserPermissionsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -400,4 +527,24 @@ func (UnimplementedUserServiceHandler) CreateUserAndMembership(context.Context, 
 
 func (UnimplementedUserServiceHandler) ListOrganizationUsers(context.Context, *connect.Request[users.ListOrganizationUsersRequest]) (*connect.Response[users.ListOrganizationUsersResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.users.UserService.ListOrganizationUsers is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) ResendInvite(context.Context, *connect.Request[users.ResendInviteRequest]) (*connect.Response[users.ResendInviteResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.users.UserService.ResendInvite is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) ListUserRoles(context.Context, *connect.Request[users.ListUserRolesRequest]) (*connect.Response[users.ListUserRolesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.users.UserService.ListUserRoles is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) AssignUserRoles(context.Context, *connect.Request[users.AssignUserRolesRequest]) (*connect.Response[users.AssignUserRolesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.users.UserService.AssignUserRoles is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) RemoveUserRole(context.Context, *connect.Request[users.RemoveUserRoleRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.users.UserService.RemoveUserRole is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) ListUserPermissions(context.Context, *connect.Request[users.ListUserPermissionsRequest]) (*connect.Response[users.ListUserPermissionsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.users.UserService.ListUserPermissions is not implemented"))
 }

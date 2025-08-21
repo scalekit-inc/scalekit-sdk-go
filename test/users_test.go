@@ -203,3 +203,41 @@ func TestMembershipOperations(t *testing.T) {
 	err = client.User().DeleteUser(context.Background(), userId)
 	assert.NoError(t, err)
 }
+
+func TestResendInvite(t *testing.T) {
+	// Create a new user first with unique email using timestamp
+	timestamp := time.Now().Unix()
+	uniqueEmail := fmt.Sprintf("resend.invite.test.%d@example.com", timestamp)
+
+	newUser := &users.CreateUser{
+		Email: uniqueEmail,
+		Metadata: map[string]string{
+			"source": "resend_invite_test",
+		},
+	}
+
+	// Create user with invitation email
+	createdUser, err := client.User().CreateUserAndMembership(context.Background(), testOrg, newUser, true)
+	assert.NoError(t, err)
+	assert.NotNil(t, createdUser)
+	assert.NotNil(t, createdUser.User)
+	assert.NotEmpty(t, createdUser.User.Id)
+	assert.Equal(t, uniqueEmail, createdUser.User.Email)
+	userId := createdUser.User.Id
+
+	// Resend invite
+	resendResponse, err := client.User().ResendInvite(context.Background(), testOrg, userId)
+	assert.NoError(t, err)
+	assert.NotNil(t, resendResponse)
+	assert.NotNil(t, resendResponse.Invite)
+	assert.Equal(t, userId, resendResponse.Invite.UserId)
+	assert.Equal(t, testOrg, resendResponse.Invite.OrganizationId)
+	assert.Equal(t, "PENDING_INVITE", resendResponse.Invite.Status)
+	assert.NotNil(t, resendResponse.Invite.CreatedAt)
+	assert.NotNil(t, resendResponse.Invite.ExpiresAt)
+	assert.Equal(t, int32(1), resendResponse.Invite.ResentCount)
+
+	// Clean up
+	err = client.User().DeleteUser(context.Background(), userId)
+	assert.NoError(t, err)
+}
