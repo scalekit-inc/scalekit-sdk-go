@@ -2,11 +2,12 @@ package test
 
 import (
 	"context"
-	"github.com/scalekit-inc/scalekit-sdk-go"
 	"testing"
 	"time"
 
-	"github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/directories"
+	"github.com/scalekit-inc/scalekit-sdk-go/v2"
+
+	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/directories"
 	"github.com/stretchr/testify/assert"
 )
 

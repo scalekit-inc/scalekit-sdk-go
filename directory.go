@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	directoriesv1 "github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/directories"
-	"github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/directories/directoriesconnect"
+	directoriesv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/directories"
+	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/directories/directoriesconnect"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 

@@ -8,7 +8,7 @@ import (
 	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	auth "github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/auth"
+	auth "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/auth"
 	http "net/http"
 	strings "strings"
 )

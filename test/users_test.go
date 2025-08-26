@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/scalekit-inc/scalekit-sdk-go"
-	"github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/commons"
-	"github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/users"
+	"github.com/scalekit-inc/scalekit-sdk-go/v2"
+	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/commons"
+	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/users"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/scalekit-inc/scalekit-sdk-go"
+	"github.com/scalekit-inc/scalekit-sdk-go/v2"
 	"github.com/stretchr/testify/assert"
 )
 

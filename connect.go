@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"connectrpc.com/connect"
-	"github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/errdetails"
+	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/errdetails"
 )
 
 type fn[TRequest interface{}, TResponse interface{}] func(

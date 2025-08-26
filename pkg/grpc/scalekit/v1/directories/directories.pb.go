@@ -9,7 +9,7 @@ package directories
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
-	_ "github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/options"
+	_ "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/options"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	_ "google.golang.org/genproto/googleapis/api/visibility"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -3220,8 +3220,8 @@ const file_scalekit_v1_directories_directories_proto_rawDesc = "" +
 	"\aSuccess\x12>\n" +
 	"<\x1a:.scalekit.v1.directories.RegenerateDirectorySecretResponse\x82\xb5\x18\x02\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02W\"U/api/v1/organizations/{organization_id}/directories/{directory_id}/secrets:regenerate\x12\xca\x01\n" +
 	"\x14TriggerDirectorySync\x124.scalekit.v1.directories.TriggerDirectorySyncRequest\x1a\x16.google.protobuf.Empty\"d\x82\xb5\x18\x02\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02I\x12G/api/v1/organizations/{organization_id}/directories/{directory_id}:sync\x1a\xaa\x02\x92A\xa6\x02\n" +
-	"\tDirectory\x12\x98\x02Directory management for viewing and controlling external identity provider connections in your Scalekit environment. This service provides endpoints for retrieving directory information, listing directories and their contents, and enabling or disabling directory synchronization.B\xf7\x01\n" +
-	"\x1bcom.scalekit.v1.directoriesB\x10DirectoriesProtoP\x01ZHgithub.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/directories\xa2\x02\x03SVD\xaa\x02\x17Scalekit.V1.Directories\xca\x02\x17Scalekit\\V1\\Directories\xe2\x02#Scalekit\\V1\\Directories\\GPBMetadata\xea\x02\x19Scalekit::V1::Directoriesb\x06proto3"
+	"\tDirectory\x12\x98\x02Directory management for viewing and controlling external identity provider connections in your Scalekit environment. This service provides endpoints for retrieving directory information, listing directories and their contents, and enabling or disabling directory synchronization.B\xfa\x01\n" +
+	"\x1bcom.scalekit.v1.directoriesB\x10DirectoriesProtoP\x01ZKgithub.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/directories\xa2\x02\x03SVD\xaa\x02\x17Scalekit.V1.Directories\xca\x02\x17Scalekit\\V1\\Directories\xe2\x02#Scalekit\\V1\\Directories\\GPBMetadata\xea\x02\x19Scalekit::V1::Directoriesb\x06proto3"
 
 var (
 	file_scalekit_v1_directories_directories_proto_rawDescOnce sync.Once

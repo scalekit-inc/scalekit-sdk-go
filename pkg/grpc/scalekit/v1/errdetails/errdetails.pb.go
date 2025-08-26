@@ -678,8 +678,8 @@ const file_scalekit_v1_errdetails_errdetails_proto_rawDesc = "" +
 	"\rToolErrorInfo\x12!\n" +
 	"\fexecution_id\x18\x01 \x01(\tR\vexecutionId\x12,\n" +
 	"\x12tool_error_message\x18\x02 \x01(\tR\x10toolErrorMessage\x12&\n" +
-	"\x0ftool_error_code\x18\x03 \x01(\tR\rtoolErrorCodeB\xf0\x01\n" +
-	"\x1acom.scalekit.v1.errdetailsB\x0fErrdetailsProtoP\x01ZGgithub.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/errdetails\xa2\x02\x03SVE\xaa\x02\x16Scalekit.V1.Errdetails\xca\x02\x16Scalekit\\V1\\Errdetails\xe2\x02\"Scalekit\\V1\\Errdetails\\GPBMetadata\xea\x02\x18Scalekit::V1::Errdetailsb\x06proto3"
+	"\x0ftool_error_code\x18\x03 \x01(\tR\rtoolErrorCodeB\xf3\x01\n" +
+	"\x1acom.scalekit.v1.errdetailsB\x0fErrdetailsProtoP\x01ZJgithub.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/errdetails\xa2\x02\x03SVE\xaa\x02\x16Scalekit.V1.Errdetails\xca\x02\x16Scalekit\\V1\\Errdetails\xe2\x02\"Scalekit\\V1\\Errdetails\\GPBMetadata\xea\x02\x18Scalekit::V1::Errdetailsb\x06proto3"
 
 var (
 	file_scalekit_v1_errdetails_errdetails_proto_rawDescOnce sync.Once

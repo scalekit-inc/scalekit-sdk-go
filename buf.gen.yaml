@@ -2,7 +2,7 @@ version: v1
 managed:
   enabled: true
   go_package_prefix:
-    default: "github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc"
+    default: "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc"
     except:
       - buf.build/googleapis/googleapis
       - buf.build/grpc-ecosystem/grpc-gateway

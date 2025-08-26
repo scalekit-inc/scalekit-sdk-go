@@ -197,8 +197,8 @@ const file_scalekit_v1_options_options_proto_rawDesc = "" +
 	"\x18WORKSPACE_SESSION_CLIENT\x10T\x12\"\n" +
 	"\x1eCUSTOMER_PORTAL_SESSION_CLIENT\x104:b\n" +
 	"\vauth_option\x12\x1e.google.protobuf.MethodOptions\x18І\x03 \x01(\v2\x1f.scalekit.v1.options.AuthOptionR\n" +
-	"authOptionB\xdb\x01\n" +
-	"\x17com.scalekit.v1.optionsB\fOptionsProtoP\x01ZDgithub.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/options\xa2\x02\x03SVO\xaa\x02\x13Scalekit.V1.Options\xca\x02\x13Scalekit\\V1\\Options\xe2\x02\x1fScalekit\\V1\\Options\\GPBMetadata\xea\x02\x15Scalekit::V1::Optionsb\x06proto3"
+	"authOptionB\xde\x01\n" +
+	"\x17com.scalekit.v1.optionsB\fOptionsProtoP\x01ZGgithub.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/options\xa2\x02\x03SVO\xaa\x02\x13Scalekit.V1.Options\xca\x02\x13Scalekit\\V1\\Options\xe2\x02\x1fScalekit\\V1\\Options\\GPBMetadata\xea\x02\x15Scalekit::V1::Optionsb\x06proto3"
 
 var (
 	file_scalekit_v1_options_options_proto_rawDescOnce sync.Once

@@ -2,9 +2,10 @@ package test
 
 import (
 	"context"
-	"github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/connections"
 	"os"
 	"testing"
+
+	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/connections"
 
 	"github.com/stretchr/testify/assert"
 )
