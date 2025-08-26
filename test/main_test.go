@@ -1,9 +1,10 @@
 package test
 
 import (
-	"github.com/scalekit-inc/scalekit-sdk-go"
 	"os"
 	"testing"
+
+	"github.com/scalekit-inc/scalekit-sdk-go/v2"
 )
 
 var (
