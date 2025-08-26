@@ -8,7 +8,7 @@ package domains
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
-	_ "github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/options"
+	_ "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/options"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -34,6 +34,7 @@ const (
 	VerificationStatus_PENDING                         VerificationStatus = 1
 	VerificationStatus_VERIFIED                        VerificationStatus = 2
 	VerificationStatus_FAILED                          VerificationStatus = 3
+	VerificationStatus_AUTO_VERIFIED                   VerificationStatus = 4
 )
 
 // Enum value maps for VerificationStatus.
@@ -43,12 +44,14 @@ var (
 		1: "PENDING",
 		2: "VERIFIED",
 		3: "FAILED",
+		4: "AUTO_VERIFIED",
 	}
 	VerificationStatus_value = map[string]int32{
 		"VERIFICATION_STATUS_UNSPECIFIED": 0,
 		"PENDING":                         1,
 		"VERIFIED":                        2,
 		"FAILED":                          3,
+		"AUTO_VERIFIED":                   4,
 	}
 )
 
@@ -83,21 +86,21 @@ type DomainType int32
 
 const (
 	DomainType_DOMAIN_TYPE_UNSPECIFIED DomainType = 0
-	DomainType_HOME_REALM_DISCOVERY    DomainType = 1
-	DomainType_JIT_PROVISIONING_DOMAIN DomainType = 2
+	DomainType_ALLOWED_EMAIL_DOMAIN    DomainType = 1
+	DomainType_ORGANIZATION_DOMAIN     DomainType = 2
 )
 
 // Enum value maps for DomainType.
 var (
 	DomainType_name = map[int32]string{
 		0: "DOMAIN_TYPE_UNSPECIFIED",
-		1: "HOME_REALM_DISCOVERY",
-		2: "JIT_PROVISIONING_DOMAIN",
+		1: "ALLOWED_EMAIL_DOMAIN",
+		2: "ORGANIZATION_DOMAIN",
 	}
 	DomainType_value = map[string]int32{
 		"DOMAIN_TYPE_UNSPECIFIED": 0,
-		"HOME_REALM_DISCOVERY":    1,
-		"JIT_PROVISIONING_DOMAIN": 2,
+		"ALLOWED_EMAIL_DOMAIN":    1,
+		"ORGANIZATION_DOMAIN":     2,
 	}
 )
 
@@ -1334,18 +1337,19 @@ const file_scalekit_v1_domains_domains_proto_rawDesc = "" +
 	"created_by\x18\v \x01(\tH\x00R\tcreatedBy\x88\x01\x01\x12@\n" +
 	"\vdomain_type\x18\f \x01(\x0e2\x1f.scalekit.v1.domains.DomainTypeR\n" +
 	"domainTypeB\r\n" +
-	"\v_created_by*`\n" +
+	"\v_created_by*s\n" +
 	"\x12VerificationStatus\x12#\n" +
 	"\x1fVERIFICATION_STATUS_UNSPECIFIED\x10\x00\x12\v\n" +
 	"\aPENDING\x10\x01\x12\f\n" +
 	"\bVERIFIED\x10\x02\x12\n" +
 	"\n" +
-	"\x06FAILED\x10\x03*`\n" +
+	"\x06FAILED\x10\x03\x12\x11\n" +
+	"\rAUTO_VERIFIED\x10\x04*\\\n" +
 	"\n" +
 	"DomainType\x12\x1b\n" +
 	"\x17DOMAIN_TYPE_UNSPECIFIED\x10\x00\x12\x18\n" +
-	"\x14HOME_REALM_DISCOVERY\x10\x01\x12\x1b\n" +
-	"\x17JIT_PROVISIONING_DOMAIN\x10\x022\x87\v\n" +
+	"\x14ALLOWED_EMAIL_DOMAIN\x10\x01\x12\x17\n" +
+	"\x13ORGANIZATION_DOMAIN\x10\x022\x87\v\n" +
 	"\rDomainService\x12\xd5\x01\n" +
 	"\fCreateDomain\x12(.scalekit.v1.domains.CreateDomainRequest\x1a).scalekit.v1.domains.CreateDomainResponse\"p\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x02d:\x06domainZ):\x06domain\"\x1f/api/v1/organizations/-/domains\"//api/v1/organizations/{organization_id}/domains\x12\xda\x01\n" +
 	"\fUpdateDomain\x12(.scalekit.v1.domains.UpdateDomainRequest\x1a).scalekit.v1.domains.UpdateDomainResponse\"u\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x02i:\x06domainZ):\x06domain2\x1f/api/v1/organizations/-/domains24/api/v1/organizations/{organization_id}/domains/{id}\x12\xce\x01\n" +
@@ -1353,8 +1357,8 @@ const file_scalekit_v1_domains_domains_proto_rawDesc = "" +
 	"\tGetDomain\x12%.scalekit.v1.domains.GetDomainRequest\x1a&.scalekit.v1.domains.GetDomainResponse\"j\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x02^Z&\x12$/api/v1/organizations/-/domains/{id}\x124/api/v1/organizations/{organization_id}/domains/{id}\x12\xbc\x01\n" +
 	"\fDeleteDomain\x12(.scalekit.v1.domains.DeleteDomainRequest\x1a\x16.google.protobuf.Empty\"j\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x02^Z&*$/api/v1/organizations/-/domains/{id}*4/api/v1/organizations/{organization_id}/domains/{id}\x12\xc0\x01\n" +
 	"\vListDomains\x12&.scalekit.v1.domains.ListDomainRequest\x1a'.scalekit.v1.domains.ListDomainResponse\"`\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x02TZ!\x12\x1f/api/v1/organizations/-/domains\x12//api/v1/organizations/{organization_id}/domains\x12\xa4\x01\n" +
-	"\x15ListAuthorizedDomains\x120.scalekit.v1.domains.ListAuthorizedDomainRequest\x1a1.scalekit.v1.domains.ListAuthorizedDomainResponse\"&\x82\xb5\x18\x02\x18\x01\x82\xd3\xe4\x93\x02\x1a\x12\x18/api/v1/domains/{origin}B\xdb\x01\n" +
-	"\x17com.scalekit.v1.domainsB\fDomainsProtoP\x01ZDgithub.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/domains\xa2\x02\x03SVD\xaa\x02\x13Scalekit.V1.Domains\xca\x02\x13Scalekit\\V1\\Domains\xe2\x02\x1fScalekit\\V1\\Domains\\GPBMetadata\xea\x02\x15Scalekit::V1::Domainsb\x06proto3"
+	"\x15ListAuthorizedDomains\x120.scalekit.v1.domains.ListAuthorizedDomainRequest\x1a1.scalekit.v1.domains.ListAuthorizedDomainResponse\"&\x82\xb5\x18\x02\x18\x01\x82\xd3\xe4\x93\x02\x1a\x12\x18/api/v1/domains/{origin}B\xde\x01\n" +
+	"\x17com.scalekit.v1.domainsB\fDomainsProtoP\x01ZGgithub.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/domains\xa2\x02\x03SVD\xaa\x02\x13Scalekit.V1.Domains\xca\x02\x13Scalekit\\V1\\Domains\xe2\x02\x1fScalekit\\V1\\Domains\\GPBMetadata\xea\x02\x15Scalekit::V1::Domainsb\x06proto3"
 
 var (
 	file_scalekit_v1_domains_domains_proto_rawDescOnce sync.Once

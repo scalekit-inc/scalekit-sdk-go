@@ -3,8 +3,8 @@ package scalekit
 import (
 	"context"
 
-	organizationsv1 "github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/organizations"
-	"github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/organizations/organizationsconnect"
+	organizationsv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/organizations"
+	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/organizations/organizationsconnect"
 )
 
 type ListOrganizationsResponse = organizationsv1.ListOrganizationsResponse

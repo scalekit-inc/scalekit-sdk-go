@@ -9,8 +9,8 @@ package connections
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
-	domains "github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/domains"
-	_ "github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/options"
+	domains "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/domains"
+	_ "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/options"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	_ "google.golang.org/genproto/googleapis/api/visibility"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -5279,8 +5279,8 @@ const file_scalekit_v1_connections_connections_proto_rawDesc = "" +
 	"\x04lang\x12\x06\x1a\x04java\n" +
 	"z\n" +
 	"\x06source\x12p\x1anListConnectionsResponse response = scalekitClient.connections().listConnectionsByOrganization(organizationId);\x82\xb5\x18\x02\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02\x19\x12\x17/api/v1/connections/app\x1a\x9a\x01\x92A\x96\x01\n" +
-	"\vConnections\x12\x86\x01Manage enterprise connections for your Scalekit environment. This service provides endpoints for retrieving, and updating connections.B\xf7\x01\n" +
-	"\x1bcom.scalekit.v1.connectionsB\x10ConnectionsProtoP\x01ZHgithub.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/connections\xa2\x02\x03SVC\xaa\x02\x17Scalekit.V1.Connections\xca\x02\x17Scalekit\\V1\\Connections\xe2\x02#Scalekit\\V1\\Connections\\GPBMetadata\xea\x02\x19Scalekit::V1::Connectionsb\x06proto3"
+	"\vConnections\x12\x86\x01Manage enterprise connections for your Scalekit environment. This service provides endpoints for retrieving, and updating connections.B\xfa\x01\n" +
+	"\x1bcom.scalekit.v1.connectionsB\x10ConnectionsProtoP\x01ZKgithub.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/connections\xa2\x02\x03SVC\xaa\x02\x17Scalekit.V1.Connections\xca\x02\x17Scalekit\\V1\\Connections\xe2\x02#Scalekit\\V1\\Connections\\GPBMetadata\xea\x02\x19Scalekit::V1::Connectionsb\x06proto3"
 
 var (
 	file_scalekit_v1_connections_connections_proto_rawDescOnce sync.Once

@@ -3,8 +3,8 @@ package scalekit
 import (
 	"context"
 
-	authv1 "github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/auth"
-	"github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/auth/authconnect"
+	authv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/auth"
+	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/auth/authconnect"
 )
 
 // Type aliases for response types

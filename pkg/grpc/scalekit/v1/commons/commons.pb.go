@@ -488,8 +488,8 @@ const file_scalekit_v1_commons_commons_proto_rawDesc = "" +
 	"\x06ACTIVE\x10\x01\x12\f\n" +
 	"\bINACTIVE\x10\x02\x12\x12\n" +
 	"\x0ePENDING_INVITE\x10\x03\x12\x12\n" +
-	"\x0eINVITE_EXPIRED\x10\x04B\xdb\x01\n" +
-	"\x17com.scalekit.v1.commonsB\fCommonsProtoP\x01ZDgithub.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/commons\xa2\x02\x03SVC\xaa\x02\x13Scalekit.V1.Commons\xca\x02\x13Scalekit\\V1\\Commons\xe2\x02\x1fScalekit\\V1\\Commons\\GPBMetadata\xea\x02\x15Scalekit::V1::Commonsb\x06proto3"
+	"\x0eINVITE_EXPIRED\x10\x04B\xde\x01\n" +
+	"\x17com.scalekit.v1.commonsB\fCommonsProtoP\x01ZGgithub.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/commons\xa2\x02\x03SVC\xaa\x02\x13Scalekit.V1.Commons\xca\x02\x13Scalekit\\V1\\Commons\xe2\x02\x1fScalekit\\V1\\Commons\\GPBMetadata\xea\x02\x15Scalekit::V1::Commonsb\x06proto3"
 
 var (
 	file_scalekit_v1_commons_commons_proto_rawDescOnce sync.Once

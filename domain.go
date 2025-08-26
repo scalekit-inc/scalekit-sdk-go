@@ -3,8 +3,8 @@ package scalekit
 import (
 	"context"
 
-	domainsv1 "github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/domains"
-	"github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/domains/domainsconnect"
+	domainsv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/domains"
+	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/domains/domainsconnect"
 )
 
 type ListDomainResponse = domainsv1.ListDomainResponse

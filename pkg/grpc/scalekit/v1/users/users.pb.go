@@ -9,8 +9,8 @@ package users
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
-	commons "github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/commons"
-	_ "github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/options"
+	commons "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/commons"
+	_ "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/options"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	_ "google.golang.org/genproto/googleapis/api/visibility"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -2278,8 +2278,10 @@ func (x *AssignUserRolesRequest) GetRoles() []*AssignRoleRequest {
 }
 
 type AssignRoleRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Deprecated: Marked as deprecated in scalekit/v1/users/users.proto.
+	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	RoleName      string `protobuf:"bytes,2,opt,name=role_name,json=roleName,proto3" json:"role_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2314,9 +2316,17 @@ func (*AssignRoleRequest) Descriptor() ([]byte, []int) {
 	return file_scalekit_v1_users_users_proto_rawDescGZIP(), []int{33}
 }
 
+// Deprecated: Marked as deprecated in scalekit/v1/users/users.proto.
 func (x *AssignRoleRequest) GetId() string {
 	if x != nil {
 		return x.Id
+	}
+	return ""
+}
+
+func (x *AssignRoleRequest) GetRoleName() string {
+	if x != nil {
+		return x.RoleName
 	}
 	return ""
 }
@@ -2369,7 +2379,7 @@ type RemoveUserRoleRequest struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	OrganizationId string                 `protobuf:"bytes,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
 	UserId         string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	RoleId         string                 `protobuf:"bytes,3,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	RoleName       string                 `protobuf:"bytes,3,opt,name=role_name,json=roleName,proto3" json:"role_name,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -2418,9 +2428,9 @@ func (x *RemoveUserRoleRequest) GetUserId() string {
 	return ""
 }
 
-func (x *RemoveUserRoleRequest) GetRoleId() string {
+func (x *RemoveUserRoleRequest) GetRoleName() string {
 	if x != nil {
-		return x.RoleId
+		return x.RoleName
 	}
 	return ""
 }
@@ -2849,15 +2859,16 @@ const file_scalekit_v1_users_users_proto_rawDesc = "" +
 	"\x16AssignUserRolesRequest\x12w\n" +
 	"\x0forganization_id\x18\x01 \x01(\tBN\x92A@2&Unique identifier for the organizationJ\x16\"org_1234abcd5678efgh\"\xbaH\br\x06:\x04org_R\x0eorganizationId\x12_\n" +
 	"\auser_id\x18\x02 \x01(\tBF\x92A82\x1eUnique identifier for the userJ\x16\"usr_1234abcd5678efgh\"\xbaH\br\x06:\x04usr_R\x06userId\x12j\n" +
-	"\x05roles\x18\x03 \x03(\v2$.scalekit.v1.users.AssignRoleRequestB.\x92A%2#List of roles to assign to the user\xbaH\x03\xc8\x01\x01R\x05roles\"m\n" +
-	"\x11AssignRoleRequest\x12X\n" +
-	"\x02id\x18\x01 \x01(\tBH\x92A92\x1eUnique identifier for the roleJ\x17\"role_1234abcd5678efgh\"\xbaH\tr\a:\x05role_R\x02id\"\x81\x01\n" +
+	"\x05roles\x18\x03 \x03(\v2$.scalekit.v1.users.AssignRoleRequestB.\x92A%2#List of roles to assign to the user\xbaH\x03\xc8\x01\x01R\x05roles\"\xb2\x01\n" +
+	"\x11AssignRoleRequest\x12N\n" +
+	"\x02id\x18\x01 \x01(\tB>\x92A92\x1eUnique identifier for the roleJ\x17\"role_1234abcd5678efgh\"\x18\x01R\x02id\x12M\n" +
+	"\trole_name\x18\x02 \x01(\tB0\x92A$2\x18Unique name for the roleJ\b\"viewer\"\xbaH\x06r\x04\x10\x00\x18dR\broleName\"\x81\x01\n" +
 	"\x17AssignUserRolesResponse\x12f\n" +
-	"\x05roles\x18\x01 \x03(\v2\x19.scalekit.v1.commons.RoleB5\x92A220List of all roles currently assigned to the userR\x05roles\"\xde\x02\n" +
+	"\x05roles\x18\x01 \x03(\v2\x19.scalekit.v1.commons.RoleB5\x92A220List of all roles currently assigned to the userR\x05roles\"\xd6\x02\n" +
 	"\x15RemoveUserRoleRequest\x12w\n" +
 	"\x0forganization_id\x18\x01 \x01(\tBN\x92A@2&Unique identifier for the organizationJ\x16\"org_1234abcd5678efgh\"\xbaH\br\x06:\x04org_R\x0eorganizationId\x12_\n" +
-	"\auser_id\x18\x02 \x01(\tBF\x92A82\x1eUnique identifier for the userJ\x16\"usr_1234abcd5678efgh\"\xbaH\br\x06:\x04usr_R\x06userId\x12k\n" +
-	"\arole_id\x18\x03 \x01(\tBR\x92AC2(Unique identifier for the role to removeJ\x17\"role_1234abcd5678efgh\"\xbaH\tr\a:\x05role_R\x06roleId\"\xf6\x01\n" +
+	"\auser_id\x18\x02 \x01(\tBF\x92A82\x1eUnique identifier for the userJ\x16\"usr_1234abcd5678efgh\"\xbaH\br\x06:\x04usr_R\x06userId\x12c\n" +
+	"\trole_name\x18\x03 \x01(\tBF\x92AC2(Unique identifier for the role to removeJ\x17\"role_1234abcd5678efgh\"R\broleName\"\xf6\x01\n" +
 	"\x1aListUserPermissionsRequest\x12w\n" +
 	"\x0forganization_id\x18\x01 \x01(\tBN\x92A@2&Unique identifier for the organizationJ\x16\"org_1234abcd5678efgh\"\xbaH\br\x06:\x04org_R\x0eorganizationId\x12_\n" +
 	"\auser_id\x18\x02 \x01(\tBF\x92A82\x1eUnique identifier for the userJ\x16\"usr_1234abcd5678efgh\"\xbaH\br\x06:\x04usr_R\x06userId\"\xe8\x03\n" +
@@ -2869,7 +2880,7 @@ const file_scalekit_v1_users_users_proto_rawDesc = "" +
 	"\vdescription\x18\x04 \x01(\tBS\x92AP2)Description of what the permission allowsJ#\"Allows creating new user accounts\"R\vdescription\x12X\n" +
 	"\x04tags\x18\x05 \x03(\tBD\x92AA2!Tags for categorizing permissionsJ\x1c[\"user-management\", \"admin\"]R\x04tags\"\x8f\x01\n" +
 	"\x1bListUserPermissionsResponse\x12p\n" +
-	"\vpermissions\x18\x01 \x03(\v2\x1d.scalekit.v1.users.PermissionB/\x92A,2*List of permissions the user has access toR\vpermissions2͑\x01\n" +
+	"\vpermissions\x18\x01 \x03(\v2\x1d.scalekit.v1.users.PermissionB/\x92A,2*List of permissions the user has access toR\vpermissions2\x8c\x9b\x01\n" +
 	"\vUserService\x12\x81\a\n" +
 	"\aGetUser\x12!.scalekit.v1.users.GetUserRequest\x1a\".scalekit.v1.users.GetUserResponse\"\xae\x06\x92A\x8a\x06\n" +
 	"\x05Users\x12\bGet user\x1a\x8e\x01Retrieves all details for a user by system-generated user ID or external ID. The response includes organization memberships and user metadata.J\x9c\x01\n" +
@@ -3358,12 +3369,21 @@ const file_scalekit_v1_users_users_proto_rawDesc = "" +
 	"        .setPageSize(50)\n" +
 	"        .build();\n" +
 	"ListOrganizationUsersResponse list = users.\n" +
-	"  listOrganizationUsers(\"org_123\", listReq);\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02/\x12-/api/v1/organizations/{organization_id}/users\x12\xd5\x06\n" +
-	"\fResendInvite\x12&.scalekit.v1.users.ResendInviteRequest\x1a'.scalekit.v1.users.ResendInviteResponse\"\xf3\x05\x92A\x9d\x05\n" +
-	"\x05Users\x12\x1cResend user invitation email\x1a\xba\x03Resends an invitation email to a user who has a pending invitation in the specified organization. Use this endpoint when a user hasn't responded to their initial invitation and you need to send them a reminder. The system will generate a new invitation email with updated expiration time and increment the resend counter. This is useful for users who may have missed the original email or need additional time to complete their account setup.J\xb8\x01\n" +
-	"\x03200\x12\xb0\x01\n" +
-	"\x80\x01Invitation email resent successfully. Returns the updated invite object with new expiration time and incremented resend counter.\x12+\n" +
-	")\x1a'.scalekit.v1.users.ResendInviteResponse\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02F:\x01*2A/api/v1/invites/organizations/{organization_id}/users/{id}/resend\x12\xee\x03\n" +
+	"  listOrganizationUsers(\"org_123\", listReq);\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02/\x12-/api/v1/organizations/{organization_id}/users\x12\x92\x10\n" +
+	"\fResendInvite\x12&.scalekit.v1.users.ResendInviteRequest\x1a'.scalekit.v1.users.ResendInviteResponse\"\xb0\x0f\x92A\xda\x0e\n" +
+	"\x05Users\x12\x1cResend user invitation email\x1a\xe1\x04Resends an invitation email to a user who has a pending or expired invitation in the specified organization. If the invitation has expired, a new invitation will be automatically created and sent. If the invitation is still valid, a reminder email will be sent instead. Use this endpoint when a user hasn't responded to their initial invitation and you need to send them a reminder or when the original invitation has expired. The invitation email includes a secure magic link that allows the user to complete their account setup and join the organization. Each resend operation increments the resent counter.J\xa7\x02\n" +
+	"\x03200\x12\x9f\x02\n" +
+	"\xef\x01Successfully resent the invitation email. Returns the updated invitation object with organization ID, user ID, membership status, timestamps, and resent count. If expired, a new invitation is created; otherwise, the existing one is resent.\x12+\n" +
+	")\x1a'.scalekit.v1.users.ResendInviteResponseJ\x8f\x02\n" +
+	"\x03400\x12\x87\x02\n" +
+	"\xdd\x01Invalid request — common causes include user ID or organization ID is invalid, full-stack authentication is disabled, user profile is missing, invite already accepted, or missing expiry time in user management settings.\x12%\n" +
+	"#\x1a!.scalekit.v1.errdetails.ErrorInfoJ\x9d\x02\n" +
+	"\x03404\x12\x95\x02\n" +
+	"\xeb\x01Resource not found — the specified user, organization, membership, or invitation could not be found in the specified environment. Verify that all IDs are correct and that the resources exist before attempting to resend an invitation.\x12%\n" +
+	"#\x1a!.scalekit.v1.errdetails.ErrorInfoJ\xf2\x02\n" +
+	"\x03500\x12\xea\x02\n" +
+	"\xc0\x02Internal server error — an unexpected error occurred while processing the invitation resend request. This may be due to database connectivity issues, problems generating the secure magic link, email delivery service failures, or transaction errors during invitation processing. Contact support if the problem persists.\x12%\n" +
+	"#\x1a!.scalekit.v1.errdetails.ErrorInfo\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02F:\x01*2A/api/v1/invites/organizations/{organization_id}/users/{id}/resend\x12\xee\x03\n" +
 	"\rListUserRoles\x12'.scalekit.v1.users.ListUserRolesRequest\x1a(.scalekit.v1.users.ListUserRolesResponse\"\x89\x03\x92A\xab\x02\n" +
 	"\x05Users\x12\x0fList user roles\x1a\x9a\x01Retrieves all roles assigned to a user within a specific organization. This includes both direct role assignments and inherited roles from role hierarchy.Jt\n" +
 	"\x03200\x12m\n" +
@@ -3373,19 +3393,19 @@ const file_scalekit_v1_users_users_proto_rawDesc = "" +
 	"\x05Users\x12\x14Assign roles to user\x1a\x90\x01Assigns one or more roles to a user within a specific organization. This operation adds to existing role assignments rather than replacing them.J`\n" +
 	"\x03200\x12Y\n" +
 	"'Successfully assigned roles to the user\x12.\n" +
-	",\x1a*.scalekit.v1.users.AssignUserRolesResponse\x82\xb5\x18\x02\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02F:\x05roles\"=/api/v1/organizations/{organization_id}/users/{user_id}/roles\x12\xa6\x03\n" +
-	"\x0eRemoveUserRole\x12(.scalekit.v1.users.RemoveUserRoleRequest\x1a\x16.google.protobuf.Empty\"\xd1\x02\x92A\xe9\x01\n" +
+	",\x1a*.scalekit.v1.users.AssignUserRolesResponse\x82\xb5\x18\x02\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02F:\x05roles\"=/api/v1/organizations/{organization_id}/users/{user_id}/roles\x12\xa8\x03\n" +
+	"\x0eRemoveUserRole\x12(.scalekit.v1.users.RemoveUserRoleRequest\x1a\x16.google.protobuf.Empty\"\xd3\x02\x92A\xe9\x01\n" +
 	"\x05Users\x12\x15Remove role from user\x1a\x9a\x01Removes a specific role assignment from a user within an organization. This only removes direct role assignments, not inherited roles from role hierarchy.J,\n" +
 	"\x03200\x12%\n" +
-	"#Role successfully removed from user\x82\xb5\x18\x02\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02I*G/api/v1/organizations/{organization_id}/users/{user_id}/roles/{role_id}\x12\xaa\x04\n" +
+	"#Role successfully removed from user\x82\xb5\x18\x02\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02K*I/api/v1/organizations/{organization_id}/users/{user_id}/roles/{role_name}\x12\xaa\x04\n" +
 	"\x13ListUserPermissions\x12-.scalekit.v1.users.ListUserPermissionsRequest\x1a..scalekit.v1.users.ListUserPermissionsResponse\"\xb3\x03\x92A\xcf\x02\n" +
 	"\x05Users\x12\x15List user permissions\x1a\xb4\x01Retrieves all permissions a user has access to within a specific organization. This includes permissions from direct role assignments and inherited permissions from role hierarchy.Jx\n" +
 	"\x03200\x12q\n" +
 	";Successfully retrieved the list of permissions for the user\x122\n" +
 	"0\x1a..scalekit.v1.users.ListUserPermissionsResponse\x82\xb5\x18\x02\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02E\x12C/api/v1/organizations/{organization_id}/users/{user_id}/permissions\x1a\xec\x03\x92A\xe8\x03\n" +
-	"\x05Users\x12\xde\x03Comprehensive user management operations including user lifecycle, organization memberships, and invitation workflows. This service provides endpoints for creating, retrieving, updating, and deleting user accounts across your Scalekit environment. It supports both individual user operations and bulk operations for user administration, including user search, pagination, and metadata management. The service also handles user invitations and organization membership management.B\xcd\x01\n" +
+	"\x05Users\x12\xde\x03Comprehensive user management operations including user lifecycle, organization memberships, and invitation workflows. This service provides endpoints for creating, retrieving, updating, and deleting user accounts across your Scalekit environment. It supports both individual user operations and bulk operations for user administration, including user search, pagination, and metadata management. The service also handles user invitations and organization membership management.B\xd0\x01\n" +
 	"\x15com.scalekit.v1.usersB\n" +
-	"UsersProtoP\x01ZBgithub.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/users\xa2\x02\x03SVU\xaa\x02\x11Scalekit.V1.Users\xca\x02\x11Scalekit\\V1\\Users\xe2\x02\x1dScalekit\\V1\\Users\\GPBMetadata\xea\x02\x13Scalekit::V1::Usersb\x06proto3"
+	"UsersProtoP\x01ZEgithub.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/users\xa2\x02\x03SVU\xaa\x02\x11Scalekit.V1.Users\xca\x02\x11Scalekit\\V1\\Users\xe2\x02\x1dScalekit\\V1\\Users\\GPBMetadata\xea\x02\x13Scalekit::V1::Usersb\x06proto3"
 
 var (
 	file_scalekit_v1_users_users_proto_rawDescOnce sync.Once

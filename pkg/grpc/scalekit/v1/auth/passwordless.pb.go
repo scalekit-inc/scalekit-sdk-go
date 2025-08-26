@@ -8,7 +8,7 @@ package auth
 
 import (
 	_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
-	_ "github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/options"
+	_ "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/options"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -689,8 +689,8 @@ const file_scalekit_v1_auth_passwordless_proto_rawDesc = "" +
 	"    // Handle error\n" +
 	"    return\n" +
 	"}\x82\xb5\x18\x02\x18\x04\x82\xd3\xe4\x93\x02&:\x01*\"!/api/v1/passwordless/email/resend\x1a\xd9\x01\x92A\xd5\x01\n" +
-	"\x11Passwordless Auth\x12\xbf\x01Endpoints for sending and verifying passwordless authentication emails. These APIs allow users to authenticate without passwords by receiving a verification code or magic link in their email.B\x91\x02\n" +
-	"!com.scalekit.v1.auth.passwordlessB\x11PasswordlessProtoP\x01ZAgithub.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/auth\xa2\x02\x04SVAP\xaa\x02\x1dScalekit.V1.Auth.Passwordless\xca\x02\x1dScalekit\\V1\\Auth\\Passwordless\xe2\x02)Scalekit\\V1\\Auth\\Passwordless\\GPBMetadata\xea\x02 Scalekit::V1::Auth::Passwordlessb\x06proto3"
+	"\x11Passwordless Auth\x12\xbf\x01Endpoints for sending and verifying passwordless authentication emails. These APIs allow users to authenticate without passwords by receiving a verification code or magic link in their email.B\x94\x02\n" +
+	"!com.scalekit.v1.auth.passwordlessB\x11PasswordlessProtoP\x01ZDgithub.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/auth\xa2\x02\x04SVAP\xaa\x02\x1dScalekit.V1.Auth.Passwordless\xca\x02\x1dScalekit\\V1\\Auth\\Passwordless\xe2\x02)Scalekit\\V1\\Auth\\Passwordless\\GPBMetadata\xea\x02 Scalekit::V1::Auth::Passwordlessb\x06proto3"
 
 var (
 	file_scalekit_v1_auth_passwordless_proto_rawDescOnce sync.Once

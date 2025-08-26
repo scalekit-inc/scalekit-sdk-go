@@ -9,8 +9,8 @@ package organizations
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
-	commons "github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/commons"
-	_ "github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/options"
+	commons "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/commons"
+	_ "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/options"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	_ "google.golang.org/genproto/googleapis/api/visibility"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -2983,7 +2983,7 @@ const file_scalekit_v1_organizations_organizations_proto_rawDesc = "" +
 	"J\x1aH.scalekit.v1.organizations.GetOrganizationUserManagementSettingsResponseJ+\n" +
 	"\x03404\x12$\n" +
 	"\"Organization or setting not found.\x82\xb5\x18\x02\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02A\x12?/api/v1/organizations/{organization_id}/settings/usermanagement\x1aX\x92AU\n" +
-	"\rOrganizations\x12D{{import \"proto/scalekit/v1/organizations/organization_details.md\"}}B\x90\x1a\x92A\x87\x18\x12\xad\x13\n" +
+	"\rOrganizations\x12D{{import \"proto/scalekit/v1/organizations/organization_details.md\"}}B\x93\x1a\x92A\x87\x18\x12\xad\x13\n" +
 	"\rScalekit APIs\x12\xd9\v# Introduction\n" +
 	"\n" +
 	"The Scalekit API is a comprehensive RESTful API that enables you to manage organizations, users, authentication settings, and identity provider integrations. All requests must use HTTPS and require proper authentication.\n" +
@@ -3081,7 +3081,7 @@ const file_scalekit_v1_organizations_organizations_proto_rawDesc = "" +
 	"\rOrganizationsj\xd4\x03\n" +
 	"\vPermissions\x12\xc4\x03Permission management for defining and controlling access to system resources. Create, retrieve, update, and delete granular permissions that represent specific actions users can perform. Permissions are the building blocks of role-based access control (RBAC) and can be assigned to roles to grant users the ability to perform specific operations. Use this service to define custom permissions for your application's unique access control requirements.r+\n" +
 	"\rScalekit Docs\x12\x1ahttps://docs.scalekit.com/\n" +
-	"\x1dcom.scalekit.v1.organizationsB\x12OrganizationsProtoP\x01ZJgithub.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/organizations\xa2\x02\x03SVO\xaa\x02\x19Scalekit.V1.Organizations\xca\x02\x19Scalekit\\V1\\Organizations\xe2\x02%Scalekit\\V1\\Organizations\\GPBMetadata\xea\x02\x1bScalekit::V1::Organizationsb\x06proto3"
+	"\x1dcom.scalekit.v1.organizationsB\x12OrganizationsProtoP\x01ZMgithub.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/organizations\xa2\x02\x03SVO\xaa\x02\x19Scalekit.V1.Organizations\xca\x02\x19Scalekit\\V1\\Organizations\xe2\x02%Scalekit\\V1\\Organizations\\GPBMetadata\xea\x02\x1bScalekit::V1::Organizationsb\x06proto3"
 
 var (
 	file_scalekit_v1_organizations_organizations_proto_rawDescOnce sync.Once

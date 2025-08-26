@@ -3,8 +3,8 @@ package scalekit
 import (
 	"context"
 
-	usersv1 "github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/users"
-	"github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/users/usersconnect"
+	usersv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/users"
+	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/users/usersconnect"
 )
 
 // Type aliases for response types

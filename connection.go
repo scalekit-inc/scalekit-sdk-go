@@ -2,8 +2,9 @@ package scalekit
 
 import (
 	"context"
-	connectionsv1 "github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/connections"
-	"github.com/scalekit-inc/scalekit-sdk-go/pkg/grpc/scalekit/v1/connections/connectionsconnect"
+
+	connectionsv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/connections"
+	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/connections/connectionsconnect"
 )
 
 type ListConnectionsResponse = connectionsv1.ListConnectionsResponse
