@@ -11,8 +11,13 @@ type ListDomainResponse = domainsv1.ListDomainResponse
 type GetDomainResponse = domainsv1.GetDomainResponse
 type CreateDomainResponse = domainsv1.CreateDomainResponse
 
+// CreateDomainOptions represents optional parameters for creating a domain
+type CreateDomainOptions struct {
+	DomainType domainsv1.DomainType
+}
+
 type Domain interface {
-	CreateDomain(ctx context.Context, organizationId, name string) (*CreateDomainResponse, error)
+	CreateDomain(ctx context.Context, organizationId, name string, options *CreateDomainOptions) (*CreateDomainResponse, error)
 	GetDomain(ctx context.Context, id string, organizationId string) (*GetDomainResponse, error)
 	ListDomains(ctx context.Context, organizationId string) (*ListDomainResponse, error)
 }
@@ -29,7 +34,15 @@ func newDomainClient(coreClient *coreClient) Domain {
 	}
 }
 
-func (d *domain) CreateDomain(ctx context.Context, organizationId, name string) (*CreateDomainResponse, error) {
+func (d *domain) CreateDomain(ctx context.Context, organizationId, name string, options *CreateDomainOptions) (*CreateDomainResponse, error) {
+	createDomain := &domainsv1.CreateDomain{
+		Domain: name,
+	}
+
+	if options != nil {
+		createDomain.DomainType = options.DomainType
+	}
+
 	return newConnectExecuter(
 		d.coreClient,
 		d.client.CreateDomain,
@@ -37,9 +50,7 @@ func (d *domain) CreateDomain(ctx context.Context, organizationId, name string) 
 			Identities: &domainsv1.CreateDomainRequest_OrganizationId{
 				OrganizationId: organizationId,
 			},
-			Domain: &domainsv1.CreateDomain{
-				Domain: name,
-			},
+			Domain: createDomain,
 		},
 	).exec(ctx)
 }
