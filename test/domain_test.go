@@ -30,7 +30,7 @@ func TestDomains(t *testing.T) {
 	// Test creating a domain with ALLOWED_EMAIL_DOMAIN type
 	allowedEmailDomainName := fmt.Sprintf("allowed-email-%d.com", time.Now().Unix())
 	allowedEmailDomain, err := client.Domain().CreateDomain(context.Background(), testOrg, allowedEmailDomainName, &scalekit.CreateDomainOptions{
-		DomainType: domains.DomainType_ALLOWED_EMAIL_DOMAIN,
+		DomainType: scalekit.DomainTypeAllowedEmail,
 	})
 	assert.NoError(t, err)
 	assert.NotNil(t, allowedEmailDomain)
@@ -43,7 +43,7 @@ func TestDomains(t *testing.T) {
 	// Test creating a domain with ORGANIZATION_DOMAIN type
 	orgDomainName := fmt.Sprintf("org-domain-%d.com", time.Now().Unix())
 	orgDomain, err := client.Domain().CreateDomain(context.Background(), testOrg, orgDomainName, &scalekit.CreateDomainOptions{
-		DomainType: domains.DomainType_ORGANIZATION_DOMAIN,
+		DomainType: scalekit.DomainTypeOrganization,
 	})
 	assert.NoError(t, err)
 	assert.NotNil(t, orgDomain)
@@ -110,4 +110,56 @@ func TestCreateDomainWithNilOptions(t *testing.T) {
 		domains.DomainType_ALLOWED_EMAIL_DOMAIN,
 		domains.DomainType_ORGANIZATION_DOMAIN,
 	}, domain.Domain.DomainType)
+}
+
+func TestCreateDomainBackwardCompatibility(t *testing.T) {
+	// Test backward compatibility - 3 parameters (no options)
+	domainName := fmt.Sprintf("backward-compat-%d.com", time.Now().Unix())
+	domain, err := client.Domain().CreateDomain(context.Background(), testOrg, domainName)
+	assert.NoError(t, err)
+	assert.NotNil(t, domain)
+	assert.NotNil(t, domain.Domain)
+	assert.Equal(t, domainName, domain.Domain.Domain)
+	assert.Equal(t, testOrg, domain.Domain.OrganizationId)
+
+	// Test new functionality - 4 parameters (with options)
+	domainWithOptionsName := fmt.Sprintf("with-options-%d.com", time.Now().Unix())
+	options := &scalekit.CreateDomainOptions{
+		DomainType: "ALLOWED_EMAIL_DOMAIN",
+	}
+	domainWithOptions, err := client.Domain().CreateDomain(context.Background(), testOrg, domainWithOptionsName, options)
+	assert.NoError(t, err)
+	assert.NotNil(t, domainWithOptions)
+	assert.NotNil(t, domainWithOptions.Domain)
+	assert.Equal(t, domainWithOptionsName, domainWithOptions.Domain.Domain)
+	assert.Equal(t, testOrg, domainWithOptions.Domain.OrganizationId)
+	assert.Equal(t, domains.DomainType_ALLOWED_EMAIL_DOMAIN, domainWithOptions.Domain.DomainType)
+}
+
+func TestCreateDomainWithStringTypes(t *testing.T) {
+	// Test creating a domain with string domain type
+	stringDomainName := fmt.Sprintf("string-domain-%d.com", time.Now().Unix())
+	options := &scalekit.CreateDomainOptions{
+		DomainType: "ALLOWED_EMAIL_DOMAIN",
+	}
+	stringDomain, err := client.Domain().CreateDomain(context.Background(), testOrg, stringDomainName, options)
+	assert.NoError(t, err)
+	assert.NotNil(t, stringDomain)
+	assert.NotNil(t, stringDomain.Domain)
+	assert.Equal(t, stringDomainName, stringDomain.Domain.Domain)
+	assert.Equal(t, testOrg, stringDomain.Domain.OrganizationId)
+	assert.Equal(t, domains.DomainType_ALLOWED_EMAIL_DOMAIN, stringDomain.Domain.DomainType)
+
+	// Test creating a domain with another string domain type
+	stringOrgDomainName := fmt.Sprintf("string-org-%d.com", time.Now().Unix())
+	orgOptions := &scalekit.CreateDomainOptions{
+		DomainType: "ORGANIZATION_DOMAIN",
+	}
+	stringOrgDomain, err := client.Domain().CreateDomain(context.Background(), testOrg, stringOrgDomainName, orgOptions)
+	assert.NoError(t, err)
+	assert.NotNil(t, stringOrgDomain)
+	assert.NotNil(t, stringOrgDomain.Domain)
+	assert.Equal(t, stringOrgDomainName, stringOrgDomain.Domain.Domain)
+	assert.Equal(t, testOrg, stringOrgDomain.Domain.OrganizationId)
+	assert.Equal(t, domains.DomainType_ORGANIZATION_DOMAIN, stringOrgDomain.Domain.DomainType)
 }

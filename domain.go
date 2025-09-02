@@ -11,13 +11,23 @@ type ListDomainResponse = domainsv1.ListDomainResponse
 type GetDomainResponse = domainsv1.GetDomainResponse
 type CreateDomainResponse = domainsv1.CreateDomainResponse
 
+// DomainType is defined as a string type alias
+type DomainType = string
+
+// Domain type constants
+const (
+	DomainTypeUnspecified  DomainType = "DOMAIN_TYPE_UNSPECIFIED"
+	DomainTypeAllowedEmail DomainType = "ALLOWED_EMAIL_DOMAIN"
+	DomainTypeOrganization DomainType = "ORGANIZATION_DOMAIN"
+)
+
 // CreateDomainOptions represents optional parameters for creating a domain
 type CreateDomainOptions struct {
-	DomainType domainsv1.DomainType
+	DomainType DomainType
 }
 
 type Domain interface {
-	CreateDomain(ctx context.Context, organizationId, name string, options *CreateDomainOptions) (*CreateDomainResponse, error)
+	CreateDomain(ctx context.Context, organizationId, name string, options ...*CreateDomainOptions) (*CreateDomainResponse, error)
 	GetDomain(ctx context.Context, id string, organizationId string) (*GetDomainResponse, error)
 	ListDomains(ctx context.Context, organizationId string) (*ListDomainResponse, error)
 }
@@ -34,13 +44,25 @@ func newDomainClient(coreClient *coreClient) Domain {
 	}
 }
 
-func (d *domain) CreateDomain(ctx context.Context, organizationId, name string, options *CreateDomainOptions) (*CreateDomainResponse, error) {
+func (d *domain) CreateDomain(ctx context.Context, organizationId, name string, options ...*CreateDomainOptions) (*CreateDomainResponse, error) {
 	createDomain := &domainsv1.CreateDomain{
 		Domain: name,
 	}
 
-	if options != nil {
-		createDomain.DomainType = options.DomainType
+	// Handle optional options - backward compatible
+	if len(options) > 0 && options[0] != nil && options[0].DomainType != "" {
+		// Simple map lookup for conversion (more efficient than switch)
+		domainTypeMap := map[string]domainsv1.DomainType{
+			"ALLOWED_EMAIL_DOMAIN":    domainsv1.DomainType_ALLOWED_EMAIL_DOMAIN,
+			"ORGANIZATION_DOMAIN":     domainsv1.DomainType_ORGANIZATION_DOMAIN,
+			"DOMAIN_TYPE_UNSPECIFIED": domainsv1.DomainType_DOMAIN_TYPE_UNSPECIFIED,
+		}
+
+		if domainType, exists := domainTypeMap[options[0].DomainType]; exists {
+			createDomain.DomainType = domainType
+		} else {
+			createDomain.DomainType = domainsv1.DomainType_DOMAIN_TYPE_UNSPECIFIED
+		}
 	}
 
 	return newConnectExecuter(
