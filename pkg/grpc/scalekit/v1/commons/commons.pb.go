@@ -7,6 +7,7 @@
 package commons
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -425,7 +426,7 @@ var File_scalekit_v1_commons_commons_proto protoreflect.FileDescriptor
 
 const file_scalekit_v1_commons_commons_proto_rawDesc = "" +
 	"\n" +
-	"!scalekit/v1/commons/commons.proto\x12\x13scalekit.v1.commons\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\"\xb9\v\n" +
+	"!scalekit/v1/commons/commons.proto\x12\x13scalekit.v1.commons\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\"\xb9\v\n" +
 	"\x16OrganizationMembership\x12\x86\x01\n" +
 	"\x0forganization_id\x18\x01 \x01(\tB]\x92AZ2@Unique identifier for the organization. Immutable and read-only.J\x16\"org_1234abcd5678efgh\"R\x0eorganizationId\x12\x89\x01\n" +
 	"\tjoin_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampBP\x92AM2KTimestamp when the membership was created. Automatically set by the server.R\bjoinTime\x12R\n" +

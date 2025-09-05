@@ -38,6 +38,7 @@ type Scalekit interface {
 	Organization() Organization
 	User() UserService
 	Passwordless() PasswordlessService
+	ConnectedAccount() ConnectedAccount
 	GetAuthorizationUrl(redirectUri string, options AuthorizationUrlOptions) (*url.URL, error)
 	AuthenticateWithCode(
 		code string,
@@ -53,13 +54,14 @@ type Scalekit interface {
 }
 
 type scalekitClient struct {
-	coreClient   *coreClient
-	connection   Connection
-	domain       Domain
-	organization Organization
-	directory    Directory
-	user         UserService
-	passwordless PasswordlessService
+	coreClient       *coreClient
+	connection       Connection
+	domain           Domain
+	organization     Organization
+	directory        Directory
+	user             UserService
+	passwordless     PasswordlessService
+	connectedAccount ConnectedAccount
 }
 
 type AuthorizationUrlOptions struct {
@@ -167,13 +169,14 @@ type LogoutUrlOptions struct {
 func NewScalekitClient(envUrl, clientId, clientSecret string) Scalekit {
 	coreClient := newCoreClient(envUrl, clientId, clientSecret)
 	return &scalekitClient{
-		coreClient:   coreClient,
-		connection:   newConnectionClient(coreClient),
-		directory:    newDirectoryClient(coreClient),
-		domain:       newDomainClient(coreClient),
-		organization: newOrganizationClient(coreClient),
-		user:         newUserClient(coreClient),
-		passwordless: newPasswordlessClient(coreClient),
+		coreClient:       coreClient,
+		connection:       newConnectionClient(coreClient),
+		directory:        newDirectoryClient(coreClient),
+		domain:           newDomainClient(coreClient),
+		organization:     newOrganizationClient(coreClient),
+		user:             newUserClient(coreClient),
+		passwordless:     newPasswordlessClient(coreClient),
+		connectedAccount: newConnectedAccountClient(coreClient),
 	}
 }
 
@@ -199,6 +202,10 @@ func (s *scalekitClient) User() UserService {
 
 func (s *scalekitClient) Passwordless() PasswordlessService {
 	return s.passwordless
+}
+
+func (s *scalekitClient) ConnectedAccount() ConnectedAccount {
+	return s.connectedAccount
 }
 
 func (s *scalekitClient) GetAuthorizationUrl(redirectUri string, options AuthorizationUrlOptions) (*url.URL, error) {
