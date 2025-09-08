@@ -9,10 +9,32 @@
 
 # Official Go SDK
 
-<a href="https://scalekit.com" target="_blank" rel="noopener noreferrer">Scalekit</a> is an Enterprise Authentication Platform purpose built for B2B applications. This Go SDK helps implement Enterprise Capabilities like Single Sign-on via SAML or OIDC in your Golang applications within a few hours.
+[![Go Reference](https://pkg.go.dev/badge/github.com/scalekit-inc/scalekit-sdk-go/v2.svg)](https://pkg.go.dev/github.com/scalekit-inc/scalekit-sdk-go/v2)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Go Report Card](https://goreportcard.com/badge/github.com/scalekit-inc/scalekit-sdk-go/v2)](https://goreportcard.com/report/github.com/scalekit-inc/scalekit-sdk-go/v2)
+
+<a href="https://scalekit.com" target="_blank" rel="noopener noreferrer">Scalekit</a> is the **auth stack for AI apps** - from human authentication to agent authorization. Build secure AI products faster with authentication for humans (SSO, passwordless, full-stack auth) and agents (MCP/APIs, delegated actions), all unified on one platform. This Go SDK enables both traditional B2B authentication and cutting-edge agentic workflows.
+
+## 🤖 Agent-First Features
+
+- **🔐 Agent Identity**: Agents as first-class actors with human ownership and org context
+- **🎯 MCP-Native OAuth 2.1**: Purpose-built for Model Context Protocol with DCR/PKCE support
+- **⏰ Ephemeral Credentials**: Time-bound, task-based authorization (minutes, not days)
+- **🔒 Token Vault**: Per-user, per-tool token storage with rotation and progressive consent
+- **👥 Human-in-the-Loop**: Step-up authentication when risk crosses thresholds
+- **📊 Immutable Audit**: Track which user initiated, which agent acted, what resource was accessed
+
+## 👨‍💼 Human Authentication
+
+- **🔐 Enterprise SSO**: Support for SAML and OIDC protocols
+- **👥 SCIM Provisioning**: Automated user provisioning and deprovisioning  
+- **🚀 Passwordless Authentication**: Magic links, OTP, and modern auth flows
+- **🏢 Multi-tenant Architecture**: Organization-level authentication policies
+- **📱 Social Logins**: Support for popular social identity providers
+- **🛡️ Full-Stack Auth**: Complete IdP-of-record solution for B2B SaaS
 
 <div>
-📚 <a target="_blank" href="https://docs.scalekit.com">Documentation</a> - 🚀 <a target="_blank" href="https://docs.scalekit.com">Quick-start Guide</a> - 💻 <a target="_blank" href="https://docs.scalekit.com/apis">API Reference</a>
+📚 <a target="_blank" href="https://docs.scalekit.com">Documentation</a> • 🚀 <a target="_blank" href="https://docs.scalekit.com/sso/quickstart/">SSO Quickstart</a> • 💻 <a target="_blank" href="https://docs.scalekit.com/apis">API Reference</a>
 </div>
 <hr />
 
@@ -119,21 +141,33 @@ func main() {
 }
 ```
 
-## Example Apps
+## 📱 Example Apps
 
-Fully functional sample applications written using some popular web application frameworks and Scalekit SDK. Feel free to clone the repo and run them locally
+Explore fully functional sample applications built with popular Go frameworks and the Scalekit SDK:
 
-- [Go Http](https://github.com/scalekit-inc/scalekit-go-example.git)
+| Framework | Repository | Description |
+|-----------|------------|-------------|
+| **Go HTTP Server** | [scalekit-go-example](https://github.com/scalekit-developers/scalekit-go-example) | Basic HTTP server implementation |
 
+## 🔗 Helpful Links
 
-## API Reference
+### 📖 Quickstart Guides
+- [**SSO Integration**](https://docs.scalekit.com/sso/quickstart/) - Implement enterprise Single Sign-on
+- [**Full Stack Auth**](https://docs.scalekit.com/fsa/quickstart/) - Complete authentication solution
+- [**Passwordless Auth**](https://docs.scalekit.com/passwordless/quickstart/) - Modern authentication flows
+- [**Social Logins**](https://docs.scalekit.com/social-logins/quickstart/) - Popular social identity providers
+- [**Machine-to-Machine**](https://docs.scalekit.com/m2m/quickstart/) - API authentication
 
-Refer to our [API reference docs](https://docs.scalekit.com/apis) for detailed information about all our API endpoints and their usage.
+### 📚 Documentation & Reference
+- [**API Reference**](https://docs.scalekit.com/apis) - Complete API documentation
+- [**Developer Kit**](https://docs.scalekit.com/dev-kit/) - Tools and utilities
+- [**API Authentication Guide**](https://docs.scalekit.com/guides/authenticate-scalekit-api/) - Secure API access
 
-## More Information
-
-- Quickstart Guide to implement Single Sign-on in your application: [SSO Quickstart Guide](https://docs.scalekit.com)
-- Understand Single Sign-on basics: [SSO Basics](https://docs.scalekit.com/best-practices/single-sign-on)
+### 🛠️ Additional Resources
+- [**Setup Guide**](https://docs.scalekit.com/guides/setup-scalekit/) - Initial platform configuration
+- [**Code Examples**](https://docs.scalekit.com/directory/code-examples/) - Ready-to-use code snippets
+- [**Admin Portal Guide**](https://docs.scalekit.com/directory/guides/admin-portal/) - Administrative interface
+- [**Launch Checklist**](https://docs.scalekit.com/directory/guides/launch-checklist/) - Pre-production checklist
 
 ## License
 
