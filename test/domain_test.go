@@ -163,3 +163,29 @@ func TestCreateDomainWithStringTypes(t *testing.T) {
 	assert.Equal(t, testOrg, stringOrgDomain.Domain.OrganizationId)
 	assert.Equal(t, domains.DomainType_ORGANIZATION_DOMAIN, stringOrgDomain.Domain.DomainType)
 }
+
+func TestDeleteDomain(t *testing.T) {
+	// First create a domain to delete
+	domainName := fmt.Sprintf("delete-test-%d.com", time.Now().Unix())
+	domain, err := client.Domain().CreateDomain(context.Background(), testOrg, domainName)
+	assert.NoError(t, err)
+	assert.NotNil(t, domain)
+	assert.NotNil(t, domain.Domain)
+
+	domainId := domain.Domain.Id
+	assert.NotEmpty(t, domainId)
+
+	// Verify the domain exists
+	retrievedDomain, err := client.Domain().GetDomain(context.Background(), domainId, testOrg)
+	assert.NoError(t, err)
+	assert.NotNil(t, retrievedDomain)
+	assert.Equal(t, domainName, retrievedDomain.Domain.Domain)
+
+	// Delete the domain
+	err = client.Domain().DeleteDomain(context.Background(), domainId, testOrg)
+	assert.NoError(t, err)
+
+	// Verify the domain is deleted by trying to get it
+	_, err = client.Domain().GetDomain(context.Background(), domainId, testOrg)
+	assert.Error(t, err) // Should return an error since domain is deleted
+}

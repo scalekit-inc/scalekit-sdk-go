@@ -30,6 +30,7 @@ type Domain interface {
 	CreateDomain(ctx context.Context, organizationId, name string, options ...*CreateDomainOptions) (*CreateDomainResponse, error)
 	GetDomain(ctx context.Context, id string, organizationId string) (*GetDomainResponse, error)
 	ListDomains(ctx context.Context, organizationId string) (*ListDomainResponse, error)
+	DeleteDomain(ctx context.Context, id string, organizationId string) error
 }
 
 type domain struct {
@@ -100,4 +101,18 @@ func (d *domain) ListDomains(ctx context.Context, organizationId string) (*ListD
 			},
 		},
 	).exec(ctx)
+}
+
+func (d *domain) DeleteDomain(ctx context.Context, id string, organizationId string) error {
+	_, err := newConnectExecuter(
+		d.coreClient,
+		d.client.DeleteDomain,
+		&domainsv1.DeleteDomainRequest{
+			Id: id,
+			Identities: &domainsv1.DeleteDomainRequest_OrganizationId{
+				OrganizationId: organizationId,
+			},
+		},
+	).exec(ctx)
+	return err
 }
