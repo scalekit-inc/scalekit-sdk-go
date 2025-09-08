@@ -2442,61 +2442,13 @@ const file_scalekit_v1_organizations_organizations_proto_rawDesc = "" +
 	"\x13FEATURE_UNSPECIFIED\x10\x00\x12\x13\n" +
 	"\vUNSPECIFIED\x10\x00\x1a\x02\b\x01\x12\f\n" +
 	"\bdir_sync\x10\x01\x12\a\n" +
-	"\x03sso\x10\x02\x1a\x02\x10\x012Ԃ\x01\n" +
-	"\x13OrganizationService\x12\xef\n" +
-	"\n" +
-	"\x12CreateOrganization\x124.scalekit.v1.organizations.CreateOrganizationRequest\x1a5.scalekit.v1.organizations.CreateOrganizationResponse\"\xeb\t\x92A\xb6\t\n" +
+	"\x03sso\x10\x02\x1a\x02\x10\x012\xed{\n" +
+	"\x13OrganizationService\x12\x88\x04\n" +
+	"\x12CreateOrganization\x124.scalekit.v1.organizations.CreateOrganizationRequest\x1a5.scalekit.v1.organizations.CreateOrganizationResponse\"\x84\x03\x92A\xcf\x02\n" +
 	"\rOrganizations\x12\x16Create an organization\x1a\x8f\x01Creates a new organization in your environment. Use this endpoint to add a new tenant that can be configured with various settings and metadataJ\x93\x01\n" +
 	"\x03201\x12\x8b\x01\n" +
 	"NReturns the newly created organization with its unique identifier and settings\x129\n" +
-	"7\x1a5.scalekit.v1.organizations.CreateOrganizationResponsej\xe4\x06\n" +
-	"\rx-codeSamples\x12\xd2\x062\xcf\x06\n" +
-	"\xa4\x01*\xa1\x01\n" +
-	"\x16\n" +
-	"\x05label\x12\r\x1a\vNode.js SDK\n" +
-	"\x14\n" +
-	"\x04lang\x12\f\x1a\n" +
-	"javascript\n" +
-	"q\n" +
-	"\x06source\x12g\x1aeconst organization = await sc.organization.createOrganization(name, {\n" +
-	"  externalId: 'externalId',\n" +
-	"});\n" +
-	"\xd5\x01*\xd2\x01\n" +
-	"\x15\n" +
-	"\x05label\x12\f\x1a\n" +
-	"Python SDK\n" +
-	"\x10\n" +
-	"\x04lang\x12\b\x1a\x06python\n" +
-	"\xa6\x01\n" +
-	"\x06source\x12\x9b\x01\x1a\x98\x01options = CreateOrganizationOptions()\n" +
-	"options.external_id = \"externalId\"\n" +
-	"organization = sc.organization.create_organization(\n" +
-	"  name,\n" +
-	"  options=options\n" +
-	")\n" +
-	"\xc7\x01*\xc4\x01\n" +
-	"\x11\n" +
-	"\x05label\x12\b\x1a\x06Go SDK\n" +
-	"\f\n" +
-	"\x04lang\x12\x04\x1a\x02go\n" +
-	"\xa0\x01\n" +
-	"\x06source\x12\x95\x01\x1a\x92\x01organization, err := sc.Organization.CreateOrganization(\n" +
-	"  ctx,\n" +
-	"  name,\n" +
-	"  scalekit.CreateOrganizationOptions{\n" +
-	"    ExternalID: \"externalId\",\n" +
-	"  },\n" +
-	")\n" +
-	"\x83\x02*\x80\x02\n" +
-	"\x13\n" +
-	"\x05label\x12\n" +
-	"\x1a\bJava SDK\n" +
-	"\x0e\n" +
-	"\x04lang\x12\x06\x1a\x04java\n" +
-	"\xd8\x01\n" +
-	"\x06source\x12\xcd\x01\x1a\xca\x01CreateOrganization createOrganization = CreateOrganization.newBuilder().setDisplayName(\"Test Org\").build();\n" +
-	"\n" +
-	"Organization createdOrganization = scalekitClient.organizations().create(createOrganization);\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02%:\forganization\"\x15/api/v1/organizations\x12\xfd\v\n" +
+	"7\x1a5.scalekit.v1.organizations.CreateOrganizationResponse\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02%:\forganization\"\x15/api/v1/organizations\x12\xfd\v\n" +
 	"\x12UpdateOrganization\x124.scalekit.v1.organizations.UpdateOrganizationRequest\x1a5.scalekit.v1.organizations.UpdateOrganizationResponse\"\xf9\n" +
 	"\x92A\xbf\n" +
 	"\n" +
@@ -2983,7 +2935,7 @@ const file_scalekit_v1_organizations_organizations_proto_rawDesc = "" +
 	"J\x1aH.scalekit.v1.organizations.GetOrganizationUserManagementSettingsResponseJ+\n" +
 	"\x03404\x12$\n" +
 	"\"Organization or setting not found.\x82\xb5\x18\x02\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02A\x12?/api/v1/organizations/{organization_id}/settings/usermanagement\x1aX\x92AU\n" +
-	"\rOrganizations\x12D{{import \"proto/scalekit/v1/organizations/organization_details.md\"}}B\x93\x1a\x92A\x87\x18\x12\xad\x13\n" +
+	"\rOrganizations\x12D{{import \"proto/scalekit/v1/organizations/organization_details.md\"}}B\xce\x13\x92A\xc2\x11\x12\xe8\f\n" +
 	"\rScalekit APIs\x12\xd9\v# Introduction\n" +
 	"\n" +
 	"The Scalekit API is a comprehensive RESTful API that enables you to manage organizations, users, authentication settings, and identity provider integrations. All requests must use HTTPS and require proper authentication.\n" +
@@ -3040,44 +2992,7 @@ const file_scalekit_v1_organizations_organizations_proto_rawDesc = "" +
 	"\":\n" +
 	"\fScalekit Inc\x12\x14https://scalekit.com\x1a\x14support@scalekit.com*8\n" +
 	"\n" +
-	"Apache 2.0\x12*http://www.apache.org/licenses/LICENSE-2.02\x051.0.0:\xc2\x06\n" +
-	"\x19x-scalar-sdk-installation\x12\xa4\x062\xa1\x06\n" +
-	"\x7f*}\n" +
-	"?\n" +
-	"\vdescription\x120\x1a.Install the Scalekit SDK for Node.js from npm:\n" +
-	"\x0e\n" +
-	"\x04lang\x12\x06\x1a\x04node\n" +
-	"*\n" +
-	"\x06source\x12 \x1a\x1enpm install @scalekit-sdk/node\n" +
-	"\x83\x01*\x80\x01\n" +
-	"?\n" +
-	"\vdescription\x120\x1a.Install the Scalekit SDK for Python using pip:\n" +
-	"\x10\n" +
-	"\x04lang\x12\b\x1a\x06python\n" +
-	"+\n" +
-	"\x06source\x12!\x1a\x1fpip install scalekit-sdk-python\n" +
-	"\x83\x01*\x80\x01\n" +
-	"1\n" +
-	"\vdescription\x12\"\x1a Install the Scalekit SDK for Go:\n" +
-	"\f\n" +
-	"\x04lang\x12\x04\x1a\x02Go\n" +
-	"=\n" +
-	"\x06source\x123\x1a1go get -u github.com/scalekit-inc/scalekit-sdk-go\n" +
-	"\x91\x03*\x8e\x03\n" +
-	"+\n" +
-	"\vdescription\x12\x1c\x1a\x1aAdding Java SDK dependency\n" +
-	"\x0e\n" +
-	"\x04lang\x12\x06\x1a\x04Java\n" +
-	"\xce\x02\n" +
-	"\x06source\x12\xc3\x02\x1a\xc0\x02/* Gradle users - add the following to your dependencies in build file */\n" +
-	"implementation \"com.scalekit:scalekit-sdk-java:2.0.1\"\n" +
-	"\n" +
-	"<!-- Maven users - add the following to your `pom.xml` -->\n" +
-	"<dependency>\n" +
-	"  <groupId>com.scalekit</groupId>\n" +
-	"  <artifactId>scalekit-sdk-java</artifactId>\n" +
-	"  <version>2.0.1</version>\n" +
-	"</dependency>\x1a\x19$SCALEKIT_ENVIRONMENT_URL*\x01\x022\x10application/json:\x10application/jsonj\x0f\n" +
+	"Apache 2.0\x12*http://www.apache.org/licenses/LICENSE-2.02\x051.0.0\x1a\x19$SCALEKIT_ENVIRONMENT_URL*\x01\x022\x10application/json:\x10application/jsonj\x0f\n" +
 	"\rOrganizationsj\xd4\x03\n" +
 	"\vPermissions\x12\xc4\x03Permission management for defining and controlling access to system resources. Create, retrieve, update, and delete granular permissions that represent specific actions users can perform. Permissions are the building blocks of role-based access control (RBAC) and can be assigned to roles to grant users the ability to perform specific operations. Use this service to define custom permissions for your application's unique access control requirements.r+\n" +
 	"\rScalekit Docs\x12\x1ahttps://docs.scalekit.com/\n" +
