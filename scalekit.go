@@ -38,6 +38,7 @@ type Scalekit interface {
 	Organization() Organization
 	User() UserService
 	Passwordless() PasswordlessService
+	Session() SessionService
 	GetAuthorizationUrl(redirectUri string, options AuthorizationUrlOptions) (*url.URL, error)
 	AuthenticateWithCode(
 		code string,
@@ -60,6 +61,7 @@ type scalekitClient struct {
 	directory    Directory
 	user         UserService
 	passwordless PasswordlessService
+	session      SessionService
 }
 
 type AuthorizationUrlOptions struct {
@@ -174,6 +176,7 @@ func NewScalekitClient(envUrl, clientId, clientSecret string) Scalekit {
 		organization: newOrganizationClient(coreClient),
 		user:         newUserClient(coreClient),
 		passwordless: newPasswordlessClient(coreClient),
+		session:      newSessionClient(coreClient),
 	}
 }
 
@@ -199,6 +202,10 @@ func (s *scalekitClient) User() UserService {
 
 func (s *scalekitClient) Passwordless() PasswordlessService {
 	return s.passwordless
+}
+
+func (s *scalekitClient) Session() SessionService {
+	return s.session
 }
 
 func (s *scalekitClient) GetAuthorizationUrl(redirectUri string, options AuthorizationUrlOptions) (*url.URL, error) {
