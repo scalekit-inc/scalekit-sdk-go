@@ -2880,47 +2880,13 @@ const file_scalekit_v1_users_users_proto_rawDesc = "" +
 	"\vdescription\x18\x04 \x01(\tBS\x92AP2)Description of what the permission allowsJ#\"Allows creating new user accounts\"R\vdescription\x12X\n" +
 	"\x04tags\x18\x05 \x03(\tBD\x92AA2!Tags for categorizing permissionsJ\x1c[\"user-management\", \"admin\"]R\x04tags\"\x8f\x01\n" +
 	"\x1bListUserPermissionsResponse\x12p\n" +
-	"\vpermissions\x18\x01 \x03(\v2\x1d.scalekit.v1.users.PermissionB/\x92A,2*List of permissions the user has access toR\vpermissions2\x8c\x9b\x01\n" +
-	"\vUserService\x12\x81\a\n" +
-	"\aGetUser\x12!.scalekit.v1.users.GetUserRequest\x1a\".scalekit.v1.users.GetUserResponse\"\xae\x06\x92A\x8a\x06\n" +
+	"\vpermissions\x18\x01 \x03(\v2\x1d.scalekit.v1.users.PermissionB/\x92A,2*List of permissions the user has access toR\vpermissions2×\x01\n" +
+	"\vUserService\x12\xb8\x03\n" +
+	"\aGetUser\x12!.scalekit.v1.users.GetUserRequest\x1a\".scalekit.v1.users.GetUserResponse\"\xe5\x02\x92A\xc1\x02\n" +
 	"\x05Users\x12\bGet user\x1a\x8e\x01Retrieves all details for a user by system-generated user ID or external ID. The response includes organization memberships and user metadata.J\x9c\x01\n" +
 	"\x03200\x12\x94\x01\n" +
 	"jUser details retrieved successfully. Returns full user object with system-generated fields and timestamps.\x12&\n" +
-	"$\x1a\".scalekit.v1.users.GetUserResponsej\xc6\x03\n" +
-	"\rx-codeSamples\x12\xb4\x032\xb1\x03\n" +
-	"n*l\n" +
-	"\x16\n" +
-	"\x05label\x12\r\x1a\vNode.js SDK\n" +
-	"\x14\n" +
-	"\x04lang\x12\f\x1a\n" +
-	"javascript\n" +
-	"<\n" +
-	"\x06source\x122\x1a0const { user } = await sc.user.getUser(user_id);\n" +
-	"o*m\n" +
-	"\x15\n" +
-	"\x05label\x12\f\x1a\n" +
-	"Python SDK\n" +
-	"\x10\n" +
-	"\x04lang\x12\b\x1a\x06python\n" +
-	"B\n" +
-	"\x06source\x128\x1a6response = users.get_user(organization_id, \n" +
-	"  user_id)\n" +
-	"\\*Z\n" +
-	"\x11\n" +
-	"\x05label\x12\b\x1a\x06Go SDK\n" +
-	"\f\n" +
-	"\x04lang\x12\x04\x1a\x02go\n" +
-	"7\n" +
-	"\x06source\x12-\x1a+resp, err := sc.User().GetUser(ctx, userID)\n" +
-	"p*n\n" +
-	"\x13\n" +
-	"\x05label\x12\n" +
-	"\x1a\bJava SDK\n" +
-	"\x0e\n" +
-	"\x04lang\x12\x06\x1a\x04java\n" +
-	"G\n" +
-	"\x06source\x12=\x1a;GetUserResponse resp = scalekit.users().getUser(\n" +
-	"  userId);\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02\x14\x12\x12/api/v1/users/{id}\x12\xba\t\n" +
+	"$\x1a\".scalekit.v1.users.GetUserResponse\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02\x14\x12\x12/api/v1/users/{id}\x12\xba\t\n" +
 	"\tListUsers\x12#.scalekit.v1.users.ListUsersRequest\x1a$.scalekit.v1.users.ListUsersResponse\"\xe1\b\x92A\xc2\b\n" +
 	"\x05Users\x12\x1dList all users in environment\x1a\xbc\x02Retrieves a paginated list of all users across your entire environment. Use this endpoint to view all users regardless of their organization memberships. This is useful for administrative purposes, user audits, or when you need to see all users in your Scalekit environment. Supports pagination for large user bases.JA\n" +
 	"\x03200\x12:\n" +

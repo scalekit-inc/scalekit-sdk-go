@@ -541,154 +541,23 @@ const file_scalekit_v1_auth_passwordless_proto_rawDesc = "" +
 	"\x1dPASSWORDLESS_TYPE_UNSPECIFIED\x10\x00\x12\a\n" +
 	"\x03OTP\x10\x01\x12\b\n" +
 	"\x04LINK\x10\x02\x12\f\n" +
-	"\bLINK_OTP\x10\x032\xe9!\n" +
-	"\x13PasswordlessService\x12\xdb\f\n" +
-	"\x15SendPasswordlessEmail\x126.scalekit.v1.auth.passwordless.SendPasswordlessRequest\x1a7.scalekit.v1.auth.passwordless.SendPasswordlessResponse\"\xd0\v\x92A\x9c\v\n" +
+	"\bLINK_OTP\x10\x032\xac\x0e\n" +
+	"\x13PasswordlessService\x12\xb4\x04\n" +
+	"\x15SendPasswordlessEmail\x126.scalekit.v1.auth.passwordless.SendPasswordlessRequest\x1a7.scalekit.v1.auth.passwordless.SendPasswordlessResponse\"\xa9\x03\x92A\xf5\x02\n" +
 	"\x11Passwordless Auth\x12\x17Send passwordless email\x1atSend a verification email containing either a verification code (OTP), magic link, or both to a user's email addressJ\xd0\x01\n" +
 	"\x03200\x12\xc8\x01\n" +
 	"\x8d\x01Successfully sent passwordless authentication email. Returns the authentication request details including expiration time and auth request ID\x126\n" +
-	"4\x1a2#/definitions/passwordlessSendPasswordlessResponsej\xa4\b\n" +
-	"\rx-codeSamples\x12\x92\b2\x8f\b\n" +
-	"\xfc\x02*\xf9\x02\n" +
-	"\x16\n" +
-	"\x05label\x12\r\x1a\vNode.js SDK\n" +
-	"\x14\n" +
-	"\x04lang\x12\f\x1a\n" +
-	"javascript\n" +
-	"\xc8\x02\n" +
-	"\x06source\x12\xbd\x02\x1a\xba\x02const response = await scalekit.passwordless.\n" +
-	"  sendPasswordlessEmail(\n" +
-	"\t\"john.doe@example.com\",\n" +
-	"\t{\n" +
-	"\t\ttemplate: \"SIGNIN\",\n" +
-	"\t\texpiresIn: 100,\n" +
-	"\t\tmagiclinkAuthUri: \"https://www.google.com\",\n" +
-	"\t\ttemplateVariables: {\n" +
-	"\t\t\temployeeID: \"EMP523\",\n" +
-	"\t\t\tteamName: \"Alpha Team\",\n" +
-	"\t\t\tsupportEmail: \"support@yourcompany.com\",\n" +
-	"\t\t},\n" +
-	"\t}\n" +
-	");\n" +
-	"\x8d\x05*\x8a\x05\n" +
-	"\x11\n" +
-	"\x05label\x12\b\x1a\x06Go SDK\n" +
-	"\f\n" +
-	"\x04lang\x12\x04\x1a\x02go\n" +
-	"\xe6\x04\n" +
-	"\x06source\x12\xdb\x04\x1a\xd8\x04templateType := scalekit.TemplateTypeSignin\n" +
-	"response, err := client.Passwordless().SendPasswordlessEmail(\n" +
-	"    ctx,\n" +
-	"    \"john.doe@example.com\",\n" +
-	"    &scalekit.SendPasswordlessOptions{\n" +
-	"        Template:         &templateType,\n" +
-	"        ExpiresIn:        100,\n" +
-	"        MagiclinkAuthUri: \"https://www.google.com\",\n" +
-	"        TemplateVariables: map[string]string{\n" +
-	"            \"employeeID\":    \"EMP523\",\n" +
-	"            \"teamName\":      \"Alpha Team\",\n" +
-	"            \"supportEmail\":  \"support@yourcompany.com\",\n" +
-	"        },\n" +
-	"    },\n" +
-	")\n" +
-	"\n" +
-	"if err != nil {\n" +
-	"    // Handle error\n" +
-	"    return\n" +
-	"}\n" +
-	"\n" +
-	"authRequestId := response.AuthRequestId\x82\xb5\x18\x02\x18\x04\x82\xd3\xe4\x93\x02$:\x01*\"\x1f/api/v1/passwordless/email/send\x12\xbc\v\n" +
-	"\x17VerifyPasswordlessEmail\x128.scalekit.v1.auth.passwordless.VerifyPasswordLessRequest\x1a9.scalekit.v1.auth.passwordless.VerifyPasswordLessResponse\"\xab\n" +
-	"\x92A\xf5\t\n" +
+	"4\x1a2#/definitions/passwordlessSendPasswordlessResponse\x82\xb5\x18\x02\x18\x04\x82\xd3\xe4\x93\x02$:\x01*\"\x1f/api/v1/passwordless/email/send\x12\xd9\x03\n" +
+	"\x17VerifyPasswordlessEmail\x128.scalekit.v1.auth.passwordless.VerifyPasswordLessRequest\x1a9.scalekit.v1.auth.passwordless.VerifyPasswordLessResponse\"\xc8\x02\x92A\x92\x02\n" +
 	"\x11Passwordless Auth\x12\x19Verify passwordless email\x1aMVerify a user's identity using either a verification code or magic link tokenJ\x92\x01\n" +
 	"\x03200\x12\x8a\x01\n" +
 	"ISuccessfully verified the passwordless authentication. Returns user email\x12=\n" +
-	";\x1a9.scalekit.v1.auth.passwordless.VerifyPasswordLessResponsej\xe0\a\n" +
-	"\rx-codeSamples\x12\xce\a2\xcb\a\n" +
-	"\xac\x02*\xa9\x02\n" +
-	"\x16\n" +
-	"\x05label\x12\r\x1a\vNode.js SDK\n" +
-	"\x14\n" +
-	"\x04lang\x12\f\x1a\n" +
-	"javascript\n" +
-	"\xf8\x01\n" +
-	"\x06source\x12\xed\x01\x1a\xea\x01const { authRequestId } = sendResponse;\n" +
-	"const verifyResponse = await scalekit.passwordless.\n" +
-	"  verifyPasswordlessEmail(\n" +
-	"\t// Verification Code (OTP)\n" +
-	"\t{ code: \"123456\" },\n" +
-	"\t// Magic Link Token\n" +
-	"\t{ linkToken: link_token },\n" +
-	"\tauthRequestId\n" +
-	");\n" +
-	"\x99\x05*\x96\x05\n" +
-	"\x11\n" +
-	"\x05label\x12\b\x1a\x06Go SDK\n" +
-	"\f\n" +
-	"\x04lang\x12\x04\x1a\x02go\n" +
-	"\xf2\x04\n" +
-	"\x06source\x12\xe7\x04\x1a\xe4\x04// Verify with OTP code\n" +
-	"verifyResponse, err := client.Passwordless().VerifyPasswordlessEmail(\n" +
-	"    ctx,\n" +
-	"    &scalekit.VerifyPasswordlessOptions{\n" +
-	"        Code:          \"123456\", // OTP code\n" +
-	"        AuthRequestId: authRequestId,\n" +
-	"    },\n" +
-	")\n" +
-	"\n" +
-	"if err != nil {\n" +
-	"    // Handle error\n" +
-	"    return\n" +
-	"}\n" +
-	"\n" +
-	"// Verify with magic link token\n" +
-	"verifyResponse, err := client.Passwordless().VerifyPasswordlessEmail(\n" +
-	"    ctx,\n" +
-	"    &scalekit.VerifyPasswordlessOptions{\n" +
-	"        LinkToken: linkToken, // Magic link token\n" +
-	"    },\n" +
-	")\n" +
-	"\n" +
-	"if err != nil {\n" +
-	"    // Handle error\n" +
-	"    return\n" +
-	"}\n" +
-	"\n" +
-	"// User verified successfully\n" +
-	"userEmail := verifyResponse.Email\x82\xb5\x18\x02\x18\x04\x82\xd3\xe4\x93\x02&:\x01*\"!/api/v1/passwordless/email/verify\x12\xd8\a\n" +
-	"\x17ResendPasswordlessEmail\x128.scalekit.v1.auth.passwordless.ResendPasswordlessRequest\x1a7.scalekit.v1.auth.passwordless.SendPasswordlessResponse\"\xc9\x06\x92A\x93\x06\n" +
+	";\x1a9.scalekit.v1.auth.passwordless.VerifyPasswordLessResponse\x82\xb5\x18\x02\x18\x04\x82\xd3\xe4\x93\x02&:\x01*\"!/api/v1/passwordless/email/verify\x12\xa5\x04\n" +
+	"\x17ResendPasswordlessEmail\x128.scalekit.v1.auth.passwordless.ResendPasswordlessRequest\x1a7.scalekit.v1.auth.passwordless.SendPasswordlessResponse\"\x96\x03\x92A\xe0\x02\n" +
 	"\x11Passwordless Auth\x12\x19Resend passwordless email\x1abResend a verification email if the user didn't receive it or if the previous code/link has expiredJ\xcb\x01\n" +
 	"\x03200\x12\xc3\x01\n" +
 	"\x83\x01Successfully resent the passwordless authentication email. Returns updated authentication request details with new expiration time.\x12;\n" +
-	"9\x1a7.scalekit.v1.auth.passwordless.SendPasswordlessResponsej\xb0\x03\n" +
-	"\rx-codeSamples\x12\x9e\x032\x9b\x03\n" +
-	"\xcb\x01*\xc8\x01\n" +
-	"\x16\n" +
-	"\x05label\x12\r\x1a\vNode.js SDK\n" +
-	"\x14\n" +
-	"\x04lang\x12\f\x1a\n" +
-	"javascript\n" +
-	"\x97\x01\n" +
-	"\x06source\x12\x8c\x01\x1a\x89\x01const { authRequestId } = sendResponse;\n" +
-	"const resendResponse = await scalekit.passwordless\n" +
-	".resendPasswordlessEmail(\n" +
-	"    authRequestId\n" +
-	");\n" +
-	"\xca\x01*\xc7\x01\n" +
-	"\x11\n" +
-	"\x05label\x12\b\x1a\x06Go SDK\n" +
-	"\f\n" +
-	"\x04lang\x12\x04\x1a\x02go\n" +
-	"\xa3\x01\n" +
-	"\x06source\x12\x98\x01\x1a\x95\x01resendResponse, err := client.Passwordless().ResendPasswordlessEmail(\n" +
-	"    ctx,\n" +
-	"    authRequestId,\n" +
-	")\n" +
-	"\n" +
-	"if err != nil {\n" +
-	"    // Handle error\n" +
-	"    return\n" +
-	"}\x82\xb5\x18\x02\x18\x04\x82\xd3\xe4\x93\x02&:\x01*\"!/api/v1/passwordless/email/resend\x1a\xd9\x01\x92A\xd5\x01\n" +
+	"9\x1a7.scalekit.v1.auth.passwordless.SendPasswordlessResponse\x82\xb5\x18\x02\x18\x04\x82\xd3\xe4\x93\x02&:\x01*\"!/api/v1/passwordless/email/resend\x1a\xd9\x01\x92A\xd5\x01\n" +
 	"\x11Passwordless Auth\x12\xbf\x01Endpoints for sending and verifying passwordless authentication emails. These APIs allow users to authenticate without passwords by receiving a verification code or magic link in their email.B\x94\x02\n" +
 	"!com.scalekit.v1.auth.passwordlessB\x11PasswordlessProtoP\x01ZDgithub.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/auth\xa2\x02\x04SVAP\xaa\x02\x1dScalekit.V1.Auth.Passwordless\xca\x02\x1dScalekit\\V1\\Auth\\Passwordless\xe2\x02)Scalekit\\V1\\Auth\\Passwordless\\GPBMetadata\xea\x02 Scalekit::V1::Auth::Passwordlessb\x06proto3"
 
