@@ -8,8 +8,10 @@ package domains
 
 import (
 	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
+	_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
 	_ "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/options"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
+	_ "google.golang.org/genproto/googleapis/api/visibility"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
@@ -1109,13 +1111,11 @@ type Domain struct {
 	Domain             string                 `protobuf:"bytes,2,opt,name=domain,proto3" json:"domain,omitempty"`
 	EnvironmentId      string                 `protobuf:"bytes,3,opt,name=environment_id,json=environmentId,proto3" json:"environment_id,omitempty"`
 	OrganizationId     string                 `protobuf:"bytes,4,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
-	ConnectionId       string                 `protobuf:"bytes,5,opt,name=connection_id,json=connectionId,proto3" json:"connection_id,omitempty"`
 	TxtRecordKey       string                 `protobuf:"bytes,6,opt,name=txt_record_key,json=txtRecordKey,proto3" json:"txt_record_key,omitempty"`
 	TxtRecordSecret    string                 `protobuf:"bytes,7,opt,name=txt_record_secret,json=txtRecordSecret,proto3" json:"txt_record_secret,omitempty"`
 	VerificationStatus VerificationStatus     `protobuf:"varint,8,opt,name=verification_status,json=verificationStatus,proto3,enum=scalekit.v1.domains.VerificationStatus" json:"verification_status,omitempty"`
 	CreateTime         *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
 	UpdateTime         *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
-	CreatedBy          *string                `protobuf:"bytes,11,opt,name=created_by,json=createdBy,proto3,oneof" json:"created_by,omitempty"`
 	DomainType         DomainType             `protobuf:"varint,12,opt,name=domain_type,json=domainType,proto3,enum=scalekit.v1.domains.DomainType" json:"domain_type,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
@@ -1179,13 +1179,6 @@ func (x *Domain) GetOrganizationId() string {
 	return ""
 }
 
-func (x *Domain) GetConnectionId() string {
-	if x != nil {
-		return x.ConnectionId
-	}
-	return ""
-}
-
 func (x *Domain) GetTxtRecordKey() string {
 	if x != nil {
 		return x.TxtRecordKey
@@ -1221,13 +1214,6 @@ func (x *Domain) GetUpdateTime() *timestamppb.Timestamp {
 	return nil
 }
 
-func (x *Domain) GetCreatedBy() string {
-	if x != nil && x.CreatedBy != nil {
-		return *x.CreatedBy
-	}
-	return ""
-}
-
 func (x *Domain) GetDomainType() DomainType {
 	if x != nil {
 		return x.DomainType
@@ -1239,105 +1225,106 @@ var File_scalekit_v1_domains_domains_proto protoreflect.FileDescriptor
 
 const file_scalekit_v1_domains_domains_proto_rawDesc = "" +
 	"\n" +
-	"!scalekit/v1/domains/domains.proto\x12\x13scalekit.v1.domains\x1a\x1bbuf/validate/validate.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/wrappers.proto\x1a!scalekit/v1/options/options.proto\"\xfe\x01\n" +
-	"\x13CreateDomainRequest\x124\n" +
-	"\x0forganization_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18 H\x00R\x0eorganizationId\x12,\n" +
-	"\vexternal_id\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18 H\x00R\n" +
-	"externalId\x12(\n" +
-	"\rconnection_id\x18\x03 \x01(\tH\x01R\fconnectionId\x88\x01\x01\x129\n" +
-	"\x06domain\x18\x04 \x01(\v2!.scalekit.v1.domains.CreateDomainR\x06domainB\f\n" +
+	"!scalekit/v1/domains/domains.proto\x12\x13scalekit.v1.domains\x1a\x1bbuf/validate/validate.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/api/visibility.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/wrappers.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\x1a!scalekit/v1/options/options.proto\"\x8a\x06\n" +
+	"\x13CreateDomainRequest\x12\xcb\x01\n" +
+	"\x0forganization_id\x18\x01 \x01(\tB\x9f\x01\x92A\x92\x012wScalekit-generated unique identifier for the organization. Use either this or external_id to identify the organization.J\x17\"org_81667076086825451\"\xbaH\x06r\x04\x10\x01\x18 H\x00R\x0eorganizationId\x12\xcd\x01\n" +
+	"\vexternal_id\x18\x02 \x01(\tB\xa9\x01\x92A\x8d\x012{Your application's unique identifier for the organization. Alternative to organization_id for identifying the organization.J\x0e\"tenant_12345\"\xbaH\x06r\x04\x10\x01\x18 \xfa\xd2\xe4\x93\x02\t\x12\aPREVIEWH\x00R\n" +
+	"externalId\x12\xba\x01\n" +
+	"\rconnection_id\x18\x03 \x01(\tB\x8f\x01\x92A}2iOptional identity provider connection ID to associate with this domain for enterprise SSO configurations.J\x10\"conn_123456789\"\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEWH\x01R\fconnectionId\x88\x01\x01\x12x\n" +
+	"\x06domain\x18\x04 \x01(\v2!.scalekit.v1.domains.CreateDomainB=\x92A:28Domain configuration including the domain name and type.R\x06domainB\f\n" +
 	"\n" +
 	"identitiesB\x10\n" +
-	"\x0e_connection_id\"K\n" +
-	"\x14CreateDomainResponse\x123\n" +
-	"\x06domain\x18\x01 \x01(\v2\x1b.scalekit.v1.domains.DomainR\x06domain\"w\n" +
-	"\fCreateDomain\x12%\n" +
-	"\x06domain\x18\x01 \x01(\tB\r\xbaH\n" +
-	"\xc8\x01\x01r\x05\x10\x04\x18\xff\x01R\x06domain\x12@\n" +
-	"\vdomain_type\x18\x02 \x01(\x0e2\x1f.scalekit.v1.domains.DomainTypeR\n" +
-	"domainType\"\x8e\x02\n" +
-	"\x13UpdateDomainRequest\x124\n" +
-	"\x0forganization_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18 H\x00R\x0eorganizationId\x12,\n" +
-	"\vexternal_id\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18 H\x00R\n" +
-	"externalId\x12(\n" +
-	"\rconnection_id\x18\x03 \x01(\tH\x01R\fconnectionId\x88\x01\x01\x12\x0e\n" +
-	"\x02id\x18\x04 \x01(\tR\x02id\x129\n" +
-	"\x06domain\x18\x05 \x01(\v2!.scalekit.v1.domains.UpdateDomainR\x06domainB\f\n" +
+	"\x0e_connection_id\"\xb3\x01\n" +
+	"\x14CreateDomainResponse\x12\x9a\x01\n" +
+	"\x06domain\x18\x01 \x01(\v2\x1b.scalekit.v1.domains.DomainBe\x92Ab2`The newly created domain object with all configuration details and system-generated identifiers.R\x06domain\"\xc0\x04\n" +
+	"\fCreateDomain\x12\xf2\x01\n" +
+	"\x06domain\x18\x01 \x01(\tB\xd9\x01\x92A\xc8\x012\xaf\x01The domain name to be configured. Must be a valid business domain you control. Public disposable domains (gmail.com, outlook.com, etc.) are automatically blocked for security.J\x14\"customerdomain.com\"\xbaH\n" +
+	"\xc8\x01\x01r\x05\x10\x04\x18\xff\x01R\x06domain\x12\xba\x02\n" +
+	"\vdomain_type\x18\x02 \x01(\x0e2\x1f.scalekit.v1.domains.DomainTypeB\xf7\x01\x92A\xf3\x012\xd8\x01The type of domain configuration. ALLOWED_EMAIL_DOMAIN enables automatic organization suggestions for users with matching email domains during sign-in/sign-up. ORGANIZATION_DOMAIN is for primary organization domains.J\x16\"ALLOWED_EMAIL_DOMAIN\"R\n" +
+	"domainType\"\x84\a\n" +
+	"\x13UpdateDomainRequest\x12\xcb\x01\n" +
+	"\x0forganization_id\x18\x01 \x01(\tB\x9f\x01\x92A\x92\x012wScalekit-generated unique identifier for the organization. Use either this or external_id to identify the organization.J\x17\"org_81667076086825451\"\xbaH\x06r\x04\x10\x01\x18 H\x00R\x0eorganizationId\x12\xcd\x01\n" +
+	"\vexternal_id\x18\x02 \x01(\tB\xa9\x01\x92A\x8d\x012{Your application's unique identifier for the organization. Alternative to organization_id for identifying the organization.J\x0e\"tenant_12345\"\xbaH\x06r\x04\x10\x01\x18 \xfa\xd2\xe4\x93\x02\t\x12\aPREVIEWH\x00R\n" +
+	"externalId\x12\x9f\x01\n" +
+	"\rconnection_id\x18\x03 \x01(\tBu\x92Ac2OOptional updated identity provider connection ID to associate with this domain.J\x10\"conn_123456789\"\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEWH\x01R\fconnectionId\x88\x01\x01\x12o\n" +
+	"\x02id\x18\x04 \x01(\tB_\x92A\\2AScalekit-generated unique identifier of the domain to be updated.J\x17\"dom_88351643129225005\"R\x02id\x12\x9b\x01\n" +
+	"\x06domain\x18\x05 \x01(\v2!.scalekit.v1.domains.UpdateDomainB`\x92A]2[Domain update configuration. Currently empty as domain name cannot be changed once created.R\x06domainB\f\n" +
 	"\n" +
 	"identitiesB\x10\n" +
 	"\x0e_connection_id\"\x0e\n" +
-	"\fUpdateDomain\"K\n" +
-	"\x14UpdateDomainResponse\x123\n" +
-	"\x06domain\x18\x01 \x01(\v2\x1b.scalekit.v1.domains.DomainR\x06domain\"\x94\x01\n" +
-	"\x10GetDomainRequest\x124\n" +
-	"\x0forganization_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18 H\x00R\x0eorganizationId\x12,\n" +
-	"\vexternal_id\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18 H\x00R\n" +
-	"externalId\x12\x0e\n" +
-	"\x02id\x18\x03 \x01(\tR\x02idB\f\n" +
+	"\fUpdateDomain\"\xa5\x01\n" +
+	"\x14UpdateDomainResponse\x12\x8c\x01\n" +
+	"\x06domain\x18\x01 \x01(\v2\x1b.scalekit.v1.domains.DomainBW\x92AT2RThe updated domain object reflecting all changes made to the domain configuration.R\x06domain\"\xad\x04\n" +
+	"\x10GetDomainRequest\x12\xcb\x01\n" +
+	"\x0forganization_id\x18\x01 \x01(\tB\x9f\x01\x92A\x92\x012wScalekit-generated unique identifier for the organization. Use either this or external_id to identify the organization.J\x17\"org_81667076086825451\"\xbaH\x06r\x04\x10\x01\x18 H\x00R\x0eorganizationId\x12\xcd\x01\n" +
+	"\vexternal_id\x18\x02 \x01(\tB\xa9\x01\x92A\x8d\x012{Your application's unique identifier for the organization. Alternative to organization_id for identifying the organization.J\x0e\"tenant_12345\"\xbaH\x06r\x04\x10\x01\x18 \xfa\xd2\xe4\x93\x02\t\x12\aPREVIEWH\x00R\n" +
+	"externalId\x12m\n" +
+	"\x02id\x18\x03 \x01(\tB]\x92AZ2?Scalekit-generated unique identifier of the domain to retrieve.J\x17\"dom_88351643129225005\"R\x02idB\f\n" +
 	"\n" +
-	"identities\"H\n" +
-	"\x11GetDomainResponse\x123\n" +
-	"\x06domain\x18\x01 \x01(\v2\x1b.scalekit.v1.domains.DomainR\x06domain\"\xd3\x01\n" +
-	"\x13DeleteDomainRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x124\n" +
-	"\x0forganization_id\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18 H\x00R\x0eorganizationId\x12,\n" +
-	"\vexternal_id\x18\x03 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18 H\x00R\n" +
-	"externalId\x12(\n" +
-	"\rconnection_id\x18\x04 \x01(\tH\x01R\fconnectionId\x88\x01\x01B\f\n" +
+	"identities\"\xaa\x01\n" +
+	"\x11GetDomainResponse\x12\x94\x01\n" +
+	"\x06domain\x18\x01 \x01(\v2\x1b.scalekit.v1.domains.DomainB_\x92A\\2ZThe requested domain object with complete details including timestamps, and configuration.R\x06domain\"\xeb\x05\n" +
+	"\x13DeleteDomainRequest\x12{\n" +
+	"\x02id\x18\x01 \x01(\tBk\x92Ah2MScalekit-generated unique identifier of the domain to be permanently deleted.J\x17\"dom_88351643129225005\"R\x02id\x12\xcb\x01\n" +
+	"\x0forganization_id\x18\x02 \x01(\tB\x9f\x01\x92A\x92\x012wScalekit-generated unique identifier for the organization. Use either this or external_id to identify the organization.J\x17\"org_81667076086825451\"\xbaH\x06r\x04\x10\x01\x18 H\x00R\x0eorganizationId\x12\xcd\x01\n" +
+	"\vexternal_id\x18\x03 \x01(\tB\xa9\x01\x92A\x8d\x012{Your application's unique identifier for the organization. Alternative to organization_id for identifying the organization.J\x0e\"tenant_12345\"\xbaH\x06r\x04\x10\x01\x18 \xfa\xd2\xe4\x93\x02\t\x12\aPREVIEWH\x00R\n" +
+	"externalId\x12\x98\x01\n" +
+	"\rconnection_id\x18\x04 \x01(\tBn\x92A\\2HOptional connection ID for additional validation during domain deletion.J\x10\"conn_123456789\"\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEWH\x01R\fconnectionId\x88\x01\x01B\f\n" +
 	"\n" +
 	"identitiesB\x10\n" +
-	"\x0e_connection_id\"\xa6\x03\n" +
-	"\x11ListDomainRequest\x124\n" +
-	"\x0forganization_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18 H\x00R\x0eorganizationId\x12,\n" +
-	"\vexternal_id\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18 H\x00R\n" +
-	"externalId\x12(\n" +
-	"\rconnection_id\x18\x03 \x01(\tH\x01R\fconnectionId\x88\x01\x01\x12\x1d\n" +
-	"\ainclude\x18\x04 \x01(\tH\x02R\ainclude\x88\x01\x01\x128\n" +
-	"\tpage_size\x18\x05 \x01(\v2\x1b.google.protobuf.Int32ValueR\bpageSize\x12<\n" +
-	"\vpage_number\x18\x06 \x01(\v2\x1b.google.protobuf.Int32ValueR\n" +
-	"pageNumber\x12@\n" +
-	"\vdomain_type\x18\a \x01(\x0e2\x1f.scalekit.v1.domains.DomainTypeR\n" +
+	"\x0e_connection_id\"\xf9\n" +
+	"\n" +
+	"\x11ListDomainRequest\x12\xcb\x01\n" +
+	"\x0forganization_id\x18\x01 \x01(\tB\x9f\x01\x92A\x92\x012wScalekit-generated unique identifier for the organization. Use either this or external_id to identify the organization.J\x17\"org_81667076086825451\"\xbaH\x06r\x04\x10\x01\x18 H\x00R\x0eorganizationId\x12\xcd\x01\n" +
+	"\vexternal_id\x18\x02 \x01(\tB\xa9\x01\x92A\x8d\x012{Your application's unique identifier for the organization. Alternative to organization_id for identifying the organization.J\x0e\"tenant_12345\"\xbaH\x06r\x04\x10\x01\x18 \xfa\xd2\xe4\x93\x02\t\x12\aPREVIEWH\x00R\n" +
+	"externalId\x12\xa8\x01\n" +
+	"\rconnection_id\x18\x03 \x01(\tB~\x92Al2XOptional filter to list domains associated with a specific identity provider connection.J\x10\"conn_123456789\"\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEWH\x01R\fconnectionId\x88\x01\x01\x12\xab\x01\n" +
+	"\ainclude\x18\x04 \x01(\tB\x8b\x01\x92A\x87\x012mOptional comma-separated list of additional fields to include in the response (e.g., 'verification_details').J\x16\"verification_details\"H\x02R\ainclude\x88\x01\x01\x12\x8f\x01\n" +
+	"\tpage_size\x18\x05 \x01(\v2\x1b.google.protobuf.Int32ValueBU\x92AR2LMaximum number of domains to return per page. Default is 30, maximum is 100.J\x0230R\bpageSize\x12\x82\x01\n" +
+	"\vpage_number\x18\x06 \x01(\v2\x1b.google.protobuf.Int32ValueBD\x92AA2<Page number to retrieve (0-based). Use 0 for the first page.J\x010R\n" +
+	"pageNumber\x12\xa9\x02\n" +
+	"\vdomain_type\x18\a \x01(\x0e2\x1f.scalekit.v1.domains.DomainTypeB\xe6\x01\x92A\xe2\x012\xc7\x01ALLOWED_EMAIL_DOMAIN enables users to join an organization with automatic suggestions in the organization switcher.\n" +
+	"\n" +
+	"ORGANIZATION_DOMAIN is used to identify the SSO connection for the organization.\n" +
+	"\n" +
+	"J\x16\"ALLOWED_EMAIL_DOMAIN\"R\n" +
 	"domainTypeB\f\n" +
 	"\n" +
 	"identitiesB\x10\n" +
 	"\x0e_connection_idB\n" +
 	"\n" +
-	"\b_include\"\xa7\x01\n" +
-	"\x13VerifyDomainRequest\x124\n" +
-	"\x0forganization_id\x18\x01 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18 H\x00R\x0eorganizationId\x12,\n" +
-	"\vexternal_id\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18 H\x00R\n" +
-	"externalId\x12\x1e\n" +
-	"\x02id\x18\x04 \x01(\tB\x0e\xbaH\vr\t\x10\x01\x18 :\x03domR\x02idB\f\n" +
+	"\b_include\"\xdd\x04\n" +
+	"\x13VerifyDomainRequest\x12\xcb\x01\n" +
+	"\x0forganization_id\x18\x01 \x01(\tB\x9f\x01\x92A\x92\x012wScalekit-generated unique identifier for the organization. Use either this or external_id to identify the organization.J\x17\"org_81667076086825451\"\xbaH\x06r\x04\x10\x01\x18 H\x00R\x0eorganizationId\x12\xcd\x01\n" +
+	"\vexternal_id\x18\x02 \x01(\tB\xa9\x01\x92A\x8d\x012{Your application's unique identifier for the organization. Alternative to organization_id for identifying the organization.J\x0e\"tenant_12345\"\xbaH\x06r\x04\x10\x01\x18 \xfa\xd2\xe4\x93\x02\t\x12\aPREVIEWH\x00R\n" +
+	"externalId\x12\x99\x01\n" +
+	"\x02id\x18\x04 \x01(\tB\x88\x01\x92Aw2\\Scalekit-generated unique identifier of the domain to verify. Must start with 'dom_' prefix.J\x17\"dom_88351643129225005\"\xbaH\vr\t\x10\x01\x18 :\x03domR\x02idB\f\n" +
 	"\n" +
-	"identities\"\x89\x01\n" +
-	"\x12ListDomainResponse\x12\x1b\n" +
-	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1f\n" +
-	"\vpage_number\x18\x02 \x01(\x05R\n" +
-	"pageNumber\x125\n" +
-	"\adomains\x18\x03 \x03(\v2\x1b.scalekit.v1.domains.DomainR\adomains\"5\n" +
-	"\x1bListAuthorizedDomainRequest\x12\x16\n" +
-	"\x06origin\x18\x01 \x01(\tR\x06origin\"8\n" +
-	"\x1cListAuthorizedDomainResponse\x12\x18\n" +
-	"\adomains\x18\x01 \x03(\tR\adomains\"\xc0\x04\n" +
-	"\x06Domain\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
-	"\x06domain\x18\x02 \x01(\tR\x06domain\x12%\n" +
-	"\x0eenvironment_id\x18\x03 \x01(\tR\renvironmentId\x12'\n" +
-	"\x0forganization_id\x18\x04 \x01(\tR\x0eorganizationId\x12#\n" +
-	"\rconnection_id\x18\x05 \x01(\tR\fconnectionId\x12$\n" +
-	"\x0etxt_record_key\x18\x06 \x01(\tR\ftxtRecordKey\x12*\n" +
-	"\x11txt_record_secret\x18\a \x01(\tR\x0ftxtRecordSecret\x12X\n" +
-	"\x13verification_status\x18\b \x01(\x0e2'.scalekit.v1.domains.VerificationStatusR\x12verificationStatus\x12;\n" +
-	"\vcreate_time\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\n" +
-	"createTime\x12;\n" +
+	"identities\"\xe2\x02\n" +
+	"\x12ListDomainResponse\x12M\n" +
+	"\tpage_size\x18\x01 \x01(\x05B0\x92A-2(Number of domains returned in this page.J\x011R\bpageSize\x12X\n" +
+	"\vpage_number\x18\x02 \x01(\x05B7\x92A42/Current page number in the pagination sequence.J\x011R\n" +
+	"pageNumber\x12\xa2\x01\n" +
+	"\adomains\x18\x03 \x03(\v2\x1b.scalekit.v1.domains.DomainBk\x92Ah2fArray of domain objects containing all domain details including verification status and configuration.R\adomains\"\xa1\x01\n" +
+	"\x1bListAuthorizedDomainRequest\x12\x81\x01\n" +
+	"\x06origin\x18\x01 \x01(\tBi\x92Af2OThe origin URL to check for authorized domains (e.g., https://app.example.com).J\x13\"https://myapp.com\"R\x06origin\"\xb0\x01\n" +
+	"\x1cListAuthorizedDomainResponse\x12\x8f\x01\n" +
+	"\adomains\x18\x01 \x03(\tBu\x92Ar2LArray of domain names that are authorized for use with the specified origin.J\"[\"example.com\", \"app.example.com\"]R\adomains\"\xb7\x0e\n" +
+	"\x06Domain\x12j\n" +
+	"\x02id\x18\x01 \x01(\tBZ\x92AW2<Scalekit-generated unique identifier for this domain record.J\x17\"dom_88351643129225005\"R\x02id\x12\xb4\x01\n" +
+	"\x06domain\x18\x02 \x01(\tB\x9b\x01\x92A\x97\x012\x7fThe business domain name that was configured for allowed email domain functionality (e.g., company.com, subdomain.company.com).J\x14\"customerdomain.com\"R\x06domain\x12x\n" +
+	"\x0eenvironment_id\x18\x03 \x01(\tBQ\x92AN23The environment ID where this domain is configured.J\x17\"env_58345499215790610\"R\renvironmentId\x12t\n" +
+	"\x0forganization_id\x18\x04 \x01(\tBK\x92AH2-The organization to which the domain belongs.J\x17\"org_81667076086825451\"R\x0eorganizationId\x12\xa8\x01\n" +
+	"\x0etxt_record_key\x18\x06 \x01(\tB\x81\x01\x92Ao2GThe DNS TXT record key that should be added to verify domain ownership.J$\"scalekit-verification=abc123def456\"\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEWR\ftxtRecordKey\x12\xa8\x01\n" +
+	"\x11txt_record_secret\x18\a \x01(\tB|\x92Aj2IThe DNS TXT record value that should be added to verify domain ownership.J\x1d\"scalekit-verification-value\"\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEWR\x0ftxtRecordSecret\x12\xdb\x02\n" +
+	"\x13verification_status\x18\b \x01(\x0e2'.scalekit.v1.domains.VerificationStatusB\x80\x02\x92A\xed\x012\xd9\x01Current verification status of the domain. AUTO_VERIFIED means the domain was automatically verified without DNS changes, VERIFIED means manually verified via DNS TXT record, PENDING requires manual DNS configuration.J\x0f\"AUTO_VERIFIED\"\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEWR\x12verificationStatus\x12\x8a\x01\n" +
+	"\vcreate_time\x18\t \x01(\v2\x1a.google.protobuf.TimestampBM\x92AJ2,Timestamp when the domain was first created.J\x1a\"2025-09-01T12:14:43.100Z\"R\n" +
+	"createTime\x12\x8f\x01\n" +
 	"\vupdate_time\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampR\n" +
-	"updateTime\x12\"\n" +
-	"\n" +
-	"created_by\x18\v \x01(\tH\x00R\tcreatedBy\x88\x01\x01\x12@\n" +
-	"\vdomain_type\x18\f \x01(\x0e2\x1f.scalekit.v1.domains.DomainTypeR\n" +
-	"domainTypeB\r\n" +
-	"\v_created_by*s\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampBR\x92AO2+Timestamp when the domain was last updated.J \"2025-09-01T12:14:43.110455169Z\"R\n" +
+	"updateTime\x12\xba\x02\n" +
+	"\vdomain_type\x18\f \x01(\x0e2\x1f.scalekit.v1.domains.DomainTypeB\xf7\x01\x92A\xf3\x012\xd8\x01The type of domain configuration. ALLOWED_EMAIL_DOMAIN enables automatic organization suggestions for users with matching email domains during sign-in/sign-up. ORGANIZATION_DOMAIN is for primary organization domains.J\x16\"ALLOWED_EMAIL_DOMAIN\"R\n" +
+	"domainTypeJ\x04\b\x05\x10\x06J\x04\b\v\x10\f*s\n" +
 	"\x12VerificationStatus\x12#\n" +
 	"\x1fVERIFICATION_STATUS_UNSPECIFIED\x10\x00\x12\v\n" +
 	"\aPENDING\x10\x01\x12\f\n" +
@@ -1349,15 +1336,74 @@ const file_scalekit_v1_domains_domains_proto_rawDesc = "" +
 	"DomainType\x12\x1b\n" +
 	"\x17DOMAIN_TYPE_UNSPECIFIED\x10\x00\x12\x18\n" +
 	"\x14ALLOWED_EMAIL_DOMAIN\x10\x01\x12\x17\n" +
-	"\x13ORGANIZATION_DOMAIN\x10\x022\x87\v\n" +
-	"\rDomainService\x12\xd5\x01\n" +
-	"\fCreateDomain\x12(.scalekit.v1.domains.CreateDomainRequest\x1a).scalekit.v1.domains.CreateDomainResponse\"p\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x02d:\x06domainZ):\x06domain\"\x1f/api/v1/organizations/-/domains\"//api/v1/organizations/{organization_id}/domains\x12\xda\x01\n" +
-	"\fUpdateDomain\x12(.scalekit.v1.domains.UpdateDomainRequest\x1a).scalekit.v1.domains.UpdateDomainResponse\"u\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x02i:\x06domainZ):\x06domain2\x1f/api/v1/organizations/-/domains24/api/v1/organizations/{organization_id}/domains/{id}\x12\xce\x01\n" +
-	"\fVerifyDomain\x12(.scalekit.v1.domains.VerifyDomainRequest\x1a\x1a.google.protobuf.BoolValue\"x\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x02lZ-2+/api/v1/organizations/-/domains/{id}:verify2;/api/v1/organizations/{organization_id}/domains/{id}:verify\x12\xc6\x01\n" +
-	"\tGetDomain\x12%.scalekit.v1.domains.GetDomainRequest\x1a&.scalekit.v1.domains.GetDomainResponse\"j\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x02^Z&\x12$/api/v1/organizations/-/domains/{id}\x124/api/v1/organizations/{organization_id}/domains/{id}\x12\xbc\x01\n" +
-	"\fDeleteDomain\x12(.scalekit.v1.domains.DeleteDomainRequest\x1a\x16.google.protobuf.Empty\"j\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x02^Z&*$/api/v1/organizations/-/domains/{id}*4/api/v1/organizations/{organization_id}/domains/{id}\x12\xc0\x01\n" +
-	"\vListDomains\x12&.scalekit.v1.domains.ListDomainRequest\x1a'.scalekit.v1.domains.ListDomainResponse\"`\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x02TZ!\x12\x1f/api/v1/organizations/-/domains\x12//api/v1/organizations/{organization_id}/domains\x12\xa4\x01\n" +
-	"\x15ListAuthorizedDomains\x120.scalekit.v1.domains.ListAuthorizedDomainRequest\x1a1.scalekit.v1.domains.ListAuthorizedDomainResponse\"&\x82\xb5\x18\x02\x18\x01\x82\xd3\xe4\x93\x02\x1a\x12\x18/api/v1/domains/{origin}B\xde\x01\n" +
+	"\x13ORGANIZATION_DOMAIN\x10\x022\x99%\n" +
+	"\rDomainService\x12\xf9\x06\n" +
+	"\fCreateDomain\x12(.scalekit.v1.domains.CreateDomainRequest\x1a).scalekit.v1.domains.CreateDomainResponse\"\x93\x06\x92A\xca\x05\n" +
+	"\aDomains\x12\rCreate Domain\x1a\xb2\x03Creates a new domain and associates it with the specified organization. The domain can be configured as either an ALLOWED_EMAIL_DOMAIN for automatic organization suggestions during user sign-in/sign-up, or as an ORGANIZATION_DOMAIN for SSO connection identification.\n" +
+	"\n" +
+	"The domain must be a valid, business email domain that you control. Public disposable domains (gmail.com, outlook.com, etc.) are automatically blocked for security.\n" +
+	"\n" +
+	"JX\n" +
+	"\x03200\x12Q\n" +
+	" Successfully created the domain.\x12-\n" +
+	"+\x1a).scalekit.v1.domains.CreateDomainResponseJ\xa0\x01\n" +
+	"\x03400\x12\x98\x01\n" +
+	"oInvalid request — common causes invalid domain format, public or disposable domain, or domain already exists.\x12%\n" +
+	"#\x1a!#/definitions/errdetailsErrorInfo\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x029:\x06domain\"//api/v1/organizations/{organization_id}/domains\x12\xd9\x05\n" +
+	"\fUpdateDomain\x12(.scalekit.v1.domains.UpdateDomainRequest\x1a).scalekit.v1.domains.UpdateDomainResponse\"\xf3\x04\x92A\x96\x04\n" +
+	"\aDomains\x12\rUpdate Domain\x1a\xa1\x03Updates an existing domain's configuration within an organization. Currently supports updating domain metadata and configuration settings.\n" +
+	"\n" +
+	"Use this endpoint to modify domain properties after initial creation. Note that the domain name itself cannot be changed once created.\n" +
+	"\n" +
+	"The domain must belong to the specified organization and you must provide either the organization ID or external ID along with the domain ID.JX\n" +
+	"\x03200\x12Q\n" +
+	" Successfully updated the domain.\x12-\n" +
+	"+\x1a).scalekit.v1.domains.UpdateDomainResponse\x82\xb5\x18\x02\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02>:\x06domain24/api/v1/organizations/{organization_id}/domains/{id}\x12\xea\x06\n" +
+	"\fVerifyDomain\x12(.scalekit.v1.domains.VerifyDomainRequest\x1a\x1a.google.protobuf.BoolValue\"\x93\x06\x92A\xb7\x05\n" +
+	"\aDomains\x12\rVerify Domain\x1a\x9e\x04Initiates domain ownership verification by checking the DNS TXT record that should be added to the domain's DNS configuration.\n" +
+	"\n" +
+	"Use this endpoint to manually trigger verification for domains that are in PENDING status. The system will check for the required TXT record and update the verification status accordingly.\n" +
+	"\n" +
+	"For automatically verified domains, this endpoint will return true immediately. For domains requiring manual verification, ensure the TXT record has been properly configured in your DNS settings before calling this endpoint.J|\n" +
+	"\x03200\x12u\n" +
+	"SDomain verification result. Returns true if verification succeeds, false otherwise.\x12\x1e\n" +
+	"\x1c\x1a\x1a.google.protobuf.BoolValue\x82\xb5\x18\x02\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02=2;/api/v1/organizations/{organization_id}/domains/{id}:verify\x12\xa9\x03\n" +
+	"\tGetDomain\x12%.scalekit.v1.domains.GetDomainRequest\x1a&.scalekit.v1.domains.GetDomainResponse\"\xcc\x02\x92A\x86\x02\n" +
+	"\aDomains\x12\n" +
+	"Get Domain\x1a\x8d\x01Retrieves complete details for a specific allowed email domain or organization domain, including timestamps, and configuration information.\n" +
+	"\n" +
+	"J_\n" +
+	"\x03200\x12X\n" +
+	"*Successfully retrieved the domain details.\x12*\n" +
+	"(\x1a&.scalekit.v1.domains.GetDomainResponse\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x026\x124/api/v1/organizations/{organization_id}/domains/{id}\x12\xe2\x03\n" +
+	"\fDeleteDomain\x12(.scalekit.v1.domains.DeleteDomainRequest\x1a\x16.google.protobuf.Empty\"\x8f\x03\x92A\xc9\x02\n" +
+	"\aDomains\x12\rDelete Domain\x1a\x87\x02Permanently removes an allowed email domain or organization domain from the organization configuration.\n" +
+	"\n" +
+	"Use this endpoint when you need to remove a domain that is no longer trusted or when consolidating multiple domains. Note that this action cannot be undone.\n" +
+	"\n" +
+	"J%\n" +
+	"\x03200\x12\x1e\n" +
+	"\x1cDomain successfully deleted.\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x026*4/api/v1/organizations/{organization_id}/domains/{id}\x12\x9e\x05\n" +
+	"\vListDomains\x12&.scalekit.v1.domains.ListDomainRequest\x1a'.scalekit.v1.domains.ListDomainResponse\"\xbd\x04\x92A\xfc\x03\n" +
+	"\aDomains\x12\fList Domains\x1a\xff\x02Retrieves a paginated list of all allowed email domains and organization domains configured for the specified organization.Use this endpoint to view and manage domain configurations.\n" +
+	"\n" +
+	"ALLOWED_EMAIL_DOMAIN enables users to join an organization with automatic suggestions in the organization switcher.\n" +
+	"\n" +
+	"ORGANIZATION_DOMAIN is used to identify the SSO connection for the organization.\n" +
+	"\n" +
+	"Ja\n" +
+	"\x03200\x12Z\n" +
+	"+Successfully retrieved the list of domains.\x12+\n" +
+	")\x1a'.scalekit.v1.domains.ListDomainResponse\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x021\x12//api/v1/organizations/{organization_id}/domains\x12\x90\x05\n" +
+	"\x15ListAuthorizedDomains\x120.scalekit.v1.domains.ListAuthorizedDomainRequest\x1a1.scalekit.v1.domains.ListAuthorizedDomainResponse\"\x91\x04\x92A\xd8\x03\n" +
+	"\aDomains\x12\x17List Authorized Domains\x1a\xbb\x02Retrieves a list of domains that are authorized for use with the specified origin URL.\n" +
+	"\n" +
+	"Use this endpoint to validate whether a particular domain is allowed for authentication or other domain-restricted operations.\n" +
+	"\n" +
+	"This is commonly used by frontend applications to verify domain allowlists and CORS configurations.Jv\n" +
+	"\x03200\x12o\n" +
+	"6Successfully retrieved the list of authorized domains.\x125\n" +
+	"3\x1a1.scalekit.v1.domains.ListAuthorizedDomainResponse\x82\xb5\x18\x02\x18\x01\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02\x1a\x12\x18/api/v1/domains/{origin}B\xde\x01\n" +
 	"\x17com.scalekit.v1.domainsB\fDomainsProtoP\x01ZGgithub.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/domains\xa2\x02\x03SVD\xaa\x02\x13Scalekit.V1.Domains\xca\x02\x13Scalekit\\V1\\Domains\xe2\x02\x1fScalekit\\V1\\Domains\\GPBMetadata\xea\x02\x15Scalekit::V1::Domainsb\x06proto3"
 
 var (
@@ -1462,7 +1508,6 @@ func file_scalekit_v1_domains_domains_proto_init() {
 		(*VerifyDomainRequest_OrganizationId)(nil),
 		(*VerifyDomainRequest_ExternalId)(nil),
 	}
-	file_scalekit_v1_domains_domains_proto_msgTypes[14].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
