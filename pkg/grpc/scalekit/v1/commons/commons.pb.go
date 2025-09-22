@@ -138,7 +138,7 @@ type OrganizationMembership struct {
 	Name             *string                `protobuf:"bytes,5,opt,name=name,proto3,oneof" json:"name,omitempty"`
 	Metadata         map[string]string      `protobuf:"bytes,7,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	DisplayName      *string                `protobuf:"bytes,9,opt,name=display_name,json=displayName,proto3,oneof" json:"display_name,omitempty"`
-	InvitedBy        *string                `protobuf:"bytes,10,opt,name=invited_by,json=invitedBy,proto3,oneof" json:"invited_by,omitempty"`
+	InviterEmail     *string                `protobuf:"bytes,10,opt,name=inviter_email,json=inviterEmail,proto3,oneof" json:"inviter_email,omitempty"`
 	CreatedAt        *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3,oneof" json:"created_at,omitempty"`
 	AcceptedAt       *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=accepted_at,json=acceptedAt,proto3,oneof" json:"accepted_at,omitempty"`
 	ExpiresAt        *timestamppb.Timestamp `protobuf:"bytes,13,opt,name=expires_at,json=expiresAt,proto3,oneof" json:"expires_at,omitempty"`
@@ -225,9 +225,9 @@ func (x *OrganizationMembership) GetDisplayName() string {
 	return ""
 }
 
-func (x *OrganizationMembership) GetInvitedBy() string {
-	if x != nil && x.InvitedBy != nil {
-		return *x.InvitedBy
+func (x *OrganizationMembership) GetInviterEmail() string {
+	if x != nil && x.InviterEmail != nil {
+		return *x.InviterEmail
 	}
 	return ""
 }
@@ -425,7 +425,7 @@ var File_scalekit_v1_commons_commons_proto protoreflect.FileDescriptor
 
 const file_scalekit_v1_commons_commons_proto_rawDesc = "" +
 	"\n" +
-	"!scalekit/v1/commons/commons.proto\x12\x13scalekit.v1.commons\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\"\xb9\v\n" +
+	"!scalekit/v1/commons/commons.proto\x12\x13scalekit.v1.commons\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\"\xc2\v\n" +
 	"\x16OrganizationMembership\x12\x86\x01\n" +
 	"\x0forganization_id\x18\x01 \x01(\tB]\x92AZ2@Unique identifier for the organization. Immutable and read-only.J\x16\"org_1234abcd5678efgh\"R\x0eorganizationId\x12\x89\x01\n" +
 	"\tjoin_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampBP\x92AM2KTimestamp when the membership was created. Automatically set by the server.R\bjoinTime\x12R\n" +
@@ -435,10 +435,9 @@ const file_scalekit_v1_commons_commons_proto_rawDesc = "" +
 	"\"AcmeCorp\"H\x00R\x04name\x88\x01\x01\x12\x94\x02\n" +
 	"\bmetadata\x18\a \x03(\v29.scalekit.v1.commons.OrganizationMembership.MetadataEntryB\xbc\x01\x92A\x9f\x012dCustom key-value pairs for storing additional user context. Keys (3-25 chars), values (1-256 chars).J7{\"department\": \"engineering\", \"location\": \"nyc-office\"}\xbaH\x16\x9a\x01\x13\x10\x14\"\x06r\x04\x10\x03\x18\x19*\ar\x05\x10\x01\x18\x80\x02R\bmetadata\x12`\n" +
 	"\fdisplay_name\x18\t \x01(\tB8\x92A52'Display name for the Organization name.J\n" +
-	"\"AcmeCorp\"H\x01R\vdisplayName\x88\x01\x01\x12N\n" +
-	"\n" +
-	"invited_by\x18\n" +
-	" \x01(\tB*\x92A'2%ID of the user who invited this user.H\x02R\tinvitedBy\x88\x01\x01\x12o\n" +
+	"\"AcmeCorp\"H\x01R\vdisplayName\x88\x01\x01\x12T\n" +
+	"\rinviter_email\x18\n" +
+	" \x01(\tB*\x92A'2%ID of the user who invited this user.H\x02R\finviterEmail\x88\x01\x01\x12o\n" +
 	"\n" +
 	"created_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampB/\x92A,2*Timestamp when the invitation was created.H\x03R\tcreatedAt\x88\x01\x01\x12w\n" +
 	"\vaccepted_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampB5\x92A220Timestamp when the user accepted the invitation.H\x04R\n" +
@@ -449,8 +448,8 @@ const file_scalekit_v1_commons_commons_proto_rawDesc = "" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\a\n" +
 	"\x05_nameB\x0f\n" +
-	"\r_display_nameB\r\n" +
-	"\v_invited_byB\r\n" +
+	"\r_display_nameB\x10\n" +
+	"\x0e_inviter_emailB\r\n" +
 	"\v_created_atB\x0e\n" +
 	"\f_accepted_atB\r\n" +
 	"\v_expires_at\"\xe0\x01\n" +
