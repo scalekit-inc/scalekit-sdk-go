@@ -1929,7 +1929,7 @@ type Invite struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	OrganizationId string                 `protobuf:"bytes,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
 	UserId         string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	InvitedBy      *string                `protobuf:"bytes,3,opt,name=invited_by,json=invitedBy,proto3,oneof" json:"invited_by,omitempty"`
+	InviterEmail   *string                `protobuf:"bytes,3,opt,name=inviter_email,json=inviterEmail,proto3,oneof" json:"inviter_email,omitempty"`
 	Status         string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
 	CreatedAt      *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	ExpiresAt      *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
@@ -1983,9 +1983,9 @@ func (x *Invite) GetUserId() string {
 	return ""
 }
 
-func (x *Invite) GetInvitedBy() string {
-	if x != nil && x.InvitedBy != nil {
-		return *x.InvitedBy
+func (x *Invite) GetInviterEmail() string {
+	if x != nil && x.InviterEmail != nil {
+		return *x.InviterEmail
 	}
 	return ""
 }
@@ -2830,20 +2830,19 @@ const file_scalekit_v1_users_users_proto_rawDesc = "" +
 	"_last_nameB\a\n" +
 	"\x05_nameB\t\n" +
 	"\a_localeB\x0f\n" +
-	"\r_phone_numberJ\x04\b\x01\x10\x02J\x04\b\x06\x10\a\"\xeb\a\n" +
+	"\r_phone_numberJ\x04\b\x01\x10\x02J\x04\b\x06\x10\a\"\xf9\a\n" +
 	"\x06Invite\x12l\n" +
 	"\x0forganization_id\x18\x01 \x01(\tBC\x92A@2-The organization to which the invite belongs.J\x0f\"org_987654321\"R\x0eorganizationId\x12\x7f\n" +
-	"\auser_id\x18\x02 \x01(\tBf\x92Ac2SUser ID to whom the invite is sent. May be empty if the user has not signed up yet.J\f\"usr_123456\"R\x06userId\x12t\n" +
-	"\n" +
-	"invited_by\x18\x03 \x01(\tBP\x92AM2;Identifier of the user or system that initiated the invite.J\x0e\"admin_998877\"H\x00R\tinvitedBy\x88\x01\x01\x12x\n" +
+	"\auser_id\x18\x02 \x01(\tBf\x92Ac2SUser ID to whom the invite is sent. May be empty if the user has not signed up yet.J\f\"usr_123456\"R\x06userId\x12\x7f\n" +
+	"\rinviter_email\x18\x03 \x01(\tBU\x92AR2;Identifier of the user or system that initiated the invite.J\x13\"admin@example.com\"H\x00R\finviterEmail\x88\x01\x01\x12x\n" +
 	"\x06status\x18\x04 \x01(\tB`\x92A]2ICurrent status of the invite (e.g., pending, accepted, expired, revoked).J\x10\"pending_invite\"R\x06status\x12\x89\x01\n" +
 	"\n" +
 	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampBN\x92AK21Timestamp when the invite was originally created.J\x16\"2025-07-10T08:00:00Z\"R\tcreatedAt\x12}\n" +
 	"\n" +
 	"expires_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampBB\x92A?2%The time at which the invite expires.J\x16\"2025-12-31T23:59:59Z\"R\texpiresAt\x12\x8f\x01\n" +
 	"\tresent_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampBV\x92AS29Timestamp when the invite was last resent, if applicable.J\x16\"2025-07-15T09:30:00Z\"R\bresentAt\x12V\n" +
-	"\fresent_count\x18\b \x01(\x05B3\x92A02+Number of times the invite has been resent.J\x012R\vresentCountB\r\n" +
-	"\v_invited_by\"\xa3\x03\n" +
+	"\fresent_count\x18\b \x01(\x05B3\x92A02+Number of times the invite has been resent.J\x012R\vresentCountB\x10\n" +
+	"\x0e_inviter_email\"\xa3\x03\n" +
 	"\x13ResendInviteRequest\x12\xd3\x01\n" +
 	"\x0forganization_id\x18\x01 \x01(\tB\xa9\x01\x92A\x96\x012|Unique identifier of the organization containing the pending invitation. Must start with 'org_' and be 1-32 characters long.J\x16\"org_1234abcd5678efgh\"\xbaH\fr\n" +
 	"\x10\x01\x18 :\x04org_R\x0eorganizationId\x12\xb5\x01\n" +
@@ -2880,7 +2879,7 @@ const file_scalekit_v1_users_users_proto_rawDesc = "" +
 	"\vdescription\x18\x04 \x01(\tBS\x92AP2)Description of what the permission allowsJ#\"Allows creating new user accounts\"R\vdescription\x12X\n" +
 	"\x04tags\x18\x05 \x03(\tBD\x92AA2!Tags for categorizing permissionsJ\x1c[\"user-management\", \"admin\"]R\x04tags\"\x8f\x01\n" +
 	"\x1bListUserPermissionsResponse\x12p\n" +
-	"\vpermissions\x18\x01 \x03(\v2\x1d.scalekit.v1.users.PermissionB/\x92A,2*List of permissions the user has access toR\vpermissions2×\x01\n" +
+	"\vpermissions\x18\x01 \x03(\v2\x1d.scalekit.v1.users.PermissionB/\x92A,2*List of permissions the user has access toR\vpermissions2\xb4\x97\x01\n" +
 	"\vUserService\x12\xb8\x03\n" +
 	"\aGetUser\x12!.scalekit.v1.users.GetUserRequest\x1a\".scalekit.v1.users.GetUserResponse\"\xe5\x02\x92A\xc1\x02\n" +
 	"\x05Users\x12\bGet user\x1a\x8e\x01Retrieves all details for a user by system-generated user ID or external ID. The response includes organization memberships and user metadata.J\x9c\x01\n" +
@@ -3180,12 +3179,12 @@ const file_scalekit_v1_users_users_proto_rawDesc = "" +
 	"j\n" +
 	"\x06source\x12`\x1a^response = scalekit_client.users.delete_membership(\n" +
 	"  organization_id=org_id,user_id=user_id\n" +
-	")\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02@*>/api/v1/memberships/organizations/{organization_id}/users/{id}\x12\x8c\x04\n" +
-	"\x10UpdateMembership\x12*.scalekit.v1.users.UpdateMembershipRequest\x1a+.scalekit.v1.users.UpdateMembershipResponse\"\x9e\x03\x92A\xb3\x02\n" +
+	")\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02@*>/api/v1/memberships/organizations/{organization_id}/users/{id}\x12\xfd\x03\n" +
+	"\x10UpdateMembership\x12*.scalekit.v1.users.UpdateMembershipRequest\x1a+.scalekit.v1.users.UpdateMembershipResponse\"\x8f\x03\x92A\xb3\x02\n" +
 	"\x05Users\x12'Update organization membership for user\x1a\x83\x01Updates a user's membership details within an organization by user ID or external ID. You can update roles and membership metadata.J{\n" +
 	"\x03200\x12t\n" +
 	"AMembership updated successfully. Returns the updated user object.\x12/\n" +
-	"-\x1a+.scalekit.v1.users.UpdateMembershipResponse\x82\xb5\x18\x02\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02L:\n" +
+	"-\x1a+.scalekit.v1.users.UpdateMembershipResponse\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02L:\n" +
 	"membership2>/api/v1/memberships/organizations/{organization_id}/users/{id}\x12\x9d\x18\n" +
 	"\x17CreateUserAndMembership\x121.scalekit.v1.users.CreateUserAndMembershipRequest\x1a2.scalekit.v1.users.CreateUserAndMembershipResponse\"\x9a\x17\x92A\xd5\x16\n" +
 	"\x05Users\x12\x1fCreate new user in organization\x1a\x83\x03Creates a new user account and immediately adds them to the specified organization. Use this endpoint when you want to create a user and grant them access to an organization in a single operation. You can provide user profile information, assign roles, and configure membership metadata. The user receives an activation email unless this feature is disabled in the organization settings.J\xb3\x01\n" +
