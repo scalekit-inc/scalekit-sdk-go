@@ -72,6 +72,9 @@ func (x *SessionDetailsRequest) GetSessionId() string {
 type UserSessionDetailsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	PageSize      uint32                 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
+	Filter        *UserSessionFilter     `protobuf:"bytes,4,opt,name=filter,proto3" json:"filter,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -113,6 +116,87 @@ func (x *UserSessionDetailsRequest) GetUserId() string {
 	return ""
 }
 
+func (x *UserSessionDetailsRequest) GetPageSize() uint32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *UserSessionDetailsRequest) GetPageToken() string {
+	if x != nil {
+		return x.PageToken
+	}
+	return ""
+}
+
+func (x *UserSessionDetailsRequest) GetFilter() *UserSessionFilter {
+	if x != nil {
+		return x.Filter
+	}
+	return nil
+}
+
+type UserSessionFilter struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Status        []string               `protobuf:"bytes,1,rep,name=status,proto3" json:"status,omitempty"`
+	StartTime     *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	EndTime       *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UserSessionFilter) Reset() {
+	*x = UserSessionFilter{}
+	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UserSessionFilter) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UserSessionFilter) ProtoMessage() {}
+
+func (x *UserSessionFilter) ProtoReflect() protoreflect.Message {
+	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UserSessionFilter.ProtoReflect.Descriptor instead.
+func (*UserSessionFilter) Descriptor() ([]byte, []int) {
+	return file_scalekit_v1_sessions_sessions_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *UserSessionFilter) GetStatus() []string {
+	if x != nil {
+		return x.Status
+	}
+	return nil
+}
+
+func (x *UserSessionFilter) GetStartTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.StartTime
+	}
+	return nil
+}
+
+func (x *UserSessionFilter) GetEndTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.EndTime
+	}
+	return nil
+}
+
 type RevokeSessionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
@@ -122,7 +206,7 @@ type RevokeSessionRequest struct {
 
 func (x *RevokeSessionRequest) Reset() {
 	*x = RevokeSessionRequest{}
-	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[2]
+	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -134,7 +218,7 @@ func (x *RevokeSessionRequest) String() string {
 func (*RevokeSessionRequest) ProtoMessage() {}
 
 func (x *RevokeSessionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[2]
+	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -147,7 +231,7 @@ func (x *RevokeSessionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RevokeSessionRequest.ProtoReflect.Descriptor instead.
 func (*RevokeSessionRequest) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_sessions_sessions_proto_rawDescGZIP(), []int{2}
+	return file_scalekit_v1_sessions_sessions_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *RevokeSessionRequest) GetSessionId() string {
@@ -159,14 +243,14 @@ func (x *RevokeSessionRequest) GetSessionId() string {
 
 type RevokeSessionResponse struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	RevokedSession *SessionDetails        `protobuf:"bytes,1,opt,name=revoked_session,json=revokedSession,proto3" json:"revoked_session,omitempty"`
+	RevokedSession *RevokedSessionDetails `protobuf:"bytes,1,opt,name=revoked_session,json=revokedSession,proto3" json:"revoked_session,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
 
 func (x *RevokeSessionResponse) Reset() {
 	*x = RevokeSessionResponse{}
-	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[3]
+	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -178,7 +262,7 @@ func (x *RevokeSessionResponse) String() string {
 func (*RevokeSessionResponse) ProtoMessage() {}
 
 func (x *RevokeSessionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[3]
+	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -191,26 +275,125 @@ func (x *RevokeSessionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RevokeSessionResponse.ProtoReflect.Descriptor instead.
 func (*RevokeSessionResponse) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_sessions_sessions_proto_rawDescGZIP(), []int{3}
+	return file_scalekit_v1_sessions_sessions_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *RevokeSessionResponse) GetRevokedSession() *SessionDetails {
+func (x *RevokeSessionResponse) GetRevokedSession() *RevokedSessionDetails {
 	if x != nil {
 		return x.RevokedSession
 	}
 	return nil
 }
 
+type RevokeAllUserSessionsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RevokeAllUserSessionsRequest) Reset() {
+	*x = RevokeAllUserSessionsRequest{}
+	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RevokeAllUserSessionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RevokeAllUserSessionsRequest) ProtoMessage() {}
+
+func (x *RevokeAllUserSessionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RevokeAllUserSessionsRequest.ProtoReflect.Descriptor instead.
+func (*RevokeAllUserSessionsRequest) Descriptor() ([]byte, []int) {
+	return file_scalekit_v1_sessions_sessions_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *RevokeAllUserSessionsRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+type RevokeAllUserSessionsResponse struct {
+	state           protoimpl.MessageState   `protogen:"open.v1"`
+	RevokedSessions []*RevokedSessionDetails `protobuf:"bytes,1,rep,name=revoked_sessions,json=revokedSessions,proto3" json:"revoked_sessions,omitempty"`
+	TotalRevoked    uint32                   `protobuf:"varint,2,opt,name=total_revoked,json=totalRevoked,proto3" json:"total_revoked,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *RevokeAllUserSessionsResponse) Reset() {
+	*x = RevokeAllUserSessionsResponse{}
+	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RevokeAllUserSessionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RevokeAllUserSessionsResponse) ProtoMessage() {}
+
+func (x *RevokeAllUserSessionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RevokeAllUserSessionsResponse.ProtoReflect.Descriptor instead.
+func (*RevokeAllUserSessionsResponse) Descriptor() ([]byte, []int) {
+	return file_scalekit_v1_sessions_sessions_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *RevokeAllUserSessionsResponse) GetRevokedSessions() []*RevokedSessionDetails {
+	if x != nil {
+		return x.RevokedSessions
+	}
+	return nil
+}
+
+func (x *RevokeAllUserSessionsResponse) GetTotalRevoked() uint32 {
+	if x != nil {
+		return x.TotalRevoked
+	}
+	return 0
+}
+
 type UserSessionDetails struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Sessions      []*SessionDetails      `protobuf:"bytes,1,rep,name=sessions,proto3" json:"sessions,omitempty"`
+	NextPageToken string                 `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	PrevPageToken string                 `protobuf:"bytes,3,opt,name=prev_page_token,json=prevPageToken,proto3" json:"prev_page_token,omitempty"`
+	TotalSize     uint32                 `protobuf:"varint,4,opt,name=total_size,json=totalSize,proto3" json:"total_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UserSessionDetails) Reset() {
 	*x = UserSessionDetails{}
-	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[4]
+	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -222,7 +405,7 @@ func (x *UserSessionDetails) String() string {
 func (*UserSessionDetails) ProtoMessage() {}
 
 func (x *UserSessionDetails) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[4]
+	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -235,7 +418,7 @@ func (x *UserSessionDetails) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserSessionDetails.ProtoReflect.Descriptor instead.
 func (*UserSessionDetails) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_sessions_sessions_proto_rawDescGZIP(), []int{4}
+	return file_scalekit_v1_sessions_sessions_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *UserSessionDetails) GetSessions() []*SessionDetails {
@@ -243,6 +426,27 @@ func (x *UserSessionDetails) GetSessions() []*SessionDetails {
 		return x.Sessions
 	}
 	return nil
+}
+
+func (x *UserSessionDetails) GetNextPageToken() string {
+	if x != nil {
+		return x.NextPageToken
+	}
+	return ""
+}
+
+func (x *UserSessionDetails) GetPrevPageToken() string {
+	if x != nil {
+		return x.PrevPageToken
+	}
+	return ""
+}
+
+func (x *UserSessionDetails) GetTotalSize() uint32 {
+	if x != nil {
+		return x.TotalSize
+	}
+	return 0
 }
 
 type SessionDetails struct {
@@ -280,7 +484,7 @@ type SessionDetails struct {
 
 func (x *SessionDetails) Reset() {
 	*x = SessionDetails{}
-	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[5]
+	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -292,7 +496,7 @@ func (x *SessionDetails) String() string {
 func (*SessionDetails) ProtoMessage() {}
 
 func (x *SessionDetails) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[5]
+	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -305,7 +509,7 @@ func (x *SessionDetails) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SessionDetails.ProtoReflect.Descriptor instead.
 func (*SessionDetails) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_sessions_sessions_proto_rawDescGZIP(), []int{5}
+	return file_scalekit_v1_sessions_sessions_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *SessionDetails) GetSessionId() string {
@@ -497,6 +701,114 @@ func (x *SessionDetails) GetLatestLocation() *Location {
 	return nil
 }
 
+type RevokedSessionDetails struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	SessionId         string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	UserId            string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	CreatedAt         *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt         *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	IdleExpiresAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=idle_expires_at,json=idleExpiresAt,proto3" json:"idle_expires_at,omitempty"`
+	AbsoluteExpiresAt *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=absolute_expires_at,json=absoluteExpiresAt,proto3" json:"absolute_expires_at,omitempty"`
+	ExpiredAt         *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=expired_at,json=expiredAt,proto3" json:"expired_at,omitempty"`
+	LogoutAt          *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=logout_at,json=logoutAt,proto3" json:"logout_at,omitempty"`
+	Status            string                 `protobuf:"bytes,11,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *RevokedSessionDetails) Reset() {
+	*x = RevokedSessionDetails{}
+	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RevokedSessionDetails) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RevokedSessionDetails) ProtoMessage() {}
+
+func (x *RevokedSessionDetails) ProtoReflect() protoreflect.Message {
+	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RevokedSessionDetails.ProtoReflect.Descriptor instead.
+func (*RevokedSessionDetails) Descriptor() ([]byte, []int) {
+	return file_scalekit_v1_sessions_sessions_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *RevokedSessionDetails) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *RevokedSessionDetails) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *RevokedSessionDetails) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *RevokedSessionDetails) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return nil
+}
+
+func (x *RevokedSessionDetails) GetIdleExpiresAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.IdleExpiresAt
+	}
+	return nil
+}
+
+func (x *RevokedSessionDetails) GetAbsoluteExpiresAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.AbsoluteExpiresAt
+	}
+	return nil
+}
+
+func (x *RevokedSessionDetails) GetExpiredAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ExpiredAt
+	}
+	return nil
+}
+
+func (x *RevokedSessionDetails) GetLogoutAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.LogoutAt
+	}
+	return nil
+}
+
+func (x *RevokedSessionDetails) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
 type Location struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
 	Region            string                 `protobuf:"bytes,1,opt,name=region,proto3" json:"region,omitempty"`
@@ -510,7 +822,7 @@ type Location struct {
 
 func (x *Location) Reset() {
 	*x = Location{}
-	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[6]
+	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -522,7 +834,7 @@ func (x *Location) String() string {
 func (*Location) ProtoMessage() {}
 
 func (x *Location) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[6]
+	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -535,7 +847,7 @@ func (x *Location) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Location.ProtoReflect.Descriptor instead.
 func (*Location) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_sessions_sessions_proto_rawDescGZIP(), []int{6}
+	return file_scalekit_v1_sessions_sessions_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *Location) GetRegion() string {
@@ -577,19 +889,37 @@ var File_scalekit_v1_sessions_sessions_proto protoreflect.FileDescriptor
 
 const file_scalekit_v1_sessions_sessions_proto_rawDesc = "" +
 	"\n" +
-	"#scalekit/v1/sessions/sessions.proto\x12\x15scalekit.v1.auditlogs\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/api/visibility.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a!scalekit/v1/options/options.proto\"N\n" +
+	"#scalekit/v1/sessions/sessions.proto\x12\x14scalekit.v1.sessions\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/api/visibility.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a!scalekit/v1/options/options.proto\"N\n" +
 	"\x15SessionDetailsRequest\x125\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\tB\x16\xbaH\x13\xc8\x01\x01r\x0e2\f^ses_[0-9]+$R\tsessionId\"L\n" +
+	"session_id\x18\x01 \x01(\tB\x16\xbaH\x13\xc8\x01\x01r\x0e2\f^ses_[0-9]+$R\tsessionId\"\xc9\x01\n" +
 	"\x19UserSessionDetailsRequest\x12/\n" +
-	"\auser_id\x18\x01 \x01(\tB\x16\xbaH\x13\xc8\x01\x01r\x0e2\f^usr_[0-9]+$R\x06userId\"M\n" +
+	"\auser_id\x18\x01 \x01(\tB\x16\xbaH\x13\xc8\x01\x01r\x0e2\f^usr_[0-9]+$R\x06userId\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\rR\bpageSize\x12\x1d\n" +
+	"\n" +
+	"page_token\x18\x03 \x01(\tR\tpageToken\x12?\n" +
+	"\x06filter\x18\x04 \x01(\v2'.scalekit.v1.sessions.UserSessionFilterR\x06filter\"\x9d\x01\n" +
+	"\x11UserSessionFilter\x12\x16\n" +
+	"\x06status\x18\x01 \x03(\tR\x06status\x129\n" +
+	"\n" +
+	"start_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\tstartTime\x125\n" +
+	"\bend_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\aendTime\"M\n" +
 	"\x14RevokeSessionRequest\x125\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\tB\x16\xbaH\x13\xc8\x01\x01r\x0e2\f^ses_[0-9]+$R\tsessionId\"g\n" +
-	"\x15RevokeSessionResponse\x12N\n" +
-	"\x0frevoked_session\x18\x01 \x01(\v2%.scalekit.v1.auditlogs.SessionDetailsR\x0erevokedSession\"W\n" +
-	"\x12UserSessionDetails\x12A\n" +
-	"\bsessions\x18\x01 \x03(\v2%.scalekit.v1.auditlogs.SessionDetailsR\bsessions\"\xa2\n" +
+	"session_id\x18\x01 \x01(\tB\x16\xbaH\x13\xc8\x01\x01r\x0e2\f^ses_[0-9]+$R\tsessionId\"m\n" +
+	"\x15RevokeSessionResponse\x12T\n" +
+	"\x0frevoked_session\x18\x01 \x01(\v2+.scalekit.v1.sessions.RevokedSessionDetailsR\x0erevokedSession\"O\n" +
+	"\x1cRevokeAllUserSessionsRequest\x12/\n" +
+	"\auser_id\x18\x01 \x01(\tB\x16\xbaH\x13\xc8\x01\x01r\x0e2\f^usr_[0-9]+$R\x06userId\"\x9c\x01\n" +
+	"\x1dRevokeAllUserSessionsResponse\x12V\n" +
+	"\x10revoked_sessions\x18\x01 \x03(\v2+.scalekit.v1.sessions.RevokedSessionDetailsR\x0frevokedSessions\x12#\n" +
+	"\rtotal_revoked\x18\x02 \x01(\rR\ftotalRevoked\"\xc5\x01\n" +
+	"\x12UserSessionDetails\x12@\n" +
+	"\bsessions\x18\x01 \x03(\v2$.scalekit.v1.sessions.SessionDetailsR\bsessions\x12&\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\x12&\n" +
+	"\x0fprev_page_token\x18\x03 \x01(\tR\rprevPageToken\x12\x1d\n" +
+	"\n" +
+	"total_size\x18\x04 \x01(\rR\ttotalSize\"\xa0\n" +
 	"\n" +
 	"\x0eSessionDetails\x12\x1d\n" +
 	"\n" +
@@ -616,28 +946,44 @@ const file_scalekit_v1_sessions_sessions_proto_rawDesc = "" +
 	"\x17initial_browser_version\x18\x10 \x01(\tR\x15initialBrowserVersion\x12.\n" +
 	"\x13initial_device_type\x18\x11 \x01(\tR\x11initialDeviceType\x12\x1d\n" +
 	"\n" +
-	"initial_ip\x18\x13 \x01(\tR\tinitialIp\x12J\n" +
-	"\x10initial_location\x18\x14 \x01(\v2\x1f.scalekit.v1.auditlogs.LocationR\x0finitialLocation\x12*\n" +
+	"initial_ip\x18\x13 \x01(\tR\tinitialIp\x12I\n" +
+	"\x10initial_location\x18\x14 \x01(\v2\x1e.scalekit.v1.sessions.LocationR\x0finitialLocation\x12*\n" +
 	"\x11latest_user_agent\x18\x15 \x01(\tR\x0flatestUserAgent\x12\x1b\n" +
 	"\tlatest_os\x18\x16 \x01(\tR\blatestOs\x12*\n" +
 	"\x11latest_os_version\x18\x17 \x01(\tR\x0flatestOsVersion\x12%\n" +
 	"\x0elatest_browser\x18\x18 \x01(\tR\rlatestBrowser\x124\n" +
 	"\x16latest_browser_version\x18\x19 \x01(\tR\x14latestBrowserVersion\x12,\n" +
 	"\x12latest_device_type\x18\x1a \x01(\tR\x10latestDeviceType\x12\x1b\n" +
-	"\tlatest_ip\x18\x1c \x01(\tR\blatestIp\x12H\n" +
-	"\x0flatest_location\x18\x1d \x01(\v2\x1f.scalekit.v1.auditlogs.LocationR\x0elatestLocation\"\x9f\x01\n" +
+	"\tlatest_ip\x18\x1c \x01(\tR\blatestIp\x12G\n" +
+	"\x0flatest_location\x18\x1d \x01(\v2\x1e.scalekit.v1.sessions.LocationR\x0elatestLocation\"\xe1\x03\n" +
+	"\x15RevokedSessionDetails\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x129\n" +
+	"\n" +
+	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
+	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12B\n" +
+	"\x0fidle_expires_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\ridleExpiresAt\x12J\n" +
+	"\x13absolute_expires_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\x11absoluteExpiresAt\x129\n" +
+	"\n" +
+	"expired_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\texpiredAt\x127\n" +
+	"\tlogout_at\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\blogoutAt\x12\x16\n" +
+	"\x06status\x18\v \x01(\tR\x06status\"\x9f\x01\n" +
 	"\bLocation\x12\x16\n" +
 	"\x06region\x18\x01 \x01(\tR\x06region\x12-\n" +
 	"\x12region_subdivision\x18\x02 \x01(\tR\x11regionSubdivision\x12\x12\n" +
 	"\x04city\x18\x03 \x01(\tR\x04city\x12\x1a\n" +
 	"\blatitude\x18\x04 \x01(\tR\blatitude\x12\x1c\n" +
-	"\tlongitude\x18\x05 \x01(\tR\tlongitude2\x90\x04\n" +
-	"\x0eSessionService\x12\x9d\x01\n" +
+	"\tlongitude\x18\x05 \x01(\tR\tlongitude2\xd3\x05\n" +
+	"\x0eSessionService\x12\x9b\x01\n" +
 	"\n" +
-	"GetSession\x12,.scalekit.v1.auditlogs.SessionDetailsRequest\x1a%.scalekit.v1.auditlogs.SessionDetails\":\x82\xb5\x18\x02\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02\x1f\x12\x1d/api/v1/sessions/{session_id}\x12\xad\x01\n" +
-	"\rRevokeSession\x12+.scalekit.v1.auditlogs.RevokeSessionRequest\x1a,.scalekit.v1.auditlogs.RevokeSessionResponse\"A\x82\xb5\x18\x02\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02&\"$/api/v1/sessions/{session_id}/revoke\x12\xad\x01\n" +
-	"\x0fGetUserSessions\x120.scalekit.v1.auditlogs.UserSessionDetailsRequest\x1a).scalekit.v1.auditlogs.UserSessionDetails\"=\x82\xb5\x18\x02\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02\"\x12 /api/v1/users/{user_id}/sessionsB\xea\x01\n" +
-	"\x19com.scalekit.v1.auditlogsB\rSessionsProtoP\x01ZHgithub.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/sessions\xa2\x02\x03SVA\xaa\x02\x15Scalekit.V1.Auditlogs\xca\x02\x15Scalekit\\V1\\Auditlogs\xe2\x02!Scalekit\\V1\\Auditlogs\\GPBMetadata\xea\x02\x17Scalekit::V1::Auditlogsb\x06proto3"
+	"GetSession\x12+.scalekit.v1.sessions.SessionDetailsRequest\x1a$.scalekit.v1.sessions.SessionDetails\":\x82\xb5\x18\x02\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02\x1f\x12\x1d/api/v1/sessions/{session_id}\x12\xab\x01\n" +
+	"\rRevokeSession\x12*.scalekit.v1.sessions.RevokeSessionRequest\x1a+.scalekit.v1.sessions.RevokeSessionResponse\"A\x82\xb5\x18\x02\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02&\"$/api/v1/sessions/{session_id}/revoke\x12\xab\x01\n" +
+	"\x0fGetUserSessions\x12/.scalekit.v1.sessions.UserSessionDetailsRequest\x1a(.scalekit.v1.sessions.UserSessionDetails\"=\x82\xb5\x18\x02\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02\"\x12 /api/v1/users/{user_id}/sessions\x12\xc6\x01\n" +
+	"\x15RevokeAllUserSessions\x122.scalekit.v1.sessions.RevokeAllUserSessionsRequest\x1a3.scalekit.v1.sessions.RevokeAllUserSessionsResponse\"D\x82\xb5\x18\x02\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02)\"'/api/v1/users/{user_id}/sessions/revokeB\xe5\x01\n" +
+	"\x18com.scalekit.v1.sessionsB\rSessionsProtoP\x01ZHgithub.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/sessions\xa2\x02\x03SVS\xaa\x02\x14Scalekit.V1.Sessions\xca\x02\x14Scalekit\\V1\\Sessions\xe2\x02 Scalekit\\V1\\Sessions\\GPBMetadata\xea\x02\x16Scalekit::V1::Sessionsb\x06proto3"
 
 var (
 	file_scalekit_v1_sessions_sessions_proto_rawDescOnce sync.Once
@@ -651,39 +997,55 @@ func file_scalekit_v1_sessions_sessions_proto_rawDescGZIP() []byte {
 	return file_scalekit_v1_sessions_sessions_proto_rawDescData
 }
 
-var file_scalekit_v1_sessions_sessions_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_scalekit_v1_sessions_sessions_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_scalekit_v1_sessions_sessions_proto_goTypes = []any{
-	(*SessionDetailsRequest)(nil),     // 0: scalekit.v1.auditlogs.SessionDetailsRequest
-	(*UserSessionDetailsRequest)(nil), // 1: scalekit.v1.auditlogs.UserSessionDetailsRequest
-	(*RevokeSessionRequest)(nil),      // 2: scalekit.v1.auditlogs.RevokeSessionRequest
-	(*RevokeSessionResponse)(nil),     // 3: scalekit.v1.auditlogs.RevokeSessionResponse
-	(*UserSessionDetails)(nil),        // 4: scalekit.v1.auditlogs.UserSessionDetails
-	(*SessionDetails)(nil),            // 5: scalekit.v1.auditlogs.SessionDetails
-	(*Location)(nil),                  // 6: scalekit.v1.auditlogs.Location
-	(*timestamppb.Timestamp)(nil),     // 7: google.protobuf.Timestamp
+	(*SessionDetailsRequest)(nil),         // 0: scalekit.v1.sessions.SessionDetailsRequest
+	(*UserSessionDetailsRequest)(nil),     // 1: scalekit.v1.sessions.UserSessionDetailsRequest
+	(*UserSessionFilter)(nil),             // 2: scalekit.v1.sessions.UserSessionFilter
+	(*RevokeSessionRequest)(nil),          // 3: scalekit.v1.sessions.RevokeSessionRequest
+	(*RevokeSessionResponse)(nil),         // 4: scalekit.v1.sessions.RevokeSessionResponse
+	(*RevokeAllUserSessionsRequest)(nil),  // 5: scalekit.v1.sessions.RevokeAllUserSessionsRequest
+	(*RevokeAllUserSessionsResponse)(nil), // 6: scalekit.v1.sessions.RevokeAllUserSessionsResponse
+	(*UserSessionDetails)(nil),            // 7: scalekit.v1.sessions.UserSessionDetails
+	(*SessionDetails)(nil),                // 8: scalekit.v1.sessions.SessionDetails
+	(*RevokedSessionDetails)(nil),         // 9: scalekit.v1.sessions.RevokedSessionDetails
+	(*Location)(nil),                      // 10: scalekit.v1.sessions.Location
+	(*timestamppb.Timestamp)(nil),         // 11: google.protobuf.Timestamp
 }
 var file_scalekit_v1_sessions_sessions_proto_depIdxs = []int32{
-	5,  // 0: scalekit.v1.auditlogs.RevokeSessionResponse.revoked_session:type_name -> scalekit.v1.auditlogs.SessionDetails
-	5,  // 1: scalekit.v1.auditlogs.UserSessionDetails.sessions:type_name -> scalekit.v1.auditlogs.SessionDetails
-	7,  // 2: scalekit.v1.auditlogs.SessionDetails.created_at:type_name -> google.protobuf.Timestamp
-	7,  // 3: scalekit.v1.auditlogs.SessionDetails.updated_at:type_name -> google.protobuf.Timestamp
-	7,  // 4: scalekit.v1.auditlogs.SessionDetails.idle_expires_at:type_name -> google.protobuf.Timestamp
-	7,  // 5: scalekit.v1.auditlogs.SessionDetails.absolute_expires_at:type_name -> google.protobuf.Timestamp
-	7,  // 6: scalekit.v1.auditlogs.SessionDetails.expired_at:type_name -> google.protobuf.Timestamp
-	7,  // 7: scalekit.v1.auditlogs.SessionDetails.logout_at:type_name -> google.protobuf.Timestamp
-	6,  // 8: scalekit.v1.auditlogs.SessionDetails.initial_location:type_name -> scalekit.v1.auditlogs.Location
-	6,  // 9: scalekit.v1.auditlogs.SessionDetails.latest_location:type_name -> scalekit.v1.auditlogs.Location
-	0,  // 10: scalekit.v1.auditlogs.SessionService.GetSession:input_type -> scalekit.v1.auditlogs.SessionDetailsRequest
-	2,  // 11: scalekit.v1.auditlogs.SessionService.RevokeSession:input_type -> scalekit.v1.auditlogs.RevokeSessionRequest
-	1,  // 12: scalekit.v1.auditlogs.SessionService.GetUserSessions:input_type -> scalekit.v1.auditlogs.UserSessionDetailsRequest
-	5,  // 13: scalekit.v1.auditlogs.SessionService.GetSession:output_type -> scalekit.v1.auditlogs.SessionDetails
-	3,  // 14: scalekit.v1.auditlogs.SessionService.RevokeSession:output_type -> scalekit.v1.auditlogs.RevokeSessionResponse
-	4,  // 15: scalekit.v1.auditlogs.SessionService.GetUserSessions:output_type -> scalekit.v1.auditlogs.UserSessionDetails
-	13, // [13:16] is the sub-list for method output_type
-	10, // [10:13] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	2,  // 0: scalekit.v1.sessions.UserSessionDetailsRequest.filter:type_name -> scalekit.v1.sessions.UserSessionFilter
+	11, // 1: scalekit.v1.sessions.UserSessionFilter.start_time:type_name -> google.protobuf.Timestamp
+	11, // 2: scalekit.v1.sessions.UserSessionFilter.end_time:type_name -> google.protobuf.Timestamp
+	9,  // 3: scalekit.v1.sessions.RevokeSessionResponse.revoked_session:type_name -> scalekit.v1.sessions.RevokedSessionDetails
+	9,  // 4: scalekit.v1.sessions.RevokeAllUserSessionsResponse.revoked_sessions:type_name -> scalekit.v1.sessions.RevokedSessionDetails
+	8,  // 5: scalekit.v1.sessions.UserSessionDetails.sessions:type_name -> scalekit.v1.sessions.SessionDetails
+	11, // 6: scalekit.v1.sessions.SessionDetails.created_at:type_name -> google.protobuf.Timestamp
+	11, // 7: scalekit.v1.sessions.SessionDetails.updated_at:type_name -> google.protobuf.Timestamp
+	11, // 8: scalekit.v1.sessions.SessionDetails.idle_expires_at:type_name -> google.protobuf.Timestamp
+	11, // 9: scalekit.v1.sessions.SessionDetails.absolute_expires_at:type_name -> google.protobuf.Timestamp
+	11, // 10: scalekit.v1.sessions.SessionDetails.expired_at:type_name -> google.protobuf.Timestamp
+	11, // 11: scalekit.v1.sessions.SessionDetails.logout_at:type_name -> google.protobuf.Timestamp
+	10, // 12: scalekit.v1.sessions.SessionDetails.initial_location:type_name -> scalekit.v1.sessions.Location
+	10, // 13: scalekit.v1.sessions.SessionDetails.latest_location:type_name -> scalekit.v1.sessions.Location
+	11, // 14: scalekit.v1.sessions.RevokedSessionDetails.created_at:type_name -> google.protobuf.Timestamp
+	11, // 15: scalekit.v1.sessions.RevokedSessionDetails.updated_at:type_name -> google.protobuf.Timestamp
+	11, // 16: scalekit.v1.sessions.RevokedSessionDetails.idle_expires_at:type_name -> google.protobuf.Timestamp
+	11, // 17: scalekit.v1.sessions.RevokedSessionDetails.absolute_expires_at:type_name -> google.protobuf.Timestamp
+	11, // 18: scalekit.v1.sessions.RevokedSessionDetails.expired_at:type_name -> google.protobuf.Timestamp
+	11, // 19: scalekit.v1.sessions.RevokedSessionDetails.logout_at:type_name -> google.protobuf.Timestamp
+	0,  // 20: scalekit.v1.sessions.SessionService.GetSession:input_type -> scalekit.v1.sessions.SessionDetailsRequest
+	3,  // 21: scalekit.v1.sessions.SessionService.RevokeSession:input_type -> scalekit.v1.sessions.RevokeSessionRequest
+	1,  // 22: scalekit.v1.sessions.SessionService.GetUserSessions:input_type -> scalekit.v1.sessions.UserSessionDetailsRequest
+	5,  // 23: scalekit.v1.sessions.SessionService.RevokeAllUserSessions:input_type -> scalekit.v1.sessions.RevokeAllUserSessionsRequest
+	8,  // 24: scalekit.v1.sessions.SessionService.GetSession:output_type -> scalekit.v1.sessions.SessionDetails
+	4,  // 25: scalekit.v1.sessions.SessionService.RevokeSession:output_type -> scalekit.v1.sessions.RevokeSessionResponse
+	7,  // 26: scalekit.v1.sessions.SessionService.GetUserSessions:output_type -> scalekit.v1.sessions.UserSessionDetails
+	6,  // 27: scalekit.v1.sessions.SessionService.RevokeAllUserSessions:output_type -> scalekit.v1.sessions.RevokeAllUserSessionsResponse
+	24, // [24:28] is the sub-list for method output_type
+	20, // [20:24] is the sub-list for method input_type
+	20, // [20:20] is the sub-list for extension type_name
+	20, // [20:20] is the sub-list for extension extendee
+	0,  // [0:20] is the sub-list for field type_name
 }
 
 func init() { file_scalekit_v1_sessions_sessions_proto_init() }
@@ -697,7 +1059,7 @@ func file_scalekit_v1_sessions_sessions_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_scalekit_v1_sessions_sessions_proto_rawDesc), len(file_scalekit_v1_sessions_sessions_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

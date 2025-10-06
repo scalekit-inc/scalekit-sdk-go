@@ -483,10 +483,9 @@ var File_scalekit_v1_auth_passwordless_proto protoreflect.FileDescriptor
 
 const file_scalekit_v1_auth_passwordless_proto_rawDesc = "" +
 	"\n" +
-	"#scalekit/v1/auth/passwordless.proto\x12\x1dscalekit.v1.auth.passwordless\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\x1a!scalekit/v1/options/options.proto\"\xc8\x10\n" +
-	"\x17SendPasswordlessRequest\x12\xad\x01\n" +
-	"\x05email\x18\x01 \x01(\tB\x96\x01\x92A\x85\x012kEmail address where the passwordless authentication credentials will be sent. Must be a valid email format.J\x16\"john.doe@example.com\"\xbaH\n" +
-	"\xc8\x01\x01r\x05\x10\x01\x18\xc0\x02R\x05email\x12\xa6\x02\n" +
+	"#scalekit/v1/auth/passwordless.proto\x12\x1dscalekit.v1.auth.passwordless\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\x1a!scalekit/v1/options/options.proto\"\xca\x10\n" +
+	"\x17SendPasswordlessRequest\x12\xaf\x01\n" +
+	"\x05email\x18\x01 \x01(\tB\x98\x01\x92A\x85\x012kEmail address where the passwordless authentication credentials will be sent. Must be a valid email format.J\x16\"john.doe@example.com\"\xbaH\f\xc8\x01\x01r\a\x10\x01\x18\xc0\x02`\x01R\x05email\x12\xa6\x02\n" +
 	"\btemplate\x18\x02 \x01(\x0e2+.scalekit.v1.auth.passwordless.TemplateTypeB\xd7\x01\x92A\xcb\x012\xbe\x01Specifies the authentication intent for the passwordless request. Use SIGNIN for existing users or SIGNUP for new user registration. This affects the email template and user experience flow.J\b\"SIGNIN\"\xbaH\x05\x82\x01\x02\x10\x01H\x00R\btemplate\x88\x01\x01\x12\xa9\x02\n" +
 	"\x12magiclink_auth_uri\x18\x03 \x01(\tB\xf5\x01\x92A\xe4\x012\xaf\x01Your application's callback URL where users will be redirected after clicking the magic link in their email. The link token will be appended as a query parameter as link_tokenJ0\"https://yourapp.com/auth/passwordless/callback\"\xe0A\x01\xbaH\ar\x05\x10\x01\x18\xe8\aH\x01R\x10magiclinkAuthUri\x88\x01\x01\x12\x9b\x02\n" +
 	"\x05state\x18\x04 \x01(\tB\xff\x01\x92A\xee\x012\xd9\x01Custom state parameter that will be returned unchanged in the verification response. Use this to maintain application state between the authentication request and callback, such as the intended destination after loginJ\x10\"d62ivasry29lso\"\xe0A\x01\xbaH\ar\x05\x10\x01\x18\xe8\aH\x02R\x05state\x88\x01\x01\x12\xa6\x01\n" +

@@ -29,7 +29,7 @@ type ListAuthLogRequest struct {
 	PageSize      uint32                 `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	PageToken     string                 `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
-	Status        string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
+	Status        []string               `protobuf:"bytes,4,rep,name=status,proto3" json:"status,omitempty"`
 	StartTime     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
 	EndTime       *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -87,11 +87,11 @@ func (x *ListAuthLogRequest) GetEmail() string {
 	return ""
 }
 
-func (x *ListAuthLogRequest) GetStatus() string {
+func (x *ListAuthLogRequest) GetStatus() []string {
 	if x != nil {
 		return x.Status
 	}
-	return ""
+	return nil
 }
 
 func (x *ListAuthLogRequest) GetStartTime() *timestamppb.Timestamp {
@@ -378,7 +378,7 @@ const file_scalekit_v1_auditlogs_auditlogs_proto_rawDesc = "" +
 	"\n" +
 	"page_token\x18\x02 \x01(\tR\tpageToken\x12\x14\n" +
 	"\x05email\x18\x03 \x01(\tR\x05email\x12\x16\n" +
-	"\x06status\x18\x04 \x01(\tR\x06status\x129\n" +
+	"\x06status\x18\x04 \x03(\tR\x06status\x129\n" +
 	"\n" +
 	"start_time\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tstartTime\x125\n" +
 	"\bend_time\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\aendTime\"\xcf\x01\n" +

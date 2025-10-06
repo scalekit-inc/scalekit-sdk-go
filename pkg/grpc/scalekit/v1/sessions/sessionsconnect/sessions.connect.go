@@ -22,7 +22,7 @@ const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// SessionServiceName is the fully-qualified name of the SessionService service.
-	SessionServiceName = "scalekit.v1.auditlogs.SessionService"
+	SessionServiceName = "scalekit.v1.sessions.SessionService"
 )
 
 // These constants are the fully-qualified names of the RPCs defined in this package. They're
@@ -35,23 +35,27 @@ const (
 const (
 	// SessionServiceGetSessionProcedure is the fully-qualified name of the SessionService's GetSession
 	// RPC.
-	SessionServiceGetSessionProcedure = "/scalekit.v1.auditlogs.SessionService/GetSession"
+	SessionServiceGetSessionProcedure = "/scalekit.v1.sessions.SessionService/GetSession"
 	// SessionServiceRevokeSessionProcedure is the fully-qualified name of the SessionService's
 	// RevokeSession RPC.
-	SessionServiceRevokeSessionProcedure = "/scalekit.v1.auditlogs.SessionService/RevokeSession"
+	SessionServiceRevokeSessionProcedure = "/scalekit.v1.sessions.SessionService/RevokeSession"
 	// SessionServiceGetUserSessionsProcedure is the fully-qualified name of the SessionService's
 	// GetUserSessions RPC.
-	SessionServiceGetUserSessionsProcedure = "/scalekit.v1.auditlogs.SessionService/GetUserSessions"
+	SessionServiceGetUserSessionsProcedure = "/scalekit.v1.sessions.SessionService/GetUserSessions"
+	// SessionServiceRevokeAllUserSessionsProcedure is the fully-qualified name of the SessionService's
+	// RevokeAllUserSessions RPC.
+	SessionServiceRevokeAllUserSessionsProcedure = "/scalekit.v1.sessions.SessionService/RevokeAllUserSessions"
 )
 
-// SessionServiceClient is a client for the scalekit.v1.auditlogs.SessionService service.
+// SessionServiceClient is a client for the scalekit.v1.sessions.SessionService service.
 type SessionServiceClient interface {
 	GetSession(context.Context, *connect.Request[sessions.SessionDetailsRequest]) (*connect.Response[sessions.SessionDetails], error)
 	RevokeSession(context.Context, *connect.Request[sessions.RevokeSessionRequest]) (*connect.Response[sessions.RevokeSessionResponse], error)
 	GetUserSessions(context.Context, *connect.Request[sessions.UserSessionDetailsRequest]) (*connect.Response[sessions.UserSessionDetails], error)
+	RevokeAllUserSessions(context.Context, *connect.Request[sessions.RevokeAllUserSessionsRequest]) (*connect.Response[sessions.RevokeAllUserSessionsResponse], error)
 }
 
-// NewSessionServiceClient constructs a client for the scalekit.v1.auditlogs.SessionService service.
+// NewSessionServiceClient constructs a client for the scalekit.v1.sessions.SessionService service.
 // By default, it uses the Connect protocol with the binary Protobuf Codec, asks for gzipped
 // responses, and sends uncompressed requests. To use the gRPC or gRPC-Web protocols, supply the
 // connect.WithGRPC() or connect.WithGRPCWeb() options.
@@ -80,36 +84,49 @@ func NewSessionServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithSchema(sessionServiceMethods.ByName("GetUserSessions")),
 			connect.WithClientOptions(opts...),
 		),
+		revokeAllUserSessions: connect.NewClient[sessions.RevokeAllUserSessionsRequest, sessions.RevokeAllUserSessionsResponse](
+			httpClient,
+			baseURL+SessionServiceRevokeAllUserSessionsProcedure,
+			connect.WithSchema(sessionServiceMethods.ByName("RevokeAllUserSessions")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // sessionServiceClient implements SessionServiceClient.
 type sessionServiceClient struct {
-	getSession      *connect.Client[sessions.SessionDetailsRequest, sessions.SessionDetails]
-	revokeSession   *connect.Client[sessions.RevokeSessionRequest, sessions.RevokeSessionResponse]
-	getUserSessions *connect.Client[sessions.UserSessionDetailsRequest, sessions.UserSessionDetails]
+	getSession            *connect.Client[sessions.SessionDetailsRequest, sessions.SessionDetails]
+	revokeSession         *connect.Client[sessions.RevokeSessionRequest, sessions.RevokeSessionResponse]
+	getUserSessions       *connect.Client[sessions.UserSessionDetailsRequest, sessions.UserSessionDetails]
+	revokeAllUserSessions *connect.Client[sessions.RevokeAllUserSessionsRequest, sessions.RevokeAllUserSessionsResponse]
 }
 
-// GetSession calls scalekit.v1.auditlogs.SessionService.GetSession.
+// GetSession calls scalekit.v1.sessions.SessionService.GetSession.
 func (c *sessionServiceClient) GetSession(ctx context.Context, req *connect.Request[sessions.SessionDetailsRequest]) (*connect.Response[sessions.SessionDetails], error) {
 	return c.getSession.CallUnary(ctx, req)
 }
 
-// RevokeSession calls scalekit.v1.auditlogs.SessionService.RevokeSession.
+// RevokeSession calls scalekit.v1.sessions.SessionService.RevokeSession.
 func (c *sessionServiceClient) RevokeSession(ctx context.Context, req *connect.Request[sessions.RevokeSessionRequest]) (*connect.Response[sessions.RevokeSessionResponse], error) {
 	return c.revokeSession.CallUnary(ctx, req)
 }
 
-// GetUserSessions calls scalekit.v1.auditlogs.SessionService.GetUserSessions.
+// GetUserSessions calls scalekit.v1.sessions.SessionService.GetUserSessions.
 func (c *sessionServiceClient) GetUserSessions(ctx context.Context, req *connect.Request[sessions.UserSessionDetailsRequest]) (*connect.Response[sessions.UserSessionDetails], error) {
 	return c.getUserSessions.CallUnary(ctx, req)
 }
 
-// SessionServiceHandler is an implementation of the scalekit.v1.auditlogs.SessionService service.
+// RevokeAllUserSessions calls scalekit.v1.sessions.SessionService.RevokeAllUserSessions.
+func (c *sessionServiceClient) RevokeAllUserSessions(ctx context.Context, req *connect.Request[sessions.RevokeAllUserSessionsRequest]) (*connect.Response[sessions.RevokeAllUserSessionsResponse], error) {
+	return c.revokeAllUserSessions.CallUnary(ctx, req)
+}
+
+// SessionServiceHandler is an implementation of the scalekit.v1.sessions.SessionService service.
 type SessionServiceHandler interface {
 	GetSession(context.Context, *connect.Request[sessions.SessionDetailsRequest]) (*connect.Response[sessions.SessionDetails], error)
 	RevokeSession(context.Context, *connect.Request[sessions.RevokeSessionRequest]) (*connect.Response[sessions.RevokeSessionResponse], error)
 	GetUserSessions(context.Context, *connect.Request[sessions.UserSessionDetailsRequest]) (*connect.Response[sessions.UserSessionDetails], error)
+	RevokeAllUserSessions(context.Context, *connect.Request[sessions.RevokeAllUserSessionsRequest]) (*connect.Response[sessions.RevokeAllUserSessionsResponse], error)
 }
 
 // NewSessionServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -137,7 +154,13 @@ func NewSessionServiceHandler(svc SessionServiceHandler, opts ...connect.Handler
 		connect.WithSchema(sessionServiceMethods.ByName("GetUserSessions")),
 		connect.WithHandlerOptions(opts...),
 	)
-	return "/scalekit.v1.auditlogs.SessionService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	sessionServiceRevokeAllUserSessionsHandler := connect.NewUnaryHandler(
+		SessionServiceRevokeAllUserSessionsProcedure,
+		svc.RevokeAllUserSessions,
+		connect.WithSchema(sessionServiceMethods.ByName("RevokeAllUserSessions")),
+		connect.WithHandlerOptions(opts...),
+	)
+	return "/scalekit.v1.sessions.SessionService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case SessionServiceGetSessionProcedure:
 			sessionServiceGetSessionHandler.ServeHTTP(w, r)
@@ -145,6 +168,8 @@ func NewSessionServiceHandler(svc SessionServiceHandler, opts ...connect.Handler
 			sessionServiceRevokeSessionHandler.ServeHTTP(w, r)
 		case SessionServiceGetUserSessionsProcedure:
 			sessionServiceGetUserSessionsHandler.ServeHTTP(w, r)
+		case SessionServiceRevokeAllUserSessionsProcedure:
+			sessionServiceRevokeAllUserSessionsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -155,13 +180,17 @@ func NewSessionServiceHandler(svc SessionServiceHandler, opts ...connect.Handler
 type UnimplementedSessionServiceHandler struct{}
 
 func (UnimplementedSessionServiceHandler) GetSession(context.Context, *connect.Request[sessions.SessionDetailsRequest]) (*connect.Response[sessions.SessionDetails], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.auditlogs.SessionService.GetSession is not implemented"))
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.sessions.SessionService.GetSession is not implemented"))
 }
 
 func (UnimplementedSessionServiceHandler) RevokeSession(context.Context, *connect.Request[sessions.RevokeSessionRequest]) (*connect.Response[sessions.RevokeSessionResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.auditlogs.SessionService.RevokeSession is not implemented"))
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.sessions.SessionService.RevokeSession is not implemented"))
 }
 
 func (UnimplementedSessionServiceHandler) GetUserSessions(context.Context, *connect.Request[sessions.UserSessionDetailsRequest]) (*connect.Response[sessions.UserSessionDetails], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.auditlogs.SessionService.GetUserSessions is not implemented"))
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.sessions.SessionService.GetUserSessions is not implemented"))
+}
+
+func (UnimplementedSessionServiceHandler) RevokeAllUserSessions(context.Context, *connect.Request[sessions.RevokeAllUserSessionsRequest]) (*connect.Response[sessions.RevokeAllUserSessionsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.sessions.SessionService.RevokeAllUserSessions is not implemented"))
 }
