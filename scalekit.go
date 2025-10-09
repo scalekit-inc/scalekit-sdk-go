@@ -50,6 +50,7 @@ type Scalekit interface {
 	GetIdpInitiatedLoginClaims(idpInitiateLoginToken string) (*IdpInitiatedLoginClaims, error)
 	ValidateAccessToken(accessToken string) (bool, error)
 	VerifyWebhookPayload(secret string, headers map[string]string, payload []byte) (bool, error)
+	VerifyInterceptorPayload(secret string, headers map[string]string, payload []byte) (bool, error)
 	RefreshAccessToken(refreshToken string) (*TokenResponse, error)
 	GetLogoutUrl(options LogoutUrlOptions) (*url.URL, error)
 	GetAccessTokenClaims(accessToken string) (*AccessTokenClaims, error)
@@ -332,6 +333,14 @@ func (s *scalekitClient) VerifyWebhookPayload(
 	headers map[string]string,
 	payload []byte,
 ) (bool, error) {
+	return s.VerifyPayloadSignature(secret, headers, payload)
+}
+
+func (s *scalekitClient) VerifyPayloadSignature(
+	secret string,
+	headers map[string]string,
+	payload []byte,
+) (bool, error) {
 	webhookId := headers["webhook-id"]
 	webhookTimestamp := headers["webhook-timestamp"]
 	webhookSignature := headers["webhook-signature"]
@@ -369,6 +378,14 @@ func (s *scalekitClient) VerifyWebhookPayload(
 	}
 
 	return false, errors.New("Invalid signature")
+}
+
+func (s *scalekitClient) VerifyInterceptorPayload(
+	secret string,
+	headers map[string]string,
+	payload []byte,
+) (bool, error) {
+	return s.VerifyPayloadSignature(secret, headers, payload)
 }
 
 func verifyTimestamp(timestampStr string) (*time.Time, error) {
