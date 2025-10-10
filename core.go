@@ -15,7 +15,7 @@ import (
 const (
 	tokenEndpoint = "oauth/token"
 	jwksEndpoint  = "keys"
-	sdkVersion    = "Scalekit-Go/v2.0.4"
+	sdkVersion    = "Scalekit-Go/2.0.5"
 )
 
 type coreClient struct {

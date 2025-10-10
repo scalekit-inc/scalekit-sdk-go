@@ -38,6 +38,7 @@ type Scalekit interface {
 	Organization() Organization
 	User() UserService
 	Passwordless() PasswordlessService
+	Session() SessionService
 	Role() RoleService
 	Permission() PermissionService
 	GetAuthorizationUrl(redirectUri string, options AuthorizationUrlOptions) (*url.URL, error)
@@ -49,6 +50,7 @@ type Scalekit interface {
 	GetIdpInitiatedLoginClaims(idpInitiateLoginToken string) (*IdpInitiatedLoginClaims, error)
 	ValidateAccessToken(accessToken string) (bool, error)
 	VerifyWebhookPayload(secret string, headers map[string]string, payload []byte) (bool, error)
+	VerifyInterceptorPayload(secret string, headers map[string]string, payload []byte) (bool, error)
 	RefreshAccessToken(refreshToken string) (*TokenResponse, error)
 	GetLogoutUrl(options LogoutUrlOptions) (*url.URL, error)
 	GetAccessTokenClaims(accessToken string) (*AccessTokenClaims, error)
@@ -62,6 +64,7 @@ type scalekitClient struct {
 	directory    Directory
 	user         UserService
 	passwordless PasswordlessService
+	session      SessionService
 	role         RoleService
 	permission   PermissionService
 }
@@ -178,6 +181,7 @@ func NewScalekitClient(envUrl, clientId, clientSecret string) Scalekit {
 		organization: newOrganizationClient(coreClient),
 		user:         newUserClient(coreClient),
 		passwordless: newPasswordlessClient(coreClient),
+		session:      newSessionClient(coreClient),
 		role:         newRoleService(coreClient),
 		permission:   newPermissionService(coreClient),
 	}
@@ -205,6 +209,10 @@ func (s *scalekitClient) User() UserService {
 
 func (s *scalekitClient) Passwordless() PasswordlessService {
 	return s.passwordless
+}
+
+func (s *scalekitClient) Session() SessionService {
+	return s.session
 }
 
 func (s *scalekitClient) Role() RoleService {
@@ -325,6 +333,14 @@ func (s *scalekitClient) VerifyWebhookPayload(
 	headers map[string]string,
 	payload []byte,
 ) (bool, error) {
+	return s.VerifyPayloadSignature(secret, headers, payload)
+}
+
+func (s *scalekitClient) VerifyPayloadSignature(
+	secret string,
+	headers map[string]string,
+	payload []byte,
+) (bool, error) {
 	webhookId := headers["webhook-id"]
 	webhookTimestamp := headers["webhook-timestamp"]
 	webhookSignature := headers["webhook-signature"]
@@ -362,6 +378,14 @@ func (s *scalekitClient) VerifyWebhookPayload(
 	}
 
 	return false, errors.New("Invalid signature")
+}
+
+func (s *scalekitClient) VerifyInterceptorPayload(
+	secret string,
+	headers map[string]string,
+	payload []byte,
+) (bool, error) {
+	return s.VerifyPayloadSignature(secret, headers, payload)
 }
 
 func verifyTimestamp(timestampStr string) (*time.Time, error) {
