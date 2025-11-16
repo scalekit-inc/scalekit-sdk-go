@@ -2,13 +2,10 @@ package scalekit
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"connectrpc.com/connect"
-	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/errdetails"
 )
 
 type fn[TRequest interface{}, TResponse interface{}] func(
@@ -81,28 +78,13 @@ func (r *connectExecuter[TRequest, TResponse]) exec(ctx context.Context) (*TResp
 		if r.maxRetry-r.retries > 0 {
 			var isUnAuthenticatedError bool
 			if httpErr, ok := err.(*httpError); ok {
-				if httpErr.StatusCode != http.StatusUnauthorized {
+				if httpErr.StatusCode == http.StatusUnauthorized {
 					isUnAuthenticatedError = true
 				}
 			}
 			if connectErr, ok := err.(*connect.Error); ok {
 				if connectErr.Code() == connect.CodeUnauthenticated {
 					isUnAuthenticatedError = true
-				}
-				if connectErr.Code() == connect.CodeInvalidArgument {
-					messages := []string{connectErr.Message()}
-					for _, detail := range connectErr.Details() {
-						msg, _ := detail.Value()
-						if info, ok := msg.(*errdetails.ErrorInfo); ok {
-							if info.ValidationErrorInfo != nil {
-								for _, field := range info.ValidationErrorInfo.FieldViolations {
-									messages = append(messages, fmt.Sprintf("%s:  %s", field.Field, field.Description))
-								}
-							}
-						}
-					}
-
-					return nil, errors.New(strings.Join(messages, "\n"))
 				}
 			}
 
@@ -113,7 +95,8 @@ func (r *connectExecuter[TRequest, TResponse]) exec(ctx context.Context) (*TResp
 			}
 		}
 
-		return nil, err
+		// Promote error to specific exception type
+		return nil, PromoteError(err)
 	}
 
 	return data.Msg, nil
