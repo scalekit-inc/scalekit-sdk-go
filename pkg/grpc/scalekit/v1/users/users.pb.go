@@ -1742,16 +1742,24 @@ func (x *CreateUser) GetMetadata() map[string]string {
 }
 
 type CreateUserProfile struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	FirstName        string                 `protobuf:"bytes,2,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
-	LastName         string                 `protobuf:"bytes,3,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
-	Name             string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
-	Locale           string                 `protobuf:"bytes,5,opt,name=locale,proto3" json:"locale,omitempty"`
-	PhoneNumber      string                 `protobuf:"bytes,7,opt,name=phone_number,json=phoneNumber,proto3" json:"phone_number,omitempty"`
-	Metadata         map[string]string      `protobuf:"bytes,8,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	CustomAttributes map[string]string      `protobuf:"bytes,9,rep,name=custom_attributes,json=customAttributes,proto3" json:"custom_attributes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	GivenName         string                 `protobuf:"bytes,2,opt,name=given_name,json=givenName,proto3" json:"given_name,omitempty"`
+	FamilyName        string                 `protobuf:"bytes,3,opt,name=family_name,json=familyName,proto3" json:"family_name,omitempty"`
+	Name              string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	Locale            string                 `protobuf:"bytes,5,opt,name=locale,proto3" json:"locale,omitempty"`
+	PhoneNumber       string                 `protobuf:"bytes,7,opt,name=phone_number,json=phoneNumber,proto3" json:"phone_number,omitempty"`
+	Metadata          map[string]string      `protobuf:"bytes,8,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	CustomAttributes  map[string]string      `protobuf:"bytes,9,rep,name=custom_attributes,json=customAttributes,proto3" json:"custom_attributes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	PreferredUsername string                 `protobuf:"bytes,10,opt,name=preferred_username,json=preferredUsername,proto3" json:"preferred_username,omitempty"`
+	Picture           *string                `protobuf:"bytes,11,opt,name=picture,proto3,oneof" json:"picture,omitempty"`
+	Gender            *string                `protobuf:"bytes,12,opt,name=gender,proto3,oneof" json:"gender,omitempty"`
+	Groups            []string               `protobuf:"bytes,13,rep,name=groups,proto3" json:"groups,omitempty"`
+	// Deprecated: Marked as deprecated in scalekit/v1/users/users.proto.
+	FirstName string `protobuf:"bytes,21,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
+	// Deprecated: Marked as deprecated in scalekit/v1/users/users.proto.
+	LastName      string `protobuf:"bytes,22,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateUserProfile) Reset() {
@@ -1784,16 +1792,16 @@ func (*CreateUserProfile) Descriptor() ([]byte, []int) {
 	return file_scalekit_v1_users_users_proto_rawDescGZIP(), []int{25}
 }
 
-func (x *CreateUserProfile) GetFirstName() string {
+func (x *CreateUserProfile) GetGivenName() string {
 	if x != nil {
-		return x.FirstName
+		return x.GivenName
 	}
 	return ""
 }
 
-func (x *CreateUserProfile) GetLastName() string {
+func (x *CreateUserProfile) GetFamilyName() string {
 	if x != nil {
-		return x.LastName
+		return x.FamilyName
 	}
 	return ""
 }
@@ -1833,17 +1841,69 @@ func (x *CreateUserProfile) GetCustomAttributes() map[string]string {
 	return nil
 }
 
+func (x *CreateUserProfile) GetPreferredUsername() string {
+	if x != nil {
+		return x.PreferredUsername
+	}
+	return ""
+}
+
+func (x *CreateUserProfile) GetPicture() string {
+	if x != nil && x.Picture != nil {
+		return *x.Picture
+	}
+	return ""
+}
+
+func (x *CreateUserProfile) GetGender() string {
+	if x != nil && x.Gender != nil {
+		return *x.Gender
+	}
+	return ""
+}
+
+func (x *CreateUserProfile) GetGroups() []string {
+	if x != nil {
+		return x.Groups
+	}
+	return nil
+}
+
+// Deprecated: Marked as deprecated in scalekit/v1/users/users.proto.
+func (x *CreateUserProfile) GetFirstName() string {
+	if x != nil {
+		return x.FirstName
+	}
+	return ""
+}
+
+// Deprecated: Marked as deprecated in scalekit/v1/users/users.proto.
+func (x *CreateUserProfile) GetLastName() string {
+	if x != nil {
+		return x.LastName
+	}
+	return ""
+}
+
 type UpdateUserProfile struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
-	FirstName        *string                `protobuf:"bytes,2,opt,name=first_name,json=firstName,proto3,oneof" json:"first_name,omitempty"`
-	LastName         *string                `protobuf:"bytes,3,opt,name=last_name,json=lastName,proto3,oneof" json:"last_name,omitempty"`
+	GivenName        *string                `protobuf:"bytes,2,opt,name=given_name,json=givenName,proto3,oneof" json:"given_name,omitempty"`
+	FamilyName       *string                `protobuf:"bytes,3,opt,name=family_name,json=familyName,proto3,oneof" json:"family_name,omitempty"`
 	Name             *string                `protobuf:"bytes,4,opt,name=name,proto3,oneof" json:"name,omitempty"`
 	Locale           *string                `protobuf:"bytes,5,opt,name=locale,proto3,oneof" json:"locale,omitempty"`
 	PhoneNumber      *string                `protobuf:"bytes,7,opt,name=phone_number,json=phoneNumber,proto3,oneof" json:"phone_number,omitempty"`
 	Metadata         map[string]string      `protobuf:"bytes,8,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	CustomAttributes map[string]string      `protobuf:"bytes,9,rep,name=custom_attributes,json=customAttributes,proto3" json:"custom_attributes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	// Deprecated: Marked as deprecated in scalekit/v1/users/users.proto.
+	FirstName *string `protobuf:"bytes,21,opt,name=first_name,json=firstName,proto3,oneof" json:"first_name,omitempty"`
+	// Deprecated: Marked as deprecated in scalekit/v1/users/users.proto.
+	LastName          *string  `protobuf:"bytes,22,opt,name=last_name,json=lastName,proto3,oneof" json:"last_name,omitempty"`
+	PreferredUsername *string  `protobuf:"bytes,10,opt,name=preferred_username,json=preferredUsername,proto3,oneof" json:"preferred_username,omitempty"`
+	Picture           *string  `protobuf:"bytes,11,opt,name=picture,proto3,oneof" json:"picture,omitempty"`
+	Gender            *string  `protobuf:"bytes,12,opt,name=gender,proto3,oneof" json:"gender,omitempty"`
+	Groups            []string `protobuf:"bytes,13,rep,name=groups,proto3" json:"groups,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *UpdateUserProfile) Reset() {
@@ -1876,16 +1936,16 @@ func (*UpdateUserProfile) Descriptor() ([]byte, []int) {
 	return file_scalekit_v1_users_users_proto_rawDescGZIP(), []int{26}
 }
 
-func (x *UpdateUserProfile) GetFirstName() string {
-	if x != nil && x.FirstName != nil {
-		return *x.FirstName
+func (x *UpdateUserProfile) GetGivenName() string {
+	if x != nil && x.GivenName != nil {
+		return *x.GivenName
 	}
 	return ""
 }
 
-func (x *UpdateUserProfile) GetLastName() string {
-	if x != nil && x.LastName != nil {
-		return *x.LastName
+func (x *UpdateUserProfile) GetFamilyName() string {
+	if x != nil && x.FamilyName != nil {
+		return *x.FamilyName
 	}
 	return ""
 }
@@ -1921,6 +1981,50 @@ func (x *UpdateUserProfile) GetMetadata() map[string]string {
 func (x *UpdateUserProfile) GetCustomAttributes() map[string]string {
 	if x != nil {
 		return x.CustomAttributes
+	}
+	return nil
+}
+
+// Deprecated: Marked as deprecated in scalekit/v1/users/users.proto.
+func (x *UpdateUserProfile) GetFirstName() string {
+	if x != nil && x.FirstName != nil {
+		return *x.FirstName
+	}
+	return ""
+}
+
+// Deprecated: Marked as deprecated in scalekit/v1/users/users.proto.
+func (x *UpdateUserProfile) GetLastName() string {
+	if x != nil && x.LastName != nil {
+		return *x.LastName
+	}
+	return ""
+}
+
+func (x *UpdateUserProfile) GetPreferredUsername() string {
+	if x != nil && x.PreferredUsername != nil {
+		return *x.PreferredUsername
+	}
+	return ""
+}
+
+func (x *UpdateUserProfile) GetPicture() string {
+	if x != nil && x.Picture != nil {
+		return *x.Picture
+	}
+	return ""
+}
+
+func (x *UpdateUserProfile) GetGender() string {
+	if x != nil && x.Gender != nil {
+		return *x.Gender
+	}
+	return ""
+}
+
+func (x *UpdateUserProfile) GetGroups() []string {
+	if x != nil {
+		return x.Groups
 	}
 	return nil
 }
@@ -2491,9 +2595,8 @@ type Permission struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	DisplayName   string                 `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
-	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	Tags          []string               `protobuf:"bytes,5,rep,name=tags,proto3" json:"tags,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Tags          []string               `protobuf:"bytes,4,rep,name=tags,proto3" json:"tags,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2538,13 +2641,6 @@ func (x *Permission) GetId() string {
 func (x *Permission) GetName() string {
 	if x != nil {
 		return x.Name
-	}
-	return ""
-}
-
-func (x *Permission) GetDisplayName() string {
-	if x != nil {
-		return x.DisplayName
 	}
 	return ""
 }
@@ -2792,45 +2888,71 @@ const file_scalekit_v1_users_users_proto_rawDesc = "" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\x0e\n" +
 	"\f_external_idJ\x04\b\x01\x10\x02J\x04\b\x02\x10\x03J\x04\b\x03\x10\x04J\x04\b\x04\x10\x05J\x04\b\n" +
-	"\x10\v\"\x92\n" +
-	"\n" +
+	"\x10\v\"\xbe\x10\n" +
 	"\x11CreateUserProfile\x12^\n" +
 	"\n" +
-	"first_name\x18\x02 \x01(\tB?\x92A42*User's given name. Maximum 200 characters.J\x06\"John\"\xbaH\x05r\x03\x18\xc8\x01R\tfirstName\x12\\\n" +
-	"\tlast_name\x18\x03 \x01(\tB?\x92A42+User's family name. Maximum 200 characters.J\x05\"Doe\"\xbaH\x05r\x03\x18\xc8\x01R\blastName\x12v\n" +
+	"given_name\x18\x02 \x01(\tB?\x92A42*User's given name. Maximum 255 characters.J\x06\"John\"\xbaH\x05r\x03\x18\xff\x01R\tgivenName\x12`\n" +
+	"\vfamily_name\x18\x03 \x01(\tB?\x92A42+User's family name. Maximum 255 characters.J\x05\"Doe\"\xbaH\x05r\x03\x18\xff\x01R\n" +
+	"familyName\x12v\n" +
 	"\x04name\x18\x04 \x01(\tBb\x92A_2IFull name in display format. Typically combines first_name and last_name.J\x12\"John Michael Doe\"R\x04name\x12y\n" +
 	"\x06locale\x18\x05 \x01(\tBa\x92A^2SUser's localization preference in BCP-47 format. Defaults to organization settings.J\a\"en-US\"R\x06locale\x12\x8a\x01\n" +
 	"\fphone_number\x18\a \x01(\tBg\x92Ad2RPhone number in E.164 international format. Required for SMS-based authentication.J\x0e\"+14155552671\"R\vphoneNumber\x12\x8b\x02\n" +
-	"\bmetadata\x18\b \x03(\v22.scalekit.v1.users.CreateUserProfile.MetadataEntryB\xba\x01\x92A\x9d\x012^System-managed key-value pairs for internal tracking. Keys (3-25 chars), values (1-256 chars).J;{\"account_status\": \"active\", \"signup_source\": \"mobile_app\"}\xbaH\x16\x9a\x01\x13\x10\x1e\"\x06r\x04\x10\x03\x18\x19*\ar\x05\x10\x01\x18\x80\x02R\bmetadata\x12\xa2\x02\n" +
-	"\x11custom_attributes\x18\t \x03(\v2:.scalekit.v1.users.CreateUserProfile.CustomAttributesEntryB\xb8\x01\x92A\x9b\x012ZCustom attributes for extended user profile data. Keys (3-25 chars), values (1-256 chars).J={\"department\": \"engineering\", \"security_clearance\": \"level2\"}\xbaH\x16\x9a\x01\x13\x10d\"\x06r\x04\x10\x03\x18\x19*\ar\x05\x10\x01\x18\x80\x02R\x10customAttributes\x1a;\n" +
+	"\bmetadata\x18\b \x03(\v22.scalekit.v1.users.CreateUserProfile.MetadataEntryB\xba\x01\x92A\x9d\x012^System-managed key-value pairs for internal tracking. Keys (3-25 chars), values (1-256 chars).J;{\"account_status\": \"active\", \"signup_source\": \"mobile_app\"}\xbaH\x16\x9a\x01\x13\x10\x14\"\x06r\x04\x10\x03\x18\x19*\ar\x05\x10\x01\x18\x80\x02R\bmetadata\x12\xa2\x02\n" +
+	"\x11custom_attributes\x18\t \x03(\v2:.scalekit.v1.users.CreateUserProfile.CustomAttributesEntryB\xb8\x01\x92A\x9b\x012ZCustom attributes for extended user profile data. Keys (3-25 chars), values (1-256 chars).J={\"department\": \"engineering\", \"security_clearance\": \"level2\"}\xbaH\x16\x9a\x01\x13\x10\x14\"\x06r\x04\x10\x03\x18\x19*\ar\x05\x10\x01\x18\x80\x02R\x10customAttributes\x12\x7f\n" +
+	"\x12preferred_username\x18\n" +
+	" \x01(\tBP\x92AE2/User's preferred username for display purposes.J\x12\"John Michael Doe\"\xbaH\x05r\x03\x18\x80\x04R\x11preferredUsername\x12z\n" +
+	"\apicture\x18\v \x01(\tB[\x92AP2,URL to the user's profile picture or avatar.J \"https://example.com/avatar.jpg\"\xbaH\x05r\x03\x18\x80\x10H\x00R\apicture\x88\x01\x01\x12A\n" +
+	"\x06gender\x18\f \x01(\tB$\x92A!2\x17User's gender identity.J\x06\"male\"H\x01R\x06gender\x88\x01\x01\x12\xa1\x01\n" +
+	"\x06groups\x18\r \x03(\tB\x88\x01\x92Ap2QList of group names the user belongs to. Each group name must be 1-250 charactersJ\x1b[\"engineering\", \"managers\"]\xbaH\x12\x92\x01\x0f\b\x00\x102\x18\x01\"\ar\x05\x10\x01\x18\xfa\x01R\x06groups\x12\x94\x01\n" +
+	"\n" +
+	"first_name\x18\x15 \x01(\tBu\x92AY2O[DEPRECATED] Use given_name instead. User's given name. Maximum 200 characters.J\x06\"John\"\xbaH\x05r\x03\x18\xc8\x01\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x18\x01R\tfirstName\x12\x93\x01\n" +
+	"\tlast_name\x18\x16 \x01(\tBv\x92AZ2Q[DEPRECATED] Use family_name instead. User's family name. Maximum 200 characters.J\x05\"Doe\"\xbaH\x05r\x03\x18\xc8\x01\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x18\x01R\blastName\x1a;\n" +
 	"\rMetadataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1aC\n" +
 	"\x15CustomAttributesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01J\x04\b\x01\x10\x02J\x04\b\x06\x10\a\"\xed\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\n" +
 	"\n" +
-	"\x11UpdateUserProfile\x12c\n" +
+	"\b_pictureB\t\n" +
+	"\a_genderJ\x04\b\x01\x10\x02J\x04\b\x06\x10\a\"\xe5(\n" +
+	"\x11UpdateUserProfile\x12\xe5\x01\n" +
 	"\n" +
-	"first_name\x18\x02 \x01(\tB?\x92A42*User's given name. Maximum 200 characters.J\x06\"John\"\xbaH\x05r\x03\x18\xc8\x01H\x00R\tfirstName\x88\x01\x01\x12a\n" +
-	"\tlast_name\x18\x03 \x01(\tB?\x92A42+User's family name. Maximum 200 characters.J\x05\"Doe\"\xbaH\x05r\x03\x18\xc8\x01H\x01R\blastName\x88\x01\x01\x12{\n" +
-	"\x04name\x18\x04 \x01(\tBb\x92A_2IFull name in display format. Typically combines first_name and last_name.J\x12\"John Michael Doe\"H\x02R\x04name\x88\x01\x01\x12~\n" +
-	"\x06locale\x18\x05 \x01(\tBa\x92A^2SUser's localization preference in BCP-47 format. Defaults to organization settings.J\a\"en-US\"H\x03R\x06locale\x88\x01\x01\x12\x8f\x01\n" +
-	"\fphone_number\x18\a \x01(\tBg\x92Ad2RPhone number in E.164 international format. Required for SMS-based authentication.J\x0e\"+14155552671\"H\x04R\vphoneNumber\x88\x01\x01\x12\x8b\x02\n" +
-	"\bmetadata\x18\b \x03(\v22.scalekit.v1.users.UpdateUserProfile.MetadataEntryB\xba\x01\x92A\x9d\x012^System-managed key-value pairs for internal tracking. Keys (3-25 chars), values (1-256 chars).J;{\"account_status\": \"active\", \"signup_source\": \"mobile_app\"}\xbaH\x16\x9a\x01\x13\x10\x1e\"\x06r\x04\x10\x03\x18\x19*\ar\x05\x10\x01\x18\x80\x02R\bmetadata\x12\xa2\x02\n" +
-	"\x11custom_attributes\x18\t \x03(\v2:.scalekit.v1.users.UpdateUserProfile.CustomAttributesEntryB\xb8\x01\x92A\x9b\x012ZCustom attributes for extended user profile data. Keys (3-25 chars), values (1-256 chars).J={\"department\": \"engineering\", \"security_clearance\": \"level2\"}\xbaH\x16\x9a\x01\x13\x10d\"\x06r\x04\x10\x03\x18\x19*\ar\x05\x10\x01\x18\x80\x02R\x10customAttributes\x1a;\n" +
+	"given_name\x18\x02 \x01(\tB\xc0\x01\x92A\xb4\x012\xa9\x01Updates the user's given name (first name). Use this field to modify how the user's first name appears in the system and user interfaces. Maximum 255 characters allowed.J\x06\"John\"\xbaH\x05r\x03\x18\xff\x01H\x00R\tgivenName\x88\x01\x01\x12\xe4\x01\n" +
+	"\vfamily_name\x18\x03 \x01(\tB\xbd\x01\x92A\xb1\x012\xa7\x01Updates the user's family name (last name or surname). Use this field to modify how the user's last name appears throughout the system. Maximum 255 characters allowed.J\x05\"Doe\"\xbaH\x05r\x03\x18\xff\x01H\x01R\n" +
+	"familyName\x88\x01\x01\x12\xae\x02\n" +
+	"\x04name\x18\x04 \x01(\tB\x94\x02\x92A\x90\x022\x81\x02Updates the user's complete display name. Use this field when you want to set the full name as a single string rather than using separate given and family names. This name appears in user interfaces, reports, and anywhere a formatted display name is needed.J\n" +
+	"\"John Doe\"H\x02R\x04name\x88\x01\x01\x12\x97\x03\n" +
+	"\x06locale\x18\x05 \x01(\tB\xf9\x02\x92A\xf5\x022\xe9\x02Updates the user's preferred language and region settings using BCP-47 format codes. Use this field to customize the user's experience with localized content, date formats, number formatting, and UI language. When not specified, the user inherits the organization's default locale settings. Common values include `en-US`, `en-GB`, `fr-FR`, `de-DE`, and `es-ES`.J\a\"en-US\"H\x03R\x06locale\x88\x01\x01\x12\xb1\x03\n" +
+	"\fphone_number\x18\a \x01(\tB\x88\x03\x92A\x84\x032\xf1\x02Updates the user's phone number in E.164 international format. Use this field to enable SMS-based authentication methods, two-factor authentication, or phone-based account recovery. The phone number must include the country code and be formatted according to E.164 standards (e.g., `+1` for US numbers). This field is required when enabling SMS authentication features.J\x0e\"+14155552671\"H\x04R\vphoneNumber\x88\x01\x01\x12\xd1\x04\n" +
+	"\bmetadata\x18\b \x03(\v22.scalekit.v1.users.UpdateUserProfile.MetadataEntryB\x80\x04\x92A\xe3\x032\xa3\x03Updates system-managed key-value pairs for internal tracking and operational data. Use this field to store system-generated metadata like account status, signup source, last activity tracking, or integration-specific identifiers. These fields are typically managed by automated processes rather than direct user input. Keys must be 3-25 characters, values must be 1-256 characters, with a maximum of 20 key-value pairs.J;{\"account_status\": \"active\", \"signup_source\": \"mobile_app\"}\xbaH\x16\x9a\x01\x13\x10\x14\"\x06r\x04\x10\x03\x18\x19*\ar\x05\x10\x01\x18\x80\x02R\bmetadata\x12\xc7\x05\n" +
+	"\x11custom_attributes\x18\t \x03(\v2:.scalekit.v1.users.UpdateUserProfile.CustomAttributesEntryB\xdd\x04\x92A\xc0\x042\xfe\x03Updates custom attributes for extended user profile data and application-specific information. Use this field to store business-specific user data like department, job title, security clearances, project assignments, or any other organizational attributes your application requires. Unlike system metadata, these attributes are typically managed by administrators or applications and are visible to end users. Keys must be 3-25 characters, values must be 1-256 characters, with a maximum of 20 key-value pairs.J={\"department\": \"engineering\", \"security_clearance\": \"level2\"}\xbaH\x16\x9a\x01\x13\x10\x14\"\x06r\x04\x10\x03\x18\x19*\ar\x05\x10\x01\x18\x80\x02R\x10customAttributes\x12\x8a\x01\n" +
+	"\n" +
+	"first_name\x18\x15 \x01(\tBf\x92AY2O[DEPRECATED] Use given_name instead. User's given name. Maximum 200 characters.J\x06\"John\"\xbaH\x05r\x03\x18\xc8\x01\x18\x01H\x05R\tfirstName\x88\x01\x01\x12\x89\x01\n" +
+	"\tlast_name\x18\x16 \x01(\tBg\x92AZ2Q[DEPRECATED] Use family_name instead. User's family name. Maximum 200 characters.J\x05\"Doe\"\xbaH\x05r\x03\x18\xc8\x01\x18\x01H\x06R\blastName\x88\x01\x01\x12\x97\x03\n" +
+	"\x12preferred_username\x18\n" +
+	" \x01(\tB\xe2\x02\x92A\xd6\x022\xbf\x02Updates the user's preferred username for display and identification purposes. Use this field to set a custom username that the user prefers to be known by, which may differ from their email or formal name. This username appears in user interfaces, mentions, and informal communications. Maximum 512 characters allowed.J\x12\"John Michael Doe\"\xbaH\x05r\x03\x18\x80\x04H\aR\x11preferredUsername\x88\x01\x01\x12\xb2\x03\n" +
+	"\apicture\x18\v \x01(\tB\x92\x03\x92A\x86\x032\xe1\x02Updates the URL to the user's profile picture or avatar image. Use this field to set or change the user's profile photo that appears in user interfaces, directory listings, and collaborative features. The URL should point to a publicly accessible image file. Supported formats typically include JPEG, PNG, and GIF. Maximum URL length is 2048 characters.J \"https://example.com/avatar.jpg\"\xbaH\x05r\x03\x18\x80\x10H\bR\apicture\x88\x01\x01\x12\xfe\x02\n" +
+	"\x06gender\x18\f \x01(\tB\xe0\x02\x92A\xdc\x022\xd1\x02Updates the user's gender identity information. Use this field to store the user's gender identity for personalization, compliance, or reporting purposes. This field supports any string value to accommodate diverse gender identities and should be handled with appropriate privacy considerations according to your organization's policies.J\x06\"male\"H\tR\x06gender\x88\x01\x01\x12\xdd\x03\n" +
+	"\x06groups\x18\r \x03(\tB\xc4\x03\x92A\xab\x032\x8b\x03Updates the list of group names the user belongs to within the organization. Use this field to manage the user's group memberships for role-based access control, team assignments, or organizational structure. Groups are typically used for permission management and collaborative access. Each group name must be unique within the list, 1-250 characters long, with a maximum of 50 groups per user.J\x1b[\"engineering\", \"managers\"]\xbaH\x12\x92\x01\x0f\b\x00\x102\x18\x01\"\ar\x05\x10\x01\x18\xfa\x01R\x06groups\x1a;\n" +
 	"\rMetadataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1aC\n" +
 	"\x15CustomAttributesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\r\n" +
-	"\v_first_nameB\f\n" +
-	"\n" +
-	"_last_nameB\a\n" +
+	"\v_given_nameB\x0e\n" +
+	"\f_family_nameB\a\n" +
 	"\x05_nameB\t\n" +
 	"\a_localeB\x0f\n" +
-	"\r_phone_numberJ\x04\b\x01\x10\x02J\x04\b\x06\x10\a\"\xf9\a\n" +
+	"\r_phone_numberB\r\n" +
+	"\v_first_nameB\f\n" +
+	"\n" +
+	"_last_nameB\x15\n" +
+	"\x13_preferred_usernameB\n" +
+	"\n" +
+	"\b_pictureB\t\n" +
+	"\a_genderJ\x04\b\x01\x10\x02J\x04\b\x06\x10\a\"\xf9\a\n" +
 	"\x06Invite\x12l\n" +
 	"\x0forganization_id\x18\x01 \x01(\tBC\x92A@2-The organization to which the invite belongs.J\x0f\"org_987654321\"R\x0eorganizationId\x12\x7f\n" +
 	"\auser_id\x18\x02 \x01(\tBf\x92Ac2SUser ID to whom the invite is sent. May be empty if the user has not signed up yet.J\f\"usr_123456\"R\x06userId\x12\x7f\n" +
@@ -2870,16 +2992,15 @@ const file_scalekit_v1_users_users_proto_rawDesc = "" +
 	"\trole_name\x18\x03 \x01(\tBF\x92AC2(Unique identifier for the role to removeJ\x17\"role_1234abcd5678efgh\"R\broleName\"\xf6\x01\n" +
 	"\x1aListUserPermissionsRequest\x12w\n" +
 	"\x0forganization_id\x18\x01 \x01(\tBN\x92A@2&Unique identifier for the organizationJ\x16\"org_1234abcd5678efgh\"\xbaH\br\x06:\x04org_R\x0eorganizationId\x12_\n" +
-	"\auser_id\x18\x02 \x01(\tBF\x92A82\x1eUnique identifier for the userJ\x16\"usr_1234abcd5678efgh\"\xbaH\br\x06:\x04usr_R\x06userId\"\xe8\x03\n" +
+	"\auser_id\x18\x02 \x01(\tBF\x92A82\x1eUnique identifier for the userJ\x16\"usr_1234abcd5678efgh\"\xbaH\br\x06:\x04usr_R\x06userId\"\x97\x03\n" +
 	"\n" +
 	"Permission\x12U\n" +
 	"\x02id\x18\x01 \x01(\tBE\x92A?2$Unique identifier for the permissionJ\x17\"perm_1234abcd5678efgh\"\xe0A\x03R\x02id\x12R\n" +
-	"\x04name\x18\x02 \x01(\tB>\x92A;2)Unique name identifier for the permissionJ\x0e\"users.create\"R\x04name\x12^\n" +
-	"\fdisplay_name\x18\x03 \x01(\tB;\x92A82&Human-readable name for the permissionJ\x0e\"Create Users\"R\vdisplayName\x12u\n" +
-	"\vdescription\x18\x04 \x01(\tBS\x92AP2)Description of what the permission allowsJ#\"Allows creating new user accounts\"R\vdescription\x12X\n" +
-	"\x04tags\x18\x05 \x03(\tBD\x92AA2!Tags for categorizing permissionsJ\x1c[\"user-management\", \"admin\"]R\x04tags\"\x8f\x01\n" +
+	"\x04name\x18\x02 \x01(\tB>\x92A;2)Unique name identifier for the permissionJ\x0e\"users:create\"R\x04name\x12u\n" +
+	"\vdescription\x18\x03 \x01(\tBS\x92AP2)Description of what the permission allowsJ#\"Allows creating new user accounts\"R\vdescription\x12g\n" +
+	"\x04tags\x18\x04 \x03(\tBS\x92AA2!Tags for categorizing permissionsJ\x1c[\"user-management\", \"admin\"]\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEWR\x04tags\"\x8f\x01\n" +
 	"\x1bListUserPermissionsResponse\x12p\n" +
-	"\vpermissions\x18\x01 \x03(\v2\x1d.scalekit.v1.users.PermissionB/\x92A,2*List of permissions the user has access toR\vpermissions2\xb4\x97\x01\n" +
+	"\vpermissions\x18\x01 \x03(\v2\x1d.scalekit.v1.users.PermissionB/\x92A,2*List of permissions the user has access toR\vpermissions2\x96\x97\x01\n" +
 	"\vUserService\x12\xb8\x03\n" +
 	"\aGetUser\x12!.scalekit.v1.users.GetUserRequest\x1a\".scalekit.v1.users.GetUserResponse\"\xe5\x02\x92A\xc1\x02\n" +
 	"\x05Users\x12\bGet user\x1a\x8e\x01Retrieves all details for a user by system-generated user ID or external ID. The response includes organization memberships and user metadata.J\x9c\x01\n" +
@@ -3348,12 +3469,12 @@ const file_scalekit_v1_users_users_proto_rawDesc = "" +
 	"#\x1a!.scalekit.v1.errdetails.ErrorInfoJ\xf2\x02\n" +
 	"\x03500\x12\xea\x02\n" +
 	"\xc0\x02Internal server error — an unexpected error occurred while processing the invitation resend request. This may be due to database connectivity issues, problems generating the secure magic link, email delivery service failures, or transaction errors during invitation processing. Contact support if the problem persists.\x12%\n" +
-	"#\x1a!.scalekit.v1.errdetails.ErrorInfo\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02F:\x01*2A/api/v1/invites/organizations/{organization_id}/users/{id}/resend\x12\xee\x03\n" +
-	"\rListUserRoles\x12'.scalekit.v1.users.ListUserRolesRequest\x1a(.scalekit.v1.users.ListUserRolesResponse\"\x89\x03\x92A\xab\x02\n" +
+	"#\x1a!.scalekit.v1.errdetails.ErrorInfo\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02F:\x01*2A/api/v1/invites/organizations/{organization_id}/users/{id}/resend\x12\xdf\x03\n" +
+	"\rListUserRoles\x12'.scalekit.v1.users.ListUserRolesRequest\x1a(.scalekit.v1.users.ListUserRolesResponse\"\xfa\x02\x92A\xab\x02\n" +
 	"\x05Users\x12\x0fList user roles\x1a\x9a\x01Retrieves all roles assigned to a user within a specific organization. This includes both direct role assignments and inherited roles from role hierarchy.Jt\n" +
 	"\x03200\x12m\n" +
 	"=Successfully retrieved the list of roles assigned to the user\x12,\n" +
-	"*\x1a(.scalekit.v1.users.ListUserRolesResponse\x82\xb5\x18\x02\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02?\x12=/api/v1/organizations/{organization_id}/users/{user_id}/roles\x12\xe2\x03\n" +
+	"*\x1a(.scalekit.v1.users.ListUserRolesResponse\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02?\x12=/api/v1/organizations/{organization_id}/users/{user_id}/roles\x12\xe2\x03\n" +
 	"\x0fAssignUserRoles\x12).scalekit.v1.users.AssignUserRolesRequest\x1a*.scalekit.v1.users.AssignUserRolesResponse\"\xf7\x02\x92A\x92\x02\n" +
 	"\x05Users\x12\x14Assign roles to user\x1a\x90\x01Assigns one or more roles to a user within a specific organization. This operation adds to existing role assignments rather than replacing them.J`\n" +
 	"\x03200\x12Y\n" +
@@ -3362,12 +3483,12 @@ const file_scalekit_v1_users_users_proto_rawDesc = "" +
 	"\x0eRemoveUserRole\x12(.scalekit.v1.users.RemoveUserRoleRequest\x1a\x16.google.protobuf.Empty\"\xd3\x02\x92A\xe9\x01\n" +
 	"\x05Users\x12\x15Remove role from user\x1a\x9a\x01Removes a specific role assignment from a user within an organization. This only removes direct role assignments, not inherited roles from role hierarchy.J,\n" +
 	"\x03200\x12%\n" +
-	"#Role successfully removed from user\x82\xb5\x18\x02\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02K*I/api/v1/organizations/{organization_id}/users/{user_id}/roles/{role_name}\x12\xaa\x04\n" +
-	"\x13ListUserPermissions\x12-.scalekit.v1.users.ListUserPermissionsRequest\x1a..scalekit.v1.users.ListUserPermissionsResponse\"\xb3\x03\x92A\xcf\x02\n" +
+	"#Role successfully removed from user\x82\xb5\x18\x02\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02K*I/api/v1/organizations/{organization_id}/users/{user_id}/roles/{role_name}\x12\x9b\x04\n" +
+	"\x13ListUserPermissions\x12-.scalekit.v1.users.ListUserPermissionsRequest\x1a..scalekit.v1.users.ListUserPermissionsResponse\"\xa4\x03\x92A\xcf\x02\n" +
 	"\x05Users\x12\x15List user permissions\x1a\xb4\x01Retrieves all permissions a user has access to within a specific organization. This includes permissions from direct role assignments and inherited permissions from role hierarchy.Jx\n" +
 	"\x03200\x12q\n" +
 	";Successfully retrieved the list of permissions for the user\x122\n" +
-	"0\x1a..scalekit.v1.users.ListUserPermissionsResponse\x82\xb5\x18\x02\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02E\x12C/api/v1/organizations/{organization_id}/users/{user_id}/permissions\x1a\xec\x03\x92A\xe8\x03\n" +
+	"0\x1a..scalekit.v1.users.ListUserPermissionsResponse\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02E\x12C/api/v1/organizations/{organization_id}/users/{user_id}/permissions\x1a\xec\x03\x92A\xe8\x03\n" +
 	"\x05Users\x12\xde\x03Comprehensive user management operations including user lifecycle, organization memberships, and invitation workflows. This service provides endpoints for creating, retrieving, updating, and deleting user accounts across your Scalekit environment. It supports both individual user operations and bulk operations for user administration, including user search, pagination, and metadata management. The service also handles user invitations and organization membership management.B\xd0\x01\n" +
 	"\x15com.scalekit.v1.usersB\n" +
 	"UsersProtoP\x01ZEgithub.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/users\xa2\x02\x03SVU\xaa\x02\x11Scalekit.V1.Users\xca\x02\x11Scalekit\\V1\\Users\xe2\x02\x1dScalekit\\V1\\Users\\GPBMetadata\xea\x02\x13Scalekit::V1::Usersb\x06proto3"
@@ -3554,6 +3675,7 @@ func file_scalekit_v1_users_users_proto_init() {
 	}
 	file_scalekit_v1_users_users_proto_msgTypes[20].OneofWrappers = []any{}
 	file_scalekit_v1_users_users_proto_msgTypes[24].OneofWrappers = []any{}
+	file_scalekit_v1_users_users_proto_msgTypes[25].OneofWrappers = []any{}
 	file_scalekit_v1_users_users_proto_msgTypes[26].OneofWrappers = []any{}
 	file_scalekit_v1_users_users_proto_msgTypes[27].OneofWrappers = []any{}
 	type x struct{}

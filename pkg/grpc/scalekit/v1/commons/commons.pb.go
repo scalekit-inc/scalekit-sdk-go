@@ -316,16 +316,25 @@ func (x *Role) GetDisplayName() string {
 type UserProfile struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
 	Id               string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	FirstName        string                 `protobuf:"bytes,2,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
-	LastName         string                 `protobuf:"bytes,3,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
+	GivenName        string                 `protobuf:"bytes,2,opt,name=given_name,json=givenName,proto3" json:"given_name,omitempty"`
+	FamilyName       string                 `protobuf:"bytes,3,opt,name=family_name,json=familyName,proto3" json:"family_name,omitempty"`
 	Name             string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
 	Locale           string                 `protobuf:"bytes,5,opt,name=locale,proto3" json:"locale,omitempty"`
 	EmailVerified    bool                   `protobuf:"varint,6,opt,name=email_verified,json=emailVerified,proto3" json:"email_verified,omitempty"`
 	PhoneNumber      string                 `protobuf:"bytes,7,opt,name=phone_number,json=phoneNumber,proto3" json:"phone_number,omitempty"`
 	Metadata         map[string]string      `protobuf:"bytes,8,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	CustomAttributes map[string]string      `protobuf:"bytes,9,rep,name=custom_attributes,json=customAttributes,proto3" json:"custom_attributes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	// Deprecated: Marked as deprecated in scalekit/v1/commons/commons.proto.
+	FirstName string `protobuf:"bytes,21,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
+	// Deprecated: Marked as deprecated in scalekit/v1/commons/commons.proto.
+	LastName            string   `protobuf:"bytes,22,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
+	PreferredUsername   string   `protobuf:"bytes,12,opt,name=preferred_username,json=preferredUsername,proto3" json:"preferred_username,omitempty"`
+	PhoneNumberVerified bool     `protobuf:"varint,13,opt,name=phone_number_verified,json=phoneNumberVerified,proto3" json:"phone_number_verified,omitempty"`
+	Picture             string   `protobuf:"bytes,14,opt,name=picture,proto3" json:"picture,omitempty"`
+	Groups              []string `protobuf:"bytes,15,rep,name=groups,proto3" json:"groups,omitempty"`
+	Gender              string   `protobuf:"bytes,16,opt,name=gender,proto3" json:"gender,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
 func (x *UserProfile) Reset() {
@@ -365,16 +374,16 @@ func (x *UserProfile) GetId() string {
 	return ""
 }
 
-func (x *UserProfile) GetFirstName() string {
+func (x *UserProfile) GetGivenName() string {
 	if x != nil {
-		return x.FirstName
+		return x.GivenName
 	}
 	return ""
 }
 
-func (x *UserProfile) GetLastName() string {
+func (x *UserProfile) GetFamilyName() string {
 	if x != nil {
-		return x.LastName
+		return x.FamilyName
 	}
 	return ""
 }
@@ -421,21 +430,71 @@ func (x *UserProfile) GetCustomAttributes() map[string]string {
 	return nil
 }
 
+// Deprecated: Marked as deprecated in scalekit/v1/commons/commons.proto.
+func (x *UserProfile) GetFirstName() string {
+	if x != nil {
+		return x.FirstName
+	}
+	return ""
+}
+
+// Deprecated: Marked as deprecated in scalekit/v1/commons/commons.proto.
+func (x *UserProfile) GetLastName() string {
+	if x != nil {
+		return x.LastName
+	}
+	return ""
+}
+
+func (x *UserProfile) GetPreferredUsername() string {
+	if x != nil {
+		return x.PreferredUsername
+	}
+	return ""
+}
+
+func (x *UserProfile) GetPhoneNumberVerified() bool {
+	if x != nil {
+		return x.PhoneNumberVerified
+	}
+	return false
+}
+
+func (x *UserProfile) GetPicture() string {
+	if x != nil {
+		return x.Picture
+	}
+	return ""
+}
+
+func (x *UserProfile) GetGroups() []string {
+	if x != nil {
+		return x.Groups
+	}
+	return nil
+}
+
+func (x *UserProfile) GetGender() string {
+	if x != nil {
+		return x.Gender
+	}
+	return ""
+}
+
 var File_scalekit_v1_commons_commons_proto protoreflect.FileDescriptor
 
 const file_scalekit_v1_commons_commons_proto_rawDesc = "" +
 	"\n" +
-	"!scalekit/v1/commons/commons.proto\x12\x13scalekit.v1.commons\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\"\xc2\v\n" +
+	"!scalekit/v1/commons/commons.proto\x12\x13scalekit.v1.commons\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\"\x97\r\n" +
 	"\x16OrganizationMembership\x12\x86\x01\n" +
 	"\x0forganization_id\x18\x01 \x01(\tB]\x92AZ2@Unique identifier for the organization. Immutable and read-only.J\x16\"org_1234abcd5678efgh\"R\x0eorganizationId\x12\x89\x01\n" +
 	"\tjoin_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampBP\x92AM2KTimestamp when the membership was created. Automatically set by the server.R\bjoinTime\x12R\n" +
 	"\x11membership_status\x18\x03 \x01(\x0e2%.scalekit.v1.commons.MembershipStatusR\x10membershipStatus\x12/\n" +
-	"\x05roles\x18\x04 \x03(\v2\x19.scalekit.v1.commons.RoleR\x05roles\x12Q\n" +
-	"\x04name\x18\x05 \x01(\tB8\x92A52'Display name for the Organization name.J\n" +
+	"\x05roles\x18\x04 \x03(\v2\x19.scalekit.v1.commons.RoleR\x05roles\x12\x9a\x01\n" +
+	"\x04name\x18\x05 \x01(\tB\x80\x01\x92A}2oOrganization name. This field stores the formal organization name used for identification and display purposes.J\n" +
 	"\"AcmeCorp\"H\x00R\x04name\x88\x01\x01\x12\x94\x02\n" +
-	"\bmetadata\x18\a \x03(\v29.scalekit.v1.commons.OrganizationMembership.MetadataEntryB\xbc\x01\x92A\x9f\x012dCustom key-value pairs for storing additional user context. Keys (3-25 chars), values (1-256 chars).J7{\"department\": \"engineering\", \"location\": \"nyc-office\"}\xbaH\x16\x9a\x01\x13\x10\x14\"\x06r\x04\x10\x03\x18\x19*\ar\x05\x10\x01\x18\x80\x02R\bmetadata\x12`\n" +
-	"\fdisplay_name\x18\t \x01(\tB8\x92A52'Display name for the Organization name.J\n" +
-	"\"AcmeCorp\"H\x01R\vdisplayName\x88\x01\x01\x12T\n" +
+	"\bmetadata\x18\a \x03(\v29.scalekit.v1.commons.OrganizationMembership.MetadataEntryB\xbc\x01\x92A\x9f\x012dCustom key-value pairs for storing additional user context. Keys (3-25 chars), values (1-256 chars).J7{\"department\": \"engineering\", \"location\": \"nyc-office\"}\xbaH\x16\x9a\x01\x13\x10\x14\"\x06r\x04\x10\x03\x18\x19*\ar\x05\x10\x01\x18\x80\x02R\bmetadata\x12\xea\x01\n" +
+	"\fdisplay_name\x18\t \x01(\tB\xc1\x01\x92A\xbd\x012\xa6\x01Organization display name. This field stores a user-friendly name for the organization that may be different from the formal name, often used for UI display purposes.J\x12\"Acme Corporation\"H\x01R\vdisplayName\x88\x01\x01\x12T\n" +
 	"\rinviter_email\x18\n" +
 	" \x01(\tB*\x92A'2%ID of the user who invited this user.H\x02R\finviterEmail\x88\x01\x01\x12o\n" +
 	"\n" +
@@ -452,24 +511,33 @@ const file_scalekit_v1_commons_commons_proto_rawDesc = "" +
 	"\x0e_inviter_emailB\r\n" +
 	"\v_created_atB\x0e\n" +
 	"\f_accepted_atB\r\n" +
-	"\v_expires_at\"\xe0\x01\n" +
+	"\v_expires_at\"\xdf\x02\n" +
 	"\x04Role\x129\n" +
-	"\x02id\x18\x01 \x01(\tB)\x92A#2\aRole IDJ\x18\"role_79643236410327240\"\xe0A\x03R\x02id\x12G\n" +
-	"\x04name\x18\x02 \x01(\tB3\x92A02\"Unique key identifier for the roleJ\n" +
+	"\x02id\x18\x01 \x01(\tB)\x92A#2\aRole IDJ\x18\"role_79643236410327240\"\xe0A\x03R\x02id\x12\xc5\x01\n" +
+	"\x04name\x18\x02 \x01(\tB\xb0\x01\x92A\xac\x012\x9d\x01Attribute name/identifier for the role used in system operations and API calls. This should be a machine-readable identifier that follows naming conventions.J\n" +
 	"\"team_dev\"R\x04name\x12T\n" +
 	"\fdisplay_name\x18\x03 \x01(\tB1\x92A.2 Human-readable name for the roleJ\n" +
-	"\"Dev Team\"R\vdisplayName\"\x99\f\n" +
+	"\"Dev Team\"R\vdisplayName\"\xbd/\n" +
 	"\vUserProfile\x12\x89\x01\n" +
-	"\x02id\x18\x01 \x01(\tBy\x92As2QUnique system-generated identifier for the user profile. Immutable and read-only.J\x1e\"usr_profile_1234abcd5678efgh\"\xe0A\x03R\x02id\x12^\n" +
+	"\x02id\x18\x01 \x01(\tBy\x92As2QUnique system-generated identifier for the user profile. Immutable and read-only.J\x1e\"usr_profile_1234abcd5678efgh\"\xe0A\x03R\x02id\x12\xeb\x02\n" +
 	"\n" +
-	"first_name\x18\x02 \x01(\tB?\x92A42*User's given name. Maximum 200 characters.J\x06\"John\"\xbaH\x05r\x03\x18\xc8\x01R\tfirstName\x12\\\n" +
-	"\tlast_name\x18\x03 \x01(\tB?\x92A42+User's family name. Maximum 200 characters.J\x05\"Doe\"\xbaH\x05r\x03\x18\xc8\x01R\blastName\x12v\n" +
-	"\x04name\x18\x04 \x01(\tBb\x92A_2IFull name in display format. Typically combines first_name and last_name.J\x12\"John Michael Doe\"R\x04name\x12y\n" +
-	"\x06locale\x18\x05 \x01(\tBa\x92A^2SUser's localization preference in BCP-47 format. Defaults to organization settings.J\a\"en-US\"R\x06locale\x12\x92\x01\n" +
-	"\x0eemail_verified\x18\x06 \x01(\bBk\x92Ae2]Indicates if the user's email address has been verified. Automatically updated by the system.J\x04true\xe0A\x03R\remailVerified\x12\x8a\x01\n" +
-	"\fphone_number\x18\a \x01(\tBg\x92Ad2RPhone number in E.164 international format. Required for SMS-based authentication.J\x0e\"+14155552671\"R\vphoneNumber\x12\x87\x02\n" +
-	"\bmetadata\x18\b \x03(\v2..scalekit.v1.commons.UserProfile.MetadataEntryB\xba\x01\x92A\x9d\x012^System-managed key-value pairs for internal tracking. Keys (3-25 chars), values (1-256 chars).J;{\"account_status\": \"active\", \"signup_source\": \"mobile_app\"}\xbaH\x16\x9a\x01\x13\x10\x1e\"\x06r\x04\x10\x03\x18\x19*\ar\x05\x10\x01\x18\x80\x02R\bmetadata\x12\x9e\x02\n" +
-	"\x11custom_attributes\x18\t \x03(\v26.scalekit.v1.commons.UserProfile.CustomAttributesEntryB\xb8\x01\x92A\x9b\x012ZCustom attributes for extended user profile data. Keys (3-25 chars), values (1-256 chars).J={\"department\": \"engineering\", \"security_clearance\": \"level2\"}\xbaH\x16\x9a\x01\x13\x10d\"\x06r\x04\x10\x03\x18\x19*\ar\x05\x10\x01\x18\x80\x02R\x10customAttributes\x1a;\n" +
+	"given_name\x18\x02 \x01(\tB\xcb\x02\x92A\xbf\x022\xb4\x02The user's given name (first name). This field stores the user's first name and is used for personalization, display purposes, and when generating the full display name. The given name appears in user interfaces, formal communications, and user listings throughout the system. Maximum 255 characters allowed.J\x06\"John\"\xbaH\x05r\x03\x18\xff\x01R\tgivenName\x12\xe9\x02\n" +
+	"\vfamily_name\x18\x03 \x01(\tB\xc7\x02\x92A\xbb\x022\xb1\x02The user's family name (last name or surname). This field stores the user's last name and is combined with the given name to create the full display name. The family name is used in formal communications, user listings, and organizational directories throughout the system. Maximum 255 characters allowed.J\x05\"Doe\"\xbaH\x05r\x03\x18\xff\x01R\n" +
+	"familyName\x12\xeb\x03\n" +
+	"\x04name\x18\x04 \x01(\tB\xd6\x03\x92A\xd2\x032\xbb\x03The user's complete display name in formatted form. This field stores the full name as a single string and is typically used when you want to set the complete name rather than using separate given and family names. This name appears in user interfaces, reports, directory listings, and anywhere a formatted display name is needed. This field serves as a formatted display name that complements the individual given_name and family_name fields.J\x12\"John Michael Doe\"R\x04name\x12\x9a\x03\n" +
+	"\x06locale\x18\x05 \x01(\tB\x81\x03\x92A\xfd\x022\xf1\x02The user's preferred language and region settings using BCP-47 format codes. This field customizes the user's experience with localized content, date formats, number formatting, and UI language throughout the system. When not specified, the user inherits the organization's default locale settings. Common values include `en-US`, `en-GB`, `fr-FR`, `de-DE`, and `es-ES`.J\a\"en-US\"R\x06locale\x12\x92\x01\n" +
+	"\x0eemail_verified\x18\x06 \x01(\bBk\x92Ae2]Indicates if the user's email address has been verified. Automatically updated by the system.J\x04true\xe0A\x03R\remailVerified\x12\xd4\x02\n" +
+	"\fphone_number\x18\a \x01(\tB\xb0\x02\x92A\xac\x022\x99\x02The user's phone number in E.164 international format. This field stores the phone number for user contact and identification purposes. The phone number must include the country code and be formatted according to E.164 standards (e.g., `+1` for US numbers). This field is optional.J\x0e\"+14155552671\"R\vphoneNumber\x12\xa0\x05\n" +
+	"\bmetadata\x18\b \x03(\v2..scalekit.v1.commons.UserProfile.MetadataEntryB\xd3\x04\x92A\xb6\x042\xde\x03Raw attributes received from identity providers during authentication. This field stores the original user profile data as received from external IdP systems (SAML, OIDC, etc.) including provider-specific claims and attributes. These fields preserve the complete set of attributes received from the identity source and are used for mapping, synchronization, and audit purposes. Keys must be 3-25 characters, values must be 1-256 characters, with a maximum of 20 key-value pairs.JS{\"idp_user_id\": \"12345\", \"department\": \"engineering\", \"employee_type\": \"full-time\"}\xbaH\x16\x9a\x01\x13\x10\x14\"\x06r\x04\x10\x03\x18\x19*\ar\x05\x10\x01\x18\x80\x02R\bmetadata\x12\xdc\x05\n" +
+	"\x11custom_attributes\x18\t \x03(\v26.scalekit.v1.commons.UserProfile.CustomAttributesEntryB\xf6\x04\x92A\xd9\x042\x97\x04Custom attributes for extended user profile data and application-specific information. This field stores business-specific user data like department, job title, security clearances, project assignments, or any other organizational attributes your application requires. Unlike system metadata, these attributes are typically managed by administrators or applications and are visible to end users for personalization and business logic. Keys must be 3-25 characters, values must be 1-256 characters, with a maximum of 20 key-value pairs.J={\"department\": \"engineering\", \"security_clearance\": \"level2\"}\xbaH\x16\x9a\x01\x13\x10\x14\"\x06r\x04\x10\x03\x18\x19*\ar\x05\x10\x01\x18\x80\x02R\x10customAttributes\x12\x94\x01\n" +
+	"\n" +
+	"first_name\x18\x15 \x01(\tBu\x92AY2O[DEPRECATED] Use given_name instead. User's given name. Maximum 255 characters.J\x06\"John\"\x18\x01\xbaH\x05r\x03\x18\xff\x01\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEWR\tfirstName\x12\x93\x01\n" +
+	"\tlast_name\x18\x16 \x01(\tBv\x92AZ2Q[DEPRECATED] Use family_name instead. User's family name. Maximum 255 characters.J\x05\"Doe\"\x18\x01\xbaH\x05r\x03\x18\xff\x01\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEWR\blastName\x12\xab\x03\n" +
+	"\x12preferred_username\x18\f \x01(\tB\xfb\x02\x92A\xef\x022\xe1\x02The user's preferred username for display and identification purposes. This field stores a custom username that the user prefers to be known by, which may differ from their email or formal name. This username appears in user interfaces, mentions, informal communications, and collaborative features throughout the system. Maximum 512 characters allowed.J\t\"johndoe\"\xbaH\x05r\x03\x18\x80\x04R\x11preferredUsername\x12\x9e\x01\n" +
+	"\x15phone_number_verified\x18\r \x01(\bBj\x92Ad2\\Indicates if the user's phone number has been verified. Automatically updated by the system.J\x04true\xe0A\x03R\x13phoneNumberVerified\x12\xe4\x03\n" +
+	"\apicture\x18\x0e \x01(\tB\xc9\x03\x92A\xc5\x032\xa0\x03The URL to the user's profile picture or avatar image. This field stores the location of the user's profile photo that appears in user interfaces, directory listings, and collaborative features throughout the system. The URL should point to a publicly accessible image file. Supported formats typically include JPEG, PNG, and GIF. This image is used for visual identification and personalization across the platform.J \"https://example.com/avatar.jpg\"R\apicture\x12\xc7\x03\n" +
+	"\x06groups\x18\x0f \x03(\tB\xae\x03\x92A\xaa\x032\x8f\x03The list of group names the user belongs to within the organization. This field stores the user's group memberships for role-based access control, team assignments, and organizational structure. Groups are typically used for permission management, collaborative access, and organizational hierarchy. Each group name represents a distinct organizational unit or team that the user is associated with.J\x16[\"admin\", \"developer\"]R\x06groups\x12\x9f\x03\n" +
+	"\x06gender\x18\x10 \x01(\tB\x86\x03\x92A\x82\x032\xf7\x02The user's gender identity information. This field stores the user's gender identity for personalization, compliance reporting, or organizational analytics purposes. This field supports any string value to accommodate diverse gender identities and should be handled with appropriate privacy considerations according to your organization's policies and applicable regulations.J\x06\"male\"R\x06gender\x1a;\n" +
 	"\rMetadataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1aC\n" +

@@ -483,21 +483,21 @@ var File_scalekit_v1_auth_passwordless_proto protoreflect.FileDescriptor
 
 const file_scalekit_v1_auth_passwordless_proto_rawDesc = "" +
 	"\n" +
-	"#scalekit/v1/auth/passwordless.proto\x12\x1dscalekit.v1.auth.passwordless\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\x1a!scalekit/v1/options/options.proto\"\xca\x10\n" +
+	"#scalekit/v1/auth/passwordless.proto\x12\x1dscalekit.v1.auth.passwordless\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\x1a!scalekit/v1/options/options.proto\"\xdb\x10\n" +
 	"\x17SendPasswordlessRequest\x12\xaf\x01\n" +
 	"\x05email\x18\x01 \x01(\tB\x98\x01\x92A\x85\x012kEmail address where the passwordless authentication credentials will be sent. Must be a valid email format.J\x16\"john.doe@example.com\"\xbaH\f\xc8\x01\x01r\a\x10\x01\x18\xc0\x02`\x01R\x05email\x12\xa6\x02\n" +
 	"\btemplate\x18\x02 \x01(\x0e2+.scalekit.v1.auth.passwordless.TemplateTypeB\xd7\x01\x92A\xcb\x012\xbe\x01Specifies the authentication intent for the passwordless request. Use SIGNIN for existing users or SIGNUP for new user registration. This affects the email template and user experience flow.J\b\"SIGNIN\"\xbaH\x05\x82\x01\x02\x10\x01H\x00R\btemplate\x88\x01\x01\x12\xa9\x02\n" +
 	"\x12magiclink_auth_uri\x18\x03 \x01(\tB\xf5\x01\x92A\xe4\x012\xaf\x01Your application's callback URL where users will be redirected after clicking the magic link in their email. The link token will be appended as a query parameter as link_tokenJ0\"https://yourapp.com/auth/passwordless/callback\"\xe0A\x01\xbaH\ar\x05\x10\x01\x18\xe8\aH\x01R\x10magiclinkAuthUri\x88\x01\x01\x12\x9b\x02\n" +
 	"\x05state\x18\x04 \x01(\tB\xff\x01\x92A\xee\x012\xd9\x01Custom state parameter that will be returned unchanged in the verification response. Use this to maintain application state between the authentication request and callback, such as the intended destination after loginJ\x10\"d62ivasry29lso\"\xe0A\x01\xbaH\ar\x05\x10\x01\x18\xe8\aH\x02R\x05state\x88\x01\x01\x12\xa6\x01\n" +
 	"\n" +
-	"expires_in\x18\x05 \x01(\rB\x81\x01\x92A{2tTime in seconds until the passwordless authentication expires. If not specified, defaults to 300 seconds (5 minutes)J\x03300\xe0A\x01H\x03R\texpiresIn\x88\x01\x01\x12\xdd\x05\n" +
-	"\x12template_variables\x18\x06 \x03(\v2M.scalekit.v1.auth.passwordless.SendPasswordlessRequest.TemplateVariablesEntryB\xde\x04\x92A\xcf\x042\x9a\x04A set of key-value pairs to personalize the email template.\n" +
+	"expires_in\x18\x05 \x01(\rB\x81\x01\x92A{2tTime in seconds until the passwordless authentication expires. If not specified, defaults to 300 seconds (5 minutes)J\x03300\xe0A\x01H\x03R\texpiresIn\x88\x01\x01\x12\xee\x05\n" +
+	"\x12template_variables\x18\x06 \x03(\v2M.scalekit.v1.auth.passwordless.SendPasswordlessRequest.TemplateVariablesEntryB\xef\x04\x92A\xcf\x042\x9a\x04A set of key-value pairs to personalize the email template.\n" +
 	"\n" +
 	"* You may include up to 30 key-value pairs.\n" +
 	"* The following variable names are reserved by the system and cannot be supplied: `otp`, `expiry_time_relative`, `link`, `expire_time`, `expiry_time`.\n" +
 	"* Every variable referenced in your email template must be included as a key-value pair.\n" +
 	"\n" +
-	"Use these variables to insert custom information, such as a team name, URL or the user's employee ID. All variables are interpolated before the email is sent, regardless of the email provider.J0{\"custom_variable_key\": \"custom_variable_value\"}\xe0A\x01\xbaH\x05\x9a\x01\x02\x10\x1eR\x11templateVariables\x1aD\n" +
+	"Use these variables to insert custom information, such as a team name, URL or the user's employee ID. All variables are interpolated before the email is sent, regardless of the email provider.J0{\"custom_variable_key\": \"custom_variable_value\"}\xe0A\x01\xbaH\x16\x9a\x01\x13\x10\x1e\"\x06r\x04\x10\x03\x18\x19*\ar\x05\x10\x01\x18\x80\x02R\x11templateVariables\x1aD\n" +
 	"\x16TemplateVariablesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\v\n" +

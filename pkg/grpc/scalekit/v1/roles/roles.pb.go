@@ -3093,7 +3093,7 @@ const file_scalekit_v1_roles_roles_proto_rawDesc = "" +
 	"\trole_name\x18\x01 \x01(\tB\xc5\x01\x92A\xa4\x012\x91\x01Unique name identifier of the role whose base inheritance relationship should be removed. Must be alphanumeric with underscores, 1-64 characters.J\x0econtent_editor\xbaH\x1a\xc8\x01\x01r\x15\x10\x01\x18@2\x0f^[a-zA-Z0-9_]+$R\broleName\"\x88\x02\n" +
 	"!DeleteOrganizationRoleBaseRequest\x12e\n" +
 	"\x06org_id\x18\x01 \x01(\tBN\x92A=2$Unique identifier to an OrganizationJ\x15\"org_121312434123312\"\xbaH\vr\t\x10\x01\x18 :\x03orgR\x05orgId\x12|\n" +
-	"\trole_name\x18\x02 \x01(\tB_\x92A:21Name of the organization role to remove base fromJ\x05admin\xbaH\x1f\xc8\x01\x01r\x1a\x10\x01\x18d2\x14^[a-zA-Z0-9_]{1,64}$R\broleName2\xe0\xc4\x01\n" +
+	"\trole_name\x18\x02 \x01(\tB_\x92A:21Name of the organization role to remove base fromJ\x05admin\xbaH\x1f\xc8\x01\x01r\x1a\x10\x01\x18d2\x14^[a-zA-Z0-9_]{1,64}$R\broleName2\xc2\xc4\x01\n" +
 	"\fRolesService\x12\x87\b\n" +
 	"\n" +
 	"CreateRole\x12$.scalekit.v1.roles.CreateRoleRequest\x1a%.scalekit.v1.roles.CreateRoleResponse\"\xab\a\x92A\x86\a\n" +
@@ -3222,17 +3222,17 @@ const file_scalekit_v1_roles_roles_proto_rawDesc = "" +
 	"\x05Roles\x12 Get organization role user count\x1a\xc0\x03Retrieves the total number of users currently assigned to the specified organization role. Use this endpoint to monitor organization role usage, enforce user limits, or understand the scope of role assignments within the organization. Provide the organization ID and role name as path parameters. The response includes the user count for the requested organization role. This operation is read-only and does not modify any data or user assignments.J\xd1\x01\n" +
 	"\x03200\x12\xc9\x01\n" +
 	"\x88\x01Successfully retrieved user count for the specified organization role. Returns the total number of users currently assigned to the role.\x12<\n" +
-	":\x1a8.scalekit.v1.roles.GetOrganizationRoleUsersCountResponse\x82\xb5\x18\x02\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02>\x12</api/v1/organizations/{org_id}/roles/{role_name}/users:count\x12\xad\x06\n" +
-	"\x12UpdateDefaultRoles\x12,.scalekit.v1.roles.UpdateDefaultRolesRequest\x1a-.scalekit.v1.roles.UpdateDefaultRolesResponse\"\xb9\x05\x92A\xdf\x04\n" +
+	":\x1a8.scalekit.v1.roles.GetOrganizationRoleUsersCountResponse\x82\xb5\x18\x02\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02>\x12</api/v1/organizations/{org_id}/roles/{role_name}/users:count\x12\x9e\x06\n" +
+	"\x12UpdateDefaultRoles\x12,.scalekit.v1.roles.UpdateDefaultRolesRequest\x1a-.scalekit.v1.roles.UpdateDefaultRolesResponse\"\xaa\x05\x92A\xdf\x04\n" +
 	"\x05Roles\x12$Set default creator and member roles\x1a\xcf\x03Updates the default creator and member roles for the current environment. Use this endpoint to configure which roles are automatically assigned to new users when they join the environment. You can specify role names for both creator and member default roles. The system will validate that the specified roles exist and update the environment settings accordingly. Returns the updated default role objects including their complete role information and permissions.J^\n" +
 	"\x03200\x12W\n" +
 	"\"Default roles updated successfully\x121\n" +
-	"/\x1a-.scalekit.v1.roles.UpdateDefaultRolesResponse\x82\xb5\x18\x02\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02;:\x01*Z\x1a:\x01*2\x15/api/v1/roles/default2\x1a/api/v1/roles:set_defaults\x12\xda\x06\n" +
-	"\x1eUpdateDefaultOrganizationRoles\x128.scalekit.v1.roles.UpdateDefaultOrganizationRolesRequest\x1a9.scalekit.v1.roles.UpdateDefaultOrganizationRolesResponse\"\xc2\x05\x92A\xed\x04\n" +
+	"/\x1a-.scalekit.v1.roles.UpdateDefaultRolesResponse\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02;:\x01*Z\x1a:\x01*2\x15/api/v1/roles/default2\x1a/api/v1/roles:set_defaults\x12\xcb\x06\n" +
+	"\x1eUpdateDefaultOrganizationRoles\x128.scalekit.v1.roles.UpdateDefaultOrganizationRolesRequest\x1a9.scalekit.v1.roles.UpdateDefaultOrganizationRolesResponse\"\xb3\x05\x92A\xed\x04\n" +
 	"\x05Roles\x12\x1eSet default organization roles\x1a\xf8\x02Updates the default member role for the specified organization. Use this endpoint to configure which role is automatically assigned to new users when they join the organization. The system will validate that the specified role exists and update the organization settings accordingly. This configuration affects all new user invitations and memberships within the organization.J\xc8\x01\n" +
 	"\x03200\x12\xc0\x01\n" +
 	"\x7fDefault organization roles updated successfully. Returns the updated default member role object with complete role information.\x12=\n" +
-	";\x1a9.scalekit.v1.roles.UpdateDefaultOrganizationRolesResponse\x82\xb5\x18\x02\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x026:\x01*21/api/v1/organizations/{org_id}/roles:set_defaults\x12\xa4\b\n" +
+	";\x1a9.scalekit.v1.roles.UpdateDefaultOrganizationRolesResponse\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x026:\x01*21/api/v1/organizations/{org_id}/roles:set_defaults\x12\xa4\b\n" +
 	"\x12ListDependentRoles\x12,.scalekit.v1.roles.ListDependentRolesRequest\x1a-.scalekit.v1.roles.ListDependentRolesResponse\"\xb0\a\x92A\xfa\x06\n" +
 	"\x05Roles\x12\x14List dependent roles\x1a\xfc\x04Retrieves all roles that directly extend the specified base role through inheritance. Use this endpoint to understand the role hierarchy and identify which roles inherit permissions from a particular base role. Provide the base role name as a path parameter, and the response will include all dependent roles with their metadata and permission information. This operation is useful for auditing role inheritance relationships, understanding the impact of changes to base roles, or managing role hierarchies effectively. Returns a list of dependent role objects including their names, display names, descriptions, and permission details.J\xdb\x01\n" +
 	"\x03200\x12\xd3\x01\n" +
