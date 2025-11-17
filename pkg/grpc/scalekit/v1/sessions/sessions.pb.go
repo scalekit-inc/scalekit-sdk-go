@@ -7,9 +7,9 @@
 package sessions
 
 import (
+	_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
 	_ "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/options"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
-	_ "google.golang.org/genproto/googleapis/api/visibility"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
@@ -462,22 +462,8 @@ type SessionDetails struct {
 	ExpiredAt                  *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=expired_at,json=expiredAt,proto3" json:"expired_at,omitempty"`
 	LogoutAt                   *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=logout_at,json=logoutAt,proto3" json:"logout_at,omitempty"`
 	Status                     string                 `protobuf:"bytes,11,opt,name=status,proto3" json:"status,omitempty"`
-	InitialUserAgent           string                 `protobuf:"bytes,12,opt,name=initial_user_agent,json=initialUserAgent,proto3" json:"initial_user_agent,omitempty"`
-	InitialOs                  string                 `protobuf:"bytes,13,opt,name=initial_os,json=initialOs,proto3" json:"initial_os,omitempty"`
-	InitialOsVersion           string                 `protobuf:"bytes,14,opt,name=initial_os_version,json=initialOsVersion,proto3" json:"initial_os_version,omitempty"`
-	InitialBrowser             string                 `protobuf:"bytes,15,opt,name=initial_browser,json=initialBrowser,proto3" json:"initial_browser,omitempty"`
-	InitialBrowserVersion      string                 `protobuf:"bytes,16,opt,name=initial_browser_version,json=initialBrowserVersion,proto3" json:"initial_browser_version,omitempty"`
-	InitialDeviceType          string                 `protobuf:"bytes,17,opt,name=initial_device_type,json=initialDeviceType,proto3" json:"initial_device_type,omitempty"`
-	InitialIp                  string                 `protobuf:"bytes,19,opt,name=initial_ip,json=initialIp,proto3" json:"initial_ip,omitempty"`
-	InitialLocation            *Location              `protobuf:"bytes,20,opt,name=initial_location,json=initialLocation,proto3" json:"initial_location,omitempty"`
-	LatestUserAgent            string                 `protobuf:"bytes,21,opt,name=latest_user_agent,json=latestUserAgent,proto3" json:"latest_user_agent,omitempty"`
-	LatestOs                   string                 `protobuf:"bytes,22,opt,name=latest_os,json=latestOs,proto3" json:"latest_os,omitempty"`
-	LatestOsVersion            string                 `protobuf:"bytes,23,opt,name=latest_os_version,json=latestOsVersion,proto3" json:"latest_os_version,omitempty"`
-	LatestBrowser              string                 `protobuf:"bytes,24,opt,name=latest_browser,json=latestBrowser,proto3" json:"latest_browser,omitempty"`
-	LatestBrowserVersion       string                 `protobuf:"bytes,25,opt,name=latest_browser_version,json=latestBrowserVersion,proto3" json:"latest_browser_version,omitempty"`
-	LatestDeviceType           string                 `protobuf:"bytes,26,opt,name=latest_device_type,json=latestDeviceType,proto3" json:"latest_device_type,omitempty"`
-	LatestIp                   string                 `protobuf:"bytes,28,opt,name=latest_ip,json=latestIp,proto3" json:"latest_ip,omitempty"`
-	LatestLocation             *Location              `protobuf:"bytes,29,opt,name=latest_location,json=latestLocation,proto3" json:"latest_location,omitempty"`
+	Device                     *DeviceDetails         `protobuf:"bytes,12,opt,name=device,proto3" json:"device,omitempty"`
+	LastActiveAt               *timestamppb.Timestamp `protobuf:"bytes,13,opt,name=last_active_at,json=lastActiveAt,proto3" json:"last_active_at,omitempty"`
 	unknownFields              protoimpl.UnknownFields
 	sizeCache                  protoimpl.SizeCache
 }
@@ -589,114 +575,116 @@ func (x *SessionDetails) GetStatus() string {
 	return ""
 }
 
-func (x *SessionDetails) GetInitialUserAgent() string {
+func (x *SessionDetails) GetDevice() *DeviceDetails {
 	if x != nil {
-		return x.InitialUserAgent
-	}
-	return ""
-}
-
-func (x *SessionDetails) GetInitialOs() string {
-	if x != nil {
-		return x.InitialOs
-	}
-	return ""
-}
-
-func (x *SessionDetails) GetInitialOsVersion() string {
-	if x != nil {
-		return x.InitialOsVersion
-	}
-	return ""
-}
-
-func (x *SessionDetails) GetInitialBrowser() string {
-	if x != nil {
-		return x.InitialBrowser
-	}
-	return ""
-}
-
-func (x *SessionDetails) GetInitialBrowserVersion() string {
-	if x != nil {
-		return x.InitialBrowserVersion
-	}
-	return ""
-}
-
-func (x *SessionDetails) GetInitialDeviceType() string {
-	if x != nil {
-		return x.InitialDeviceType
-	}
-	return ""
-}
-
-func (x *SessionDetails) GetInitialIp() string {
-	if x != nil {
-		return x.InitialIp
-	}
-	return ""
-}
-
-func (x *SessionDetails) GetInitialLocation() *Location {
-	if x != nil {
-		return x.InitialLocation
+		return x.Device
 	}
 	return nil
 }
 
-func (x *SessionDetails) GetLatestUserAgent() string {
+func (x *SessionDetails) GetLastActiveAt() *timestamppb.Timestamp {
 	if x != nil {
-		return x.LatestUserAgent
+		return x.LastActiveAt
+	}
+	return nil
+}
+
+type DeviceDetails struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	UserAgent      string                 `protobuf:"bytes,12,opt,name=user_agent,json=userAgent,proto3" json:"user_agent,omitempty"`
+	Os             string                 `protobuf:"bytes,13,opt,name=os,proto3" json:"os,omitempty"`
+	OsVersion      string                 `protobuf:"bytes,14,opt,name=os_version,json=osVersion,proto3" json:"os_version,omitempty"`
+	Browser        string                 `protobuf:"bytes,15,opt,name=browser,proto3" json:"browser,omitempty"`
+	BrowserVersion string                 `protobuf:"bytes,16,opt,name=browser_version,json=browserVersion,proto3" json:"browser_version,omitempty"`
+	DeviceType     string                 `protobuf:"bytes,17,opt,name=device_type,json=deviceType,proto3" json:"device_type,omitempty"`
+	Ip             string                 `protobuf:"bytes,19,opt,name=ip,proto3" json:"ip,omitempty"`
+	Location       *Location              `protobuf:"bytes,20,opt,name=location,proto3" json:"location,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *DeviceDetails) Reset() {
+	*x = DeviceDetails{}
+	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeviceDetails) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeviceDetails) ProtoMessage() {}
+
+func (x *DeviceDetails) ProtoReflect() protoreflect.Message {
+	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeviceDetails.ProtoReflect.Descriptor instead.
+func (*DeviceDetails) Descriptor() ([]byte, []int) {
+	return file_scalekit_v1_sessions_sessions_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *DeviceDetails) GetUserAgent() string {
+	if x != nil {
+		return x.UserAgent
 	}
 	return ""
 }
 
-func (x *SessionDetails) GetLatestOs() string {
+func (x *DeviceDetails) GetOs() string {
 	if x != nil {
-		return x.LatestOs
+		return x.Os
 	}
 	return ""
 }
 
-func (x *SessionDetails) GetLatestOsVersion() string {
+func (x *DeviceDetails) GetOsVersion() string {
 	if x != nil {
-		return x.LatestOsVersion
+		return x.OsVersion
 	}
 	return ""
 }
 
-func (x *SessionDetails) GetLatestBrowser() string {
+func (x *DeviceDetails) GetBrowser() string {
 	if x != nil {
-		return x.LatestBrowser
+		return x.Browser
 	}
 	return ""
 }
 
-func (x *SessionDetails) GetLatestBrowserVersion() string {
+func (x *DeviceDetails) GetBrowserVersion() string {
 	if x != nil {
-		return x.LatestBrowserVersion
+		return x.BrowserVersion
 	}
 	return ""
 }
 
-func (x *SessionDetails) GetLatestDeviceType() string {
+func (x *DeviceDetails) GetDeviceType() string {
 	if x != nil {
-		return x.LatestDeviceType
+		return x.DeviceType
 	}
 	return ""
 }
 
-func (x *SessionDetails) GetLatestIp() string {
+func (x *DeviceDetails) GetIp() string {
 	if x != nil {
-		return x.LatestIp
+		return x.Ip
 	}
 	return ""
 }
 
-func (x *SessionDetails) GetLatestLocation() *Location {
+func (x *DeviceDetails) GetLocation() *Location {
 	if x != nil {
-		return x.LatestLocation
+		return x.Location
 	}
 	return nil
 }
@@ -712,13 +700,14 @@ type RevokedSessionDetails struct {
 	ExpiredAt         *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=expired_at,json=expiredAt,proto3" json:"expired_at,omitempty"`
 	LogoutAt          *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=logout_at,json=logoutAt,proto3" json:"logout_at,omitempty"`
 	Status            string                 `protobuf:"bytes,11,opt,name=status,proto3" json:"status,omitempty"`
+	LastActiveAt      *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=last_active_at,json=lastActiveAt,proto3" json:"last_active_at,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
 
 func (x *RevokedSessionDetails) Reset() {
 	*x = RevokedSessionDetails{}
-	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[9]
+	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -730,7 +719,7 @@ func (x *RevokedSessionDetails) String() string {
 func (*RevokedSessionDetails) ProtoMessage() {}
 
 func (x *RevokedSessionDetails) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[9]
+	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -743,7 +732,7 @@ func (x *RevokedSessionDetails) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RevokedSessionDetails.ProtoReflect.Descriptor instead.
 func (*RevokedSessionDetails) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_sessions_sessions_proto_rawDescGZIP(), []int{9}
+	return file_scalekit_v1_sessions_sessions_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *RevokedSessionDetails) GetSessionId() string {
@@ -809,6 +798,13 @@ func (x *RevokedSessionDetails) GetStatus() string {
 	return ""
 }
 
+func (x *RevokedSessionDetails) GetLastActiveAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.LastActiveAt
+	}
+	return nil
+}
+
 type Location struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
 	Region            string                 `protobuf:"bytes,1,opt,name=region,proto3" json:"region,omitempty"`
@@ -822,7 +818,7 @@ type Location struct {
 
 func (x *Location) Reset() {
 	*x = Location{}
-	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[10]
+	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -834,7 +830,7 @@ func (x *Location) String() string {
 func (*Location) ProtoMessage() {}
 
 func (x *Location) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[10]
+	mi := &file_scalekit_v1_sessions_sessions_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -847,7 +843,7 @@ func (x *Location) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Location.ProtoReflect.Descriptor instead.
 func (*Location) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_sessions_sessions_proto_rawDescGZIP(), []int{10}
+	return file_scalekit_v1_sessions_sessions_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *Location) GetRegion() string {
@@ -889,100 +885,114 @@ var File_scalekit_v1_sessions_sessions_proto protoreflect.FileDescriptor
 
 const file_scalekit_v1_sessions_sessions_proto_rawDesc = "" +
 	"\n" +
-	"#scalekit/v1/sessions/sessions.proto\x12\x14scalekit.v1.sessions\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/api/visibility.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a!scalekit/v1/options/options.proto\"N\n" +
-	"\x15SessionDetailsRequest\x125\n" +
+	"#scalekit/v1/sessions/sessions.proto\x12\x14scalekit.v1.sessions\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\x1a!scalekit/v1/options/options.proto\"\xad\x01\n" +
+	"\x15SessionDetailsRequest\x12\x93\x01\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\tB\x16\xbaH\x13\xc8\x01\x01r\x0e2\f^ses_[0-9]+$R\tsessionId\"\xc9\x01\n" +
-	"\x19UserSessionDetailsRequest\x12/\n" +
-	"\auser_id\x18\x01 \x01(\tB\x16\xbaH\x13\xc8\x01\x01r\x0e2\f^usr_[0-9]+$R\x06userId\x12\x1b\n" +
-	"\tpage_size\x18\x02 \x01(\rR\bpageSize\x12\x1d\n" +
+	"session_id\x18\x01 \x01(\tBt\x92A[2AUnique identifier for the session. Must start with 'ses_' prefix.J\x16\"ses_1234567890123456\"\xbaH\x13\xc8\x01\x01r\x0e2\f^ses_[0-9]+$R\tsessionId\"\xc8\a\n" +
+	"\x19UserSessionDetailsRequest\x12\xa6\x01\n" +
+	"\auser_id\x18\x01 \x01(\tB\x8c\x01\x92As2YUnique identifier for the user whose sessions to retrieve. Must start with 'usr_' prefix.J\x16\"usr_1234567890123456\"\xbaH\x13\xc8\x01\x01r\x0e2\f^usr_[0-9]+$R\x06userId\x12\xf4\x01\n" +
+	"\tpage_size\x18\x02 \x01(\rB\xd6\x01\x92A\xd2\x012\xcb\x01Maximum number of sessions to return in a single page. Optional parameter. If not specified, defaults to a server-defined limit. Use smaller values for faster responses, larger values for fewer requests.J\x0250R\bpageSize\x12\x9b\x02\n" +
 	"\n" +
-	"page_token\x18\x03 \x01(\tR\tpageToken\x12?\n" +
-	"\x06filter\x18\x04 \x01(\v2'.scalekit.v1.sessions.UserSessionFilterR\x06filter\"\x9d\x01\n" +
-	"\x11UserSessionFilter\x12\x16\n" +
-	"\x06status\x18\x01 \x03(\tR\x06status\x129\n" +
+	"page_token\x18\x03 \x01(\tB\xfb\x01\x92A\xf7\x012\xc0\x01Pagination token from the previous response for retrieving the next page of results. Leave empty for the first page. Use the next_page_token from a previous response to fetch subsequent pages.J2\"eyJwYWdlIjogMiwgImxhc3RfaWQiOiAic2VzXzEyMzQ1In0=\"R\tpageToken\x12\xec\x01\n" +
+	"\x06filter\x18\x04 \x01(\v2'.scalekit.v1.sessions.UserSessionFilterB\xaa\x01\x92A\xa6\x012\xa3\x01Optional filter criteria to narrow session results. Can filter by one or more statuses and/or a time range of creation dates. Leave empty to retrieve all sessions.R\x06filter\"\xb0\x06\n" +
+	"\x11UserSessionFilter\x12\xaf\x02\n" +
+	"\x06status\x18\x01 \x03(\tB\x96\x02\x92A\x92\x022\x83\x02Filter sessions by one or more status values. Possible values: 'active', 'expired', 'revoked', 'logout'. Leave empty to include all statuses. Multiple values use OR logic (e.g., status=['active', 'expired'] returns sessions that are either active OR expired).J\n" +
+	"[\"active\"]R\x06status\x12\xfa\x01\n" +
 	"\n" +
-	"start_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\tstartTime\x125\n" +
-	"\bend_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\aendTime\"M\n" +
-	"\x14RevokeSessionRequest\x125\n" +
+	"start_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampB\xbe\x01\x92A\xba\x012\x9f\x01Filter to include only sessions created on or after this timestamp. Optional. Uses RFC 3339 format. Useful for querying sessions within a specific time window.J\x16\"2025-01-01T00:00:00Z\"R\tstartTime\x12\xeb\x01\n" +
+	"\bend_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampB\xb3\x01\x92A\xaf\x012\x94\x01Filter to include only sessions created on or before this timestamp. Optional. Uses RFC 3339 format. Must be after start_time if both are specified.J\x16\"2025-12-31T23:59:59Z\"R\aendTime\"\xb6\x01\n" +
+	"\x14RevokeSessionRequest\x12\x9d\x01\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\tB\x16\xbaH\x13\xc8\x01\x01r\x0e2\f^ses_[0-9]+$R\tsessionId\"m\n" +
-	"\x15RevokeSessionResponse\x12T\n" +
-	"\x0frevoked_session\x18\x01 \x01(\v2+.scalekit.v1.sessions.RevokedSessionDetailsR\x0erevokedSession\"O\n" +
-	"\x1cRevokeAllUserSessionsRequest\x12/\n" +
-	"\auser_id\x18\x01 \x01(\tB\x16\xbaH\x13\xc8\x01\x01r\x0e2\f^usr_[0-9]+$R\x06userId\"\x9c\x01\n" +
-	"\x1dRevokeAllUserSessionsResponse\x12V\n" +
-	"\x10revoked_sessions\x18\x01 \x03(\v2+.scalekit.v1.sessions.RevokedSessionDetailsR\x0frevokedSessions\x12#\n" +
-	"\rtotal_revoked\x18\x02 \x01(\rR\ftotalRevoked\"\xc5\x01\n" +
-	"\x12UserSessionDetails\x12@\n" +
-	"\bsessions\x18\x01 \x03(\v2$.scalekit.v1.sessions.SessionDetailsR\bsessions\x12&\n" +
-	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\x12&\n" +
-	"\x0fprev_page_token\x18\x03 \x01(\tR\rprevPageToken\x12\x1d\n" +
+	"session_id\x18\x01 \x01(\tB~\x92Ae2KUnique identifier for the session to revoke. Must start with 'ses_' prefix.J\x16\"ses_1234567890123456\"\xbaH\x13\xc8\x01\x01r\x0e2\f^ses_[0-9]+$R\tsessionId\"\xf6\x01\n" +
+	"\x15RevokeSessionResponse\x12\xdc\x01\n" +
+	"\x0frevoked_session\x18\x01 \x01(\v2+.scalekit.v1.sessions.RevokedSessionDetailsB\x85\x01\x92A\x81\x012\x7fDetails of the revoked session including session ID, user ID, creation and revocation timestamps, and final device information.R\x0erevokedSession\"\xcf\x01\n" +
+	"\x1cRevokeAllUserSessionsRequest\x12\xae\x01\n" +
+	"\auser_id\x18\x01 \x01(\tB\x94\x01\x92A{2aUnique identifier for the user whose all sessions will be revoked. Must start with 'usr_' prefix.J\x16\"usr_1234567890123456\"\xbaH\x13\xc8\x01\x01r\x0e2\f^usr_[0-9]+$R\x06userId\"\x97\x03\n" +
+	"\x1dRevokeAllUserSessionsResponse\x12\xe9\x01\n" +
+	"\x10revoked_sessions\x18\x01 \x03(\v2+.scalekit.v1.sessions.RevokedSessionDetailsB\x90\x01\x92A\x8c\x012\x89\x01List of all sessions that were revoked, including detailed information for each revoked session with IDs, timestamps, and device details.R\x0frevokedSessions\x12\x89\x01\n" +
+	"\rtotal_revoked\x18\x02 \x01(\rBd\x92Aa2\\Total count of active sessions that were revoked. Useful for confirmation and audit logging.J\x015R\ftotalRevoked\"\xb1\a\n" +
+	"\x12UserSessionDetails\x12\xda\x01\n" +
+	"\bsessions\x18\x01 \x03(\v2$.scalekit.v1.sessions.SessionDetailsB\x97\x01\x92A\x93\x012\x90\x01Array of session objects for the requested user. May contain fewer entries than the requested page_size when reaching the final page of results.R\bsessions\x12\xf3\x01\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tB\xca\x01\x92A\xc6\x012\x8f\x01Pagination token for retrieving the next page of results. Empty string if there are no more pages (you have reached the final page of results).J2\"eyJwYWdlIjogMiwgImxhc3RfaWQiOiAic2VzXzEyMzQ1In0=\"R\rnextPageToken\x12\xf6\x01\n" +
+	"\x0fprev_page_token\x18\x03 \x01(\tB\xcd\x01\x92A\xc9\x012\x92\x01Pagination token for retrieving the previous page of results. Empty string for the first page. Use this to navigate backward through result pages.J2\"eyJwYWdlIjogMCwgImZpcnN0X2lkIjogInNlc183OTAxIn0=\"R\rprevPageToken\x12\xce\x01\n" +
 	"\n" +
-	"total_size\x18\x04 \x01(\rR\ttotalSize\"\xa0\n" +
+	"total_size\x18\x04 \x01(\rB\xae\x01\x92A\xaa\x012\xa3\x01Total number of sessions matching the applied filter criteria, regardless of pagination. This represents the complete result set size before pagination is applied.J\x0242R\ttotalSize\"\x82\x1b\n" +
+	"\x0eSessionDetails\x12\xa0\x01\n" +
 	"\n" +
-	"\x0eSessionDetails\x12\x1d\n" +
+	"session_id\x18\x01 \x01(\tB\x80\x01\x92A}2cUnique identifier for the session. System-generated read-only field used to reference this session.J\x16\"ses_1234567890123456\"R\tsessionId\x12\x87\x01\n" +
+	"\auser_id\x18\x02 \x01(\tBn\x92Ak2QUnique identifier for the user who owns and is authenticated within this session.J\x16\"usr_1234567890123456\"R\x06userId\x12\x9c\x02\n" +
+	"\x1bauthenticated_organizations\x18\x03 \x03(\tB\xda\x01\x92A\xd6\x012\xbb\x01List of organization IDs that have been authenticated for this user within the current session. Contains all organizations where the user has successfully completed SSO or authentication.J\x16[\"org_123\", \"org_456\"]R\x1aauthenticatedOrganizations\x12\xe8\x01\n" +
+	"\x0forganization_id\x18\x04 \x01(\tB\xbe\x01\x92A\xba\x012\x9f\x01Organization ID for the user's most recently active organization within this session. This represents the primary organization context for the current session.J\x16\"org_1234567890123456\"R\x0eorganizationId\x12\xe8\x01\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\x12?\n" +
-	"\x1bauthenticated_organizations\x18\x03 \x03(\tR\x1aauthenticatedOrganizations\x12'\n" +
-	"\x0forganization_id\x18\x04 \x01(\tR\x0eorganizationId\x129\n" +
+	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampB\xac\x01\x92A\xa8\x012\x8d\x01Timestamp indicating when the session was created. This is set once at session creation and remains constant throughout the session lifetime.J\x16\"2025-01-15T10:30:00Z\"R\tcreatedAt\x12\xf3\x01\n" +
 	"\n" +
-	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampB\xb7\x01\x92A\xb3\x012\x98\x01Timestamp indicating when the session was last updated. Updated whenever session state changes such as organization context changes or metadata updates.J\x16\"2025-01-15T10:45:00Z\"R\tupdatedAt\x12\xba\x02\n" +
+	"\x0fidle_expires_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampB\xf5\x01\x92A\xf1\x012\xd6\x01Projected expiration timestamp if the session remains idle without user activity. This timestamp is recalculated with each user activity. Session will be automatically terminated at this time if no activity occurs.J\x16\"2025-01-15T11:30:00Z\"R\ridleExpiresAt\x12\xa4\x02\n" +
+	"\x13absolute_expires_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampB\xd7\x01\x92A\xd3\x012\xb8\x01Hard expiration timestamp for the session regardless of user activity. The session will be forcibly terminated at this time. This represents the maximum session lifetime from creation.J\x16\"2025-01-22T10:30:00Z\"R\x11absoluteExpiresAt\x12\xe4\x02\n" +
 	"\n" +
-	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12B\n" +
-	"\x0fidle_expires_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\ridleExpiresAt\x12J\n" +
-	"\x13absolute_expires_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\x11absoluteExpiresAt\x129\n" +
-	"\n" +
-	"expired_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\texpiredAt\x127\n" +
+	"expired_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampB\xa8\x02\x92A\xa4\x022\x89\x02Timestamp when the session was terminated. Null if the session is still active. Set when the session expires due to reaching idle_expires_at or absolute_expires_at timeout, or when administratively revoked. Not set for user-initiated logout (see logout_at instead).J\x16\"2025-01-15T12:00:00Z\"R\texpiredAt\x12\x94\x02\n" +
 	"\tlogout_at\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampR\blogoutAt\x12\x16\n" +
-	"\x06status\x18\v \x01(\tR\x06status\x12,\n" +
-	"\x12initial_user_agent\x18\f \x01(\tR\x10initialUserAgent\x12\x1d\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampB\xda\x01\x92A\xd6\x012\xbb\x01Timestamp when the user explicitly logged out from the session. Null if the user has not logged out. When set, indicates the session ended due to explicit user logout rather than timeout.J\x16\"2025-01-15T14:00:00Z\"R\blogoutAt\x12\xf7\x02\n" +
+	"\x06status\x18\v \x01(\tB\xde\x02\x92A\xda\x022\xcd\x02Current operational status of the session. Possible values: 'active' (session is valid and requests are allowed), 'expired' (session terminated due to idle or absolute timeout), 'revoked' (session was administratively revoked), 'logout' (user explicitly logged out). Use this to determine if the session can be used for new requests.J\b\"active\"R\x06status\x12\xd9\x01\n" +
+	"\x06device\x18\f \x01(\v2#.scalekit.v1.sessions.DeviceDetailsB\x9b\x01\x92A\x97\x012\x94\x01Complete device metadata associated with this session including browser, operating system, device type, and geographic location based on IP address.R\x06device\x12\x9f\x02\n" +
+	"\x0elast_active_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampB\xdc\x01\x92A\xd8\x012\xbd\x01Timestamp of the most recent user activity detected in this session. Updated on each API request or user interaction. Used to determine if a session has exceeded the idle timeout threshold.J\x16\"2025-01-15T10:55:30Z\"R\flastActiveAt\"\xed\r\n" +
+	"\rDeviceDetails\x12\xe2\x02\n" +
 	"\n" +
-	"initial_os\x18\r \x01(\tR\tinitialOs\x12,\n" +
-	"\x12initial_os_version\x18\x0e \x01(\tR\x10initialOsVersion\x12'\n" +
-	"\x0finitial_browser\x18\x0f \x01(\tR\x0einitialBrowser\x126\n" +
-	"\x17initial_browser_version\x18\x10 \x01(\tR\x15initialBrowserVersion\x12.\n" +
-	"\x13initial_device_type\x18\x11 \x01(\tR\x11initialDeviceType\x12\x1d\n" +
+	"user_agent\x18\f \x01(\tB\xc2\x02\x92A\xbe\x022\xc2\x01Complete HTTP User-Agent header string from the client request. Contains browser type, version, and operating system information. Used for detailed device fingerprinting and user agent analysis.Jw\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36\"R\tuserAgent\x12\x96\x01\n" +
+	"\x02os\x18\r \x01(\tB\x85\x01\x92A\x81\x012vOperating system name extracted from the user agent and device headers. Examples: macOS, Windows, Linux, iOS, Android.J\a\"macOS\"R\x02os\x12\x86\x01\n" +
 	"\n" +
-	"initial_ip\x18\x13 \x01(\tR\tinitialIp\x12I\n" +
-	"\x10initial_location\x18\x14 \x01(\v2\x1e.scalekit.v1.sessions.LocationR\x0finitialLocation\x12*\n" +
-	"\x11latest_user_agent\x18\x15 \x01(\tR\x0flatestUserAgent\x12\x1b\n" +
-	"\tlatest_os\x18\x16 \x01(\tR\blatestOs\x12*\n" +
-	"\x11latest_os_version\x18\x17 \x01(\tR\x0flatestOsVersion\x12%\n" +
-	"\x0elatest_browser\x18\x18 \x01(\tR\rlatestBrowser\x124\n" +
-	"\x16latest_browser_version\x18\x19 \x01(\tR\x14latestBrowserVersion\x12,\n" +
-	"\x12latest_device_type\x18\x1a \x01(\tR\x10latestDeviceType\x12\x1b\n" +
-	"\tlatest_ip\x18\x1c \x01(\tR\blatestIp\x12G\n" +
-	"\x0flatest_location\x18\x1d \x01(\v2\x1e.scalekit.v1.sessions.LocationR\x0elatestLocation\"\xe1\x03\n" +
-	"\x15RevokedSessionDetails\x12\x1d\n" +
+	"os_version\x18\x0e \x01(\tBg\x92Ad2ZVersion of the operating system. Represents the specific OS release the device is running.J\x06\"14.2\"R\tosVersion\x12\x97\x01\n" +
+	"\abrowser\x18\x0f \x01(\tB}\x92Az2nBrowser name and family extracted from the user agent. Examples: Chrome, Safari, Firefox, Edge, Mobile Safari.J\b\"Chrome\"R\abrowser\x12\xa1\x01\n" +
+	"\x0fbrowser_version\x18\x10 \x01(\tBx\x92Au2fVersion of the browser application. Represents the specific release version of the browser being used.J\v\"120.0.0.0\"R\x0ebrowserVersion\x12\x9a\x02\n" +
+	"\vdevice_type\x18\x11 \x01(\tB\xf8\x01\x92A\xf4\x012\xe6\x01Categorized device type classification. Possible values: 'desktop' (traditional computers), 'mobile' (smartphones and small tablets), 'tablet' (large tablets), 'other'. Useful for displaying session information by device category.J\t\"desktop\"R\n" +
+	"deviceType\x12\xe3\x01\n" +
+	"\x02ip\x18\x13 \x01(\tB\xd2\x01\x92A\xce\x012\xbe\x01IP address of the device that initiated the session. This is the public-facing IP address used to connect to the application. Useful for security audits and geographic distribution analysis.J\v\"192.0.2.1\"R\x02ip\x12\x93\x02\n" +
+	"\blocation\x18\x14 \x01(\v2\x1e.scalekit.v1.sessions.LocationB\xd6\x01\x92A\xd2\x012\xcf\x01Geographic location information derived from IP address geolocation. Includes country, region, city, and coordinates. Note: Based on IP location data and may not represent the user's exact physical location.R\blocation\"\xc8\x0f\n" +
+	"\x15RevokedSessionDetails\x12\x88\x01\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\x129\n" +
+	"session_id\x18\x01 \x01(\tBi\x92Af2LUnique identifier for the revoked session. System-generated read-only field.J\x16\"ses_1234567890123456\"R\tsessionId\x12l\n" +
+	"\auser_id\x18\x02 \x01(\tBS\x92AP26Unique identifier for the user who owned this session.J\x16\"usr_1234567890123456\"R\x06userId\x12\xa7\x01\n" +
 	"\n" +
-	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampBl\x92Ai2OTimestamp indicating when the session was originally created before revocation.J\x16\"2025-01-15T10:30:00Z\"R\tcreatedAt\x12\xa2\x01\n" +
 	"\n" +
-	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12B\n" +
-	"\x0fidle_expires_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\ridleExpiresAt\x12J\n" +
-	"\x13absolute_expires_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\x11absoluteExpiresAt\x129\n" +
+	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampBg\x92Ad2JTimestamp indicating when the session was last modified before revocation.J\x16\"2025-01-15T10:45:00Z\"R\tupdatedAt\x12\xfb\x01\n" +
+	"\x0fidle_expires_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampB\xb6\x01\x92A\xb2\x012\x97\x01The idle expiration timestamp that was configured for this session before revocation. Represents when the session would have expired due to inactivity.J\x16\"2025-01-15T11:30:00Z\"R\ridleExpiresAt\x12\xfa\x01\n" +
+	"\x13absolute_expires_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampB\xad\x01\x92A\xa9\x012\x8e\x01The absolute expiration timestamp that was configured for this session before revocation. Represents the hard deadline regardless of activity.J\x16\"2025-01-22T10:30:00Z\"R\x11absoluteExpiresAt\x12\xc5\x01\n" +
 	"\n" +
-	"expired_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\texpiredAt\x127\n" +
+	"expired_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampB\x89\x01\x92A\x85\x012kTimestamp when the session was actually terminated. Set to the revocation time when the session is revoked.J\x16\"2025-01-15T12:00:00Z\"R\texpiredAt\x12\xcc\x01\n" +
 	"\tlogout_at\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampR\blogoutAt\x12\x16\n" +
-	"\x06status\x18\v \x01(\tR\x06status\"\x9f\x01\n" +
-	"\bLocation\x12\x16\n" +
-	"\x06region\x18\x01 \x01(\tR\x06region\x12-\n" +
-	"\x12region_subdivision\x18\x02 \x01(\tR\x11regionSubdivision\x12\x12\n" +
-	"\x04city\x18\x03 \x01(\tR\x04city\x12\x1a\n" +
-	"\blatitude\x18\x04 \x01(\tR\blatitude\x12\x1c\n" +
-	"\tlongitude\x18\x05 \x01(\tR\tlongitude2\xd3\x05\n" +
-	"\x0eSessionService\x12\x9b\x01\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampB\x92\x01\x92A\x8e\x012tTimestamp when the user explicitly logged out (if applicable). Null if the session was revoked without prior logout.J\x16\"2025-01-15T14:00:00Z\"R\blogoutAt\x12\xec\x01\n" +
+	"\x06status\x18\v \x01(\tB\xd3\x01\x92A\xcf\x012\xc1\x01Status of the session after revocation. Always 'revoked' since only active sessions can be revoked. Sessions that were already expired or logged out are not included in the revocation response.J\t\"revoked\"R\x06status\x12\xe5\x01\n" +
+	"\x0elast_active_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampB\xa2\x01\x92A\x9e\x012\x83\x01Timestamp of the last recorded user activity in this session before revocation. Helps identify inactive sessions that were revoked.J\x16\"2025-01-15T10:55:30Z\"R\flastActiveAt\"\x9e\a\n" +
+	"\bLocation\x12\xac\x01\n" +
+	"\x06region\x18\x01 \x01(\tB\x93\x01\x92A\x8f\x012|Geographic region name derived from IP geolocation. Represents the country-level location (e.g., 'United States', 'France').J\x0f\"United States\"R\x06region\x12\xbd\x01\n" +
+	"\x12region_subdivision\x18\x02 \x01(\tB\x8d\x01\x92A\x89\x012\x80\x01Regional subdivision code or name (e.g., state abbreviation for US, province for Canada). Two-letter ISO format when applicable.J\x04\"CA\"R\x11regionSubdivision\x12\x99\x01\n" +
+	"\x04city\x18\x03 \x01(\tB\x84\x01\x92A\x80\x012mCity name where the session originated based on IP geolocation. Approximate location derived from IP address.J\x0f\"San Francisco\"R\x04city\x12\xbe\x01\n" +
+	"\blatitude\x18\x04 \x01(\tB\xa1\x01\x92A\x9d\x012\x8f\x01Latitude coordinate of the estimated location. Decimal format (e.g., '37.7749'). Note: Represents IP geolocation center and may not be precise.J\t\"37.7749\"R\blatitude\x12\xc5\x01\n" +
+	"\tlongitude\x18\x05 \x01(\tB\xa6\x01\x92A\xa2\x012\x92\x01Longitude coordinate of the estimated location. Decimal format (e.g., '-122.4194'). Note: Represents IP geolocation center and may not be precise.J\v\"-122.4194\"R\tlongitude2\xc8\x1f\n" +
+	"\x0eSessionService\x12\xdb\x06\n" +
 	"\n" +
-	"GetSession\x12+.scalekit.v1.sessions.SessionDetailsRequest\x1a$.scalekit.v1.sessions.SessionDetails\":\x82\xb5\x18\x02\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02\x1f\x12\x1d/api/v1/sessions/{session_id}\x12\xab\x01\n" +
-	"\rRevokeSession\x12*.scalekit.v1.sessions.RevokeSessionRequest\x1a+.scalekit.v1.sessions.RevokeSessionResponse\"A\x82\xb5\x18\x02\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02&\"$/api/v1/sessions/{session_id}/revoke\x12\xab\x01\n" +
-	"\x0fGetUserSessions\x12/.scalekit.v1.sessions.UserSessionDetailsRequest\x1a(.scalekit.v1.sessions.UserSessionDetails\"=\x82\xb5\x18\x02\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02\"\x12 /api/v1/users/{user_id}/sessions\x12\xc6\x01\n" +
-	"\x15RevokeAllUserSessions\x122.scalekit.v1.sessions.RevokeAllUserSessionsRequest\x1a3.scalekit.v1.sessions.RevokeAllUserSessionsResponse\"D\x82\xb5\x18\x02\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02)\"'/api/v1/users/{user_id}/sessions/revokeB\xe5\x01\n" +
+	"GetSession\x12+.scalekit.v1.sessions.SessionDetailsRequest\x1a$.scalekit.v1.sessions.SessionDetails\"\xf9\x05\x92A\xca\x05\n" +
+	"\bSessions\x12\x13Get session details\x1a\xcd\x04Retrieves comprehensive details for a specific user session including authentication status, device information, and expiration timelines. Use this endpoint to fetch current session metadata for security audits, session validation, or to display session information in user account management interfaces. Returns all session properties including the user ID, authenticated organizations, device details with browser/OS information, IP address and geolocation, and all relevant timestamps (creation, last activity, idle expiration, absolute expiration, and actual expiration if applicable).JY\n" +
+	"\x03200\x12R\n" +
+	"&Successfully retrieved session details\x12(\n" +
+	"&\x1a$.scalekit.v1.sessions.SessionDetails\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02\x1f\x12\x1d/api/v1/sessions/{session_id}\x12\xa2\x06\n" +
+	"\rRevokeSession\x12*.scalekit.v1.sessions.RevokeSessionRequest\x1a+.scalekit.v1.sessions.RevokeSessionResponse\"\xb7\x05\x92A\x81\x05\n" +
+	"\bSessions\x12\x13Revoke user session\x1a\xde\x03Immediately invalidates a specific user session by session ID, setting its status to 'revoked'. Once revoked, the session cannot be used for any future API requests or application access. Use this endpoint to implement session-level logout, force a user to reauthenticate on a specific device, or terminate suspicious sessions. The revocation is instantaneous and irreversible. Returns the revoked session details including the session ID, user ID, and the revocation timestamp.J\x7f\n" +
+	"\x03200\x12x\n" +
+	"ESuccessfully revoked the session. Returns the revoked session details\x12/\n" +
+	"-\x1a+.scalekit.v1.sessions.RevokeSessionResponse\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02&\"$/api/v1/sessions/{session_id}/revoke\x12\xb0\a\n" +
+	"\x0fGetUserSessions\x12/.scalekit.v1.sessions.UserSessionDetailsRequest\x1a(.scalekit.v1.sessions.UserSessionDetails\"\xc1\x06\x92A\x8f\x06\n" +
+	"\bSessions\x12\x12List user sessions\x1a\xd7\x04Retrieves a paginated list of all sessions associated with a specific user across all devices and browsers. Use this endpoint to audit user activity, display all active sessions in account management interfaces, or verify user authentication status across devices. Supports filtering by session status (active, expired, revoked, logout) and time range (creation date). Returns session details for each session including device information, IP address, geolocation, and current status. The response includes pagination metadata (page tokens and total count) to handle large session lists efficiently.J\x94\x01\n" +
+	"\x03200\x12\x8c\x01\n" +
+	"\\Successfully retrieved user sessions. Returns a list of sessions with pagination information\x12,\n" +
+	"*\x1a(.scalekit.v1.sessions.UserSessionDetails\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02\"\x12 /api/v1/users/{user_id}/sessions\x12\xbe\a\n" +
+	"\x15RevokeAllUserSessions\x122.scalekit.v1.sessions.RevokeAllUserSessionsRequest\x1a3.scalekit.v1.sessions.RevokeAllUserSessionsResponse\"\xbb\x06\x92A\x82\x06\n" +
+	"\bSessions\x12\x18Revoke all user sessions\x1a\xb9\x04Immediately invalidates all active sessions for a specific user across all devices and browsers, setting their status to 'revoked'. Use this endpoint to implement global logout functionality, force re-authentication after security incidents, or terminate all sessions following a password reset or credential compromise. Only active sessions are revoked; already expired, logout, or previously revoked sessions remain unchanged. The revocation is atomic and instantaneous. Returns a list of all revoked sessions with their details and a total count of sessions revoked.J\x9f\x01\n" +
+	"\x03200\x12\x97\x01\n" +
+	"\\Successfully revoked all user sessions. Returns the list of revoked sessions and total count\x127\n" +
+	"5\x1a3.scalekit.v1.sessions.RevokeAllUserSessionsResponse\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02)\"'/api/v1/users/{user_id}/sessions/revoke\x1a\xbe\x03\x92A\xba\x03\n" +
+	"\bSessions\x12\xad\x03Comprehensive session management for user authentication and authorization. This service provides endpoints for retrieving session details, managing user sessions across devices, revoking individual sessions, and terminating all active sessions for a user. It supports session auditing, device tracking, and security monitoring with detailed session metadata including device information, IP geolocation, and activity timestamps.B\xe5\x01\n" +
 	"\x18com.scalekit.v1.sessionsB\rSessionsProtoP\x01ZHgithub.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/sessions\xa2\x02\x03SVS\xaa\x02\x14Scalekit.V1.Sessions\xca\x02\x14Scalekit\\V1\\Sessions\xe2\x02 Scalekit\\V1\\Sessions\\GPBMetadata\xea\x02\x16Scalekit::V1::Sessionsb\x06proto3"
 
 var (
@@ -997,7 +1007,7 @@ func file_scalekit_v1_sessions_sessions_proto_rawDescGZIP() []byte {
 	return file_scalekit_v1_sessions_sessions_proto_rawDescData
 }
 
-var file_scalekit_v1_sessions_sessions_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_scalekit_v1_sessions_sessions_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_scalekit_v1_sessions_sessions_proto_goTypes = []any{
 	(*SessionDetailsRequest)(nil),         // 0: scalekit.v1.sessions.SessionDetailsRequest
 	(*UserSessionDetailsRequest)(nil),     // 1: scalekit.v1.sessions.UserSessionDetailsRequest
@@ -1008,44 +1018,47 @@ var file_scalekit_v1_sessions_sessions_proto_goTypes = []any{
 	(*RevokeAllUserSessionsResponse)(nil), // 6: scalekit.v1.sessions.RevokeAllUserSessionsResponse
 	(*UserSessionDetails)(nil),            // 7: scalekit.v1.sessions.UserSessionDetails
 	(*SessionDetails)(nil),                // 8: scalekit.v1.sessions.SessionDetails
-	(*RevokedSessionDetails)(nil),         // 9: scalekit.v1.sessions.RevokedSessionDetails
-	(*Location)(nil),                      // 10: scalekit.v1.sessions.Location
-	(*timestamppb.Timestamp)(nil),         // 11: google.protobuf.Timestamp
+	(*DeviceDetails)(nil),                 // 9: scalekit.v1.sessions.DeviceDetails
+	(*RevokedSessionDetails)(nil),         // 10: scalekit.v1.sessions.RevokedSessionDetails
+	(*Location)(nil),                      // 11: scalekit.v1.sessions.Location
+	(*timestamppb.Timestamp)(nil),         // 12: google.protobuf.Timestamp
 }
 var file_scalekit_v1_sessions_sessions_proto_depIdxs = []int32{
 	2,  // 0: scalekit.v1.sessions.UserSessionDetailsRequest.filter:type_name -> scalekit.v1.sessions.UserSessionFilter
-	11, // 1: scalekit.v1.sessions.UserSessionFilter.start_time:type_name -> google.protobuf.Timestamp
-	11, // 2: scalekit.v1.sessions.UserSessionFilter.end_time:type_name -> google.protobuf.Timestamp
-	9,  // 3: scalekit.v1.sessions.RevokeSessionResponse.revoked_session:type_name -> scalekit.v1.sessions.RevokedSessionDetails
-	9,  // 4: scalekit.v1.sessions.RevokeAllUserSessionsResponse.revoked_sessions:type_name -> scalekit.v1.sessions.RevokedSessionDetails
+	12, // 1: scalekit.v1.sessions.UserSessionFilter.start_time:type_name -> google.protobuf.Timestamp
+	12, // 2: scalekit.v1.sessions.UserSessionFilter.end_time:type_name -> google.protobuf.Timestamp
+	10, // 3: scalekit.v1.sessions.RevokeSessionResponse.revoked_session:type_name -> scalekit.v1.sessions.RevokedSessionDetails
+	10, // 4: scalekit.v1.sessions.RevokeAllUserSessionsResponse.revoked_sessions:type_name -> scalekit.v1.sessions.RevokedSessionDetails
 	8,  // 5: scalekit.v1.sessions.UserSessionDetails.sessions:type_name -> scalekit.v1.sessions.SessionDetails
-	11, // 6: scalekit.v1.sessions.SessionDetails.created_at:type_name -> google.protobuf.Timestamp
-	11, // 7: scalekit.v1.sessions.SessionDetails.updated_at:type_name -> google.protobuf.Timestamp
-	11, // 8: scalekit.v1.sessions.SessionDetails.idle_expires_at:type_name -> google.protobuf.Timestamp
-	11, // 9: scalekit.v1.sessions.SessionDetails.absolute_expires_at:type_name -> google.protobuf.Timestamp
-	11, // 10: scalekit.v1.sessions.SessionDetails.expired_at:type_name -> google.protobuf.Timestamp
-	11, // 11: scalekit.v1.sessions.SessionDetails.logout_at:type_name -> google.protobuf.Timestamp
-	10, // 12: scalekit.v1.sessions.SessionDetails.initial_location:type_name -> scalekit.v1.sessions.Location
-	10, // 13: scalekit.v1.sessions.SessionDetails.latest_location:type_name -> scalekit.v1.sessions.Location
-	11, // 14: scalekit.v1.sessions.RevokedSessionDetails.created_at:type_name -> google.protobuf.Timestamp
-	11, // 15: scalekit.v1.sessions.RevokedSessionDetails.updated_at:type_name -> google.protobuf.Timestamp
-	11, // 16: scalekit.v1.sessions.RevokedSessionDetails.idle_expires_at:type_name -> google.protobuf.Timestamp
-	11, // 17: scalekit.v1.sessions.RevokedSessionDetails.absolute_expires_at:type_name -> google.protobuf.Timestamp
-	11, // 18: scalekit.v1.sessions.RevokedSessionDetails.expired_at:type_name -> google.protobuf.Timestamp
-	11, // 19: scalekit.v1.sessions.RevokedSessionDetails.logout_at:type_name -> google.protobuf.Timestamp
-	0,  // 20: scalekit.v1.sessions.SessionService.GetSession:input_type -> scalekit.v1.sessions.SessionDetailsRequest
-	3,  // 21: scalekit.v1.sessions.SessionService.RevokeSession:input_type -> scalekit.v1.sessions.RevokeSessionRequest
-	1,  // 22: scalekit.v1.sessions.SessionService.GetUserSessions:input_type -> scalekit.v1.sessions.UserSessionDetailsRequest
-	5,  // 23: scalekit.v1.sessions.SessionService.RevokeAllUserSessions:input_type -> scalekit.v1.sessions.RevokeAllUserSessionsRequest
-	8,  // 24: scalekit.v1.sessions.SessionService.GetSession:output_type -> scalekit.v1.sessions.SessionDetails
-	4,  // 25: scalekit.v1.sessions.SessionService.RevokeSession:output_type -> scalekit.v1.sessions.RevokeSessionResponse
-	7,  // 26: scalekit.v1.sessions.SessionService.GetUserSessions:output_type -> scalekit.v1.sessions.UserSessionDetails
-	6,  // 27: scalekit.v1.sessions.SessionService.RevokeAllUserSessions:output_type -> scalekit.v1.sessions.RevokeAllUserSessionsResponse
-	24, // [24:28] is the sub-list for method output_type
-	20, // [20:24] is the sub-list for method input_type
-	20, // [20:20] is the sub-list for extension type_name
-	20, // [20:20] is the sub-list for extension extendee
-	0,  // [0:20] is the sub-list for field type_name
+	12, // 6: scalekit.v1.sessions.SessionDetails.created_at:type_name -> google.protobuf.Timestamp
+	12, // 7: scalekit.v1.sessions.SessionDetails.updated_at:type_name -> google.protobuf.Timestamp
+	12, // 8: scalekit.v1.sessions.SessionDetails.idle_expires_at:type_name -> google.protobuf.Timestamp
+	12, // 9: scalekit.v1.sessions.SessionDetails.absolute_expires_at:type_name -> google.protobuf.Timestamp
+	12, // 10: scalekit.v1.sessions.SessionDetails.expired_at:type_name -> google.protobuf.Timestamp
+	12, // 11: scalekit.v1.sessions.SessionDetails.logout_at:type_name -> google.protobuf.Timestamp
+	9,  // 12: scalekit.v1.sessions.SessionDetails.device:type_name -> scalekit.v1.sessions.DeviceDetails
+	12, // 13: scalekit.v1.sessions.SessionDetails.last_active_at:type_name -> google.protobuf.Timestamp
+	11, // 14: scalekit.v1.sessions.DeviceDetails.location:type_name -> scalekit.v1.sessions.Location
+	12, // 15: scalekit.v1.sessions.RevokedSessionDetails.created_at:type_name -> google.protobuf.Timestamp
+	12, // 16: scalekit.v1.sessions.RevokedSessionDetails.updated_at:type_name -> google.protobuf.Timestamp
+	12, // 17: scalekit.v1.sessions.RevokedSessionDetails.idle_expires_at:type_name -> google.protobuf.Timestamp
+	12, // 18: scalekit.v1.sessions.RevokedSessionDetails.absolute_expires_at:type_name -> google.protobuf.Timestamp
+	12, // 19: scalekit.v1.sessions.RevokedSessionDetails.expired_at:type_name -> google.protobuf.Timestamp
+	12, // 20: scalekit.v1.sessions.RevokedSessionDetails.logout_at:type_name -> google.protobuf.Timestamp
+	12, // 21: scalekit.v1.sessions.RevokedSessionDetails.last_active_at:type_name -> google.protobuf.Timestamp
+	0,  // 22: scalekit.v1.sessions.SessionService.GetSession:input_type -> scalekit.v1.sessions.SessionDetailsRequest
+	3,  // 23: scalekit.v1.sessions.SessionService.RevokeSession:input_type -> scalekit.v1.sessions.RevokeSessionRequest
+	1,  // 24: scalekit.v1.sessions.SessionService.GetUserSessions:input_type -> scalekit.v1.sessions.UserSessionDetailsRequest
+	5,  // 25: scalekit.v1.sessions.SessionService.RevokeAllUserSessions:input_type -> scalekit.v1.sessions.RevokeAllUserSessionsRequest
+	8,  // 26: scalekit.v1.sessions.SessionService.GetSession:output_type -> scalekit.v1.sessions.SessionDetails
+	4,  // 27: scalekit.v1.sessions.SessionService.RevokeSession:output_type -> scalekit.v1.sessions.RevokeSessionResponse
+	7,  // 28: scalekit.v1.sessions.SessionService.GetUserSessions:output_type -> scalekit.v1.sessions.UserSessionDetails
+	6,  // 29: scalekit.v1.sessions.SessionService.RevokeAllUserSessions:output_type -> scalekit.v1.sessions.RevokeAllUserSessionsResponse
+	26, // [26:30] is the sub-list for method output_type
+	22, // [22:26] is the sub-list for method input_type
+	22, // [22:22] is the sub-list for extension type_name
+	22, // [22:22] is the sub-list for extension extendee
+	0,  // [0:22] is the sub-list for field type_name
 }
 
 func init() { file_scalekit_v1_sessions_sessions_proto_init() }
@@ -1059,7 +1072,7 @@ func file_scalekit_v1_sessions_sessions_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_scalekit_v1_sessions_sessions_proto_rawDesc), len(file_scalekit_v1_sessions_sessions_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

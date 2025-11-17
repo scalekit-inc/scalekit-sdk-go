@@ -1336,7 +1336,7 @@ const file_scalekit_v1_domains_domains_proto_rawDesc = "" +
 	"DomainType\x12\x1b\n" +
 	"\x17DOMAIN_TYPE_UNSPECIFIED\x10\x00\x12\x18\n" +
 	"\x14ALLOWED_EMAIL_DOMAIN\x10\x01\x12\x17\n" +
-	"\x13ORGANIZATION_DOMAIN\x10\x022\x99%\n" +
+	"\x13ORGANIZATION_DOMAIN\x10\x022\xa7(\n" +
 	"\rDomainService\x12\xf9\x06\n" +
 	"\fCreateDomain\x12(.scalekit.v1.domains.CreateDomainRequest\x1a).scalekit.v1.domains.CreateDomainResponse\"\x93\x06\x92A\xca\x05\n" +
 	"\aDomains\x12\rCreate Domain\x1a\xb2\x03Creates a new domain and associates it with the specified organization. The domain can be configured as either an ALLOWED_EMAIL_DOMAIN for automatic organization suggestions during user sign-in/sign-up, or as an ORGANIZATION_DOMAIN for SSO connection identification.\n" +
@@ -1403,7 +1403,8 @@ const file_scalekit_v1_domains_domains_proto_rawDesc = "" +
 	"This is commonly used by frontend applications to verify domain allowlists and CORS configurations.Jv\n" +
 	"\x03200\x12o\n" +
 	"6Successfully retrieved the list of authorized domains.\x125\n" +
-	"3\x1a1.scalekit.v1.domains.ListAuthorizedDomainResponse\x82\xb5\x18\x02\x18\x01\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02\x1a\x12\x18/api/v1/domains/{origin}B\xde\x01\n" +
+	"3\x1a1.scalekit.v1.domains.ListAuthorizedDomainResponse\x82\xb5\x18\x02\x18\x01\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02\x1a\x12\x18/api/v1/domains/{origin}\x1a\x8b\x03\x92A\x87\x03\n" +
+	"\aDomains\x12\xfb\x02Domain management for organization email domains and SSO configurations. This service provides endpoints for creating, retrieving, listing, and deleting domains that are associated with organizations. It supports domain type configuration for email domain allowlists and SSO identification, and provides comprehensive domain metadata including status and connection associations.B\xde\x01\n" +
 	"\x17com.scalekit.v1.domainsB\fDomainsProtoP\x01ZGgithub.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/domains\xa2\x02\x03SVD\xaa\x02\x13Scalekit.V1.Domains\xca\x02\x13Scalekit\\V1\\Domains\xe2\x02\x1fScalekit\\V1\\Domains\\GPBMetadata\xea\x02\x15Scalekit::V1::Domainsb\x06proto3"
 
 var (

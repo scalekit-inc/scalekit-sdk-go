@@ -32,6 +32,7 @@ type ListAuthLogRequest struct {
 	Status        []string               `protobuf:"bytes,4,rep,name=status,proto3" json:"status,omitempty"`
 	StartTime     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
 	EndTime       *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	ResourceId    string                 `protobuf:"bytes,7,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -106,6 +107,13 @@ func (x *ListAuthLogRequest) GetEndTime() *timestamppb.Timestamp {
 		return x.EndTime
 	}
 	return nil
+}
+
+func (x *ListAuthLogRequest) GetResourceId() string {
+	if x != nil {
+		return x.ResourceId
+	}
+	return ""
 }
 
 type ListAuthLogResponse struct {
@@ -189,6 +197,9 @@ type AuthLogRequest struct {
 	Timestamp          *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
 	ConnectionDetails  []*ConnectionDetails   `protobuf:"bytes,10,rep,name=connection_details,json=connectionDetails,proto3" json:"connection_details,omitempty"`
 	Workflow           string                 `protobuf:"bytes,11,opt,name=workflow,proto3" json:"workflow,omitempty"`
+	ResourceId         string                 `protobuf:"bytes,12,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
+	ResourceName       string                 `protobuf:"bytes,13,opt,name=resource_name,json=resourceName,proto3" json:"resource_name,omitempty"`
+	ResourceType       string                 `protobuf:"bytes,14,opt,name=resource_type,json=resourceType,proto3" json:"resource_type,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -300,6 +311,27 @@ func (x *AuthLogRequest) GetWorkflow() string {
 	return ""
 }
 
+func (x *AuthLogRequest) GetResourceId() string {
+	if x != nil {
+		return x.ResourceId
+	}
+	return ""
+}
+
+func (x *AuthLogRequest) GetResourceName() string {
+	if x != nil {
+		return x.ResourceName
+	}
+	return ""
+}
+
+func (x *AuthLogRequest) GetResourceType() string {
+	if x != nil {
+		return x.ResourceType
+	}
+	return ""
+}
+
 type ConnectionDetails struct {
 	state              protoimpl.MessageState `protogen:"open.v1"`
 	ConnectionId       string                 `protobuf:"bytes,1,opt,name=connection_id,json=connectionId,proto3" json:"connection_id,omitempty"`
@@ -372,7 +404,7 @@ var File_scalekit_v1_auditlogs_auditlogs_proto protoreflect.FileDescriptor
 
 const file_scalekit_v1_auditlogs_auditlogs_proto_rawDesc = "" +
 	"\n" +
-	"%scalekit/v1/auditlogs/auditlogs.proto\x12\x15scalekit.v1.auditlogs\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a!scalekit/v1/options/options.proto\"\xf0\x01\n" +
+	"%scalekit/v1/auditlogs/auditlogs.proto\x12\x15scalekit.v1.auditlogs\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a!scalekit/v1/options/options.proto\"\x91\x02\n" +
 	"\x12ListAuthLogRequest\x12\x1b\n" +
 	"\tpage_size\x18\x01 \x01(\rR\bpageSize\x12\x1d\n" +
 	"\n" +
@@ -381,13 +413,15 @@ const file_scalekit_v1_auditlogs_auditlogs_proto_rawDesc = "" +
 	"\x06status\x18\x04 \x03(\tR\x06status\x129\n" +
 	"\n" +
 	"start_time\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tstartTime\x125\n" +
-	"\bend_time\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\aendTime\"\xcf\x01\n" +
+	"\bend_time\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\aendTime\x12\x1f\n" +
+	"\vresource_id\x18\a \x01(\tR\n" +
+	"resourceId\"\xcf\x01\n" +
 	"\x13ListAuthLogResponse\x12&\n" +
 	"\x0fnext_page_token\x18\x01 \x01(\tR\rnextPageToken\x12&\n" +
 	"\x0fprev_page_token\x18\x02 \x01(\tR\rprevPageToken\x12\x1d\n" +
 	"\n" +
 	"total_size\x18\x03 \x01(\rR\ttotalSize\x12I\n" +
-	"\fauthRequests\x18\x04 \x03(\v2%.scalekit.v1.auditlogs.AuthLogRequestR\fauthRequests\"\xe4\x03\n" +
+	"\fauthRequests\x18\x04 \x03(\v2%.scalekit.v1.auditlogs.AuthLogRequestR\fauthRequests\"\xcf\x04\n" +
 	"\x0eAuthLogRequest\x12'\n" +
 	"\x0forganization_id\x18\x01 \x01(\tR\x0eorganizationId\x12%\n" +
 	"\x0eenvironment_id\x18\x02 \x01(\tR\renvironmentId\x12#\n" +
@@ -400,7 +434,11 @@ const file_scalekit_v1_auditlogs_auditlogs_proto_rawDesc = "" +
 	"\ttimestamp\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\x12W\n" +
 	"\x12connection_details\x18\n" +
 	" \x03(\v2(.scalekit.v1.auditlogs.ConnectionDetailsR\x11connectionDetails\x12\x1a\n" +
-	"\bworkflow\x18\v \x01(\tR\bworkflow\"\xbb\x01\n" +
+	"\bworkflow\x18\v \x01(\tR\bworkflow\x12\x1f\n" +
+	"\vresource_id\x18\f \x01(\tR\n" +
+	"resourceId\x12#\n" +
+	"\rresource_name\x18\r \x01(\tR\fresourceName\x12#\n" +
+	"\rresource_type\x18\x0e \x01(\tR\fresourceType\"\xbb\x01\n" +
 	"\x11ConnectionDetails\x12#\n" +
 	"\rconnection_id\x18\x01 \x01(\tR\fconnectionId\x12'\n" +
 	"\x0forganization_id\x18\x02 \x01(\tR\x0eorganizationId\x12'\n" +
