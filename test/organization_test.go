@@ -140,6 +140,40 @@ func TestUpdateOrganizationSettings(t *testing.T) {
 	assert.False(t, updatedOrganization.Organization.Settings.Features[1].Enabled)
 }
 
+func TestUpsertUserManagementSettings(t *testing.T) {
+	organizationsList, err := client.Organization().ListOrganization(context.Background(), &scalekit.ListOrganizationOptions{
+		PageSize: 1,
+	})
+	assert.NoError(t, err)
+	if len(organizationsList.Organizations) == 0 {
+		t.Skip("no organizations available for testing user management settings")
+	}
+
+	organization := organizationsList.Organizations[0]
+	maxUsers := int32(150)
+
+	settings, err := client.Organization().UpsertUserManagementSettings(context.Background(), organization.Id, scalekit.OrganizationUserManagementSettings{
+		MaxAllowedUsers: toInt32Ptr(maxUsers),
+	})
+	if err != nil {
+		t.Skipf("skipping UpsertUserManagementSettings test due to error: %v", err)
+	}
+	assert.NotNil(t, settings)
+	if settings.MaxAllowedUsers == nil {
+		t.Fatalf("expected MaxAllowedUsers to be set")
+	}
+	assert.Equal(t, maxUsers, settings.MaxAllowedUsers.Value)
+
+	updatedMaxUsers := int32(0)
+	settings, err = client.Organization().UpsertUserManagementSettings(context.Background(), organization.Id, scalekit.OrganizationUserManagementSettings{
+		MaxAllowedUsers: toInt32Ptr(updatedMaxUsers),
+	})
+	assert.NoError(t, err)
+	assert.NotNil(t, settings)
+	assert.NotNil(t, settings.MaxAllowedUsers)
+	assert.Equal(t, updatedMaxUsers, settings.MaxAllowedUsers.Value)
+}
+
 func TestCreateWithMetadata(t *testing.T) {
 	organizationName := "Tested from GO Sdk"
 

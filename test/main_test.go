@@ -36,3 +36,7 @@ func TestMain(m *testing.M) {
 func toPtr(s string) *string {
 	return &s
 }
+
+func toInt32Ptr(i int32) *int32 {
+	return &i
+}
