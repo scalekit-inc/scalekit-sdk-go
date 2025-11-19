@@ -5,6 +5,7 @@ import (
 
 	organizationsv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/organizations"
 	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/organizations/organizationsconnect"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type ListOrganizationsResponse = organizationsv1.ListOrganizationsResponse
@@ -20,6 +21,9 @@ type OrganizationSettings struct {
 type Feature struct {
 	Name    string
 	Enabled bool
+}
+type OrganizationUserManagementSettings struct {
+	MaxAllowedUsers *int32
 }
 
 type CreateOrganizationOptions struct {
@@ -37,6 +41,7 @@ type Organization interface {
 	DeleteOrganization(ctx context.Context, id string) error
 	GeneratePortalLink(ctx context.Context, organizationId string) (*Link, error)
 	UpdateOrganizationSettings(ctx context.Context, id string, settings OrganizationSettings) (*GetOrganizationResponse, error)
+	UpsertUserManagementSettings(ctx context.Context, organizationId string, settings OrganizationUserManagementSettings) (*organizationsv1.OrganizationUserManagementSettings, error)
 }
 
 type organization struct {
@@ -171,4 +176,26 @@ func (o *organization) UpdateOrganizationSettings(ctx context.Context, id string
 		o.client.UpdateOrganizationSettings,
 		request,
 	).exec(ctx)
+}
+
+func (o *organization) UpsertUserManagementSettings(ctx context.Context, organizationId string, settings OrganizationUserManagementSettings) (*organizationsv1.OrganizationUserManagementSettings, error) {
+	request := &organizationsv1.UpsertUserManagementSettingsRequest{
+		OrganizationId: organizationId,
+		Settings:       &organizationsv1.OrganizationUserManagementSettings{},
+	}
+
+	if settings.MaxAllowedUsers != nil {
+		request.Settings.MaxAllowedUsers = wrapperspb.Int32(*settings.MaxAllowedUsers)
+	}
+
+	resp, err := newConnectExecuter(
+		o.coreClient,
+		o.client.UpsertUserManagementSettings,
+		request,
+	).exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Settings, nil
 }

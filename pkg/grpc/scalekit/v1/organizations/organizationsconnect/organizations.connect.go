@@ -79,9 +79,9 @@ const (
 	// OrganizationServiceDeleteOrganizationSessionSettingsProcedure is the fully-qualified name of the
 	// OrganizationService's DeleteOrganizationSessionSettings RPC.
 	OrganizationServiceDeleteOrganizationSessionSettingsProcedure = "/scalekit.v1.organizations.OrganizationService/DeleteOrganizationSessionSettings"
-	// OrganizationServiceUpdateUserManagementSettingsProcedure is the fully-qualified name of the
-	// OrganizationService's UpdateUserManagementSettings RPC.
-	OrganizationServiceUpdateUserManagementSettingsProcedure = "/scalekit.v1.organizations.OrganizationService/UpdateUserManagementSettings"
+	// OrganizationServiceUpsertUserManagementSettingsProcedure is the fully-qualified name of the
+	// OrganizationService's UpsertUserManagementSettings RPC.
+	OrganizationServiceUpsertUserManagementSettingsProcedure = "/scalekit.v1.organizations.OrganizationService/UpsertUserManagementSettings"
 	// OrganizationServiceGetOrganizationUserManagementSettingProcedure is the fully-qualified name of
 	// the OrganizationService's GetOrganizationUserManagementSetting RPC.
 	OrganizationServiceGetOrganizationUserManagementSettingProcedure = "/scalekit.v1.organizations.OrganizationService/GetOrganizationUserManagementSetting"
@@ -109,7 +109,7 @@ type OrganizationServiceClient interface {
 	UpdateOrganizationSessionSettings(context.Context, *connect.Request[organizations.UpdateOrganizationSessionSettingsRequest]) (*connect.Response[organizations.UpdateOrganizationSessionSettingsResponse], error)
 	DeleteOrganizationSessionSettings(context.Context, *connect.Request[organizations.DeleteOrganizationSessionSettingsRequest]) (*connect.Response[emptypb.Empty], error)
 	// Update user management setting for an organization
-	UpdateUserManagementSettings(context.Context, *connect.Request[organizations.UpdateUserManagementSettingsRequest]) (*connect.Response[organizations.UpdateUserManagementSettingsResponse], error)
+	UpsertUserManagementSettings(context.Context, *connect.Request[organizations.UpsertUserManagementSettingsRequest]) (*connect.Response[organizations.UpsertUserManagementSettingsResponse], error)
 	GetOrganizationUserManagementSetting(context.Context, *connect.Request[organizations.GetOrganizationUserManagementSettingsRequest]) (*connect.Response[organizations.GetOrganizationUserManagementSettingsResponse], error)
 }
 
@@ -215,10 +215,10 @@ func NewOrganizationServiceClient(httpClient connect.HTTPClient, baseURL string,
 			connect.WithSchema(organizationServiceMethods.ByName("DeleteOrganizationSessionSettings")),
 			connect.WithClientOptions(opts...),
 		),
-		updateUserManagementSettings: connect.NewClient[organizations.UpdateUserManagementSettingsRequest, organizations.UpdateUserManagementSettingsResponse](
+		upsertUserManagementSettings: connect.NewClient[organizations.UpsertUserManagementSettingsRequest, organizations.UpsertUserManagementSettingsResponse](
 			httpClient,
-			baseURL+OrganizationServiceUpdateUserManagementSettingsProcedure,
-			connect.WithSchema(organizationServiceMethods.ByName("UpdateUserManagementSettings")),
+			baseURL+OrganizationServiceUpsertUserManagementSettingsProcedure,
+			connect.WithSchema(organizationServiceMethods.ByName("UpsertUserManagementSettings")),
 			connect.WithClientOptions(opts...),
 		),
 		getOrganizationUserManagementSetting: connect.NewClient[organizations.GetOrganizationUserManagementSettingsRequest, organizations.GetOrganizationUserManagementSettingsResponse](
@@ -247,7 +247,7 @@ type organizationServiceClient struct {
 	getOrganizationSessionSettings       *connect.Client[organizations.GetOrganizationSessionSettingsRequest, organizations.GetOrganizationSessionSettingsResponse]
 	updateOrganizationSessionSettings    *connect.Client[organizations.UpdateOrganizationSessionSettingsRequest, organizations.UpdateOrganizationSessionSettingsResponse]
 	deleteOrganizationSessionSettings    *connect.Client[organizations.DeleteOrganizationSessionSettingsRequest, emptypb.Empty]
-	updateUserManagementSettings         *connect.Client[organizations.UpdateUserManagementSettingsRequest, organizations.UpdateUserManagementSettingsResponse]
+	upsertUserManagementSettings         *connect.Client[organizations.UpsertUserManagementSettingsRequest, organizations.UpsertUserManagementSettingsResponse]
 	getOrganizationUserManagementSetting *connect.Client[organizations.GetOrganizationUserManagementSettingsRequest, organizations.GetOrganizationUserManagementSettingsResponse]
 }
 
@@ -331,10 +331,10 @@ func (c *organizationServiceClient) DeleteOrganizationSessionSettings(ctx contex
 	return c.deleteOrganizationSessionSettings.CallUnary(ctx, req)
 }
 
-// UpdateUserManagementSettings calls
-// scalekit.v1.organizations.OrganizationService.UpdateUserManagementSettings.
-func (c *organizationServiceClient) UpdateUserManagementSettings(ctx context.Context, req *connect.Request[organizations.UpdateUserManagementSettingsRequest]) (*connect.Response[organizations.UpdateUserManagementSettingsResponse], error) {
-	return c.updateUserManagementSettings.CallUnary(ctx, req)
+// UpsertUserManagementSettings calls
+// scalekit.v1.organizations.OrganizationService.UpsertUserManagementSettings.
+func (c *organizationServiceClient) UpsertUserManagementSettings(ctx context.Context, req *connect.Request[organizations.UpsertUserManagementSettingsRequest]) (*connect.Response[organizations.UpsertUserManagementSettingsResponse], error) {
+	return c.upsertUserManagementSettings.CallUnary(ctx, req)
 }
 
 // GetOrganizationUserManagementSetting calls
@@ -365,7 +365,7 @@ type OrganizationServiceHandler interface {
 	UpdateOrganizationSessionSettings(context.Context, *connect.Request[organizations.UpdateOrganizationSessionSettingsRequest]) (*connect.Response[organizations.UpdateOrganizationSessionSettingsResponse], error)
 	DeleteOrganizationSessionSettings(context.Context, *connect.Request[organizations.DeleteOrganizationSessionSettingsRequest]) (*connect.Response[emptypb.Empty], error)
 	// Update user management setting for an organization
-	UpdateUserManagementSettings(context.Context, *connect.Request[organizations.UpdateUserManagementSettingsRequest]) (*connect.Response[organizations.UpdateUserManagementSettingsResponse], error)
+	UpsertUserManagementSettings(context.Context, *connect.Request[organizations.UpsertUserManagementSettingsRequest]) (*connect.Response[organizations.UpsertUserManagementSettingsResponse], error)
 	GetOrganizationUserManagementSetting(context.Context, *connect.Request[organizations.GetOrganizationUserManagementSettingsRequest]) (*connect.Response[organizations.GetOrganizationUserManagementSettingsResponse], error)
 }
 
@@ -466,10 +466,10 @@ func NewOrganizationServiceHandler(svc OrganizationServiceHandler, opts ...conne
 		connect.WithSchema(organizationServiceMethods.ByName("DeleteOrganizationSessionSettings")),
 		connect.WithHandlerOptions(opts...),
 	)
-	organizationServiceUpdateUserManagementSettingsHandler := connect.NewUnaryHandler(
-		OrganizationServiceUpdateUserManagementSettingsProcedure,
-		svc.UpdateUserManagementSettings,
-		connect.WithSchema(organizationServiceMethods.ByName("UpdateUserManagementSettings")),
+	organizationServiceUpsertUserManagementSettingsHandler := connect.NewUnaryHandler(
+		OrganizationServiceUpsertUserManagementSettingsProcedure,
+		svc.UpsertUserManagementSettings,
+		connect.WithSchema(organizationServiceMethods.ByName("UpsertUserManagementSettings")),
 		connect.WithHandlerOptions(opts...),
 	)
 	organizationServiceGetOrganizationUserManagementSettingHandler := connect.NewUnaryHandler(
@@ -510,8 +510,8 @@ func NewOrganizationServiceHandler(svc OrganizationServiceHandler, opts ...conne
 			organizationServiceUpdateOrganizationSessionSettingsHandler.ServeHTTP(w, r)
 		case OrganizationServiceDeleteOrganizationSessionSettingsProcedure:
 			organizationServiceDeleteOrganizationSessionSettingsHandler.ServeHTTP(w, r)
-		case OrganizationServiceUpdateUserManagementSettingsProcedure:
-			organizationServiceUpdateUserManagementSettingsHandler.ServeHTTP(w, r)
+		case OrganizationServiceUpsertUserManagementSettingsProcedure:
+			organizationServiceUpsertUserManagementSettingsHandler.ServeHTTP(w, r)
 		case OrganizationServiceGetOrganizationUserManagementSettingProcedure:
 			organizationServiceGetOrganizationUserManagementSettingHandler.ServeHTTP(w, r)
 		default:
@@ -583,8 +583,8 @@ func (UnimplementedOrganizationServiceHandler) DeleteOrganizationSessionSettings
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.organizations.OrganizationService.DeleteOrganizationSessionSettings is not implemented"))
 }
 
-func (UnimplementedOrganizationServiceHandler) UpdateUserManagementSettings(context.Context, *connect.Request[organizations.UpdateUserManagementSettingsRequest]) (*connect.Response[organizations.UpdateUserManagementSettingsResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.organizations.OrganizationService.UpdateUserManagementSettings is not implemented"))
+func (UnimplementedOrganizationServiceHandler) UpsertUserManagementSettings(context.Context, *connect.Request[organizations.UpsertUserManagementSettingsRequest]) (*connect.Response[organizations.UpsertUserManagementSettingsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.organizations.OrganizationService.UpsertUserManagementSettings is not implemented"))
 }
 
 func (UnimplementedOrganizationServiceHandler) GetOrganizationUserManagementSetting(context.Context, *connect.Request[organizations.GetOrganizationUserManagementSettingsRequest]) (*connect.Response[organizations.GetOrganizationUserManagementSettingsResponse], error) {
