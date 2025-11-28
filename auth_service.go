@@ -10,6 +10,7 @@ import (
 
 // Type aliases for auth requests.
 type UpdateLoginUserDetailsRequest = authv1.UpdateLoginUserDetailsRequest
+type LoggedInUserDetails = authv1.User
 
 // AuthService provides helper methods for interacting with the Auth gRPC surface.
 type AuthService interface {

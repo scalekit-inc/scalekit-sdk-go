@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	scalekit "github.com/scalekit-inc/scalekit-sdk-go/v2"
-	authv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/auth"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,7 +16,7 @@ func TestAuthServiceUpdateLoginUserDetailsValidation(t *testing.T) {
 		return &scalekit.UpdateLoginUserDetailsRequest{
 			ConnectionId:   "conn",
 			LoginRequestId: "login",
-			User: &authv1.User{
+			User: &scalekit.LoggedInUserDetails{
 				Sub:   "sub",
 				Email: "user@example.com",
 			},
