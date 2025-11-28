@@ -1,10 +1,8 @@
 package scalekit
 
 import (
-	"context"
-	"errors"
-
 	"connectrpc.com/connect"
+	"context"
 	authv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/auth"
 	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/auth/authconnect"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
@@ -35,25 +33,6 @@ func newAuthService(coreClient *coreClient) AuthService {
 }
 
 func (a *authService) UpdateLoginUserDetails(ctx context.Context, req *UpdateLoginUserDetailsRequest) error {
-	if req == nil {
-		return errors.New("update login user details request is required")
-	}
-	if req.ConnectionId == "" {
-		return errors.New("connectionId is required")
-	}
-	if req.LoginRequestId == "" {
-		return errors.New("loginRequestId is required")
-	}
-	if req.User == nil {
-		return errors.New("user details are required")
-	}
-	if req.User.Sub == "" {
-		return errors.New("user sub is required")
-	}
-	if req.User.Email == "" {
-		return errors.New("user email is required")
-	}
-
 	_, err := newConnectExecuter(
 		a.coreClient,
 		a.client.UpdateLoginUserDetails,
