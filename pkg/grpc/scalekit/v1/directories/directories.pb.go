@@ -2914,7 +2914,7 @@ const file_scalekit_v1_directories_directories_proto_rawDesc = "" +
 	"\fSecretStatus\x12\n" +
 	"\n" +
 	"\x06ACTIVE\x10\x00\x12\f\n" +
-	"\bINACTIVE\x10\x012\xb8R\n" +
+	"\bINACTIVE\x10\x012\xd1/\n" +
 	"\x10DirectoryService\x12\xd1\x01\n" +
 	"\x0fCreateDirectory\x12/.scalekit.v1.directories.CreateDirectoryRequest\x1a0.scalekit.v1.directories.CreateDirectoryResponse\"[\x82\xb5\x18\x02\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02@:\tdirectory\"3/api/v1/organizations/{organization_id}/directories\x12\x9e\x02\n" +
 	"\x0fDeleteDirectory\x12/.scalekit.v1.directories.DeleteDirectoryRequest\x1a\x16.google.protobuf.Empty\"\xc1\x01\x92Ai\n" +
@@ -2924,286 +2924,37 @@ const file_scalekit_v1_directories_directories_proto_rawDesc = "" +
 	"\x0fUpdateDirectory\x12/.scalekit.v1.directories.UpdateDirectoryRequest\x1a0.scalekit.v1.directories.UpdateDirectoryResponse\"`\x82\xb5\x18\x02\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02E:\tdirectory28/api/v1/organizations/{organization_id}/directories/{id}\x12\xd4\x01\n" +
 	"\x18AssignGroupsForDirectory\x128.scalekit.v1.directories.AssignGroupsForDirectoryRequest\x1a\x16.google.protobuf.Empty\"f\x82\xb5\x18\x02\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02K:\x01*\x1aF/api/v1/organizations/{organization_id}/directories/{id}/groups:assign\x12\xe7\x01\n" +
 	"\vAssignRoles\x12+.scalekit.v1.directories.AssignRolesRequest\x1a,.scalekit.v1.directories.AssignRolesResponse\"}\x82\xb5\x18\x02\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02b:\x10role_assignments\x1aN/api/v1/organizations/{organization_id}/directories/{id}/groups/-/roles:assign\x12\xec\x01\n" +
-	"\x10UpdateAttributes\x120.scalekit.v1.directories.UpdateAttributesRequest\x1a1.scalekit.v1.directories.UpdateAttributesResponse\"s\x82\xb5\x18\x02\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02X:\x11attribute_mapping\x1aC/api/v1/organizations/{organization_id}/directories/{id}/attributes\x12\xbb\b\n" +
-	"\fGetDirectory\x12,.scalekit.v1.directories.GetDirectoryRequest\x1a-.scalekit.v1.directories.GetDirectoryResponse\"\xcd\a\x92A\x83\a\n" +
+	"\x10UpdateAttributes\x120.scalekit.v1.directories.UpdateAttributesRequest\x1a1.scalekit.v1.directories.UpdateAttributesResponse\"s\x82\xb5\x18\x02\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02X:\x11attribute_mapping\x1aC/api/v1/organizations/{organization_id}/directories/{id}/attributes\x12\x92\x03\n" +
+	"\fGetDirectory\x12,.scalekit.v1.directories.GetDirectoryRequest\x1a-.scalekit.v1.directories.GetDirectoryResponse\"\xa4\x02\x92A\xda\x01\n" +
 	"\tDirectory\x12\x15Get directory details\x1aPRetrieves detailed information about a specific directory within an organizationJd\n" +
 	"\x03200\x12]\n" +
 	"(Successfully retrieved directory details\x121\n" +
-	"/\x1a-.scalekit.v1.directories.GetDirectoryResponsej\xa6\x05\n" +
-	"\rx-codeSamples\x12\x94\x052\x91\x05\n" +
-	"\x9e\x01*\x9b\x01\n" +
-	"\x16\n" +
-	"\x05label\x12\r\x1a\vNode.js SDK\n" +
-	"\x14\n" +
-	"\x04lang\x12\f\x1a\n" +
-	"javascript\n" +
-	"k\n" +
-	"\x06source\x12a\x1a_const { directory } = await scalekit.directory.getDirectory(\n" +
-	"  organizationId,\n" +
-	"  directoryId\n" +
-	");\n" +
-	"\xd4\x01*\xd1\x01\n" +
-	"\x15\n" +
-	"\x05label\x12\f\x1a\n" +
-	"Python SDK\n" +
-	"\x10\n" +
-	"\x04lang\x12\b\x1a\x06python\n" +
-	"\xa5\x01\n" +
-	"\x06source\x12\x9a\x01\x1a\x97\x01directory = sc.directory.get_directory(\n" +
-	"  directory_id='<directory_id>', organization_id='<organization_id>'\n" +
-	")\n" +
-	"print(f'Directory details: {directory}')\n" +
-	"\x80\x01*~\n" +
-	"\x11\n" +
-	"\x05label\x12\b\x1a\x06Go SDK\n" +
-	"\f\n" +
-	"\x04lang\x12\x04\x1a\x02go\n" +
-	"[\n" +
-	"\x06source\x12Q\x1aOdirectory, err := sc.Directory().GetDirectory(ctx, organizationId, directoryId)\n" +
-	"\x93\x01*\x90\x01\n" +
-	"\x13\n" +
-	"\x05label\x12\n" +
-	"\x1a\bJava SDK\n" +
-	"\x0e\n" +
-	"\x04lang\x12\x06\x1a\x04java\n" +
-	"i\n" +
-	"\x06source\x12_\x1a]Directory directory = scalekitClient.directories().getDirectory(directoryId, organizationId);\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x02:\x128/api/v1/organizations/{organization_id}/directories/{id}\x12\xa8\a\n" +
-	"\x0fListDirectories\x12/.scalekit.v1.directories.ListDirectoriesRequest\x1a0.scalekit.v1.directories.ListDirectoriesResponse\"\xb1\x06\x92A\xec\x05\n" +
+	"/\x1a-.scalekit.v1.directories.GetDirectoryResponse\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x02:\x128/api/v1/organizations/{organization_id}/directories/{id}\x12\xeb\x02\n" +
+	"\x0fListDirectories\x12/.scalekit.v1.directories.ListDirectoriesRequest\x1a0.scalekit.v1.directories.ListDirectoriesResponse\"\xf4\x01\x92A\xaf\x01\n" +
 	"\tDirectory\x12\x1dList organization directoriesJ\x82\x01\n" +
 	"\x03200\x12{\n" +
 	"CSuccessfully retrieved the list of directories for the organization\x124\n" +
-	"2\x1a0.scalekit.v1.directories.ListDirectoriesResponsej\xba\x04\n" +
-	"\rx-codeSamples\x12\xa8\x042\xa5\x04\n" +
-	"|*z\n" +
-	"\x16\n" +
-	"\x05label\x12\r\x1a\vNode.js SDK\n" +
-	"\x14\n" +
-	"\x04lang\x12\f\x1a\n" +
-	"javascript\n" +
-	"J\n" +
-	"\x06source\x12@\x1a>await scalekit.directory.listDirectories('<organization_id>');\n" +
-	"\x92\x01*\x8f\x01\n" +
-	"\x15\n" +
-	"\x05label\x12\f\x1a\n" +
-	"Python SDK\n" +
-	"\x10\n" +
-	"\x04lang\x12\b\x1a\x06python\n" +
-	"d\n" +
-	"\x06source\x12Z\x1aXdirectories_list = sc.directory.list_directories(\n" +
-	"\torganization_id='<organization_id>'\n" +
-	")\n" +
-	"w*u\n" +
-	"\x11\n" +
-	"\x05label\x12\b\x1a\x06Go SDK\n" +
-	"\f\n" +
-	"\x04lang\x12\x04\x1a\x02go\n" +
-	"R\n" +
-	"\x06source\x12H\x1aFdirectories,err := sc.Directory().ListDirectories(ctx, organizationId)\n" +
-	"\x96\x01*\x93\x01\n" +
-	"\x13\n" +
-	"\x05label\x12\n" +
-	"\x1a\bJava SDK\n" +
-	"\x0e\n" +
-	"\x04lang\x12\x06\x1a\x04java\n" +
-	"l\n" +
-	"\x06source\x12b\x1a`ListDirectoriesResponse response = scalekitClient.directories().listDirectories(organizationId);\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x025\x123/api/v1/organizations/{organization_id}/directories\x12\xb7\b\n" +
-	"\x0fEnableDirectory\x12/.scalekit.v1.directories.ToggleDirectoryRequest\x1a0.scalekit.v1.directories.ToggleDirectoryResponse\"\xc0\a\x92A\xef\x06\n" +
+	"2\x1a0.scalekit.v1.directories.ListDirectoriesResponse\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x025\x123/api/v1/organizations/{organization_id}/directories\x12\xb0\x03\n" +
+	"\x0fEnableDirectory\x12/.scalekit.v1.directories.ToggleDirectoryRequest\x1a0.scalekit.v1.directories.ToggleDirectoryResponse\"\xb9\x02\x92A\xe8\x01\n" +
 	"\tDirectory\x12\x12Enable a directory\x1a\x7fActivates a directory within an organization, allowing it to synchronize users and groups with the connected Directory providerJF\n" +
 	"\x03200\x12?\n" +
 	"\aSuccess\x124\n" +
-	"2\x1a0.scalekit.v1.directories.ToggleDirectoryResponsej\x84\x05\n" +
-	"\rx-codeSamples\x12\xf2\x042\xef\x04\n" +
-	"\x89\x01*\x86\x01\n" +
-	"\x16\n" +
-	"\x05label\x12\r\x1a\vNode.js SDK\n" +
-	"\x14\n" +
-	"\x04lang\x12\f\x1a\n" +
-	"javascript\n" +
-	"V\n" +
-	"\x06source\x12L\x1aJawait sc.directory.enableDirectory('<organization_id>', '<directory_id>');\n" +
-	"\xb5\x01*\xb2\x01\n" +
-	"\x15\n" +
-	"\x05label\x12\f\x1a\n" +
-	"Python SDK\n" +
-	"\x10\n" +
-	"\x04lang\x12\b\x1a\x06python\n" +
-	"\x86\x01\n" +
-	"\x06source\x12|\x1azdirectory_response = sc.directory.enable_directory(\n" +
-	"  directory_id='<directory_id>', organization_id='<organization_id>'\n" +
-	")\n" +
-	"\x7f*}\n" +
-	"\x11\n" +
-	"\x05label\x12\b\x1a\x06Go SDK\n" +
-	"\f\n" +
-	"\x04lang\x12\x04\x1a\x02go\n" +
-	"Z\n" +
-	"\x06source\x12P\x1aNenable,err := sc.Directory().EnableDirectory(ctx, organizationId, directoryId)\n" +
-	"\xa7\x01*\xa4\x01\n" +
-	"\x13\n" +
-	"\x05label\x12\n" +
-	"\x1a\bJava SDK\n" +
-	"\x0e\n" +
-	"\x04lang\x12\x06\x1a\x04java\n" +
-	"}\n" +
-	"\x06source\x12s\x1aqToggleDirectoryResponse enableResponse = client\n" +
-	"  .directories()\n" +
-	"  .enableDirectory(directoryId, organizationId);\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x02A2?/api/v1/organizations/{organization_id}/directories/{id}:enable\x12\x9e\t\n" +
-	"\x10DisableDirectory\x12/.scalekit.v1.directories.ToggleDirectoryRequest\x1a0.scalekit.v1.directories.ToggleDirectoryResponse\"\xa6\b\x92A\xd4\a\n" +
+	"2\x1a0.scalekit.v1.directories.ToggleDirectoryResponse\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x02A2?/api/v1/organizations/{organization_id}/directories/{id}:enable\x12\xfb\x03\n" +
+	"\x10DisableDirectory\x12/.scalekit.v1.directories.ToggleDirectoryRequest\x1a0.scalekit.v1.directories.ToggleDirectoryResponse\"\x83\x03\x92A\xb1\x02\n" +
 	"\tDirectory\x12\x13Disable a directory\x1a\xaa\x01Stops synchronization of users and groups from a specified directory within an organization. This operation prevents further updates from the connected Directory providerJb\n" +
 	"\x03200\x12[\n" +
 	"#Successfully disabled the directory\x124\n" +
-	"2\x1a0.scalekit.v1.directories.ToggleDirectoryResponsej\xa0\x05\n" +
-	"\rx-codeSamples\x12\x8e\x052\x8b\x05\n" +
-	"\x96\x01*\x93\x01\n" +
-	"\x16\n" +
-	"\x05label\x12\r\x1a\vNode.js SDK\n" +
-	"\x14\n" +
-	"\x04lang\x12\f\x1a\n" +
-	"javascript\n" +
-	"c\n" +
-	"\x06source\x12Y\x1aWawait scalekit.directory.disableDirectory(\n" +
-	"  '<organization_id>',\n" +
-	"  '<directory_id>'\n" +
-	");\n" +
-	"\xb6\x01*\xb3\x01\n" +
-	"\x15\n" +
-	"\x05label\x12\f\x1a\n" +
-	"Python SDK\n" +
-	"\x10\n" +
-	"\x04lang\x12\b\x1a\x06python\n" +
-	"\x87\x01\n" +
-	"\x06source\x12}\x1a{directory_response = sc.directory.disable_directory(\n" +
-	"  directory_id='<directory_id>', organization_id='<organization_id>'\n" +
-	")\n" +
-	"\x81\x01*\x7f\n" +
-	"\x11\n" +
-	"\x05label\x12\b\x1a\x06Go SDK\n" +
-	"\f\n" +
-	"\x04lang\x12\x04\x1a\x02go\n" +
-	"\\\n" +
-	"\x06source\x12R\x1aPdisable,err := sc.Directory().DisableDirectory(ctx, organizationId, directoryId)\n" +
-	"\xb2\x01*\xaf\x01\n" +
-	"\x13\n" +
-	"\x05label\x12\n" +
-	"\x1a\bJava SDK\n" +
-	"\x0e\n" +
-	"\x04lang\x12\x06\x1a\x04java\n" +
-	"\x87\x01\n" +
-	"\x06source\x12}\x1a{ToggleDirectoryResponse disableResponse = scalekitClient\n" +
-	"  .directories()\n" +
-	"  .disableDirectory(directoryId, organizationId);\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x02B2@/api/v1/organizations/{organization_id}/directories/{id}:disable\x12\xe1\v\n" +
-	"\x12ListDirectoryUsers\x122.scalekit.v1.directories.ListDirectoryUsersRequest\x1a3.scalekit.v1.directories.ListDirectoryUsersResponse\"\xe1\n" +
-	"\x92A\x87\n" +
-	"\n" +
+	"2\x1a0.scalekit.v1.directories.ToggleDirectoryResponse\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x02B2@/api/v1/organizations/{organization_id}/directories/{id}:disable\x12\xbb\x04\n" +
+	"\x12ListDirectoryUsers\x122.scalekit.v1.directories.ListDirectoryUsersRequest\x1a3.scalekit.v1.directories.ListDirectoryUsersResponse\"\xbb\x03\x92A\xe1\x02\n" +
 	"\tDirectory\x12\x14List directory users\x1a\xb2\x01Retrieves a list of all users within a specified directory for an organization. This endpoint allows you to view user accounts associated with your connected Directory Providers.J\x88\x01\n" +
 	"\x03200\x12\x80\x01\n" +
 	"ESuccessfully retrieved the list of users from the specified directory\x127\n" +
-	"5\x1a3.scalekit.v1.directories.ListDirectoryUsersResponsej\xa3\a\n" +
-	"\rx-codeSamples\x12\x91\a2\x8e\a\n" +
-	"\xaa\x01*\xa7\x01\n" +
-	"\x16\n" +
-	"\x05label\x12\r\x1a\vNode.js SDK\n" +
-	"\x14\n" +
-	"\x04lang\x12\f\x1a\n" +
-	"javascript\n" +
-	"w\n" +
-	"\x06source\x12m\x1akconst { users } = await scalekit.directory.listDirectoryUsers(\n" +
-	"  '<organization_id>',\n" +
-	"  '<directory_id>'\n" +
-	");\n" +
-	"\xb6\x01*\xb3\x01\n" +
-	"\x15\n" +
-	"\x05label\x12\f\x1a\n" +
-	"Python SDK\n" +
-	"\x10\n" +
-	"\x04lang\x12\b\x1a\x06python\n" +
-	"\x87\x01\n" +
-	"\x06source\x12}\x1a{directory_users = sc.directory.list_directory_users(\n" +
-	"  directory_id='<directory_id>', organization_id='<organization_id>'\n" +
-	")\n" +
-	"\xe2\x01*\xdf\x01\n" +
-	"\x11\n" +
-	"\x05label\x12\b\x1a\x06Go SDK\n" +
-	"\f\n" +
-	"\x04lang\x12\x04\x1a\x02go\n" +
-	"\xbb\x01\n" +
-	"\x06source\x12\xb0\x01\x1a\xad\x01options := &ListDirectoryUsersOptions{\n" +
-	"\t\tPageSize: 10,\n" +
-	"\t\tPageToken: \"\",\n" +
-	"\t}\n" +
-	"directoryUsers,err := sc.Directory().ListDirectoryUsers(ctx, organizationId, directoryId, options)\n" +
-	"\xc0\x02*\xbd\x02\n" +
-	"\x13\n" +
-	"\x05label\x12\n" +
-	"\x1a\bJava SDK\n" +
-	"\x0e\n" +
-	"\x04lang\x12\x06\x1a\x04java\n" +
-	"\x95\x02\n" +
-	"\x06source\x12\x8a\x02\x1a\x87\x02var options = ListDirectoryResourceOptions.builder()\n" +
-	"  .pageSize(10)\n" +
-	"  .pageToken(\"\")\n" +
-	"  .includeDetail(true)\n" +
-	"  .build();\n" +
-	"\n" +
-	"ListDirectoryUsersResponse usersResponse = scalekitClient\n" +
-	"  .directories()\n" +
-	"  .listDirectoryUsers(directory.getId(), organizationId, options);\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x02J\x12H/api/v1/organizations/{organization_id}/directories/{directory_id}/users\x12\xc3\v\n" +
-	"\x13ListDirectoryGroups\x123.scalekit.v1.directories.ListDirectoryGroupsRequest\x1a4.scalekit.v1.directories.ListDirectoryGroupsResponse\"\xc0\n" +
-	"\x92A\xe5\t\n" +
+	"5\x1a3.scalekit.v1.directories.ListDirectoryUsersResponse\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x02J\x12H/api/v1/organizations/{organization_id}/directories/{directory_id}/users\x12\x92\x04\n" +
+	"\x13ListDirectoryGroups\x123.scalekit.v1.directories.ListDirectoryGroupsRequest\x1a4.scalekit.v1.directories.ListDirectoryGroupsResponse\"\x8f\x03\x92A\xb4\x02\n" +
 	"\tDirectory\x12\x15List directory groups\x1a\x82\x01Retrieves all groups from a specified directory. Use this endpoint to view group structures from your connected identity provider.J\x8a\x01\n" +
 	"\x03200\x12\x82\x01\n" +
 	"FSuccessfully retrieved the list of groups from the specified directory\x128\n" +
-	"6\x1a4.scalekit.v1.directories.ListDirectoryGroupsResponsej\xae\a\n" +
-	"\rx-codeSamples\x12\x9c\a2\x99\a\n" +
-	"\xac\x01*\xa9\x01\n" +
-	"\x16\n" +
-	"\x05label\x12\r\x1a\vNode.js SDK\n" +
-	"\x14\n" +
-	"\x04lang\x12\f\x1a\n" +
-	"javascript\n" +
-	"y\n" +
-	"\x06source\x12o\x1amconst { groups } = await scalekit.directory.listDirectoryGroups(\n" +
-	"  '<organization_id>',\n" +
-	"  '<directory_id>'\n" +
-	");\n" +
-	"\xb8\x01*\xb5\x01\n" +
-	"\x15\n" +
-	"\x05label\x12\f\x1a\n" +
-	"Python SDK\n" +
-	"\x10\n" +
-	"\x04lang\x12\b\x1a\x06python\n" +
-	"\x89\x01\n" +
-	"\x06source\x12\x7f\x1a}directory_groups = sc.directory.list_directory_groups(\n" +
-	"  directory_id='<directory_id>', organization_id='<organization_id>'\n" +
-	")\n" +
-	"\xe6\x01*\xe3\x01\n" +
-	"\x11\n" +
-	"\x05label\x12\b\x1a\x06Go SDK\n" +
-	"\f\n" +
-	"\x04lang\x12\x04\x1a\x02go\n" +
-	"\xbf\x01\n" +
-	"\x06source\x12\xb4\x01\x1a\xb1\x01options := &ListDirectoryGroupsOptions{\n" +
-	"\t\tPageSize: 10,\n" +
-	"\t\tPageToken:\"\",\n" +
-	"\t}\n" +
-	"\n" +
-	"directoryGroups, err := sc.Directory().ListDirectoryGroups(ctx, organizationId, directoryId, options)\n" +
-	"\xc3\x02*\xc0\x02\n" +
-	"\x13\n" +
-	"\x05label\x12\n" +
-	"\x1a\bJava SDK\n" +
-	"\x0e\n" +
-	"\x04lang\x12\x06\x1a\x04java\n" +
-	"\x98\x02\n" +
-	"\x06source\x12\x8d\x02\x1a\x8a\x02var options = ListDirectoryResourceOptions.builder()\n" +
-	"  .pageSize(10)\n" +
-	"  .pageToken(\"\")\n" +
-	"  .includeDetail(true)\n" +
-	"  .build();\n" +
-	"\n" +
-	"ListDirectoryGroupsResponse groupsResponse = scalekitClient\n" +
-	"  .directories()\n" +
-	"  .listDirectoryGroups(directory.getId(), organizationId, options);\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x02K\x12I/api/v1/organizations/{organization_id}/directories/{directory_id}/groups\x12\xc1\x04\n" +
+	"6\x1a4.scalekit.v1.directories.ListDirectoryGroupsResponse\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x02K\x12I/api/v1/organizations/{organization_id}/directories/{directory_id}/groups\x12\xc1\x04\n" +
 	"\x1aListDirectoryGroupsSummary\x12:.scalekit.v1.directories.ListDirectoryGroupsSummaryRequest\x1a4.scalekit.v1.directories.ListDirectoryGroupsResponse\"\xb0\x03\x92A\xbe\x02\n" +
 	"\tDirectory\x12\x1dList directory groups summary\x1a\x84\x01Retrieves all groups from a specified directory. This is not a paginated api. It gives a summary view with id and name of the group.J\x8a\x01\n" +
 	"\x03200\x12\x82\x01\n" +

@@ -88,9 +88,6 @@ const (
 	// ConnectionServiceListAppConnectionsProcedure is the fully-qualified name of the
 	// ConnectionService's ListAppConnections RPC.
 	ConnectionServiceListAppConnectionsProcedure = "/scalekit.v1.connections.ConnectionService/ListAppConnections"
-	// ConnectionServiceUpdateConnectionUserManagementSettingsProcedure is the fully-qualified name of
-	// the ConnectionService's UpdateConnectionUserManagementSettings RPC.
-	ConnectionServiceUpdateConnectionUserManagementSettingsProcedure = "/scalekit.v1.connections.ConnectionService/UpdateConnectionUserManagementSettings"
 )
 
 // ConnectionServiceClient is a client for the scalekit.v1.connections.ConnectionService service.
@@ -113,7 +110,6 @@ type ConnectionServiceClient interface {
 	DisableConnection(context.Context, *connect.Request[connections.ToggleConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error)
 	GetConnectionTestResult(context.Context, *connect.Request[connections.GetConnectionTestResultRequest]) (*connect.Response[connections.GetConnectionTestResultResponse], error)
 	ListAppConnections(context.Context, *connect.Request[connections.ListAppConnectionsRequest]) (*connect.Response[connections.ListAppConnectionsResponse], error)
-	UpdateConnectionUserManagementSettings(context.Context, *connect.Request[connections.UpdateConnectionUserManagementSettingsRequest]) (*connect.Response[connections.UpdateConnectionUserManagementSettingsResponse], error)
 }
 
 // NewConnectionServiceClient constructs a client for the scalekit.v1.connections.ConnectionService
@@ -235,36 +231,29 @@ func NewConnectionServiceClient(httpClient connect.HTTPClient, baseURL string, o
 			connect.WithSchema(connectionServiceMethods.ByName("ListAppConnections")),
 			connect.WithClientOptions(opts...),
 		),
-		updateConnectionUserManagementSettings: connect.NewClient[connections.UpdateConnectionUserManagementSettingsRequest, connections.UpdateConnectionUserManagementSettingsResponse](
-			httpClient,
-			baseURL+ConnectionServiceUpdateConnectionUserManagementSettingsProcedure,
-			connect.WithSchema(connectionServiceMethods.ByName("UpdateConnectionUserManagementSettings")),
-			connect.WithClientOptions(opts...),
-		),
 	}
 }
 
 // connectionServiceClient implements ConnectionServiceClient.
 type connectionServiceClient struct {
-	createEnvironmentConnection            *connect.Client[connections.CreateEnvironmentConnectionRequest, connections.CreateConnectionResponse]
-	createConnection                       *connect.Client[connections.CreateConnectionRequest, connections.CreateConnectionResponse]
-	assignDomainsToConnection              *connect.Client[connections.AssignDomainsToConnectionRequest, connections.AssignDomainsToConnectionResponse]
-	getEnvironmentConnection               *connect.Client[connections.GetEnvironmentConnectionRequest, connections.GetConnectionResponse]
-	getConnection                          *connect.Client[connections.GetConnectionRequest, connections.GetConnectionResponse]
-	listConnections                        *connect.Client[connections.ListConnectionsRequest, connections.ListConnectionsResponse]
-	listOrganizationConnections            *connect.Client[connections.ListOrganizationConnectionsRequest, connections.ListOrganizationConnectionsResponse]
-	searchOrganizationConnections          *connect.Client[connections.SearchOrganizationConnectionsRequest, connections.SearchOrganizationConnectionsResponse]
-	updateEnvironmentConnection            *connect.Client[connections.UpdateEnvironmentConnectionRequest, connections.UpdateConnectionResponse]
-	updateConnection                       *connect.Client[connections.UpdateConnectionRequest, connections.UpdateConnectionResponse]
-	deleteEnvironmentConnection            *connect.Client[connections.DeleteEnvironmentConnectionRequest, emptypb.Empty]
-	deleteConnection                       *connect.Client[connections.DeleteConnectionRequest, emptypb.Empty]
-	enableEnvironmentConnection            *connect.Client[connections.ToggleEnvironmentConnectionRequest, connections.ToggleConnectionResponse]
-	enableConnection                       *connect.Client[connections.ToggleConnectionRequest, connections.ToggleConnectionResponse]
-	disableEnvironmentConnection           *connect.Client[connections.ToggleEnvironmentConnectionRequest, connections.ToggleConnectionResponse]
-	disableConnection                      *connect.Client[connections.ToggleConnectionRequest, connections.ToggleConnectionResponse]
-	getConnectionTestResult                *connect.Client[connections.GetConnectionTestResultRequest, connections.GetConnectionTestResultResponse]
-	listAppConnections                     *connect.Client[connections.ListAppConnectionsRequest, connections.ListAppConnectionsResponse]
-	updateConnectionUserManagementSettings *connect.Client[connections.UpdateConnectionUserManagementSettingsRequest, connections.UpdateConnectionUserManagementSettingsResponse]
+	createEnvironmentConnection   *connect.Client[connections.CreateEnvironmentConnectionRequest, connections.CreateConnectionResponse]
+	createConnection              *connect.Client[connections.CreateConnectionRequest, connections.CreateConnectionResponse]
+	assignDomainsToConnection     *connect.Client[connections.AssignDomainsToConnectionRequest, connections.AssignDomainsToConnectionResponse]
+	getEnvironmentConnection      *connect.Client[connections.GetEnvironmentConnectionRequest, connections.GetConnectionResponse]
+	getConnection                 *connect.Client[connections.GetConnectionRequest, connections.GetConnectionResponse]
+	listConnections               *connect.Client[connections.ListConnectionsRequest, connections.ListConnectionsResponse]
+	listOrganizationConnections   *connect.Client[connections.ListOrganizationConnectionsRequest, connections.ListOrganizationConnectionsResponse]
+	searchOrganizationConnections *connect.Client[connections.SearchOrganizationConnectionsRequest, connections.SearchOrganizationConnectionsResponse]
+	updateEnvironmentConnection   *connect.Client[connections.UpdateEnvironmentConnectionRequest, connections.UpdateConnectionResponse]
+	updateConnection              *connect.Client[connections.UpdateConnectionRequest, connections.UpdateConnectionResponse]
+	deleteEnvironmentConnection   *connect.Client[connections.DeleteEnvironmentConnectionRequest, emptypb.Empty]
+	deleteConnection              *connect.Client[connections.DeleteConnectionRequest, emptypb.Empty]
+	enableEnvironmentConnection   *connect.Client[connections.ToggleEnvironmentConnectionRequest, connections.ToggleConnectionResponse]
+	enableConnection              *connect.Client[connections.ToggleConnectionRequest, connections.ToggleConnectionResponse]
+	disableEnvironmentConnection  *connect.Client[connections.ToggleEnvironmentConnectionRequest, connections.ToggleConnectionResponse]
+	disableConnection             *connect.Client[connections.ToggleConnectionRequest, connections.ToggleConnectionResponse]
+	getConnectionTestResult       *connect.Client[connections.GetConnectionTestResultRequest, connections.GetConnectionTestResultResponse]
+	listAppConnections            *connect.Client[connections.ListAppConnectionsRequest, connections.ListAppConnectionsResponse]
 }
 
 // CreateEnvironmentConnection calls
@@ -366,12 +355,6 @@ func (c *connectionServiceClient) ListAppConnections(ctx context.Context, req *c
 	return c.listAppConnections.CallUnary(ctx, req)
 }
 
-// UpdateConnectionUserManagementSettings calls
-// scalekit.v1.connections.ConnectionService.UpdateConnectionUserManagementSettings.
-func (c *connectionServiceClient) UpdateConnectionUserManagementSettings(ctx context.Context, req *connect.Request[connections.UpdateConnectionUserManagementSettingsRequest]) (*connect.Response[connections.UpdateConnectionUserManagementSettingsResponse], error) {
-	return c.updateConnectionUserManagementSettings.CallUnary(ctx, req)
-}
-
 // ConnectionServiceHandler is an implementation of the scalekit.v1.connections.ConnectionService
 // service.
 type ConnectionServiceHandler interface {
@@ -393,7 +376,6 @@ type ConnectionServiceHandler interface {
 	DisableConnection(context.Context, *connect.Request[connections.ToggleConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error)
 	GetConnectionTestResult(context.Context, *connect.Request[connections.GetConnectionTestResultRequest]) (*connect.Response[connections.GetConnectionTestResultResponse], error)
 	ListAppConnections(context.Context, *connect.Request[connections.ListAppConnectionsRequest]) (*connect.Response[connections.ListAppConnectionsResponse], error)
-	UpdateConnectionUserManagementSettings(context.Context, *connect.Request[connections.UpdateConnectionUserManagementSettingsRequest]) (*connect.Response[connections.UpdateConnectionUserManagementSettingsResponse], error)
 }
 
 // NewConnectionServiceHandler builds an HTTP handler from the service implementation. It returns
@@ -511,12 +493,6 @@ func NewConnectionServiceHandler(svc ConnectionServiceHandler, opts ...connect.H
 		connect.WithSchema(connectionServiceMethods.ByName("ListAppConnections")),
 		connect.WithHandlerOptions(opts...),
 	)
-	connectionServiceUpdateConnectionUserManagementSettingsHandler := connect.NewUnaryHandler(
-		ConnectionServiceUpdateConnectionUserManagementSettingsProcedure,
-		svc.UpdateConnectionUserManagementSettings,
-		connect.WithSchema(connectionServiceMethods.ByName("UpdateConnectionUserManagementSettings")),
-		connect.WithHandlerOptions(opts...),
-	)
 	return "/scalekit.v1.connections.ConnectionService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ConnectionServiceCreateEnvironmentConnectionProcedure:
@@ -555,8 +531,6 @@ func NewConnectionServiceHandler(svc ConnectionServiceHandler, opts ...connect.H
 			connectionServiceGetConnectionTestResultHandler.ServeHTTP(w, r)
 		case ConnectionServiceListAppConnectionsProcedure:
 			connectionServiceListAppConnectionsHandler.ServeHTTP(w, r)
-		case ConnectionServiceUpdateConnectionUserManagementSettingsProcedure:
-			connectionServiceUpdateConnectionUserManagementSettingsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -636,8 +610,4 @@ func (UnimplementedConnectionServiceHandler) GetConnectionTestResult(context.Con
 
 func (UnimplementedConnectionServiceHandler) ListAppConnections(context.Context, *connect.Request[connections.ListAppConnectionsRequest]) (*connect.Response[connections.ListAppConnectionsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.ListAppConnections is not implemented"))
-}
-
-func (UnimplementedConnectionServiceHandler) UpdateConnectionUserManagementSettings(context.Context, *connect.Request[connections.UpdateConnectionUserManagementSettingsRequest]) (*connect.Response[connections.UpdateConnectionUserManagementSettingsResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.UpdateConnectionUserManagementSettings is not implemented"))
 }
