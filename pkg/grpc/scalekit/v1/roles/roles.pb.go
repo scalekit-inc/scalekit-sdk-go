@@ -3093,102 +3093,35 @@ const file_scalekit_v1_roles_roles_proto_rawDesc = "" +
 	"\trole_name\x18\x01 \x01(\tB\xc5\x01\x92A\xa4\x012\x91\x01Unique name identifier of the role whose base inheritance relationship should be removed. Must be alphanumeric with underscores, 1-64 characters.J\x0econtent_editor\xbaH\x1a\xc8\x01\x01r\x15\x10\x01\x18@2\x0f^[a-zA-Z0-9_]+$R\broleName\"\x88\x02\n" +
 	"!DeleteOrganizationRoleBaseRequest\x12e\n" +
 	"\x06org_id\x18\x01 \x01(\tBN\x92A=2$Unique identifier to an OrganizationJ\x15\"org_121312434123312\"\xbaH\vr\t\x10\x01\x18 :\x03orgR\x05orgId\x12|\n" +
-	"\trole_name\x18\x02 \x01(\tB_\x92A:21Name of the organization role to remove base fromJ\x05admin\xbaH\x1f\xc8\x01\x01r\x1a\x10\x01\x18d2\x14^[a-zA-Z0-9_]{1,64}$R\broleName2\xc2\xc4\x01\n" +
-	"\fRolesService\x12\x87\b\n" +
+	"\trole_name\x18\x02 \x01(\tB_\x92A:21Name of the organization role to remove base fromJ\x05admin\xbaH\x1f\xc8\x01\x01r\x1a\x10\x01\x18d2\x14^[a-zA-Z0-9_]{1,64}$R\broleName2\xeb\xbb\x01\n" +
+	"\fRolesService\x12\xcf\x05\n" +
 	"\n" +
-	"CreateRole\x12$.scalekit.v1.roles.CreateRoleRequest\x1a%.scalekit.v1.roles.CreateRoleResponse\"\xab\a\x92A\x86\a\n" +
+	"CreateRole\x12$.scalekit.v1.roles.CreateRoleRequest\x1a%.scalekit.v1.roles.CreateRoleResponse\"\xf3\x04\x92A\xce\x04\n" +
 	"\x05Roles\x12\x1eCreate new role in environment\x1a\x88\x03Creates a new role within the environment with specified permissions and metadata. Use this endpoint to define custom roles that can be assigned to users or groups. You can create hierarchical roles by extending existing roles, assign specific permissions, and configure display information. Roles are the foundation of your access control system and determine what actions users can perform.J\x99\x01\n" +
 	"\x03201\x12\x91\x01\n" +
 	"dRole created successfully. Returns the complete role object with system-generated ID and timestamps.\x12)\n" +
-	"'\x1a%.scalekit.v1.roles.CreateRoleResponsej\xb5\x02\n" +
-	"\rx-codeSamples\x12\xa3\x022\xa0\x02\n" +
-	"\x9d\x02*\x9a\x02\n" +
-	"\x15\n" +
-	"\x05label\x12\f\x1a\n" +
-	"Python SDK\n" +
-	"\x10\n" +
-	"\x04lang\x12\b\x1a\x06python\n" +
-	"\xee\x01\n" +
-	"\x06source\x12\xe3\x01\x1a\xe0\x01from scalekit.v1.roles.roles_pb2 import CreateRole\n" +
+	"'\x1a%.scalekit.v1.roles.CreateRoleResponse\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02\x15:\x04role\"\r/api/v1/roles\x12\xb2\x05\n" +
 	"\n" +
-	"role = CreateRole(\n" +
-	"    name=\"viewer\",\n" +
-	"    display_name=\"Viewer\",\n" +
-	"    description=\"Read-only access\",\n" +
-	")\n" +
-	"create_response = scalekit_client.roles.create_role(\n" +
-	"    role=role,\n" +
-	")\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02\x15:\x04role\"\r/api/v1/roles\x12\x96\b\n" +
-	"\n" +
-	"UpdateRole\x12$.scalekit.v1.roles.UpdateRoleRequest\x1a%.scalekit.v1.roles.UpdateRoleResponse\"\xba\a\x92A\x89\a\n" +
+	"UpdateRole\x12$.scalekit.v1.roles.UpdateRoleRequest\x1a%.scalekit.v1.roles.UpdateRoleResponse\"\xd6\x04\x92A\xa5\x04\n" +
 	"\x05Roles\x12\x17Update role information\x1a\xf6\x02Modifies an existing role's properties including display name, description, permissions, and inheritance. Use this endpoint to update role metadata, change permission assignments, or modify role hierarchy. Only the fields you specify will be updated, leaving other properties unchanged. When updating permissions, the new list replaces all existing permissions for the role.J\x89\x01\n" +
 	"\x03200\x12\x81\x01\n" +
 	"TRole updated successfully. Returns the modified role object with updated timestamps.\x12)\n" +
-	"'\x1a%.scalekit.v1.roles.UpdateRoleResponsej\xe1\x02\n" +
-	"\rx-codeSamples\x12\xcf\x022\xcc\x02\n" +
-	"\xc9\x02*\xc6\x02\n" +
-	"\x15\n" +
-	"\x05label\x12\f\x1a\n" +
-	"Python SDK\n" +
-	"\x10\n" +
-	"\x04lang\x12\b\x1a\x06python\n" +
-	"\x9a\x02\n" +
-	"\x06source\x12\x8f\x02\x1a\x8c\x02from scalekit.v1.roles.roles_pb2 import UpdateRole\n" +
-	"\n" +
-	"update_role = UpdateRole(\n" +
-	"    display_name=\"Viewer (Limited)\",\n" +
-	"    description=\"Read-only access, no billing\",\n" +
-	")\n" +
-	"updated_role = scalekit_client.roles.update_role(\n" +
-	"    role_id=\"role_123456789\",\n" +
-	"    role=update_role,\n" +
-	")\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02!:\x04role\x1a\x19/api/v1/roles/{role_name}\x12\xa3\x06\n" +
-	"\aGetRole\x12!.scalekit.v1.roles.GetRoleRequest\x1a\".scalekit.v1.roles.GetRoleResponse\"\xd0\x05\x92A\xa5\x05\n" +
+	"'\x1a%.scalekit.v1.roles.UpdateRoleResponse\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02!:\x04role\x1a\x19/api/v1/roles/{role_name}\x12\xff\x04\n" +
+	"\aGetRole\x12!.scalekit.v1.roles.GetRoleRequest\x1a\".scalekit.v1.roles.GetRoleResponse\"\xac\x04\x92A\x81\x04\n" +
 	"\x05Roles\x12\x10Get role details\x1a\xa9\x02Retrieves complete information for a specific role including metadata and inheritance details (base role and dependent role count). Use this endpoint to audit role configuration and understand the role's place in the hierarchy. To view the role's permissions, use the ListRolePermissions endpoint.J\xb9\x01\n" +
 	"\x03200\x12\xb1\x01\n" +
 	"\x86\x01Successfully retrieved role details. Returns the role object including metadata and inheritance details. Permissions are not included.\x12&\n" +
-	"$\x1a\".scalekit.v1.roles.GetRoleResponsej\xa1\x01\n" +
-	"\rx-codeSamples\x12\x8f\x012\x8c\x01\n" +
-	"\x89\x01*\x86\x01\n" +
-	"\x15\n" +
-	"\x05label\x12\f\x1a\n" +
-	"Python SDK\n" +
-	"\x10\n" +
-	"\x04lang\x12\b\x1a\x06python\n" +
-	"[\n" +
-	"\x06source\x12Q\x1aOrole_response = scalekit_client.roles.get_role(\n" +
-	"    role_id=\"role_123456789\",\n" +
-	")\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02\x1b\x12\x19/api/v1/roles/{role_name}\x12\x8d\a\n" +
-	"\tListRoles\x12#.scalekit.v1.roles.ListRolesRequest\x1a$.scalekit.v1.roles.ListRolesResponse\"\xb4\x06\x92A\x95\x06\n" +
+	"$\x1a\".scalekit.v1.roles.GetRoleResponse\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02\x1b\x12\x19/api/v1/roles/{role_name}\x12\x89\x06\n" +
+	"\tListRoles\x12#.scalekit.v1.roles.ListRolesRequest\x1a$.scalekit.v1.roles.ListRolesResponse\"\xb0\x05\x92A\x91\x05\n" +
 	"\x05Roles\x12\x1dList all roles in environment\x1a\xc4\x03Retrieves a comprehensive list of all roles available within the specified environment including organization roles. Use this endpoint to view all role definitions, including custom roles and their configurations. You can optionally include permission details for each role to understand their capabilities. This is useful for role management, auditing organization access controls, or understanding the available access levels within the organization.J\xa1\x01\n" +
 	"\x03200\x12\x99\x01\n" +
 	"mSuccessfully retrieved list of roles. Returns all roles with their metadata and optionally their permissions.\x12(\n" +
-	"&\x1a$.scalekit.v1.roles.ListRolesResponsej\x81\x01\n" +
-	"\rx-codeSamples\x12p2n\n" +
-	"l*j\n" +
-	"\x15\n" +
-	"\x05label\x12\f\x1a\n" +
-	"Python SDK\n" +
-	"\x10\n" +
-	"\x04lang\x12\b\x1a\x06python\n" +
-	"?\n" +
-	"\x06source\x125\x1a3roles_response = scalekit_client.roles.list_roles()\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x02\x0f\x12\r/api/v1/roles\x12\xbf\a\n" +
+	"&\x1a$.scalekit.v1.roles.ListRolesResponse\x82\xb5\x18\x02\x18t\x82\xd3\xe4\x93\x02\x0f\x12\r/api/v1/roles\x12\xac\x06\n" +
 	"\n" +
-	"DeleteRole\x12$.scalekit.v1.roles.DeleteRoleRequest\x1a\x16.google.protobuf.Empty\"\xf2\x06\x92A\xc7\x06\n" +
+	"DeleteRole\x12$.scalekit.v1.roles.DeleteRoleRequest\x1a\x16.google.protobuf.Empty\"\xdf\x05\x92A\xb4\x05\n" +
 	"\x05Roles\x12\x1eDelete role and reassign users\x1a\xbb\x04Permanently removes a role from the environment and reassigns users who had that role to a different role. Use this endpoint when you need to clean up unused roles or restructure your access control system. The role cannot be deleted if it has dependent roles (roles that extend it) unless you specify a replacement role. If users are assigned to the role being deleted, you must provide a reassign_role_name to move those users to a different role before deletion can proceed. This action cannot be undone, so ensure no critical users depend on the role before deletion.JM\n" +
 	"\x03200\x12F\n" +
-	"DRole successfully deleted and users reassigned. No content returned.j\x90\x01\n" +
-	"\rx-codeSamples\x12\x7f2}\n" +
-	"{*y\n" +
-	"\x15\n" +
-	"\x05label\x12\f\x1a\n" +
-	"Python SDK\n" +
-	"\x10\n" +
-	"\x04lang\x12\b\x1a\x06python\n" +
-	"N\n" +
-	"\x06source\x12D\x1aBscalekit_client.roles.delete_role(\n" +
-	"    role_id=\"role_123456789\",\n" +
-	")\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02\x1b*\x19/api/v1/roles/{role_name}\x12\xdc\x06\n" +
+	"DRole successfully deleted and users reassigned. No content returned.\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02\x1b*\x19/api/v1/roles/{role_name}\x12\xdc\x06\n" +
 	"\x16CreateOrganizationRole\x120.scalekit.v1.roles.CreateOrganizationRoleRequest\x1a1.scalekit.v1.roles.CreateOrganizationRoleResponse\"\xdc\x05\x92A\xa0\x05\n" +
 	"\x05Roles\x12\x18Create organization role\x1a\xc7\x03Creates a new role within the specified organization with basic configuration including name, display name, description, and permissions. Use this endpoint to define custom roles that can be assigned to users within the organization. You can create hierarchical roles by extending existing roles and assign specific permissions to control access levels. The role will be scoped to the organization and can be used for organization-specific access control.J\xb2\x01\n" +
 	"\x03201\x12\xaa\x01\n" +
