@@ -134,6 +134,8 @@ func (d *domain) ListDomains(ctx context.Context, organizationId string, options
 		if opts.PageNumber > 0 {
 			request.PageNumber = &wrapperspb.Int32Value{Value: int32(opts.PageNumber)}
 		}
+	} else {
+		request.PageSize = &wrapperspb.Int32Value{Value: int32(100)}
 	}
 
 	return newConnectExecuter(
