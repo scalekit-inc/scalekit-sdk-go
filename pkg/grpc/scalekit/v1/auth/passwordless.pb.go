@@ -483,21 +483,21 @@ var File_scalekit_v1_auth_passwordless_proto protoreflect.FileDescriptor
 
 const file_scalekit_v1_auth_passwordless_proto_rawDesc = "" +
 	"\n" +
-	"#scalekit/v1/auth/passwordless.proto\x12\x1dscalekit.v1.auth.passwordless\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\x1a!scalekit/v1/options/options.proto\"\xdb\x10\n" +
+	"#scalekit/v1/auth/passwordless.proto\x12\x1dscalekit.v1.auth.passwordless\x1a\x1cgoogle/api/annotations.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\x1a!scalekit/v1/options/options.proto\"\xd9\x10\n" +
 	"\x17SendPasswordlessRequest\x12\xaf\x01\n" +
 	"\x05email\x18\x01 \x01(\tB\x98\x01\x92A\x85\x012kEmail address where the passwordless authentication credentials will be sent. Must be a valid email format.J\x16\"john.doe@example.com\"\xbaH\f\xc8\x01\x01r\a\x10\x01\x18\xc0\x02`\x01R\x05email\x12\xa6\x02\n" +
 	"\btemplate\x18\x02 \x01(\x0e2+.scalekit.v1.auth.passwordless.TemplateTypeB\xd7\x01\x92A\xcb\x012\xbe\x01Specifies the authentication intent for the passwordless request. Use SIGNIN for existing users or SIGNUP for new user registration. This affects the email template and user experience flow.J\b\"SIGNIN\"\xbaH\x05\x82\x01\x02\x10\x01H\x00R\btemplate\x88\x01\x01\x12\xa9\x02\n" +
 	"\x12magiclink_auth_uri\x18\x03 \x01(\tB\xf5\x01\x92A\xe4\x012\xaf\x01Your application's callback URL where users will be redirected after clicking the magic link in their email. The link token will be appended as a query parameter as link_tokenJ0\"https://yourapp.com/auth/passwordless/callback\"\xe0A\x01\xbaH\ar\x05\x10\x01\x18\xe8\aH\x01R\x10magiclinkAuthUri\x88\x01\x01\x12\x9b\x02\n" +
 	"\x05state\x18\x04 \x01(\tB\xff\x01\x92A\xee\x012\xd9\x01Custom state parameter that will be returned unchanged in the verification response. Use this to maintain application state between the authentication request and callback, such as the intended destination after loginJ\x10\"d62ivasry29lso\"\xe0A\x01\xbaH\ar\x05\x10\x01\x18\xe8\aH\x02R\x05state\x88\x01\x01\x12\xa6\x01\n" +
 	"\n" +
-	"expires_in\x18\x05 \x01(\rB\x81\x01\x92A{2tTime in seconds until the passwordless authentication expires. If not specified, defaults to 300 seconds (5 minutes)J\x03300\xe0A\x01H\x03R\texpiresIn\x88\x01\x01\x12\xee\x05\n" +
-	"\x12template_variables\x18\x06 \x03(\v2M.scalekit.v1.auth.passwordless.SendPasswordlessRequest.TemplateVariablesEntryB\xef\x04\x92A\xcf\x042\x9a\x04A set of key-value pairs to personalize the email template.\n" +
+	"expires_in\x18\x05 \x01(\rB\x81\x01\x92A{2tTime in seconds until the passwordless authentication expires. If not specified, defaults to 300 seconds (5 minutes)J\x03300\xe0A\x01H\x03R\texpiresIn\x88\x01\x01\x12\xec\x05\n" +
+	"\x12template_variables\x18\x06 \x03(\v2M.scalekit.v1.auth.passwordless.SendPasswordlessRequest.TemplateVariablesEntryB\xed\x04\x92A\xcf\x042\x9a\x04A set of key-value pairs to personalize the email template.\n" +
 	"\n" +
 	"* You may include up to 30 key-value pairs.\n" +
 	"* The following variable names are reserved by the system and cannot be supplied: `otp`, `expiry_time_relative`, `link`, `expire_time`, `expiry_time`.\n" +
 	"* Every variable referenced in your email template must be included as a key-value pair.\n" +
 	"\n" +
-	"Use these variables to insert custom information, such as a team name, URL or the user's employee ID. All variables are interpolated before the email is sent, regardless of the email provider.J0{\"custom_variable_key\": \"custom_variable_value\"}\xe0A\x01\xbaH\x16\x9a\x01\x13\x10\x1e\"\x06r\x04\x10\x03\x18\x19*\ar\x05\x10\x01\x18\x80\x02R\x11templateVariables\x1aD\n" +
+	"Use these variables to insert custom information, such as a team name, URL or the user's employee ID. All variables are interpolated before the email is sent, regardless of the email provider.J0{\"custom_variable_key\": \"custom_variable_value\"}\xe0A\x01\xbaH\x14\x9a\x01\x11\x10\x1e\"\x06r\x04\x10\x02\x18\x19*\x05r\x03\x18\x80\x02R\x11templateVariables\x1aD\n" +
 	"\x16TemplateVariablesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\v\n" +
@@ -540,24 +540,24 @@ const file_scalekit_v1_auth_passwordless_proto_rawDesc = "" +
 	"\x1dPASSWORDLESS_TYPE_UNSPECIFIED\x10\x00\x12\a\n" +
 	"\x03OTP\x10\x01\x12\b\n" +
 	"\x04LINK\x10\x02\x12\f\n" +
-	"\bLINK_OTP\x10\x032\xac\x0e\n" +
-	"\x13PasswordlessService\x12\xb4\x04\n" +
-	"\x15SendPasswordlessEmail\x126.scalekit.v1.auth.passwordless.SendPasswordlessRequest\x1a7.scalekit.v1.auth.passwordless.SendPasswordlessResponse\"\xa9\x03\x92A\xf5\x02\n" +
-	"\x11Passwordless Auth\x12\x17Send passwordless email\x1atSend a verification email containing either a verification code (OTP), magic link, or both to a user's email addressJ\xd0\x01\n" +
+	"\bLINK_OTP\x10\x032\xa8\x0e\n" +
+	"\x13PasswordlessService\x12\xb3\x04\n" +
+	"\x15SendPasswordlessEmail\x126.scalekit.v1.auth.passwordless.SendPasswordlessRequest\x1a7.scalekit.v1.auth.passwordless.SendPasswordlessResponse\"\xa8\x03\x92A\xf4\x02\n" +
+	"\x10Magic link & OTP\x12\x17Send passwordless email\x1atSend a verification email containing either a verification code (OTP), magic link, or both to a user's email addressJ\xd0\x01\n" +
 	"\x03200\x12\xc8\x01\n" +
 	"\x8d\x01Successfully sent passwordless authentication email. Returns the authentication request details including expiration time and auth request ID\x126\n" +
-	"4\x1a2#/definitions/passwordlessSendPasswordlessResponse\x82\xb5\x18\x02\x18\x04\x82\xd3\xe4\x93\x02$:\x01*\"\x1f/api/v1/passwordless/email/send\x12\xd9\x03\n" +
-	"\x17VerifyPasswordlessEmail\x128.scalekit.v1.auth.passwordless.VerifyPasswordLessRequest\x1a9.scalekit.v1.auth.passwordless.VerifyPasswordLessResponse\"\xc8\x02\x92A\x92\x02\n" +
-	"\x11Passwordless Auth\x12\x19Verify passwordless email\x1aMVerify a user's identity using either a verification code or magic link tokenJ\x92\x01\n" +
+	"4\x1a2#/definitions/passwordlessSendPasswordlessResponse\x82\xb5\x18\x02\x18\x04\x82\xd3\xe4\x93\x02$:\x01*\"\x1f/api/v1/passwordless/email/send\x12\xd8\x03\n" +
+	"\x17VerifyPasswordlessEmail\x128.scalekit.v1.auth.passwordless.VerifyPasswordLessRequest\x1a9.scalekit.v1.auth.passwordless.VerifyPasswordLessResponse\"\xc7\x02\x92A\x91\x02\n" +
+	"\x10Magic link & OTP\x12\x19Verify passwordless email\x1aMVerify a user's identity using either a verification code or magic link tokenJ\x92\x01\n" +
 	"\x03200\x12\x8a\x01\n" +
 	"ISuccessfully verified the passwordless authentication. Returns user email\x12=\n" +
-	";\x1a9.scalekit.v1.auth.passwordless.VerifyPasswordLessResponse\x82\xb5\x18\x02\x18\x04\x82\xd3\xe4\x93\x02&:\x01*\"!/api/v1/passwordless/email/verify\x12\xa5\x04\n" +
-	"\x17ResendPasswordlessEmail\x128.scalekit.v1.auth.passwordless.ResendPasswordlessRequest\x1a7.scalekit.v1.auth.passwordless.SendPasswordlessResponse\"\x96\x03\x92A\xe0\x02\n" +
-	"\x11Passwordless Auth\x12\x19Resend passwordless email\x1abResend a verification email if the user didn't receive it or if the previous code/link has expiredJ\xcb\x01\n" +
+	";\x1a9.scalekit.v1.auth.passwordless.VerifyPasswordLessResponse\x82\xb5\x18\x02\x18\x04\x82\xd3\xe4\x93\x02&:\x01*\"!/api/v1/passwordless/email/verify\x12\xa4\x04\n" +
+	"\x17ResendPasswordlessEmail\x128.scalekit.v1.auth.passwordless.ResendPasswordlessRequest\x1a7.scalekit.v1.auth.passwordless.SendPasswordlessResponse\"\x95\x03\x92A\xdf\x02\n" +
+	"\x10Magic link & OTP\x12\x19Resend passwordless email\x1abResend a verification email if the user didn't receive it or if the previous code/link has expiredJ\xcb\x01\n" +
 	"\x03200\x12\xc3\x01\n" +
 	"\x83\x01Successfully resent the passwordless authentication email. Returns updated authentication request details with new expiration time.\x12;\n" +
-	"9\x1a7.scalekit.v1.auth.passwordless.SendPasswordlessResponse\x82\xb5\x18\x02\x18\x04\x82\xd3\xe4\x93\x02&:\x01*\"!/api/v1/passwordless/email/resend\x1a\xd9\x01\x92A\xd5\x01\n" +
-	"\x11Passwordless Auth\x12\xbf\x01Endpoints for sending and verifying passwordless authentication emails. These APIs allow users to authenticate without passwords by receiving a verification code or magic link in their email.B\x94\x02\n" +
+	"9\x1a7.scalekit.v1.auth.passwordless.SendPasswordlessResponse\x82\xb5\x18\x02\x18\x04\x82\xd3\xe4\x93\x02&:\x01*\"!/api/v1/passwordless/email/resend\x1a\xd8\x01\x92A\xd4\x01\n" +
+	"\x10Magic link & OTP\x12\xbf\x01Endpoints for sending and verifying passwordless authentication emails. These APIs allow users to authenticate without passwords by receiving a verification code or magic link in their email.B\x94\x02\n" +
 	"!com.scalekit.v1.auth.passwordlessB\x11PasswordlessProtoP\x01ZDgithub.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/auth\xa2\x02\x04SVAP\xaa\x02\x1dScalekit.V1.Auth.Passwordless\xca\x02\x1dScalekit\\V1\\Auth\\Passwordless\xe2\x02)Scalekit\\V1\\Auth\\Passwordless\\GPBMetadata\xea\x02 Scalekit::V1::Auth::Passwordlessb\x06proto3"
 
 var (
