@@ -129,21 +129,113 @@ func (MembershipStatus) EnumDescriptor() ([]byte, []int) {
 	return file_scalekit_v1_commons_commons_proto_rawDescGZIP(), []int{1}
 }
 
+type IdentityProviderType int32
+
+const (
+	IdentityProviderType_IDENTITY_PROVIDER_UNSPECIFIED IdentityProviderType = 0
+	IdentityProviderType_OKTA                          IdentityProviderType = 1
+	IdentityProviderType_GOOGLE                        IdentityProviderType = 2
+	IdentityProviderType_MICROSOFT_AD                  IdentityProviderType = 3
+	IdentityProviderType_AUTH0                         IdentityProviderType = 4
+	IdentityProviderType_ONELOGIN                      IdentityProviderType = 5
+	IdentityProviderType_PING_IDENTITY                 IdentityProviderType = 6
+	IdentityProviderType_JUMPCLOUD                     IdentityProviderType = 7
+	IdentityProviderType_CUSTOM                        IdentityProviderType = 8
+	IdentityProviderType_GITHUB                        IdentityProviderType = 9
+	IdentityProviderType_GITLAB                        IdentityProviderType = 10
+	IdentityProviderType_LINKEDIN                      IdentityProviderType = 11
+	IdentityProviderType_SALESFORCE                    IdentityProviderType = 12
+	IdentityProviderType_MICROSOFT                     IdentityProviderType = 13
+	IdentityProviderType_IDP_SIMULATOR                 IdentityProviderType = 14
+	IdentityProviderType_SCALEKIT                      IdentityProviderType = 15
+	IdentityProviderType_ADFS                          IdentityProviderType = 16
+)
+
+// Enum value maps for IdentityProviderType.
+var (
+	IdentityProviderType_name = map[int32]string{
+		0:  "IDENTITY_PROVIDER_UNSPECIFIED",
+		1:  "OKTA",
+		2:  "GOOGLE",
+		3:  "MICROSOFT_AD",
+		4:  "AUTH0",
+		5:  "ONELOGIN",
+		6:  "PING_IDENTITY",
+		7:  "JUMPCLOUD",
+		8:  "CUSTOM",
+		9:  "GITHUB",
+		10: "GITLAB",
+		11: "LINKEDIN",
+		12: "SALESFORCE",
+		13: "MICROSOFT",
+		14: "IDP_SIMULATOR",
+		15: "SCALEKIT",
+		16: "ADFS",
+	}
+	IdentityProviderType_value = map[string]int32{
+		"IDENTITY_PROVIDER_UNSPECIFIED": 0,
+		"OKTA":                          1,
+		"GOOGLE":                        2,
+		"MICROSOFT_AD":                  3,
+		"AUTH0":                         4,
+		"ONELOGIN":                      5,
+		"PING_IDENTITY":                 6,
+		"JUMPCLOUD":                     7,
+		"CUSTOM":                        8,
+		"GITHUB":                        9,
+		"GITLAB":                        10,
+		"LINKEDIN":                      11,
+		"SALESFORCE":                    12,
+		"MICROSOFT":                     13,
+		"IDP_SIMULATOR":                 14,
+		"SCALEKIT":                      15,
+		"ADFS":                          16,
+	}
+)
+
+func (x IdentityProviderType) Enum() *IdentityProviderType {
+	p := new(IdentityProviderType)
+	*p = x
+	return p
+}
+
+func (x IdentityProviderType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (IdentityProviderType) Descriptor() protoreflect.EnumDescriptor {
+	return file_scalekit_v1_commons_commons_proto_enumTypes[2].Descriptor()
+}
+
+func (IdentityProviderType) Type() protoreflect.EnumType {
+	return &file_scalekit_v1_commons_commons_proto_enumTypes[2]
+}
+
+func (x IdentityProviderType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use IdentityProviderType.Descriptor instead.
+func (IdentityProviderType) EnumDescriptor() ([]byte, []int) {
+	return file_scalekit_v1_commons_commons_proto_rawDescGZIP(), []int{2}
+}
+
 type OrganizationMembership struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	OrganizationId   string                 `protobuf:"bytes,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
-	JoinTime         *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=join_time,json=joinTime,proto3" json:"join_time,omitempty"`
-	MembershipStatus MembershipStatus       `protobuf:"varint,3,opt,name=membership_status,json=membershipStatus,proto3,enum=scalekit.v1.commons.MembershipStatus" json:"membership_status,omitempty"`
-	Roles            []*Role                `protobuf:"bytes,4,rep,name=roles,proto3" json:"roles,omitempty"`
-	Name             *string                `protobuf:"bytes,5,opt,name=name,proto3,oneof" json:"name,omitempty"`
-	Metadata         map[string]string      `protobuf:"bytes,7,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	DisplayName      *string                `protobuf:"bytes,9,opt,name=display_name,json=displayName,proto3,oneof" json:"display_name,omitempty"`
-	InviterEmail     *string                `protobuf:"bytes,10,opt,name=inviter_email,json=inviterEmail,proto3,oneof" json:"inviter_email,omitempty"`
-	CreatedAt        *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3,oneof" json:"created_at,omitempty"`
-	AcceptedAt       *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=accepted_at,json=acceptedAt,proto3,oneof" json:"accepted_at,omitempty"`
-	ExpiresAt        *timestamppb.Timestamp `protobuf:"bytes,13,opt,name=expires_at,json=expiresAt,proto3,oneof" json:"expires_at,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	OrganizationId     string                 `protobuf:"bytes,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
+	JoinTime           *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=join_time,json=joinTime,proto3" json:"join_time,omitempty"`
+	MembershipStatus   MembershipStatus       `protobuf:"varint,3,opt,name=membership_status,json=membershipStatus,proto3,enum=scalekit.v1.commons.MembershipStatus" json:"membership_status,omitempty"`
+	Roles              []*Role                `protobuf:"bytes,4,rep,name=roles,proto3" json:"roles,omitempty"`
+	Name               *string                `protobuf:"bytes,5,opt,name=name,proto3,oneof" json:"name,omitempty"`
+	Metadata           map[string]string      `protobuf:"bytes,7,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	DisplayName        *string                `protobuf:"bytes,9,opt,name=display_name,json=displayName,proto3,oneof" json:"display_name,omitempty"`
+	InviterEmail       *string                `protobuf:"bytes,10,opt,name=inviter_email,json=inviterEmail,proto3,oneof" json:"inviter_email,omitempty"`
+	CreatedAt          *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3,oneof" json:"created_at,omitempty"`
+	AcceptedAt         *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=accepted_at,json=acceptedAt,proto3,oneof" json:"accepted_at,omitempty"`
+	ExpiresAt          *timestamppb.Timestamp `protobuf:"bytes,13,opt,name=expires_at,json=expiresAt,proto3,oneof" json:"expires_at,omitempty"`
+	ProvisioningMethod *string                `protobuf:"bytes,14,opt,name=provisioning_method,json=provisioningMethod,proto3,oneof" json:"provisioning_method,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *OrganizationMembership) Reset() {
@@ -253,6 +345,13 @@ func (x *OrganizationMembership) GetExpiresAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *OrganizationMembership) GetProvisioningMethod() string {
+	if x != nil && x.ProvisioningMethod != nil {
+		return *x.ProvisioningMethod
+	}
+	return ""
+}
+
 type Role struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -327,12 +426,13 @@ type UserProfile struct {
 	// Deprecated: Marked as deprecated in scalekit/v1/commons/commons.proto.
 	FirstName string `protobuf:"bytes,21,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
 	// Deprecated: Marked as deprecated in scalekit/v1/commons/commons.proto.
-	LastName            string   `protobuf:"bytes,22,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
-	PreferredUsername   string   `protobuf:"bytes,12,opt,name=preferred_username,json=preferredUsername,proto3" json:"preferred_username,omitempty"`
-	PhoneNumberVerified bool     `protobuf:"varint,13,opt,name=phone_number_verified,json=phoneNumberVerified,proto3" json:"phone_number_verified,omitempty"`
-	Picture             string   `protobuf:"bytes,14,opt,name=picture,proto3" json:"picture,omitempty"`
-	Groups              []string `protobuf:"bytes,15,rep,name=groups,proto3" json:"groups,omitempty"`
-	Gender              string   `protobuf:"bytes,16,opt,name=gender,proto3" json:"gender,omitempty"`
+	LastName            string              `protobuf:"bytes,22,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
+	PreferredUsername   string              `protobuf:"bytes,12,opt,name=preferred_username,json=preferredUsername,proto3" json:"preferred_username,omitempty"`
+	PhoneNumberVerified bool                `protobuf:"varint,13,opt,name=phone_number_verified,json=phoneNumberVerified,proto3" json:"phone_number_verified,omitempty"`
+	Picture             string              `protobuf:"bytes,14,opt,name=picture,proto3" json:"picture,omitempty"`
+	Groups              []string            `protobuf:"bytes,15,rep,name=groups,proto3" json:"groups,omitempty"`
+	Gender              string              `protobuf:"bytes,16,opt,name=gender,proto3" json:"gender,omitempty"`
+	ExternalIdentities  []*ExternalIdentity `protobuf:"bytes,10,rep,name=external_identities,json=externalIdentities,proto3" json:"external_identities,omitempty"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
@@ -481,11 +581,126 @@ func (x *UserProfile) GetGender() string {
 	return ""
 }
 
+func (x *UserProfile) GetExternalIdentities() []*ExternalIdentity {
+	if x != nil {
+		return x.ExternalIdentities
+	}
+	return nil
+}
+
+type ExternalIdentity struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Identifier for this connection.
+	ConnectionId string `protobuf:"bytes,1,opt,name=connection_id,json=connectionId,proto3" json:"connection_id,omitempty"`
+	// Connection name.
+	ConnectionType string `protobuf:"bytes,2,opt,name=connection_type,json=connectionType,proto3" json:"connection_type,omitempty"`
+	// Name of connection, e.g. Google.
+	ConnectionProvider IdentityProviderType `protobuf:"varint,3,opt,name=connection_provider,json=connectionProvider,proto3,enum=scalekit.v1.commons.IdentityProviderType" json:"connection_provider,omitempty"`
+	// Unique identifier of the user for this identity.
+	ConnectionUserId string `protobuf:"bytes,4,opt,name=connection_user_id,json=connectionUserId,proto3" json:"connection_user_id,omitempty"`
+	// Whether this identity is from a social provider (true) or not (false).
+	IsSocial bool `protobuf:"varint,5,opt,name=is_social,json=isSocial,proto3" json:"is_social,omitempty"`
+	// Last successful login time with this IdP for the user.
+	LastLoginTime *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=last_login_time,json=lastLoginTime,proto3" json:"last_login_time,omitempty"`
+	// Creation of this external identity with the IdP for the user.
+	CreatedTime *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_time,json=createdTime,proto3" json:"created_time,omitempty"`
+	// Last time when sync of data happened for this user from external IdP.
+	LastSyncedTime *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=last_synced_time,json=lastSyncedTime,proto3" json:"last_synced_time,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *ExternalIdentity) Reset() {
+	*x = ExternalIdentity{}
+	mi := &file_scalekit_v1_commons_commons_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExternalIdentity) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExternalIdentity) ProtoMessage() {}
+
+func (x *ExternalIdentity) ProtoReflect() protoreflect.Message {
+	mi := &file_scalekit_v1_commons_commons_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExternalIdentity.ProtoReflect.Descriptor instead.
+func (*ExternalIdentity) Descriptor() ([]byte, []int) {
+	return file_scalekit_v1_commons_commons_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ExternalIdentity) GetConnectionId() string {
+	if x != nil {
+		return x.ConnectionId
+	}
+	return ""
+}
+
+func (x *ExternalIdentity) GetConnectionType() string {
+	if x != nil {
+		return x.ConnectionType
+	}
+	return ""
+}
+
+func (x *ExternalIdentity) GetConnectionProvider() IdentityProviderType {
+	if x != nil {
+		return x.ConnectionProvider
+	}
+	return IdentityProviderType_IDENTITY_PROVIDER_UNSPECIFIED
+}
+
+func (x *ExternalIdentity) GetConnectionUserId() string {
+	if x != nil {
+		return x.ConnectionUserId
+	}
+	return ""
+}
+
+func (x *ExternalIdentity) GetIsSocial() bool {
+	if x != nil {
+		return x.IsSocial
+	}
+	return false
+}
+
+func (x *ExternalIdentity) GetLastLoginTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.LastLoginTime
+	}
+	return nil
+}
+
+func (x *ExternalIdentity) GetCreatedTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedTime
+	}
+	return nil
+}
+
+func (x *ExternalIdentity) GetLastSyncedTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.LastSyncedTime
+	}
+	return nil
+}
+
 var File_scalekit_v1_commons_commons_proto protoreflect.FileDescriptor
 
 const file_scalekit_v1_commons_commons_proto_rawDesc = "" +
 	"\n" +
-	"!scalekit/v1/commons/commons.proto\x12\x13scalekit.v1.commons\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\"\x97\r\n" +
+	"!scalekit/v1/commons/commons.proto\x12\x13scalekit.v1.commons\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\"\xda\x10\n" +
 	"\x16OrganizationMembership\x12\x86\x01\n" +
 	"\x0forganization_id\x18\x01 \x01(\tB]\x92AZ2@Unique identifier for the organization. Immutable and read-only.J\x16\"org_1234abcd5678efgh\"R\x0eorganizationId\x12\x89\x01\n" +
 	"\tjoin_time\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampBP\x92AM2KTimestamp when the membership was created. Automatically set by the server.R\bjoinTime\x12R\n" +
@@ -502,7 +717,14 @@ const file_scalekit_v1_commons_commons_proto_rawDesc = "" +
 	"\vaccepted_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampB5\x92A220Timestamp when the user accepted the invitation.H\x04R\n" +
 	"acceptedAt\x88\x01\x01\x12k\n" +
 	"\n" +
-	"expires_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampB+\x92A(2&Timestamp when the invitation expired.H\x05R\texpiresAt\x88\x01\x01\x1a;\n" +
+	"expires_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampB+\x92A(2&Timestamp when the invitation expired.H\x05R\texpiresAt\x88\x01\x01\x12\xa8\x03\n" +
+	"\x13provisioning_method\x18\x0e \x01(\tB\xf1\x02\x92A\xed\x022\xea\x02How the user was provisioned. \n" +
+	"Possible values: \n" +
+	"- `jit_using_sso` (Just-in-time provisioning during SSO login)\n" +
+	"- `allowed_email_domain` (User joined via allowed email domain matching)\n" +
+	"- `org_creator` (User created the organization)\n" +
+	"- `direct_provision` (User was directly provisioned via API or SCIM)\n" +
+	"- `invitation` (User was invited and accepted an invitation)H\x06R\x12provisioningMethod\x88\x01\x01\x1a;\n" +
 	"\rMetadataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\a\n" +
@@ -511,13 +733,14 @@ const file_scalekit_v1_commons_commons_proto_rawDesc = "" +
 	"\x0e_inviter_emailB\r\n" +
 	"\v_created_atB\x0e\n" +
 	"\f_accepted_atB\r\n" +
-	"\v_expires_at\"\xdf\x02\n" +
+	"\v_expires_atB\x16\n" +
+	"\x14_provisioning_method\"\xdf\x02\n" +
 	"\x04Role\x129\n" +
 	"\x02id\x18\x01 \x01(\tB)\x92A#2\aRole IDJ\x18\"role_79643236410327240\"\xe0A\x03R\x02id\x12\xc5\x01\n" +
 	"\x04name\x18\x02 \x01(\tB\xb0\x01\x92A\xac\x012\x9d\x01Attribute name/identifier for the role used in system operations and API calls. This should be a machine-readable identifier that follows naming conventions.J\n" +
 	"\"team_dev\"R\x04name\x12T\n" +
 	"\fdisplay_name\x18\x03 \x01(\tB1\x92A.2 Human-readable name for the roleJ\n" +
-	"\"Dev Team\"R\vdisplayName\"\xbd/\n" +
+	"\"Dev Team\"R\vdisplayName\"\xe70\n" +
 	"\vUserProfile\x12\x89\x01\n" +
 	"\x02id\x18\x01 \x01(\tBy\x92As2QUnique system-generated identifier for the user profile. Immutable and read-only.J\x1e\"usr_profile_1234abcd5678efgh\"\xe0A\x03R\x02id\x12\xeb\x02\n" +
 	"\n" +
@@ -537,13 +760,25 @@ const file_scalekit_v1_commons_commons_proto_rawDesc = "" +
 	"\x15phone_number_verified\x18\r \x01(\bBj\x92Ad2\\Indicates if the user's phone number has been verified. Automatically updated by the system.J\x04true\xe0A\x03R\x13phoneNumberVerified\x12\xe4\x03\n" +
 	"\apicture\x18\x0e \x01(\tB\xc9\x03\x92A\xc5\x032\xa0\x03The URL to the user's profile picture or avatar image. This field stores the location of the user's profile photo that appears in user interfaces, directory listings, and collaborative features throughout the system. The URL should point to a publicly accessible image file. Supported formats typically include JPEG, PNG, and GIF. This image is used for visual identification and personalization across the platform.J \"https://example.com/avatar.jpg\"R\apicture\x12\xc7\x03\n" +
 	"\x06groups\x18\x0f \x03(\tB\xae\x03\x92A\xaa\x032\x8f\x03The list of group names the user belongs to within the organization. This field stores the user's group memberships for role-based access control, team assignments, and organizational structure. Groups are typically used for permission management, collaborative access, and organizational hierarchy. Each group name represents a distinct organizational unit or team that the user is associated with.J\x16[\"admin\", \"developer\"]R\x06groups\x12\x9f\x03\n" +
-	"\x06gender\x18\x10 \x01(\tB\x86\x03\x92A\x82\x032\xf7\x02The user's gender identity information. This field stores the user's gender identity for personalization, compliance reporting, or organizational analytics purposes. This field supports any string value to accommodate diverse gender identities and should be handled with appropriate privacy considerations according to your organization's policies and applicable regulations.J\x06\"male\"R\x06gender\x1a;\n" +
+	"\x06gender\x18\x10 \x01(\tB\x86\x03\x92A\x82\x032\xf7\x02The user's gender identity information. This field stores the user's gender identity for personalization, compliance reporting, or organizational analytics purposes. This field supports any string value to accommodate diverse gender identities and should be handled with appropriate privacy considerations according to your organization's policies and applicable regulations.J\x06\"male\"R\x06gender\x12\xa7\x01\n" +
+	"\x13external_identities\x18\n" +
+	" \x03(\v2%.scalekit.v1.commons.ExternalIdentityBO\x92AI2GList of external identity connections associated with the user profile.\xe0A\x03R\x12externalIdentities\x1a;\n" +
 	"\rMetadataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1aC\n" +
 	"\x15CustomAttributesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01*9\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xa4\n" +
+	"\n" +
+	"\x10ExternalIdentity\x12\x96\x01\n" +
+	"\rconnection_id\x18\x01 \x01(\tBq\x92Ak2PUnique identifier for the external identity connection. Immutable and read-only.J\x17\"conn_1234abcd5678efgh\"\xe0A\x03R\fconnectionId\x12c\n" +
+	"\x0fconnection_type\x18\x02 \x01(\tB:\x92A42)Name of the external identity connection.J\a\"OAUTH\"\xe0A\x03R\x0econnectionType\x12\x8c\x01\n" +
+	"\x13connection_provider\x18\x03 \x01(\x0e2).scalekit.v1.commons.IdentityProviderTypeB0\x92A*2\x1eType of the identity provider.J\b\"GOOGLE\"\xe0A\x03R\x12connectionProvider\x12\xa9\x01\n" +
+	"\x12connection_user_id\x18\x04 \x01(\tB{\x92Au2aUnique identifier for the user in the external identity provider system. Immutable and read-only.J\x10\"ext_user_12345\"\xe0A\x03R\x10connectionUserId\x12\x9b\x01\n" +
+	"\tis_social\x18\x05 \x01(\bB~\x92Ax2pIndicates if the identity provider is a social provider (true) or enterprise/custom provider (false). Read-only.J\x04true\xe0A\x03R\bisSocial\x12\xc3\x01\n" +
+	"\x0flast_login_time\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampB\x7f\x92Ay2wTimestamp of the user's last successful login via this external identity provider. Automatically updated by the system.\xe0A\x03R\rlastLoginTime\x12\xa3\x01\n" +
+	"\fcreated_time\x18\a \x01(\v2\x1a.google.protobuf.TimestampBd\x92A^2\\Timestamp when this external identity connection was first created. Immutable and read-only.\xe0A\x03R\vcreatedTime\x12\xcc\x01\n" +
+	"\x10last_synced_time\x18\b \x01(\v2\x1a.google.protobuf.TimestampB\x85\x01\x92A\x7f2}Timestamp of the last data synchronization for this external identity from the provider. Automatically updated by the system.\xe0A\x03R\x0elastSyncedTime*9\n" +
 	"\n" +
 	"RegionCode\x12\x1b\n" +
 	"\x17REGION_CODE_UNSPECIFIED\x10\x00\x12\x06\n" +
@@ -555,7 +790,31 @@ const file_scalekit_v1_commons_commons_proto_rawDesc = "" +
 	"\x06ACTIVE\x10\x01\x12\f\n" +
 	"\bINACTIVE\x10\x02\x12\x12\n" +
 	"\x0ePENDING_INVITE\x10\x03\x12\x12\n" +
-	"\x0eINVITE_EXPIRED\x10\x04B\xde\x01\n" +
+	"\x0eINVITE_EXPIRED\x10\x04*\x98\x02\n" +
+	"\x14IdentityProviderType\x12!\n" +
+	"\x1dIDENTITY_PROVIDER_UNSPECIFIED\x10\x00\x12\b\n" +
+	"\x04OKTA\x10\x01\x12\n" +
+	"\n" +
+	"\x06GOOGLE\x10\x02\x12\x10\n" +
+	"\fMICROSOFT_AD\x10\x03\x12\t\n" +
+	"\x05AUTH0\x10\x04\x12\f\n" +
+	"\bONELOGIN\x10\x05\x12\x11\n" +
+	"\rPING_IDENTITY\x10\x06\x12\r\n" +
+	"\tJUMPCLOUD\x10\a\x12\n" +
+	"\n" +
+	"\x06CUSTOM\x10\b\x12\n" +
+	"\n" +
+	"\x06GITHUB\x10\t\x12\n" +
+	"\n" +
+	"\x06GITLAB\x10\n" +
+	"\x12\f\n" +
+	"\bLINKEDIN\x10\v\x12\x0e\n" +
+	"\n" +
+	"SALESFORCE\x10\f\x12\r\n" +
+	"\tMICROSOFT\x10\r\x12\x11\n" +
+	"\rIDP_SIMULATOR\x10\x0e\x12\f\n" +
+	"\bSCALEKIT\x10\x0f\x12\b\n" +
+	"\x04ADFS\x10\x10B\xde\x01\n" +
 	"\x17com.scalekit.v1.commonsB\fCommonsProtoP\x01ZGgithub.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/commons\xa2\x02\x03SVC\xaa\x02\x13Scalekit.V1.Commons\xca\x02\x13Scalekit\\V1\\Commons\xe2\x02\x1fScalekit\\V1\\Commons\\GPBMetadata\xea\x02\x15Scalekit::V1::Commonsb\x06proto3"
 
 var (
@@ -570,34 +829,41 @@ func file_scalekit_v1_commons_commons_proto_rawDescGZIP() []byte {
 	return file_scalekit_v1_commons_commons_proto_rawDescData
 }
 
-var file_scalekit_v1_commons_commons_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_scalekit_v1_commons_commons_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_scalekit_v1_commons_commons_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_scalekit_v1_commons_commons_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_scalekit_v1_commons_commons_proto_goTypes = []any{
 	(RegionCode)(0),                // 0: scalekit.v1.commons.RegionCode
 	(MembershipStatus)(0),          // 1: scalekit.v1.commons.MembershipStatus
-	(*OrganizationMembership)(nil), // 2: scalekit.v1.commons.OrganizationMembership
-	(*Role)(nil),                   // 3: scalekit.v1.commons.Role
-	(*UserProfile)(nil),            // 4: scalekit.v1.commons.UserProfile
-	nil,                            // 5: scalekit.v1.commons.OrganizationMembership.MetadataEntry
-	nil,                            // 6: scalekit.v1.commons.UserProfile.MetadataEntry
-	nil,                            // 7: scalekit.v1.commons.UserProfile.CustomAttributesEntry
-	(*timestamppb.Timestamp)(nil),  // 8: google.protobuf.Timestamp
+	(IdentityProviderType)(0),      // 2: scalekit.v1.commons.IdentityProviderType
+	(*OrganizationMembership)(nil), // 3: scalekit.v1.commons.OrganizationMembership
+	(*Role)(nil),                   // 4: scalekit.v1.commons.Role
+	(*UserProfile)(nil),            // 5: scalekit.v1.commons.UserProfile
+	(*ExternalIdentity)(nil),       // 6: scalekit.v1.commons.ExternalIdentity
+	nil,                            // 7: scalekit.v1.commons.OrganizationMembership.MetadataEntry
+	nil,                            // 8: scalekit.v1.commons.UserProfile.MetadataEntry
+	nil,                            // 9: scalekit.v1.commons.UserProfile.CustomAttributesEntry
+	(*timestamppb.Timestamp)(nil),  // 10: google.protobuf.Timestamp
 }
 var file_scalekit_v1_commons_commons_proto_depIdxs = []int32{
-	8, // 0: scalekit.v1.commons.OrganizationMembership.join_time:type_name -> google.protobuf.Timestamp
-	1, // 1: scalekit.v1.commons.OrganizationMembership.membership_status:type_name -> scalekit.v1.commons.MembershipStatus
-	3, // 2: scalekit.v1.commons.OrganizationMembership.roles:type_name -> scalekit.v1.commons.Role
-	5, // 3: scalekit.v1.commons.OrganizationMembership.metadata:type_name -> scalekit.v1.commons.OrganizationMembership.MetadataEntry
-	8, // 4: scalekit.v1.commons.OrganizationMembership.created_at:type_name -> google.protobuf.Timestamp
-	8, // 5: scalekit.v1.commons.OrganizationMembership.accepted_at:type_name -> google.protobuf.Timestamp
-	8, // 6: scalekit.v1.commons.OrganizationMembership.expires_at:type_name -> google.protobuf.Timestamp
-	6, // 7: scalekit.v1.commons.UserProfile.metadata:type_name -> scalekit.v1.commons.UserProfile.MetadataEntry
-	7, // 8: scalekit.v1.commons.UserProfile.custom_attributes:type_name -> scalekit.v1.commons.UserProfile.CustomAttributesEntry
-	9, // [9:9] is the sub-list for method output_type
-	9, // [9:9] is the sub-list for method input_type
-	9, // [9:9] is the sub-list for extension type_name
-	9, // [9:9] is the sub-list for extension extendee
-	0, // [0:9] is the sub-list for field type_name
+	10, // 0: scalekit.v1.commons.OrganizationMembership.join_time:type_name -> google.protobuf.Timestamp
+	1,  // 1: scalekit.v1.commons.OrganizationMembership.membership_status:type_name -> scalekit.v1.commons.MembershipStatus
+	4,  // 2: scalekit.v1.commons.OrganizationMembership.roles:type_name -> scalekit.v1.commons.Role
+	7,  // 3: scalekit.v1.commons.OrganizationMembership.metadata:type_name -> scalekit.v1.commons.OrganizationMembership.MetadataEntry
+	10, // 4: scalekit.v1.commons.OrganizationMembership.created_at:type_name -> google.protobuf.Timestamp
+	10, // 5: scalekit.v1.commons.OrganizationMembership.accepted_at:type_name -> google.protobuf.Timestamp
+	10, // 6: scalekit.v1.commons.OrganizationMembership.expires_at:type_name -> google.protobuf.Timestamp
+	8,  // 7: scalekit.v1.commons.UserProfile.metadata:type_name -> scalekit.v1.commons.UserProfile.MetadataEntry
+	9,  // 8: scalekit.v1.commons.UserProfile.custom_attributes:type_name -> scalekit.v1.commons.UserProfile.CustomAttributesEntry
+	6,  // 9: scalekit.v1.commons.UserProfile.external_identities:type_name -> scalekit.v1.commons.ExternalIdentity
+	2,  // 10: scalekit.v1.commons.ExternalIdentity.connection_provider:type_name -> scalekit.v1.commons.IdentityProviderType
+	10, // 11: scalekit.v1.commons.ExternalIdentity.last_login_time:type_name -> google.protobuf.Timestamp
+	10, // 12: scalekit.v1.commons.ExternalIdentity.created_time:type_name -> google.protobuf.Timestamp
+	10, // 13: scalekit.v1.commons.ExternalIdentity.last_synced_time:type_name -> google.protobuf.Timestamp
+	14, // [14:14] is the sub-list for method output_type
+	14, // [14:14] is the sub-list for method input_type
+	14, // [14:14] is the sub-list for extension type_name
+	14, // [14:14] is the sub-list for extension extendee
+	0,  // [0:14] is the sub-list for field type_name
 }
 
 func init() { file_scalekit_v1_commons_commons_proto_init() }
@@ -611,8 +877,8 @@ func file_scalekit_v1_commons_commons_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_scalekit_v1_commons_commons_proto_rawDesc), len(file_scalekit_v1_commons_commons_proto_rawDesc)),
-			NumEnums:      2,
-			NumMessages:   6,
+			NumEnums:      3,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

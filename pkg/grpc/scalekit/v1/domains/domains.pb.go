@@ -1236,11 +1236,11 @@ const file_scalekit_v1_domains_domains_proto_rawDesc = "" +
 	"identitiesB\x10\n" +
 	"\x0e_connection_id\"\xb3\x01\n" +
 	"\x14CreateDomainResponse\x12\x9a\x01\n" +
-	"\x06domain\x18\x01 \x01(\v2\x1b.scalekit.v1.domains.DomainBe\x92Ab2`The newly created domain object with all configuration details and system-generated identifiers.R\x06domain\"\xc0\x04\n" +
+	"\x06domain\x18\x01 \x01(\v2\x1b.scalekit.v1.domains.DomainBe\x92Ab2`The newly created domain object with all configuration details and system-generated identifiers.R\x06domain\"\xbf\x04\n" +
 	"\fCreateDomain\x12\xf2\x01\n" +
 	"\x06domain\x18\x01 \x01(\tB\xd9\x01\x92A\xc8\x012\xaf\x01The domain name to be configured. Must be a valid business domain you control. Public disposable domains (gmail.com, outlook.com, etc.) are automatically blocked for security.J\x14\"customerdomain.com\"\xbaH\n" +
-	"\xc8\x01\x01r\x05\x10\x04\x18\xff\x01R\x06domain\x12\xba\x02\n" +
-	"\vdomain_type\x18\x02 \x01(\x0e2\x1f.scalekit.v1.domains.DomainTypeB\xf7\x01\x92A\xf3\x012\xd8\x01The type of domain configuration. ALLOWED_EMAIL_DOMAIN enables automatic organization suggestions for users with matching email domains during sign-in/sign-up. ORGANIZATION_DOMAIN is for primary organization domains.J\x16\"ALLOWED_EMAIL_DOMAIN\"R\n" +
+	"\xc8\x01\x01r\x05\x10\x04\x18\xff\x01R\x06domain\x12\xb9\x02\n" +
+	"\vdomain_type\x18\x02 \x01(\x0e2\x1f.scalekit.v1.domains.DomainTypeB\xf6\x01\x92A\xf2\x012\xd8\x01The type of domain configuration. ALLOWED_EMAIL_DOMAIN enables automatic organization suggestions for users with matching email domains during sign-in/sign-up. ORGANIZATION_DOMAIN is for primary organization domains.J\x15\"ORGANIZATION_DOMAIN\"R\n" +
 	"domainType\"\x84\a\n" +
 	"\x13UpdateDomainRequest\x12\xcb\x01\n" +
 	"\x0forganization_id\x18\x01 \x01(\tB\x9f\x01\x92A\x92\x012wScalekit-generated unique identifier for the organization. Use either this or external_id to identify the organization.J\x17\"org_81667076086825451\"\xbaH\x06r\x04\x10\x01\x18 H\x00R\x0eorganizationId\x12\xcd\x01\n" +
@@ -1309,7 +1309,7 @@ const file_scalekit_v1_domains_domains_proto_rawDesc = "" +
 	"\x1bListAuthorizedDomainRequest\x12\x81\x01\n" +
 	"\x06origin\x18\x01 \x01(\tBi\x92Af2OThe origin URL to check for authorized domains (e.g., https://app.example.com).J\x13\"https://myapp.com\"R\x06origin\"\xb0\x01\n" +
 	"\x1cListAuthorizedDomainResponse\x12\x8f\x01\n" +
-	"\adomains\x18\x01 \x03(\tBu\x92Ar2LArray of domain names that are authorized for use with the specified origin.J\"[\"example.com\", \"app.example.com\"]R\adomains\"\xb7\x0e\n" +
+	"\adomains\x18\x01 \x03(\tBu\x92Ar2LArray of domain names that are authorized for use with the specified origin.J\"[\"example.com\", \"app.example.com\"]R\adomains\"\xb6\x0e\n" +
 	"\x06Domain\x12j\n" +
 	"\x02id\x18\x01 \x01(\tBZ\x92AW2<Scalekit-generated unique identifier for this domain record.J\x17\"dom_88351643129225005\"R\x02id\x12\xb4\x01\n" +
 	"\x06domain\x18\x02 \x01(\tB\x9b\x01\x92A\x97\x012\x7fThe business domain name that was configured for allowed email domain functionality (e.g., company.com, subdomain.company.com).J\x14\"customerdomain.com\"R\x06domain\x12x\n" +
@@ -1322,8 +1322,8 @@ const file_scalekit_v1_domains_domains_proto_rawDesc = "" +
 	"createTime\x12\x8f\x01\n" +
 	"\vupdate_time\x18\n" +
 	" \x01(\v2\x1a.google.protobuf.TimestampBR\x92AO2+Timestamp when the domain was last updated.J \"2025-09-01T12:14:43.110455169Z\"R\n" +
-	"updateTime\x12\xba\x02\n" +
-	"\vdomain_type\x18\f \x01(\x0e2\x1f.scalekit.v1.domains.DomainTypeB\xf7\x01\x92A\xf3\x012\xd8\x01The type of domain configuration. ALLOWED_EMAIL_DOMAIN enables automatic organization suggestions for users with matching email domains during sign-in/sign-up. ORGANIZATION_DOMAIN is for primary organization domains.J\x16\"ALLOWED_EMAIL_DOMAIN\"R\n" +
+	"updateTime\x12\xb9\x02\n" +
+	"\vdomain_type\x18\f \x01(\x0e2\x1f.scalekit.v1.domains.DomainTypeB\xf6\x01\x92A\xf2\x012\xd8\x01The type of domain configuration. ALLOWED_EMAIL_DOMAIN enables automatic organization suggestions for users with matching email domains during sign-in/sign-up. ORGANIZATION_DOMAIN is for primary organization domains.J\x15\"ORGANIZATION_DOMAIN\"R\n" +
 	"domainTypeJ\x04\b\x05\x10\x06J\x04\b\v\x10\f*s\n" +
 	"\x12VerificationStatus\x12#\n" +
 	"\x1fVERIFICATION_STATUS_UNSPECIFIED\x10\x00\x12\v\n" +

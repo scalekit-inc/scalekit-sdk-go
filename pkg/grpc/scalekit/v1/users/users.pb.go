@@ -40,7 +40,7 @@ type User struct {
 	Memberships   []*commons.OrganizationMembership `protobuf:"bytes,7,rep,name=memberships,proto3" json:"memberships,omitempty"`
 	UserProfile   *commons.UserProfile              `protobuf:"bytes,8,opt,name=user_profile,json=userProfile,proto3" json:"user_profile,omitempty"`
 	Metadata      map[string]string                 `protobuf:"bytes,9,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	LastLogin     *timestamppb.Timestamp            `protobuf:"bytes,10,opt,name=last_login,json=lastLogin,proto3" json:"last_login,omitempty"`
+	LastLoginTime *timestamppb.Timestamp            `protobuf:"bytes,10,opt,name=last_login_time,json=lastLoginTime,proto3" json:"last_login_time,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -138,9 +138,9 @@ func (x *User) GetMetadata() map[string]string {
 	return nil
 }
 
-func (x *User) GetLastLogin() *timestamppb.Timestamp {
+func (x *User) GetLastLoginTime() *timestamppb.Timestamp {
 	if x != nil {
-		return x.LastLogin
+		return x.LastLoginTime
 	}
 	return nil
 }
@@ -2707,7 +2707,7 @@ var File_scalekit_v1_users_users_proto protoreflect.FileDescriptor
 
 const file_scalekit_v1_users_users_proto_rawDesc = "" +
 	"\n" +
-	"\x1dscalekit/v1/users/users.proto\x12\x11scalekit.v1.users\x1a\x1bbuf/validate/validate.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1bgoogle/api/visibility.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\x1a!scalekit/v1/commons/commons.proto\x1a!scalekit/v1/options/options.proto\"\xf4\r\n" +
+	"\x1dscalekit/v1/users/users.proto\x12\x11scalekit.v1.users\x1a\x1bbuf/validate/validate.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x1bgoogle/api/visibility.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\x1a!scalekit/v1/commons/commons.proto\x1a!scalekit/v1/options/options.proto\"\xf1\r\n" +
 	"\x04User\x12u\n" +
 	"\x02id\x18\x01 \x01(\tBe\x92Ab2HUnique system-generated identifier for the user. Immutable once created.J\x16\"usr_1234abcd5678efgh\"R\x02id\x12\xaf\x01\n" +
 	"\x0eenvironment_id\x18\x02 \x01(\tB\x87\x01\x92Ar2XIdentifier of the environment where the user was created. System-assigned and read-only.J\x16\"env_9876zyxw5432vuts\"\xe0A\x03\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEWR\renvironmentId\x12\x9c\x01\n" +
@@ -2720,10 +2720,9 @@ const file_scalekit_v1_users_users_proto_rawDesc = "" +
 	"externalId\x88\x01\x01\x12\xa9\x01\n" +
 	"\vmemberships\x18\a \x03(\v2+.scalekit.v1.commons.OrganizationMembershipBZ\x92AW2UList of organization memberships. Automatically populated based on group assignments.R\vmemberships\x12\x9c\x01\n" +
 	"\fuser_profile\x18\b \x01(\v2 .scalekit.v1.commons.UserProfileBW\x92AT2RUser's personal information including name, address, and other profile attributes.R\vuserProfile\x12\x80\x02\n" +
-	"\bmetadata\x18\t \x03(\v2%.scalekit.v1.users.User.MetadataEntryB\xbc\x01\x92A\x9f\x012dCustom key-value pairs for storing additional user context. Keys (3-25 chars), values (1-256 chars).J7{\"department\": \"engineering\", \"location\": \"nyc-office\"}\xbaH\x16\x9a\x01\x13\x10\x14\"\x06r\x04\x10\x03\x18\x19*\ar\x05\x10\x01\x18\x80\x02R\bmetadata\x12\xa4\x01\n" +
-	"\n" +
-	"last_login\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampBi\x92AW2UTimestamp of the user's most recent successful authentication. Updated automatically.\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEWR\tlastLogin\x1a;\n" +
+	"\bmetadata\x18\t \x03(\v2%.scalekit.v1.users.User.MetadataEntryB\xbc\x01\x92A\x9f\x012dCustom key-value pairs for storing additional user context. Keys (3-25 chars), values (1-256 chars).J7{\"department\": \"engineering\", \"location\": \"nyc-office\"}\xbaH\x16\x9a\x01\x13\x10\x14\"\x06r\x04\x10\x03\x18\x19*\ar\x05\x10\x01\x18\x80\x02R\bmetadata\x12\xa1\x01\n" +
+	"\x0flast_login_time\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampB]\x92AW2UTimestamp of the user's most recent successful authentication. Updated automatically.\xe0A\x03R\rlastLoginTime\x1a;\n" +
 	"\rMetadataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\x0e\n" +
@@ -3000,54 +2999,18 @@ const file_scalekit_v1_users_users_proto_rawDesc = "" +
 	"\vdescription\x18\x03 \x01(\tBS\x92AP2)Description of what the permission allowsJ#\"Allows creating new user accounts\"R\vdescription\x12g\n" +
 	"\x04tags\x18\x04 \x03(\tBS\x92AA2!Tags for categorizing permissionsJ\x1c[\"user-management\", \"admin\"]\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEWR\x04tags\"\x8f\x01\n" +
 	"\x1bListUserPermissionsResponse\x12p\n" +
-	"\vpermissions\x18\x01 \x03(\v2\x1d.scalekit.v1.users.PermissionB/\x92A,2*List of permissions the user has access toR\vpermissions2\x96\x97\x01\n" +
+	"\vpermissions\x18\x01 \x03(\v2\x1d.scalekit.v1.users.PermissionB/\x92A,2*List of permissions the user has access toR\vpermissions2\x89U\n" +
 	"\vUserService\x12\xb8\x03\n" +
 	"\aGetUser\x12!.scalekit.v1.users.GetUserRequest\x1a\".scalekit.v1.users.GetUserResponse\"\xe5\x02\x92A\xc1\x02\n" +
 	"\x05Users\x12\bGet user\x1a\x8e\x01Retrieves all details for a user by system-generated user ID or external ID. The response includes organization memberships and user metadata.J\x9c\x01\n" +
 	"\x03200\x12\x94\x01\n" +
 	"jUser details retrieved successfully. Returns full user object with system-generated fields and timestamps.\x12&\n" +
-	"$\x1a\".scalekit.v1.users.GetUserResponse\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02\x14\x12\x12/api/v1/users/{id}\x12\xba\t\n" +
-	"\tListUsers\x12#.scalekit.v1.users.ListUsersRequest\x1a$.scalekit.v1.users.ListUsersResponse\"\xe1\b\x92A\xc2\b\n" +
+	"$\x1a\".scalekit.v1.users.GetUserResponse\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02\x14\x12\x12/api/v1/users/{id}\x12\xa0\x04\n" +
+	"\tListUsers\x12#.scalekit.v1.users.ListUsersRequest\x1a$.scalekit.v1.users.ListUsersResponse\"\xc7\x03\x92A\xa8\x03\n" +
 	"\x05Users\x12\x1dList all users in environment\x1a\xbc\x02Retrieves a paginated list of all users across your entire environment. Use this endpoint to view all users regardless of their organization memberships. This is useful for administrative purposes, user audits, or when you need to see all users in your Scalekit environment. Supports pagination for large user bases.JA\n" +
 	"\x03200\x12:\n" +
 	"\x0eList of users.\x12(\n" +
-	"&\x1a$.scalekit.v1.users.ListUsersResponsej\x97\x05\n" +
-	"\rx-codeSamples\x12\x85\x052\x82\x05\n" +
-	"}*{\n" +
-	"\x16\n" +
-	"\x05label\x12\r\x1a\vNode.js SDK\n" +
-	"\x14\n" +
-	"\x04lang\x12\f\x1a\n" +
-	"javascript\n" +
-	"K\n" +
-	"\x06source\x12A\x1a?const response = await sc.user.listUsers(\n" +
-	"  { pageSize: 100 });\n" +
-	"\xac\x01*\xa9\x01\n" +
-	"\x15\n" +
-	"\x05label\x12\f\x1a\n" +
-	"Python SDK\n" +
-	"\x10\n" +
-	"\x04lang\x12\b\x1a\x06python\n" +
-	"~\n" +
-	"\x06source\x12t\x1ar# pass empty org to fetch all users in environment\n" +
-	"resp,_ = sc.users.list_users(organization_id=\"\", page_size=100)\n" +
-	"\x91\x01*\x8e\x01\n" +
-	"\x11\n" +
-	"\x05label\x12\b\x1a\x06Go SDK\n" +
-	"\f\n" +
-	"\x04lang\x12\x04\x1a\x02go\n" +
-	"k\n" +
-	"\x06source\x12a\x1a_all, err := sc.User().ListOrganizationUsers(ctx, \"\", &scalekit.ListUsersOptions{PageSize: 100})\n" +
-	"\xbd\x01*\xba\x01\n" +
-	"\x13\n" +
-	"\x05label\x12\n" +
-	"\x1a\bJava SDK\n" +
-	"\x0e\n" +
-	"\x04lang\x12\x06\x1a\x04java\n" +
-	"\x92\x01\n" +
-	"\x06source\x12\x87\x01\x1a\x84\x01ListUsersRequest lur = ListUsersRequest.\n" +
-	"  newBuilder().setPageSize(100).build();\n" +
-	"ListUsersResponse allUsers = users.listUsers(lur);\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02\x0f\x12\r/api/v1/users\x12\xcb\x03\n" +
+	"&\x1a$.scalekit.v1.users.ListUsersResponse\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02\x0f\x12\r/api/v1/users\x12\xcb\x03\n" +
 	"\vSearchUsers\x12%.scalekit.v1.users.SearchUsersRequest\x1a&.scalekit.v1.users.SearchUsersResponse\"\xec\x02\x92A\xb7\x02\n" +
 	"\x05Users\x12\fSearch users\x1a\x85\x01Searches for users in the environment by email, user ID, or external ID. Returns all users that match the query. Supports pagination.J\x97\x01\n" +
 	"\x03200\x12\x8f\x01\n" +
@@ -3057,405 +3020,44 @@ const file_scalekit_v1_users_users_proto_rawDesc = "" +
 	"\x05Users\x12\x19Search organization users\x1a\xa5\x01Searches for users within a specific organization by email, user ID, or external ID. Returns all users in the organization that match the query. Supports pagination.J\xbb\x01\n" +
 	"\x03200\x12\xb3\x01\n" +
 	"yReturns a list of matching users within the organization and a page token for pagination if there are additional results.\x126\n" +
-	"4\x1a2.scalekit.v1.users.SearchOrganizationUsersResponse\x82\xb5\x18\x02\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x026\x124/api/v1/organizations/{organization_id}/users:search\x12\xd8\x11\n" +
+	"4\x1a2.scalekit.v1.users.SearchOrganizationUsersResponse\x82\xb5\x18\x02\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x026\x124/api/v1/organizations/{organization_id}/users:search\x12\x96\x05\n" +
 	"\n" +
-	"UpdateUser\x12$.scalekit.v1.users.UpdateUserRequest\x1a%.scalekit.v1.users.UpdateUserResponse\"\xfc\x10\x92A\xd2\x10\n" +
+	"UpdateUser\x12$.scalekit.v1.users.UpdateUserRequest\x1a%.scalekit.v1.users.UpdateUserResponse\"\xba\x04\x92A\x90\x04\n" +
 	"\x05Users\x12\x17Update user information\x1a\xe1\x02Modifies user account information including profile details, metadata, and external ID. Use this endpoint to update a user's personal information, contact details, or custom metadata. You can update the user's profile, phone number, and metadata fields. Note that fields like user ID, email address, environment ID, and creation time cannot be modified.J\x89\x01\n" +
 	"\x03200\x12\x81\x01\n" +
 	"TUser updated successfully. Returns the modified user object with updated timestamps.\x12)\n" +
-	"'\x1a%.scalekit.v1.users.UpdateUserResponsej\xbf\f\n" +
-	"\rx-codeSamples\x12\xad\f2\xaa\f\n" +
-	"\xd1\x01*\xce\x01\n" +
-	"\x16\n" +
-	"\x05label\x12\r\x1a\vNode.js SDK\n" +
-	"\x14\n" +
-	"\x04lang\x12\f\x1a\n" +
-	"javascript\n" +
-	"\x9d\x01\n" +
-	"\x06source\x12\x92\x01\x1a\x8f\x01await sc.user.updateUser(\"usr_123\", {\n" +
-	"\tuserProfile: {\n" +
-	"\t\tfirstName: \"John\",\n" +
-	"\t\tlastName: \"Smith\",\n" +
-	"\t},\n" +
-	"\tmetadata: {\n" +
-	"\t\tdepartment: \"sales\",\n" +
-	"\t},\n" +
-	"});\n" +
-	"\xe0\x04*\xdd\x04\n" +
-	"\x15\n" +
-	"\x05label\x12\f\x1a\n" +
-	"Python SDK\n" +
-	"\x10\n" +
-	"\x04lang\x12\b\x1a\x06python\n" +
-	"\xb1\x04\n" +
-	"\x06source\x12\xa6\x04\x1a\xa3\x04import os\n" +
-	"from scalekit import ScalekitClient\n" +
-	"from scalekit.v1.users.users_pb2 import UpdateUser\n" +
-	"from scalekit.v1.commons.\n" +
-	"  commons_pb2 import UserProfile\n" +
-	"sc = ScalekitClient(\n" +
-	"    env_url=os.getenv(\"SCALEKIT_ENV_URL\"),\n" +
-	"    client_id=os.getenv(\"SCALEKIT_CLIENT_ID\"),\n" +
-	"    client_secret=os.getenv(\"SCALEKIT_CLIENT_SECRET\"),\n" +
-	")\n" +
-	"update_user = UpdateUser(\n" +
-	"    user_profile=UserProfile(\n" +
-	"        first_name=\"John\",\n" +
-	"        last_name=\"Smith\"\n" +
-	"    ),\n" +
-	"    metadata={\"department\": \"sales\"}\n" +
-	")\n" +
-	"sc.users.update_user(organization_id=\"org_123\", \n" +
-	"  user=update_user)\n" +
-	"\xae\x02*\xab\x02\n" +
-	"\x11\n" +
-	"\x05label\x12\b\x1a\x06Go SDK\n" +
-	"\f\n" +
-	"\x04lang\x12\x04\x1a\x02go\n" +
-	"\x87\x02\n" +
-	"\x06source\x12\xfc\x01\x1a\xf9\x01upd := &usersv1.UpdateUser{\n" +
-	"    UserProfile: &usersv1.UpdateUserProfile{\n" +
-	"        FirstName: \"John\",\n" +
-	"        LastName:  \"Smith\",\n" +
-	"    },\n" +
-	"    Metadata: map[string]string{\n" +
-	"        \"department\": \"sales\",\n" +
-	"    },\n" +
-	"}\n" +
-	"sc.User().UpdateUser(ctx, \"usr_123\", upd)\n" +
-	"\xbf\x03*\xbc\x03\n" +
-	"\x13\n" +
-	"\x05label\x12\n" +
-	"\x1a\bJava SDK\n" +
-	"\x0e\n" +
-	"\x04lang\x12\x06\x1a\x04java\n" +
-	"\x94\x03\n" +
-	"\x06source\x12\x89\x03\x1a\x86\x03UpdateUser upd = UpdateUser.newBuilder()\n" +
-	"        .setUserProfile(\n" +
-	"          UpdateUserProfile.newBuilder()\n" +
-	"                .setFirstName(\"John\")\n" +
-	"                .setLastName(\"Smith\")\n" +
-	"                .build())\n" +
-	"        .putMetadata(\"department\", \"sales\")\n" +
-	"        .build();\n" +
-	"UpdateUserRequest updReq = UpdateUserRequest.\n" +
-	"  newBuilder().setUser(upd).build();\n" +
-	"users.updateUser(\"usr_123\", updReq);\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02\x1a:\x04user2\x12/api/v1/users/{id}\x12\xd0\a\n" +
+	"'\x1a%.scalekit.v1.users.UpdateUserResponse\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02\x1a:\x04user2\x12/api/v1/users/{id}\x12\xfd\x03\n" +
 	"\n" +
-	"DeleteUser\x12$.scalekit.v1.users.DeleteUserRequest\x1a\x16.google.protobuf.Empty\"\x83\a\x92A\xdf\x06\n" +
+	"DeleteUser\x12$.scalekit.v1.users.DeleteUserRequest\x1a\x16.google.protobuf.Empty\"\xb0\x03\x92A\x8c\x03\n" +
 	"\x05Users\x12\x17Delete user permanently\x1a\xb0\x02Permanently removes a user from your environment and deletes all associated data. Use this endpoint when you need to completely remove a user account. This action deletes the user's profile, memberships, and all related data across all organizations. This operation cannot be undone, so use with caution.J7\n" +
 	"\x03200\x120\n" +
-	".User successfully deleted. No content returnedj\xd0\x03\n" +
-	"\rx-codeSamples\x12\xbe\x032\xbb\x03\n" +
-	"b*`\n" +
-	"\x16\n" +
-	"\x05label\x12\r\x1a\vNode.js SDK\n" +
-	"\x14\n" +
-	"\x04lang\x12\f\x1a\n" +
-	"javascript\n" +
-	"0\n" +
-	"\x06source\x12&\x1a$await sc.user.deleteUser(\"usr_123\");\n" +
-	"~*|\n" +
-	"\x15\n" +
-	"\x05label\x12\f\x1a\n" +
-	"Python SDK\n" +
-	"\x10\n" +
-	"\x04lang\x12\b\x1a\x06python\n" +
-	"Q\n" +
-	"\x06source\x12G\x1aEsc.users.delete_user(organization_id=\"org_123\", \n" +
-	"  user_id=\"usr_123\")\n" +
-	"\x81\x01*\x7f\n" +
-	"\x11\n" +
-	"\x05label\x12\b\x1a\x06Go SDK\n" +
-	"\f\n" +
-	"\x04lang\x12\x04\x1a\x02go\n" +
-	"\\\n" +
-	"\x06source\x12R\x1aPif err := sc.User().DeleteUser(ctx, \n" +
-	"  \"usr_123\"); err != nil {\n" +
-	"    panic(err)\n" +
-	"}\n" +
-	"Q*O\n" +
-	"\x13\n" +
-	"\x05label\x12\n" +
-	"\x1a\bJava SDK\n" +
-	"\x0e\n" +
-	"\x04lang\x12\x06\x1a\x04java\n" +
-	"(\n" +
-	"\x06source\x12\x1e\x1a\x1cusers.deleteUser(\"usr_123\");\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02\x14*\x12/api/v1/users/{id}\x12\xa1\x18\n" +
-	"\x10CreateMembership\x12*.scalekit.v1.users.CreateMembershipRequest\x1a+.scalekit.v1.users.CreateMembershipResponse\"\xb3\x17\x92A\xd7\x16\n" +
+	".User successfully deleted. No content returned\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02\x14*\x12/api/v1/users/{id}\x12\xa8\x05\n" +
+	"\x10CreateMembership\x12*.scalekit.v1.users.CreateMembershipRequest\x1a+.scalekit.v1.users.CreateMembershipResponse\"\xba\x04\x92A\xde\x03\n" +
 	"\x05Users\x12!Add existing user to organization\x1a\x95\x02Adds an existing user to an organization and assigns them specific roles and permissions. Use this endpoint when you want to grant an existing user access to a particular organization. You can specify roles, metadata, and other membership details during the invitation process.J\x99\x01\n" +
 	"\x03201\x12\x91\x01\n" +
 	"^User successfully added to the organization. Returns details of the updated membership details\x12/\n" +
-	"-\x1a+.scalekit.v1.users.CreateMembershipResponsej\xf6\x12\n" +
-	"\rx-codeSamples\x12\xe4\x122\xe1\x12\n" +
-	"\x92\x03*\x8f\x03\n" +
-	"\x16\n" +
-	"\x05label\x12\r\x1a\vNode.js SDK\n" +
-	"\x14\n" +
-	"\x04lang\x12\f\x1a\n" +
-	"javascript\n" +
-	"\xde\x02\n" +
-	"\x06source\x12\xd3\x02\x1a\xd0\x02import { ScalekitClient } from \"@scalekit-sdk/node\";\n" +
-	"const sc = new ScalekitClient(\n" +
-	"\tprocess.env.SCALEKIT_ENV_URL,\n" +
-	"\tprocess.env.SCALEKIT_CLIENT_ID,\n" +
-	"\tprocess.env.SCALEKIT_CLIENT_SECRET\n" +
-	");\n" +
-	"await sc.user.createMembership(\"org_123\", \"usr_123\", {\n" +
-	"\troles: [\"admin\"],\n" +
-	"\tmetadata: {\n" +
-	"\t\tdepartment: \"engineering\",\n" +
-	"\t\tlocation: \"nyc-office\",\n" +
-	"\t},\n" +
-	"});\n" +
-	"\xe0\x03*\xdd\x03\n" +
-	"\x15\n" +
-	"\x05label\x12\f\x1a\n" +
-	"Python SDK\n" +
-	"\x10\n" +
-	"\x04lang\x12\b\x1a\x06python\n" +
-	"\xb1\x03\n" +
-	"\x06source\x12\xa6\x03\x1a\xa3\x03import os\n" +
-	"from scalekit import ScalekitClient\n" +
-	"sc = ScalekitClient(\n" +
-	"    env_url=os.getenv(\"SCALEKIT_ENV_URL\"),\n" +
-	"    client_id=os.getenv(\"SCALEKIT_CLIENT_ID\"),\n" +
-	"    client_secret=os.getenv(\"SCALEKIT_CLIENT_SECRET\"),\n" +
-	")\n" +
-	"# The Python SDK currently exposes a helper that \n" +
-	"  #simply links an existing\n" +
-	"# user to an organization.\n" +
-	"resp, _ = sc.users.add_user_to_organization(\n" +
-	"    organization_id=\"org_123\",\n" +
-	"    user_id=\"usr_123\",\n" +
-	")\n" +
-	"\x85\x05*\x82\x05\n" +
-	"\x11\n" +
-	"\x05label\x12\b\x1a\x06Go SDK\n" +
-	"\f\n" +
-	"\x04lang\x12\x04\x1a\x02go\n" +
-	"\xde\x04\n" +
-	"\x06source\x12\xd3\x04\x1a\xd0\x04func main() {\n" +
-	"    sc := scalekit.NewScalekitClient(\n" +
-	"        os.Getenv(\"SCALEKIT_ENV_URL\"),\n" +
-	"        os.Getenv(\"SCALEKIT_CLIENT_ID\"),\n" +
-	"        os.Getenv(\"SCALEKIT_CLIENT_SECRET\"),\n" +
-	"    )\n" +
-	"    membership := &usersv1.CreateMembership{\n" +
-	"        Roles: []*usersv1.Role{{Name: \"admin\"}},\n" +
-	"        Metadata: map[string]string{\n" +
-	"            \"department\": \"engineering\",\n" +
-	"            \"location\":   \"nyc-office\",\n" +
-	"        },\n" +
-	"    }\n" +
-	"    resp, \n" +
-	"      err := sc.User().CreateMembership(\n" +
-	"        context.Background(), \"org_123\", \n" +
-	"          \"usr_123\", membership, false)\n" +
-	"    if err != nil {\n" +
-	"        panic(err)\n" +
-	"    }\n" +
-	"}\n" +
-	"\xde\x06*\xdb\x06\n" +
-	"\x13\n" +
-	"\x05label\x12\n" +
-	"\x1a\bJava SDK\n" +
-	"\x0e\n" +
-	"\x04lang\x12\x06\x1a\x04java\n" +
-	"\xb3\x06\n" +
-	"\x06source\x12\xa8\x06\x1a\xa5\x06import com.scalekit.ScalekitClient;\n" +
-	"import com.scalekit.api.UserClient;\n" +
-	"import com.scalekit.grpc.scalekit.v1.users.*;\n" +
-	"ScalekitClient sk = new ScalekitClient(\n" +
-	"    System.getenv(\"SCALEKIT_ENV_URL\"),\n" +
-	"    System.getenv(\"SCALEKIT_CLIENT_ID\"),\n" +
-	"    System.getenv(\"SCALEKIT_CLIENT_SECRET\")\n" +
-	");\n" +
-	"UserClient users = sk.users();\n" +
-	"CreateMembershipRequest membershipReq = CreateMemb\n" +
-	"  ershipRequest.newBuilder()\n" +
-	"        .setMembership(\n" +
-	"          CreateMembership.newBuilder()\n" +
-	"                .addRoles(Role.newBuilder(\n" +
-	"                  ).setName(\"admin\").build())\n" +
-	"                .putMetadata(\"department\", \"engineering\")\n" +
-	"                .putMetadata(\"location\", \"nyc-office\")\n" +
-	"                .build())\n" +
-	"        .build();\n" +
-	"CreateMembershipResponse res = users.\n" +
-	"  createMembership(\"org_123\", \"usr_123\", \n" +
-	"    membershipReq);\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02L:\n" +
-	"membership\">/api/v1/memberships/organizations/{organization_id}/users/{id}\x12\xb0\x05\n" +
-	"\x10DeleteMembership\x12*.scalekit.v1.users.DeleteMembershipRequest\x1a\x16.google.protobuf.Empty\"\xd7\x04\x92A\x87\x04\n" +
+	"-\x1a+.scalekit.v1.users.CreateMembershipResponse\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02L:\n" +
+	"membership\">/api/v1/memberships/organizations/{organization_id}/users/{id}\x12\xfd\x03\n" +
+	"\x10DeleteMembership\x12*.scalekit.v1.users.DeleteMembershipRequest\x1a\x16.google.protobuf.Empty\"\xa4\x03\x92A\xd4\x02\n" +
 	"\x05Users\x12'Delete organization membership for user\x1a\xdc\x01Removes a user from an organization by user ID or external ID. If the user has no memberships left and cascade is true, the user is also deleted. This action is irreversible and may also remove related group memberships.JC\n" +
 	"\x03200\x12<\n" +
-	":User successfully marked for deletion. No content returnedj\xb0\x01\n" +
-	"\rx-codeSamples\x12\x9e\x012\x9b\x01\n" +
-	"\x98\x01*\x95\x01\n" +
-	"\x15\n" +
-	"\x05label\x12\f\x1a\n" +
-	"Python SDK\n" +
-	"\x10\n" +
-	"\x04lang\x12\b\x1a\x06python\n" +
-	"j\n" +
-	"\x06source\x12`\x1a^response = scalekit_client.users.delete_membership(\n" +
-	"  organization_id=org_id,user_id=user_id\n" +
-	")\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02@*>/api/v1/memberships/organizations/{organization_id}/users/{id}\x12\xfd\x03\n" +
+	":User successfully marked for deletion. No content returned\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02@*>/api/v1/memberships/organizations/{organization_id}/users/{id}\x12\xfd\x03\n" +
 	"\x10UpdateMembership\x12*.scalekit.v1.users.UpdateMembershipRequest\x1a+.scalekit.v1.users.UpdateMembershipResponse\"\x8f\x03\x92A\xb3\x02\n" +
 	"\x05Users\x12'Update organization membership for user\x1a\x83\x01Updates a user's membership details within an organization by user ID or external ID. You can update roles and membership metadata.J{\n" +
 	"\x03200\x12t\n" +
 	"AMembership updated successfully. Returns the updated user object.\x12/\n" +
 	"-\x1a+.scalekit.v1.users.UpdateMembershipResponse\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02L:\n" +
-	"membership2>/api/v1/memberships/organizations/{organization_id}/users/{id}\x12\x9d\x18\n" +
-	"\x17CreateUserAndMembership\x121.scalekit.v1.users.CreateUserAndMembershipRequest\x1a2.scalekit.v1.users.CreateUserAndMembershipResponse\"\x9a\x17\x92A\xd5\x16\n" +
+	"membership2>/api/v1/memberships/organizations/{organization_id}/users/{id}\x12\xac\x06\n" +
+	"\x17CreateUserAndMembership\x121.scalekit.v1.users.CreateUserAndMembershipRequest\x1a2.scalekit.v1.users.CreateUserAndMembershipResponse\"\xa9\x05\x92A\xe4\x04\n" +
 	"\x05Users\x12\x1fCreate new user in organization\x1a\x83\x03Creates a new user account and immediately adds them to the specified organization. Use this endpoint when you want to create a user and grant them access to an organization in a single operation. You can provide user profile information, assign roles, and configure membership metadata. The user receives an activation email unless this feature is disabled in the organization settings.J\xb3\x01\n" +
 	"\x03201\x12\xab\x01\n" +
 	"qUser created successfully. Returns the created user object, including system-generated identifiers and timestamps\x126\n" +
-	"4\x1a2.scalekit.v1.users.CreateUserAndMembershipResponsej\xee\x11\n" +
-	"\rx-codeSamples\x12\xdc\x112\xd9\x11\n" +
-	"\xd0\x02*\xcd\x02\n" +
-	"\x16\n" +
-	"\x05label\x12\r\x1a\vNode.js SDK\n" +
-	"\x14\n" +
-	"\x04lang\x12\f\x1a\n" +
-	"javascript\n" +
-	"\x9c\x02\n" +
-	"\x06source\x12\x91\x02\x1a\x8e\x02const {\n" +
-	"   user } = await sc.user.\n" +
-	"    createUserAndMembership(\"org_123\", {\n" +
-	"\temail: \"user@example.com\",\n" +
-	"\texternalId: \"ext_12345a67b89c\",\n" +
-	"\tmetadata: { department: \"engineering\", \n" +
-	"\t  location: \"nyc-office\" },\n" +
-	"\tuserProfile: {\n" +
-	"\t\tfirstName: \"John\",\n" +
-	"\t\tlastName: \"Doe\",\n" +
-	"\t},\n" +
-	"});\n" +
-	"\xaa\x05*\xa7\x05\n" +
-	"\x15\n" +
-	"\x05label\x12\f\x1a\n" +
-	"Python SDK\n" +
-	"\x10\n" +
-	"\x04lang\x12\b\x1a\x06python\n" +
-	"\xfb\x04\n" +
-	"\x06source\x12\xf0\x04\x1a\xed\x04import os\n" +
-	"from scalekit import ScalekitClient\n" +
-	"from scalekit.v1.users.users_pb2 import User\n" +
-	"from scalekit.v1.commons.\n" +
-	"  commons_pb2 import UserProfile\n" +
-	"sc = ScalekitClient(\n" +
-	"    env_url=os.getenv(\"SCALEKIT_ENV_URL\"),\n" +
-	"    client_id=os.getenv(\"SCALEKIT_CLIENT_ID\"),\n" +
-	"    client_secret=os.getenv(\"SCALEKIT_CLIENT_SECRET\"),\n" +
-	")\n" +
-	"user_msg = User(\n" +
-	"    email=\"user@example.com\",\n" +
-	"    external_id=\"ext_12345a67b89c\",\n" +
-	"    metadata={\"department\": \"engineering\", \"location\": \"nyc-office\"},\n" +
-	"    user_profile=UserProfile(\n" +
-	"        first_name=\"John\",\n" +
-	"        last_name=\"Doe\"\n" +
-	"    )\n" +
-	")\n" +
-	"create_resp, \n" +
-	"  _ = sc.users.create_user(\"org_123\", user_msg)\n" +
-	"\xf1\x03*\xee\x03\n" +
-	"\x11\n" +
-	"\x05label\x12\b\x1a\x06Go SDK\n" +
-	"\f\n" +
-	"\x04lang\x12\x04\x1a\x02go\n" +
-	"\xca\x03\n" +
-	"\x06source\x12\xbf\x03\x1a\xbc\x03newUser := &usersv1.CreateUser{\n" +
-	"    Email:      \"user@example.com\",\n" +
-	"    ExternalId: \"ext_12345a67b89c\",\n" +
-	"    Metadata: map[string]string{\n" +
-	"        \"department\": \"engineering\",\n" +
-	"        \"location\":   \"nyc-office\",\n" +
-	"    },\n" +
-	"    UserProfile: &usersv1.CreateUserProfile{\n" +
-	"        FirstName: \"John\",\n" +
-	"        LastName:  \"Doe\",\n" +
-	"    },\n" +
-	"}\n" +
-	"cuResp, \n" +
-	"  err := sc.User().CreateUserAndMembership(ctx, \"org_123\", newUser, false)\n" +
-	"if err != nil { /* handle error */ }\n" +
-	"\xe2\x05*\xdf\x05\n" +
-	"\x13\n" +
-	"\x05label\x12\n" +
-	"\x1a\bJava SDK\n" +
-	"\x0e\n" +
-	"\x04lang\x12\x06\x1a\x04java\n" +
-	"\xb7\x05\n" +
-	"\x06source\x12\xac\x05\x1a\xa9\x05CreateUser createUser = CreateUser.newBuilder()\n" +
-	"        .setEmail(\"user@example.com\")\n" +
-	"        .setExternalId(\"ext_12345a67b89c\")\n" +
-	"        .putMetadata(\"department\", \"engineering\")\n" +
-	"        .putMetadata(\"location\", \"nyc-office\")\n" +
-	"        .setUserProfile(\n" +
-	"          CreateUserProfile.newBuilder()\n" +
-	"                .setFirstName(\"John\")\n" +
-	"                .setLastName(\"Doe\")\n" +
-	"                .build())\n" +
-	"        .build();\n" +
-	"CreateUserAndMembershipRequest cuReq = CreateUserA\n" +
-	"  ndMembershipRequest.newBuilder()\n" +
-	"        .setUser(createUser)\n" +
-	"        .build();\n" +
-	"CreateUserAndMembershipResponse cuResp = users.\n" +
-	"  createUserAndMembership(\"org_123\", cuReq);\n" +
-	"System.out.println(cuResp.getUser().getId());\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x025:\x04user\"-/api/v1/organizations/{organization_id}/users\x12\xa4\v\n" +
-	"\x15ListOrganizationUsers\x12/.scalekit.v1.users.ListOrganizationUsersRequest\x1a0.scalekit.v1.users.ListOrganizationUsersResponse\"\xa7\n" +
-	"\x92A\xe8\t\n" +
+	"4\x1a2.scalekit.v1.users.CreateUserAndMembershipResponse\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x025:\x04user\"-/api/v1/organizations/{organization_id}/users\x12\xe3\x04\n" +
+	"\x15ListOrganizationUsers\x12/.scalekit.v1.users.ListOrganizationUsersRequest\x1a0.scalekit.v1.users.ListOrganizationUsersResponse\"\xe6\x03\x92A\xa7\x03\n" +
 	"\x05Users\x12\x17List organization users\x1a\x87\x02Retrieves a paginated list of all users who are members of the specified organization. Use this endpoint to view all users with access to a particular organization, including their roles, metadata, and membership details. Supports pagination for large user lists.J{\n" +
 	"\x03200\x12t\n" +
 	"<Successfully retrieved the list of users in the organization\x124\n" +
-	"2\x1a0.scalekit.v1.users.ListOrganizationUsersResponsej\xbe\x06\n" +
-	"\rx-codeSamples\x12\xac\x062\xa9\x06\n" +
-	"\xb4\x01*\xb1\x01\n" +
-	"\x16\n" +
-	"\x05label\x12\r\x1a\vNode.js SDK\n" +
-	"\x14\n" +
-	"\x04lang\x12\f\x1a\n" +
-	"javascript\n" +
-	"\x80\x01\n" +
-	"\x06source\x12v\x1atconst response = await sc.user.\n" +
-	"  listOrganizationUsers(\"org_123\", {\n" +
-	"\tpageSize: 50,\n" +
-	"});\n" +
-	"console.log(response.users);\n" +
-	"\x7f*}\n" +
-	"\x15\n" +
-	"\x05label\x12\f\x1a\n" +
-	"Python SDK\n" +
-	"\x10\n" +
-	"\x04lang\x12\b\x1a\x06python\n" +
-	"R\n" +
-	"\x06source\x12H\x1aFresp, _ = sc.users.list_users(organization_id=\"org_123\", page_size=50)\n" +
-	"\xdb\x01*\xd8\x01\n" +
-	"\x11\n" +
-	"\x05label\x12\b\x1a\x06Go SDK\n" +
-	"\f\n" +
-	"\x04lang\x12\x04\x1a\x02go\n" +
-	"\xb4\x01\n" +
-	"\x06source\x12\xa9\x01\x1a\xa6\x01list, \n" +
-	"  err := sc.User().ListOrganizationUsers(ctx, \"org_123\", &scalekit.ListUsersOptions{PageSize: 50})\n" +
-	"if err != nil { /* handle error */ }\n" +
-	"fmt.Println(list.Users)\n" +
-	"\x90\x02*\x8d\x02\n" +
-	"\x13\n" +
-	"\x05label\x12\n" +
-	"\x1a\bJava SDK\n" +
-	"\x0e\n" +
-	"\x04lang\x12\x06\x1a\x04java\n" +
-	"\xe5\x01\n" +
-	"\x06source\x12\xda\x01\x1a\xd7\x01ListOrganizationUsersRequest listReq = ListOrganiz\n" +
-	"  ationUsersRequest.newBuilder()\n" +
-	"        .setPageSize(50)\n" +
-	"        .build();\n" +
-	"ListOrganizationUsersResponse list = users.\n" +
-	"  listOrganizationUsers(\"org_123\", listReq);\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02/\x12-/api/v1/organizations/{organization_id}/users\x12\x92\x10\n" +
+	"2\x1a0.scalekit.v1.users.ListOrganizationUsersResponse\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02/\x12-/api/v1/organizations/{organization_id}/users\x12\x92\x10\n" +
 	"\fResendInvite\x12&.scalekit.v1.users.ResendInviteRequest\x1a'.scalekit.v1.users.ResendInviteResponse\"\xb0\x0f\x92A\xda\x0e\n" +
 	"\x05Users\x12\x1cResend user invitation email\x1a\xe1\x04Resends an invitation email to a user who has a pending or expired invitation in the specified organization. If the invitation has expired, a new invitation will be automatically created and sent. If the invitation is still valid, a reminder email will be sent instead. Use this endpoint when a user hasn't responded to their initial invitation and you need to send them a reminder or when the original invitation has expired. The invitation email includes a secure magic link that allows the user to complete their account setup and join the organization. Each resend operation increments the resent counter.J\xa7\x02\n" +
 	"\x03200\x12\x9f\x02\n" +
@@ -3567,7 +3169,7 @@ var file_scalekit_v1_users_users_proto_depIdxs = []int32{
 	49, // 2: scalekit.v1.users.User.memberships:type_name -> scalekit.v1.commons.OrganizationMembership
 	50, // 3: scalekit.v1.users.User.user_profile:type_name -> scalekit.v1.commons.UserProfile
 	39, // 4: scalekit.v1.users.User.metadata:type_name -> scalekit.v1.users.User.MetadataEntry
-	48, // 5: scalekit.v1.users.User.last_login:type_name -> google.protobuf.Timestamp
+	48, // 5: scalekit.v1.users.User.last_login_time:type_name -> google.protobuf.Timestamp
 	24, // 6: scalekit.v1.users.CreateUserAndMembershipRequest.user:type_name -> scalekit.v1.users.CreateUser
 	0,  // 7: scalekit.v1.users.CreateUserAndMembershipResponse.user:type_name -> scalekit.v1.users.User
 	26, // 8: scalekit.v1.users.UpdateUser.user_profile:type_name -> scalekit.v1.users.UpdateUserProfile

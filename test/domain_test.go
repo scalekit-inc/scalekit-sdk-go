@@ -189,3 +189,106 @@ func TestDeleteDomain(t *testing.T) {
 	_, err = client.Domain().GetDomain(context.Background(), domainId, testOrg)
 	assert.Error(t, err) // Should return an error since domain is deleted
 }
+
+func TestListDomains(t *testing.T) {
+	// Create a domain with ORGANIZATION_DOMAIN type
+	orgDomainName := fmt.Sprintf("list-org-%d.com", time.Now().Unix())
+	orgDomain, err := client.Domain().CreateDomain(context.Background(), testOrg, orgDomainName, &scalekit.CreateDomainOptions{
+		DomainType: scalekit.DomainTypeOrganization,
+	})
+	assert.NoError(t, err)
+	assert.NotNil(t, orgDomain)
+	assert.NotNil(t, orgDomain.Domain)
+	assert.Equal(t, domains.DomainType_ORGANIZATION_DOMAIN, orgDomain.Domain.DomainType)
+
+	orgDomainId := orgDomain.Domain.Id
+	assert.NotEmpty(t, orgDomainId)
+
+	// Create a domain with ALLOWED_EMAIL_DOMAIN type
+	allowedEmailDomainName := fmt.Sprintf("list-allowed-email-%d.com", time.Now().Unix())
+	allowedEmailDomain, err := client.Domain().CreateDomain(context.Background(), testOrg, allowedEmailDomainName, &scalekit.CreateDomainOptions{
+		DomainType: scalekit.DomainTypeAllowedEmail,
+	})
+	assert.NoError(t, err)
+	assert.NotNil(t, allowedEmailDomain)
+	assert.NotNil(t, allowedEmailDomain.Domain)
+	assert.Equal(t, domains.DomainType_ALLOWED_EMAIL_DOMAIN, allowedEmailDomain.Domain.DomainType)
+
+	allowedEmailDomainId := allowedEmailDomain.Domain.Id
+	assert.NotEmpty(t, allowedEmailDomainId)
+
+	// Verify the domains exist
+	retrievedOrgDomain, err := client.Domain().GetDomain(context.Background(), orgDomainId, testOrg)
+	assert.NoError(t, err)
+	assert.NotNil(t, retrievedOrgDomain)
+	assert.Equal(t, orgDomainName, retrievedOrgDomain.Domain.Domain)
+
+	retrievedAllowedEmailDomain, err := client.Domain().GetDomain(context.Background(), allowedEmailDomainId, testOrg)
+	assert.NoError(t, err)
+	assert.NotNil(t, retrievedAllowedEmailDomain)
+	assert.Equal(t, allowedEmailDomainName, retrievedAllowedEmailDomain.Domain.Domain)
+
+	// Test listing all domains (no filter)
+	allDomainsList, err := client.Domain().ListDomains(context.Background(), testOrg)
+	assert.NoError(t, err)
+	assert.True(t, len(allDomainsList.Domains) > 0)
+
+	foundOrgDomain := false
+	foundAllowedEmailDomain := false
+	for _, d := range allDomainsList.Domains {
+		if d.Id == orgDomainId {
+			foundOrgDomain = true
+			assert.Equal(t, domains.DomainType_ORGANIZATION_DOMAIN, d.DomainType)
+		}
+		if d.Id == allowedEmailDomainId {
+			foundAllowedEmailDomain = true
+			assert.Equal(t, domains.DomainType_ALLOWED_EMAIL_DOMAIN, d.DomainType)
+		}
+	}
+	assert.True(t, foundOrgDomain, "Organization domain should be in the list")
+	assert.True(t, foundAllowedEmailDomain, "Allowed email domain should be in the list")
+
+	// Test listing domains filtered by ORGANIZATION_DOMAIN type
+	orgDomainsList, err := client.Domain().ListDomains(context.Background(), testOrg, &scalekit.ListDomainOptions{
+		DomainType: scalekit.DomainTypeOrganization,
+	})
+	assert.NoError(t, err)
+	assert.True(t, len(orgDomainsList.Domains) > 0)
+
+	foundOrgDomainInFiltered := false
+	foundAllowedEmailDomainInFiltered := false
+	for _, d := range orgDomainsList.Domains {
+		// All domains in the filtered list should be ORGANIZATION_DOMAIN type
+		assert.Equal(t, domains.DomainType_ORGANIZATION_DOMAIN, d.DomainType)
+		if d.Id == orgDomainId {
+			foundOrgDomainInFiltered = true
+		}
+		if d.Id == allowedEmailDomainId {
+			foundAllowedEmailDomainInFiltered = true
+		}
+	}
+	assert.True(t, foundOrgDomainInFiltered, "Organization domain should be in the filtered list")
+	assert.False(t, foundAllowedEmailDomainInFiltered, "Allowed email domain should NOT be in the ORGANIZATION_DOMAIN filtered list")
+
+	// Test listing domains filtered by ALLOWED_EMAIL_DOMAIN type
+	allowedEmailDomainsList, err := client.Domain().ListDomains(context.Background(), testOrg, &scalekit.ListDomainOptions{
+		DomainType: scalekit.DomainTypeAllowedEmail,
+	})
+	assert.NoError(t, err)
+	assert.True(t, len(allowedEmailDomainsList.Domains) > 0)
+
+	foundOrgDomainInEmailFiltered := false
+	foundAllowedEmailDomainInEmailFiltered := false
+	for _, d := range allowedEmailDomainsList.Domains {
+		// All domains in the filtered list should be ALLOWED_EMAIL_DOMAIN type
+		assert.Equal(t, domains.DomainType_ALLOWED_EMAIL_DOMAIN, d.DomainType)
+		if d.Id == orgDomainId {
+			foundOrgDomainInEmailFiltered = true
+		}
+		if d.Id == allowedEmailDomainId {
+			foundAllowedEmailDomainInEmailFiltered = true
+		}
+	}
+	assert.False(t, foundOrgDomainInEmailFiltered, "Organization domain should NOT be in the ALLOWED_EMAIL_DOMAIN filtered list")
+	assert.True(t, foundAllowedEmailDomainInEmailFiltered, "Allowed email domain should be in the filtered list")
+}
