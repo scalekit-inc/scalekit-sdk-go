@@ -42,6 +42,7 @@ type Scalekit interface {
 	Session() SessionService
 	Role() RoleService
 	Permission() PermissionService
+	WebAuthn() WebAuthnService
 	GetAuthorizationUrl(redirectUri string, options AuthorizationUrlOptions) (*url.URL, error)
 	AuthenticateWithCode(
 		code string,
@@ -69,6 +70,7 @@ type scalekitClient struct {
 	session      SessionService
 	role         RoleService
 	permission   PermissionService
+	webauthn     WebAuthnService
 }
 
 type AuthorizationUrlOptions struct {
@@ -187,6 +189,7 @@ func NewScalekitClient(envUrl, clientId, clientSecret string) Scalekit {
 		session:      newSessionClient(coreClient),
 		role:         newRoleService(coreClient),
 		permission:   newPermissionService(coreClient),
+		webauthn:     newWebAuthnClient(coreClient),
 	}
 }
 
@@ -228,6 +231,10 @@ func (s *scalekitClient) Role() RoleService {
 
 func (s *scalekitClient) Permission() PermissionService {
 	return s.permission
+}
+
+func (s *scalekitClient) WebAuthn() WebAuthnService {
+	return s.webauthn
 }
 
 func (s *scalekitClient) GetAuthorizationUrl(redirectUri string, options AuthorizationUrlOptions) (*url.URL, error) {
