@@ -5,6 +5,7 @@ import (
 
 	domainsv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/domains"
 	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/domains/domainsconnect"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type ListDomainResponse = domainsv1.ListDomainResponse
@@ -26,10 +27,19 @@ type CreateDomainOptions struct {
 	DomainType DomainType
 }
 
+// ListDomainOptions represents optional parameters for listing domains
+type ListDomainOptions struct {
+	DomainType DomainType
+	PageSize   uint32
+	PageNumber uint32
+}
+
+type ListDomainsRequest = domainsv1.ListDomainRequest
+
 type Domain interface {
 	CreateDomain(ctx context.Context, organizationId, name string, options ...*CreateDomainOptions) (*CreateDomainResponse, error)
 	GetDomain(ctx context.Context, id string, organizationId string) (*GetDomainResponse, error)
-	ListDomains(ctx context.Context, organizationId string) (*ListDomainResponse, error)
+	ListDomains(ctx context.Context, organizationId string, options ...*ListDomainOptions) (*ListDomainResponse, error)
 	DeleteDomain(ctx context.Context, id string, organizationId string) error
 }
 
@@ -91,15 +101,47 @@ func (d *domain) GetDomain(ctx context.Context, id string, organizationId string
 	).exec(ctx)
 }
 
-func (d *domain) ListDomains(ctx context.Context, organizationId string) (*ListDomainResponse, error) {
+func (d *domain) ListDomains(ctx context.Context, organizationId string, options ...*ListDomainOptions) (*ListDomainResponse, error) {
+	request := &domainsv1.ListDomainRequest{
+		Identities: &domainsv1.ListDomainRequest_OrganizationId{
+			OrganizationId: organizationId,
+		},
+	}
+
+	// Handle optional parameters
+	if len(options) > 0 && options[0] != nil {
+		opts := options[0]
+
+		// Handle optional domain type filter
+		if opts.DomainType != "" {
+			// Simple map lookup for conversion (more efficient than switch)
+			domainTypeMap := map[string]domainsv1.DomainType{
+				"ALLOWED_EMAIL_DOMAIN":    domainsv1.DomainType_ALLOWED_EMAIL_DOMAIN,
+				"ORGANIZATION_DOMAIN":     domainsv1.DomainType_ORGANIZATION_DOMAIN,
+				"DOMAIN_TYPE_UNSPECIFIED": domainsv1.DomainType_DOMAIN_TYPE_UNSPECIFIED,
+			}
+
+			if domainType, exists := domainTypeMap[opts.DomainType]; exists {
+				request.DomainType = domainType
+			} else {
+				request.DomainType = domainsv1.DomainType_DOMAIN_TYPE_UNSPECIFIED
+			}
+		}
+
+		if opts.PageSize > 0 {
+			request.PageSize = &wrapperspb.Int32Value{Value: int32(opts.PageSize)}
+		}
+		if opts.PageNumber > 0 {
+			request.PageNumber = &wrapperspb.Int32Value{Value: int32(opts.PageNumber)}
+		}
+	} else {
+		request.PageSize = &wrapperspb.Int32Value{Value: int32(100)}
+	}
+
 	return newConnectExecuter(
 		d.coreClient,
 		d.client.ListDomains,
-		&domainsv1.ListDomainRequest{
-			Identities: &domainsv1.ListDomainRequest_OrganizationId{
-				OrganizationId: organizationId,
-			},
-		},
+		request,
 	).exec(ctx)
 }
 
