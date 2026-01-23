@@ -1,5 +1,3 @@
-# Reference
-
 ## ScalekitClient
 
 <details><summary><code>client := <a href="scalekit.go">scalekit.NewScalekitClient</a>(envUrl, clientId, clientSecret) -> scalekit.Scalekit</code></summary>
