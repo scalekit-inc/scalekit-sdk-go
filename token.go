@@ -2,6 +2,7 @@ package scalekit
 
 import (
 	"context"
+	"errors"
 
 	tokensv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/tokens"
 	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/tokens/tokensconnect"
@@ -46,6 +47,9 @@ func newTokenService(coreClient *coreClient) TokenService {
 }
 
 func (t *tokenService) CreateToken(ctx context.Context, organizationId string, options CreateTokenOptions) (*CreateTokenResponse, error) {
+	if organizationId == "" {
+		return nil, errors.New("organizationId is required")
+	}
 	createToken := &tokensv1.CreateToken{
 		OrganizationId: organizationId,
 	}
@@ -72,6 +76,9 @@ func (t *tokenService) CreateToken(ctx context.Context, organizationId string, o
 }
 
 func (t *tokenService) ValidateToken(ctx context.Context, token string) (*ValidateTokenResponse, error) {
+	if token == "" {
+		return nil, errors.New("token is required")
+	}
 	return newConnectExecuter(
 		t.coreClient,
 		t.client.ValidateToken,
@@ -82,6 +89,9 @@ func (t *tokenService) ValidateToken(ctx context.Context, token string) (*Valida
 }
 
 func (t *tokenService) InvalidateToken(ctx context.Context, token string) error {
+	if token == "" {
+		return errors.New("token is required")
+	}
 	_, err := newConnectExecuter(
 		t.coreClient,
 		t.client.InvalidateToken,
@@ -94,6 +104,9 @@ func (t *tokenService) InvalidateToken(ctx context.Context, token string) error 
 }
 
 func (t *tokenService) ListTokens(ctx context.Context, organizationId string, options ListTokensOptions) (*ListTokensResponse, error) {
+	if organizationId == "" {
+		return nil, errors.New("organizationId is required")
+	}
 	request := &tokensv1.ListTokensRequest{
 		OrganizationId: organizationId,
 	}
