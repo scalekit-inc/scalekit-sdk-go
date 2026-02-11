@@ -3,6 +3,7 @@ package scalekit
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	tokensv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/tokens"
 	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/tokens/tokensconnect"
@@ -79,13 +80,17 @@ func (t *tokenService) ValidateToken(ctx context.Context, token string) (*Valida
 	if token == "" {
 		return nil, errors.New("token is required")
 	}
-	return newConnectExecuter(
+	result, err := newConnectExecuter(
 		t.coreClient,
 		t.client.ValidateToken,
 		&tokensv1.ValidateTokenRequest{
 			Token: token,
 		},
 	).exec(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %v", ErrTokenValidationFailed, err)
+	}
+	return result, nil
 }
 
 func (t *tokenService) InvalidateToken(ctx context.Context, token string) error {

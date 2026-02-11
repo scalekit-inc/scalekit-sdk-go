@@ -215,6 +215,7 @@ func TestInvalidateToken(t *testing.T) {
 	// Validate should fail for invalidated token
 	_, err = client.Token().ValidateToken(ctx, created.Token)
 	assert.Error(t, err)
+	assert.ErrorIs(t, err, scalekit.ErrTokenValidationFailed)
 }
 
 func TestInvalidateTokenIdempotent(t *testing.T) {
