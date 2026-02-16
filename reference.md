@@ -2,7 +2,7 @@
 
 ## ScalekitClient
 
-<details><summary><code>client := <a href="scalekit.go">scalekit.NewScalekitClient</a>(envUrl, clientId, clientSecret) -> scalekit.Scalekit</code></summary>
+<details><summary><code>client := <a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">scalekit.NewScalekitClient</a>(envUrl, clientId, clientSecret) -> scalekit.Scalekit</code></summary>
 <dl>
 <dd>
 
@@ -79,7 +79,7 @@ client := scalekit.NewScalekitClient(
 </dl>
 </details>
 
-<details><summary><code>client.<a href="scalekit.go">GetAuthorizationUrl</a>(redirectUri, options) -> (*url.URL, error)</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">GetAuthorizationUrl</a>(redirectUri, options) -> (*url.URL, error)</code></summary>
 <dl>
 <dd>
 
@@ -164,7 +164,7 @@ if err != nil {
 </dl>
 </details>
 
-<details><summary><code>client.<a href="scalekit.go">AuthenticateWithCode</a>(code, redirectUri, options) -> (*AuthenticationResponse, error)</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">AuthenticateWithCode</a>(code, redirectUri, options) -> (*AuthenticationResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -248,7 +248,7 @@ _ = user
 </dl>
 </details>
 
-<details><summary><code>client.<a href="scalekit.go">GetIdpInitiatedLoginClaims</a>(idpInitiatedLoginToken) -> (*IdpInitiatedLoginClaims, error)</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">GetIdpInitiatedLoginClaims</a>(idpInitiatedLoginToken) -> (*IdpInitiatedLoginClaims, error)</code></summary>
 <dl>
 <dd>
 
@@ -309,7 +309,7 @@ _ = claims
 </dl>
 </details>
 
-<details><summary><code>client.<a href="scalekit.go">GetAccessTokenClaims</a>(accessToken) -> (*AccessTokenClaims, error)</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">GetAccessTokenClaims</a>(accessToken) -> (*AccessTokenClaims, error)</code></summary>
 <dl>
 <dd>
 
@@ -366,7 +366,7 @@ _ = claims
 </dl>
 </details>
 
-<details><summary><code>client.<a href="scalekit.go">ValidateAccessToken</a>(accessToken) -> (bool, error)</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">ValidateAccessToken</a>(accessToken) -> (bool, error)</code></summary>
 <dl>
 <dd>
 
@@ -423,7 +423,7 @@ _ = ok
 </dl>
 </details>
 
-<details><summary><code>client.<a href="scalekit.go">RefreshAccessToken</a>(refreshToken) -> (*TokenResponse, error)</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">RefreshAccessToken</a>(refreshToken) -> (*TokenResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -480,7 +480,7 @@ _ = tokens.AccessToken
 </dl>
 </details>
 
-<details><summary><code>client.<a href="scalekit.go">GetLogoutUrl</a>(options) -> (*url.URL, error)</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">GetLogoutUrl</a>(options) -> (*url.URL, error)</code></summary>
 <dl>
 <dd>
 
@@ -544,7 +544,7 @@ _ = logoutURL
 </dl>
 </details>
 
-<details><summary><code>client.<a href="scalekit.go">VerifyWebhookPayload</a>(secret, headers, payload) -> (bool, error)</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">VerifyWebhookPayload</a>(secret, headers, payload) -> (bool, error)</code></summary>
 <dl>
 <dd>
 
@@ -625,7 +625,7 @@ _ = valid
 </dl>
 </details>
 
-<details><summary><code>client.<a href="scalekit.go">VerifyInterceptorPayload</a>(secret, headers, payload) -> (bool, error)</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">VerifyInterceptorPayload</a>(secret, headers, payload) -> (bool, error)</code></summary>
 <dl>
 <dd>
 
@@ -698,7 +698,7 @@ _ = valid
 </dl>
 </details>
 
-<details><summary><code>client.<a href="scalekit.go">Connection</a>() -> scalekit.Connection</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">Connection</a>() -> scalekit.Connection</code></summary>
 <dl>
 <dd>
 
@@ -720,7 +720,7 @@ Returns the Connections client (`client.Connection()`), used to manage and query
 </dl>
 </details>
 
-<details><summary><code>client.<a href="scalekit.go">Organization</a>() -> scalekit.Organization</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">Organization</a>() -> scalekit.Organization</code></summary>
 <dl>
 <dd>
 
@@ -742,7 +742,7 @@ Returns the Organizations client (`client.Organization()`), used to manage organ
 </dl>
 </details>
 
-<details><summary><code>client.<a href="scalekit.go">User</a>() -> scalekit.UserService</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">User</a>() -> scalekit.UserService</code></summary>
 <dl>
 <dd>
 
@@ -764,7 +764,7 @@ Returns the Users client (`client.User()`), used to manage users and memberships
 </dl>
 </details>
 
-<details><summary><code>client.<a href="scalekit.go">Domain</a>() -> scalekit.Domain</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">Domain</a>() -> scalekit.Domain</code></summary>
 <dl>
 <dd>
 
@@ -786,7 +786,7 @@ Returns the Domains client (`client.Domain()`), used to manage and query domains
 </dl>
 </details>
 
-<details><summary><code>client.<a href="scalekit.go">Directory</a>() -> scalekit.Directory</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">Directory</a>() -> scalekit.Directory</code></summary>
 <dl>
 <dd>
 
@@ -808,7 +808,7 @@ Returns the Directories client (`client.Directory()`), used to list directories 
 </dl>
 </details>
 
-<details><summary><code>client.<a href="scalekit.go">Session</a>() -> scalekit.SessionService</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">Session</a>() -> scalekit.SessionService</code></summary>
 <dl>
 <dd>
 
@@ -830,7 +830,7 @@ Returns the Sessions client (`client.Session()`), used to list and revoke sessio
 </dl>
 </details>
 
-<details><summary><code>client.<a href="scalekit.go">Role</a>() -> scalekit.RoleService</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">Role</a>() -> scalekit.RoleService</code></summary>
 <dl>
 <dd>
 
@@ -852,7 +852,7 @@ Returns the Roles client (`client.Role()`), used to manage roles and organizatio
 </dl>
 </details>
 
-<details><summary><code>client.<a href="scalekit.go">Permission</a>() -> scalekit.PermissionService</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">Permission</a>() -> scalekit.PermissionService</code></summary>
 <dl>
 <dd>
 
@@ -874,7 +874,7 @@ Returns the Permissions client (`client.Permission()`), used to manage permissio
 </dl>
 </details>
 
-<details><summary><code>client.<a href="scalekit.go">Passwordless</a>() -> scalekit.PasswordlessService</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">Passwordless</a>() -> scalekit.PasswordlessService</code></summary>
 <dl>
 <dd>
 
@@ -896,7 +896,7 @@ Returns the Passwordless client (`client.Passwordless()`), used for passwordless
 </dl>
 </details>
 
-<details><summary><code>client.<a href="scalekit.go">WebAuthn</a>() -> scalekit.WebAuthnService</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">WebAuthn</a>() -> scalekit.WebAuthnService</code></summary>
 <dl>
 <dd>
 
@@ -918,7 +918,7 @@ Returns the WebAuthn client (`client.WebAuthn()`), used to manage passkey creden
 </dl>
 </details>
 
-<details><summary><code>client.<a href="scalekit.go">Auth</a>() -> scalekit.AuthService</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">Auth</a>() -> scalekit.AuthService</code></summary>
 <dl>
 <dd>
 
@@ -942,7 +942,7 @@ Returns the Auth client (`client.Auth()`), used for Auth gRPC helper methods (e.
 
 ## Organizations
 
-<details><summary><code>client.Organization().<a href="organization.go">CreateOrganization</a>(ctx, name, options) -> (*CreateOrganizationResponse, error)</code></summary>
+<details><summary><code>client.Organization().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/organization.go">CreateOrganization</a>(ctx, name, options) -> (*CreateOrganizationResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -1033,7 +1033,7 @@ fmt.Println("Organization ID:", org.Organization.Id)
 </dl>
 </details>
 
-<details><summary><code>client.Organization().<a href="organization.go">ListOrganization</a>(ctx, options) -> (*ListOrganizationsResponse, error)</code></summary>
+<details><summary><code>client.Organization().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/organization.go">ListOrganization</a>(ctx, options) -> (*ListOrganizationsResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -1106,7 +1106,7 @@ for _, org := range orgs.Organizations {
 </dl>
 </details>
 
-<details><summary><code>client.Organization().<a href="organization.go">GetOrganization</a>(ctx, id) -> (*GetOrganizationResponse, error)</code></summary>
+<details><summary><code>client.Organization().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/organization.go">GetOrganization</a>(ctx, id) -> (*GetOrganizationResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -1171,7 +1171,7 @@ _ = org.Organization
 </dl>
 </details>
 
-<details><summary><code>client.Organization().<a href="organization.go">GetOrganizationByExternalId</a>(ctx, externalId) -> (*GetOrganizationResponse, error)</code></summary>
+<details><summary><code>client.Organization().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/organization.go">GetOrganizationByExternalId</a>(ctx, externalId) -> (*GetOrganizationResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -1236,7 +1236,7 @@ _ = org.Organization
 </dl>
 </details>
 
-<details><summary><code>client.Organization().<a href="organization.go">UpdateOrganization</a>(ctx, id, organization) -> (*UpdateOrganizationResponse, error)</code></summary>
+<details><summary><code>client.Organization().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/organization.go">UpdateOrganization</a>(ctx, id, organization) -> (*UpdateOrganizationResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -1315,7 +1315,7 @@ _ = updated.Organization
 </dl>
 </details>
 
-<details><summary><code>client.Organization().<a href="organization.go">UpdateOrganizationByExternalId</a>(ctx, externalId, organization) -> (*UpdateOrganizationResponse, error)</code></summary>
+<details><summary><code>client.Organization().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/organization.go">UpdateOrganizationByExternalId</a>(ctx, externalId, organization) -> (*UpdateOrganizationResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -1394,7 +1394,7 @@ _ = updated.Organization
 </dl>
 </details>
 
-<details><summary><code>client.Organization().<a href="organization.go">DeleteOrganization</a>(ctx, id) -> error</code></summary>
+<details><summary><code>client.Organization().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/organization.go">DeleteOrganization</a>(ctx, id) -> error</code></summary>
 <dl>
 <dd>
 
@@ -1457,7 +1457,7 @@ if err := client.Organization().DeleteOrganization(ctx, "org_123"); err != nil {
 </dl>
 </details>
 
-<details><summary><code>client.Organization().<a href="organization.go">GeneratePortalLink</a>(ctx, organizationId) -> (*organizationsv1.Link, error)</code></summary>
+<details><summary><code>client.Organization().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/organization.go">GeneratePortalLink</a>(ctx, organizationId) -> (*organizationsv1.Link, error)</code></summary>
 <dl>
 <dd>
 
@@ -1522,7 +1522,7 @@ _ = link.Url
 </dl>
 </details>
 
-<details><summary><code>client.Organization().<a href="organization.go">UpdateOrganizationSettings</a>(ctx, id, settings) -> (*GetOrganizationResponse, error)</code></summary>
+<details><summary><code>client.Organization().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/organization.go">UpdateOrganizationSettings</a>(ctx, id, settings) -> (*GetOrganizationResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -1601,7 +1601,7 @@ _ = resp.Organization.Settings
 </dl>
 </details>
 
-<details><summary><code>client.Organization().<a href="organization.go">UpsertUserManagementSettings</a>(ctx, organizationId, settings) -> (*organizationsv1.OrganizationUserManagementSettings, error)</code></summary>
+<details><summary><code>client.Organization().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/organization.go">UpsertUserManagementSettings</a>(ctx, organizationId, settings) -> (*organizationsv1.OrganizationUserManagementSettings, error)</code></summary>
 <dl>
 <dd>
 
@@ -1684,7 +1684,7 @@ _ = settings.MaxAllowedUsers
 
 ## Connections
 
-<details><summary><code>client.Connection().<a href="connection.go">GetConnection</a>(ctx, organizationId, id) -> (*GetConnectionResponse, error)</code></summary>
+<details><summary><code>client.Connection().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/connection.go">GetConnection</a>(ctx, organizationId, id) -> (*GetConnectionResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -1757,7 +1757,7 @@ _ = conn.Connection
 </dl>
 </details>
 
-<details><summary><code>client.Connection().<a href="connection.go">ListConnectionsByDomain</a>(ctx, domain) -> (*ListConnectionsResponse, error)</code></summary>
+<details><summary><code>client.Connection().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/connection.go">ListConnectionsByDomain</a>(ctx, domain) -> (*ListConnectionsResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -1822,7 +1822,7 @@ _ = conns.Connections
 </dl>
 </details>
 
-<details><summary><code>client.Connection().<a href="connection.go">ListConnections</a>(ctx, organizationId) -> (*ListConnectionsResponse, error)</code></summary>
+<details><summary><code>client.Connection().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/connection.go">ListConnections</a>(ctx, organizationId) -> (*ListConnectionsResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -1887,7 +1887,7 @@ _ = conns.Connections
 </dl>
 </details>
 
-<details><summary><code>client.Connection().<a href="connection.go">EnableConnection</a>(ctx, organizationId, id) -> (*ToggleConnectionResponse, error)</code></summary>
+<details><summary><code>client.Connection().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/connection.go">EnableConnection</a>(ctx, organizationId, id) -> (*ToggleConnectionResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -1960,7 +1960,7 @@ _ = resp.Enabled
 </dl>
 </details>
 
-<details><summary><code>client.Connection().<a href="connection.go">DisableConnection</a>(ctx, organizationId, id) -> (*ToggleConnectionResponse, error)</code></summary>
+<details><summary><code>client.Connection().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/connection.go">DisableConnection</a>(ctx, organizationId, id) -> (*ToggleConnectionResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -2035,7 +2035,7 @@ _ = resp.Enabled
 
 ## Users
 
-<details><summary><code>client.User().<a href="users.go">ListOrganizationUsers</a>(ctx, organizationId, options) -> (*ListOrganizationUsersResponse, error)</code></summary>
+<details><summary><code>client.User().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/users.go">ListOrganizationUsers</a>(ctx, organizationId, options) -> (*ListOrganizationUsersResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -2113,7 +2113,7 @@ _ = users.Users
 </dl>
 </details>
 
-<details><summary><code>client.User().<a href="users.go">GetUser</a>(ctx, userId) -> (*GetUserResponse, error)</code></summary>
+<details><summary><code>client.User().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/users.go">GetUser</a>(ctx, userId) -> (*GetUserResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -2178,7 +2178,7 @@ _ = user.User
 </dl>
 </details>
 
-<details><summary><code>client.User().<a href="users.go">UpdateUser</a>(ctx, userId, updateUser) -> (*UpdateUserResponse, error)</code></summary>
+<details><summary><code>client.User().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/users.go">UpdateUser</a>(ctx, userId, updateUser) -> (*UpdateUserResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -2263,7 +2263,7 @@ _ = updated.User
 </dl>
 </details>
 
-<details><summary><code>client.User().<a href="users.go">CreateUserAndMembership</a>(ctx, organizationId, user, sendInvitationEmail) -> (*CreateUserAndMembershipResponse, error)</code></summary>
+<details><summary><code>client.User().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/users.go">CreateUserAndMembership</a>(ctx, organizationId, user, sendInvitationEmail) -> (*CreateUserAndMembershipResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -2349,7 +2349,7 @@ _ = created.User.Id
 </dl>
 </details>
 
-<details><summary><code>client.User().<a href="users.go">DeleteUser</a>(ctx, userId) -> error</code></summary>
+<details><summary><code>client.User().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/users.go">DeleteUser</a>(ctx, userId) -> error</code></summary>
 <dl>
 <dd>
 
@@ -2412,7 +2412,7 @@ if err := client.User().DeleteUser(ctx, "usr_123"); err != nil {
 </dl>
 </details>
 
-<details><summary><code>client.User().<a href="users.go">CreateMembership</a>(ctx, organizationId, userId, membership, sendInvitationEmail) -> (*CreateMembershipResponse, error)</code></summary>
+<details><summary><code>client.User().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/users.go">CreateMembership</a>(ctx, organizationId, userId, membership, sendInvitationEmail) -> (*CreateMembershipResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -2506,7 +2506,7 @@ _ = resp.User
 </dl>
 </details>
 
-<details><summary><code>client.User().<a href="users.go">UpdateMembership</a>(ctx, organizationId, userId, membership) -> (*UpdateMembershipResponse, error)</code></summary>
+<details><summary><code>client.User().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/users.go">UpdateMembership</a>(ctx, organizationId, userId, membership) -> (*UpdateMembershipResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -2589,7 +2589,7 @@ _ = resp.User
 </dl>
 </details>
 
-<details><summary><code>client.User().<a href="users.go">DeleteMembership</a>(ctx, organizationId, userId, cascade) -> error</code></summary>
+<details><summary><code>client.User().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/users.go">DeleteMembership</a>(ctx, organizationId, userId, cascade) -> error</code></summary>
 <dl>
 <dd>
 
@@ -2670,7 +2670,7 @@ if err := client.User().DeleteMembership(ctx, "org_123", "usr_123", false); err 
 </dl>
 </details>
 
-<details><summary><code>client.User().<a href="users.go">ResendInvite</a>(ctx, organizationId, userId) -> (*usersv1.ResendInviteResponse, error)</code></summary>
+<details><summary><code>client.User().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/users.go">ResendInvite</a>(ctx, organizationId, userId) -> (*usersv1.ResendInviteResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -2745,7 +2745,7 @@ _ = resp.Invite
 
 ## Domains
 
-<details><summary><code>client.Domain().<a href="domain.go">CreateDomain</a>(ctx, organizationId, name, options?) -> (*CreateDomainResponse, error)</code></summary>
+<details><summary><code>client.Domain().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/domain.go">CreateDomain</a>(ctx, organizationId, name, options?) -> (*CreateDomainResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -2841,7 +2841,7 @@ _ = created2.Domain
 </dl>
 </details>
 
-<details><summary><code>client.Domain().<a href="domain.go">GetDomain</a>(ctx, id, organizationId) -> (*GetDomainResponse, error)</code></summary>
+<details><summary><code>client.Domain().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/domain.go">GetDomain</a>(ctx, id, organizationId) -> (*GetDomainResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -2914,7 +2914,7 @@ _ = domain.Domain
 </dl>
 </details>
 
-<details><summary><code>client.Domain().<a href="domain.go">ListDomains</a>(ctx, organizationId, options?) -> (*ListDomainResponse, error)</code></summary>
+<details><summary><code>client.Domain().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/domain.go">ListDomains</a>(ctx, organizationId, options?) -> (*ListDomainResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -3000,7 +3000,7 @@ _ = orgDomains.Domains
 </dl>
 </details>
 
-<details><summary><code>client.Domain().<a href="domain.go">DeleteDomain</a>(ctx, id, organizationId) -> error</code></summary>
+<details><summary><code>client.Domain().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/domain.go">DeleteDomain</a>(ctx, id, organizationId) -> error</code></summary>
 <dl>
 <dd>
 
@@ -3073,7 +3073,7 @@ if err := client.Domain().DeleteDomain(ctx, "dom_123", "org_123"); err != nil {
 
 ## Directories
 
-<details><summary><code>client.Directory().<a href="directory.go">ListDirectories</a>(ctx, organizationId) -> (*ListDirectoriesResponse, error)</code></summary>
+<details><summary><code>client.Directory().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/directory.go">ListDirectories</a>(ctx, organizationId) -> (*ListDirectoriesResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -3138,7 +3138,7 @@ _ = dirs.Directories
 </dl>
 </details>
 
-<details><summary><code>client.Directory().<a href="directory.go">GetDirectory</a>(ctx, organizationId, directoryId) -> (*GetDirectoryResponse, error)</code></summary>
+<details><summary><code>client.Directory().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/directory.go">GetDirectory</a>(ctx, organizationId, directoryId) -> (*GetDirectoryResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -3211,7 +3211,7 @@ _ = dir.Directory
 </dl>
 </details>
 
-<details><summary><code>client.Directory().<a href="directory.go">GetPrimaryDirectoryByOrganizationId</a>(ctx, organizationId) -> (*GetDirectoryResponse, error)</code></summary>
+<details><summary><code>client.Directory().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/directory.go">GetPrimaryDirectoryByOrganizationId</a>(ctx, organizationId) -> (*GetDirectoryResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -3276,7 +3276,7 @@ _ = dir.Directory
 </dl>
 </details>
 
-<details><summary><code>client.Directory().<a href="directory.go">ListDirectoryUsers</a>(ctx, organizationId, directoryId, options?) -> (*ListDirectoryUsersResponse, error)</code></summary>
+<details><summary><code>client.Directory().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/directory.go">ListDirectoryUsers</a>(ctx, organizationId, directoryId, options?) -> (*ListDirectoryUsersResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -3370,7 +3370,7 @@ _ = resp.Users
 </dl>
 </details>
 
-<details><summary><code>client.Directory().<a href="directory.go">ListDirectoryGroups</a>(ctx, organizationId, directoryId, options?) -> (*ListDirectoryGroupsResponse, error)</code></summary>
+<details><summary><code>client.Directory().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/directory.go">ListDirectoryGroups</a>(ctx, organizationId, directoryId, options?) -> (*ListDirectoryGroupsResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -3460,7 +3460,7 @@ _ = resp.Groups
 </dl>
 </details>
 
-<details><summary><code>client.Directory().<a href="directory.go">EnableDirectory</a>(ctx, organizationId, directoryId) -> (*ToggleDirectoryResponse, error)</code></summary>
+<details><summary><code>client.Directory().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/directory.go">EnableDirectory</a>(ctx, organizationId, directoryId) -> (*ToggleDirectoryResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -3533,7 +3533,7 @@ _ = resp.Enabled
 </dl>
 </details>
 
-<details><summary><code>client.Directory().<a href="directory.go">DisableDirectory</a>(ctx, organizationId, directoryId) -> (*ToggleDirectoryResponse, error)</code></summary>
+<details><summary><code>client.Directory().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/directory.go">DisableDirectory</a>(ctx, organizationId, directoryId) -> (*ToggleDirectoryResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -3608,7 +3608,7 @@ _ = resp.Enabled
 
 ## Sessions
 
-<details><summary><code>client.Session().<a href="sessions.go">GetSession</a>(ctx, sessionId) -> (*SessionDetails, error)</code></summary>
+<details><summary><code>client.Session().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/sessions.go">GetSession</a>(ctx, sessionId) -> (*SessionDetails, error)</code></summary>
 <dl>
 <dd>
 
@@ -3673,7 +3673,7 @@ _ = session
 </dl>
 </details>
 
-<details><summary><code>client.Session().<a href="sessions.go">GetUserSessions</a>(ctx, userId, pageSize, pageToken, filter?) -> (*UserSessionDetails, error)</code></summary>
+<details><summary><code>client.Session().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/sessions.go">GetUserSessions</a>(ctx, userId, pageSize, pageToken, filter?) -> (*UserSessionDetails, error)</code></summary>
 <dl>
 <dd>
 
@@ -3762,7 +3762,7 @@ _ = resp.Sessions
 </dl>
 </details>
 
-<details><summary><code>client.Session().<a href="sessions.go">RevokeSession</a>(ctx, sessionId) -> (*RevokeSessionResponse, error)</code></summary>
+<details><summary><code>client.Session().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/sessions.go">RevokeSession</a>(ctx, sessionId) -> (*RevokeSessionResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -3827,7 +3827,7 @@ _ = resp
 </dl>
 </details>
 
-<details><summary><code>client.Session().<a href="sessions.go">RevokeAllUserSessions</a>(ctx, userId) -> (*RevokeAllUserSessionsResponse, error)</code></summary>
+<details><summary><code>client.Session().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/sessions.go">RevokeAllUserSessions</a>(ctx, userId) -> (*RevokeAllUserSessionsResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -3894,7 +3894,7 @@ _ = resp
 
 ## Roles
 
-<details><summary><code>client.Role().<a href="role.go">CreateRole</a>(ctx, role) -> (*CreateRoleResponse, error)</code></summary>
+<details><summary><code>client.Role().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/role.go">CreateRole</a>(ctx, role) -> (*CreateRoleResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -3939,7 +3939,7 @@ Creates a new environment-level role.
 </dl>
 </details>
 
-<details><summary><code>client.Role().<a href="role.go">GetRole</a>(ctx, roleName) -> (*GetRoleResponse, error)</code></summary>
+<details><summary><code>client.Role().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/role.go">GetRole</a>(ctx, roleName) -> (*GetRoleResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -3984,7 +3984,7 @@ Fetches an environment-level role by name.
 </dl>
 </details>
 
-<details><summary><code>client.Role().<a href="role.go">ListRoles</a>(ctx) -> (*ListRolesResponse, error)</code></summary>
+<details><summary><code>client.Role().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/role.go">ListRoles</a>(ctx) -> (*ListRolesResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -4021,7 +4021,7 @@ Lists all environment-level roles.
 </dl>
 </details>
 
-<details><summary><code>client.Role().<a href="role.go">UpdateRole</a>(ctx, roleName, role) -> (*UpdateRoleResponse, error)</code></summary>
+<details><summary><code>client.Role().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/role.go">UpdateRole</a>(ctx, roleName, role) -> (*UpdateRoleResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -4074,7 +4074,7 @@ Updates an environment-level role.
 </dl>
 </details>
 
-<details><summary><code>client.Role().<a href="role.go">DeleteRole</a>(ctx, roleName, reassignRoleName?) -> error</code></summary>
+<details><summary><code>client.Role().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/role.go">DeleteRole</a>(ctx, roleName, reassignRoleName?) -> error</code></summary>
 <dl>
 <dd>
 
@@ -4127,7 +4127,7 @@ Deletes an environment-level role. Optionally provide `reassignRoleName` to reas
 </dl>
 </details>
 
-<details><summary><code>client.Role().<a href="role.go">GetRoleUsersCount</a>(ctx, roleName) -> (*GetRoleUsersCountResponse, error)</code></summary>
+<details><summary><code>client.Role().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/role.go">GetRoleUsersCount</a>(ctx, roleName) -> (*GetRoleUsersCountResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -4172,7 +4172,7 @@ Gets the count of users associated with an environment-level role.
 </dl>
 </details>
 
-<details><summary><code>client.Role().<a href="role.go">CreateOrganizationRole</a>(ctx, orgId, role) -> (*CreateOrganizationRoleResponse, error)</code></summary>
+<details><summary><code>client.Role().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/role.go">CreateOrganizationRole</a>(ctx, orgId, role) -> (*CreateOrganizationRoleResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -4225,7 +4225,7 @@ Creates an organization-level role.
 </dl>
 </details>
 
-<details><summary><code>client.Role().<a href="role.go">GetOrganizationRole</a>(ctx, orgId, roleName) -> (*GetOrganizationRoleResponse, error)</code></summary>
+<details><summary><code>client.Role().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/role.go">GetOrganizationRole</a>(ctx, orgId, roleName) -> (*GetOrganizationRoleResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -4278,7 +4278,7 @@ Fetches an organization-level role by name.
 </dl>
 </details>
 
-<details><summary><code>client.Role().<a href="role.go">ListOrganizationRoles</a>(ctx, orgId) -> (*ListOrganizationRolesResponse, error)</code></summary>
+<details><summary><code>client.Role().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/role.go">ListOrganizationRoles</a>(ctx, orgId) -> (*ListOrganizationRolesResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -4323,7 +4323,7 @@ Lists organization-level roles.
 </dl>
 </details>
 
-<details><summary><code>client.Role().<a href="role.go">UpdateOrganizationRole</a>(ctx, orgId, roleName, role) -> (*UpdateOrganizationRoleResponse, error)</code></summary>
+<details><summary><code>client.Role().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/role.go">UpdateOrganizationRole</a>(ctx, orgId, roleName, role) -> (*UpdateOrganizationRoleResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -4384,7 +4384,7 @@ Updates an organization-level role by name.
 </dl>
 </details>
 
-<details><summary><code>client.Role().<a href="role.go">DeleteOrganizationRole</a>(ctx, orgId, roleName, reassignRoleName?) -> error</code></summary>
+<details><summary><code>client.Role().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/role.go">DeleteOrganizationRole</a>(ctx, orgId, roleName, reassignRoleName?) -> error</code></summary>
 <dl>
 <dd>
 
@@ -4445,7 +4445,7 @@ Deletes an organization-level role by name. Optionally provide `reassignRoleName
 </dl>
 </details>
 
-<details><summary><code>client.Role().<a href="role.go">GetOrganizationRoleUsersCount</a>(ctx, orgId, roleName) -> (*GetOrganizationRoleUsersCountResponse, error)</code></summary>
+<details><summary><code>client.Role().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/role.go">GetOrganizationRoleUsersCount</a>(ctx, orgId, roleName) -> (*GetOrganizationRoleUsersCountResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -4498,7 +4498,7 @@ Gets the count of users associated with an organization-level role.
 </dl>
 </details>
 
-<details><summary><code>client.Role().<a href="role.go">UpdateDefaultOrganizationRoles</a>(ctx, orgId, defaultMemberRole) -> (*UpdateDefaultOrganizationRolesResponse, error)</code></summary>
+<details><summary><code>client.Role().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/role.go">UpdateDefaultOrganizationRoles</a>(ctx, orgId, defaultMemberRole) -> (*UpdateDefaultOrganizationRolesResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -4551,7 +4551,7 @@ Updates the default member role for an organization.
 </dl>
 </details>
 
-<details><summary><code>client.Role().<a href="role.go">DeleteOrganizationRoleBase</a>(ctx, orgId, roleName) -> error</code></summary>
+<details><summary><code>client.Role().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/role.go">DeleteOrganizationRoleBase</a>(ctx, orgId, roleName) -> error</code></summary>
 <dl>
 <dd>
 
@@ -4606,7 +4606,7 @@ Deletes the base relationship for an organization role.
 
 ## Permissions
 
-<details><summary><code>client.Permission().<a href="permission.go">CreatePermission</a>(ctx, permission) -> (*CreatePermissionResponse, error)</code></summary>
+<details><summary><code>client.Permission().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/permission.go">CreatePermission</a>(ctx, permission) -> (*CreatePermissionResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -4651,7 +4651,7 @@ Creates a new permission.
 </dl>
 </details>
 
-<details><summary><code>client.Permission().<a href="permission.go">GetPermission</a>(ctx, permissionName) -> (*GetPermissionResponse, error)</code></summary>
+<details><summary><code>client.Permission().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/permission.go">GetPermission</a>(ctx, permissionName) -> (*GetPermissionResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -4696,7 +4696,7 @@ Fetches a permission by name.
 </dl>
 </details>
 
-<details><summary><code>client.Permission().<a href="permission.go">ListPermissions</a>(ctx, pageToken?) -> (*ListPermissionsResponse, error)</code></summary>
+<details><summary><code>client.Permission().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/permission.go">ListPermissions</a>(ctx, pageToken?) -> (*ListPermissionsResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -4741,7 +4741,7 @@ Lists permissions with optional pagination.
 </dl>
 </details>
 
-<details><summary><code>client.Permission().<a href="permission.go">UpdatePermission</a>(ctx, permissionName, permission) -> (*UpdatePermissionResponse, error)</code></summary>
+<details><summary><code>client.Permission().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/permission.go">UpdatePermission</a>(ctx, permissionName, permission) -> (*UpdatePermissionResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -4794,7 +4794,7 @@ Updates an existing permission by name.
 </dl>
 </details>
 
-<details><summary><code>client.Permission().<a href="permission.go">DeletePermission</a>(ctx, permissionName) -> error</code></summary>
+<details><summary><code>client.Permission().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/permission.go">DeletePermission</a>(ctx, permissionName) -> error</code></summary>
 <dl>
 <dd>
 
@@ -4839,7 +4839,7 @@ Deletes a permission by name.
 </dl>
 </details>
 
-<details><summary><code>client.Permission().<a href="permission.go">ListRolePermissions</a>(ctx, roleName) -> (*ListRolePermissionsResponse, error)</code></summary>
+<details><summary><code>client.Permission().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/permission.go">ListRolePermissions</a>(ctx, roleName) -> (*ListRolePermissionsResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -4884,7 +4884,7 @@ Lists permissions associated with a role.
 </dl>
 </details>
 
-<details><summary><code>client.Permission().<a href="permission.go">AddPermissionsToRole</a>(ctx, roleName, permissionNames) -> (*AddPermissionsToRoleResponse, error)</code></summary>
+<details><summary><code>client.Permission().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/permission.go">AddPermissionsToRole</a>(ctx, roleName, permissionNames) -> (*AddPermissionsToRoleResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -4937,7 +4937,7 @@ Adds permissions to a role.
 </dl>
 </details>
 
-<details><summary><code>client.Permission().<a href="permission.go">RemovePermissionFromRole</a>(ctx, roleName, permissionName) -> error</code></summary>
+<details><summary><code>client.Permission().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/permission.go">RemovePermissionFromRole</a>(ctx, roleName, permissionName) -> error</code></summary>
 <dl>
 <dd>
 
@@ -4990,7 +4990,7 @@ Removes a permission from a role.
 </dl>
 </details>
 
-<details><summary><code>client.Permission().<a href="permission.go">ListEffectiveRolePermissions</a>(ctx, roleName) -> (*ListEffectiveRolePermissionsResponse, error)</code></summary>
+<details><summary><code>client.Permission().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/permission.go">ListEffectiveRolePermissions</a>(ctx, roleName) -> (*ListEffectiveRolePermissionsResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -5037,7 +5037,7 @@ Lists effective permissions for a role (including inherited permissions).
 
 ## Passwordless
 
-<details><summary><code>client.Passwordless().<a href="passwordless.go">SendPasswordlessEmail</a>(ctx, email, options?) -> (*SendPasswordlessResponse, error)</code></summary>
+<details><summary><code>client.Passwordless().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/passwordless.go">SendPasswordlessEmail</a>(ctx, email, options?) -> (*SendPasswordlessResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -5124,7 +5124,7 @@ _ = resp.AuthRequestId
 </dl>
 </details>
 
-<details><summary><code>client.Passwordless().<a href="passwordless.go">VerifyPasswordlessEmail</a>(ctx, options) -> (*VerifyPasswordLessResponse, error)</code></summary>
+<details><summary><code>client.Passwordless().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/passwordless.go">VerifyPasswordlessEmail</a>(ctx, options) -> (*VerifyPasswordLessResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -5195,7 +5195,7 @@ _ = verified
 </dl>
 </details>
 
-<details><summary><code>client.Passwordless().<a href="passwordless.go">ResendPasswordlessEmail</a>(ctx, authRequestId) -> (*SendPasswordlessResponse, error)</code></summary>
+<details><summary><code>client.Passwordless().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/passwordless.go">ResendPasswordlessEmail</a>(ctx, authRequestId) -> (*SendPasswordlessResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -5262,7 +5262,7 @@ _ = resp.AuthRequestId
 
 ## WebAuthn
 
-<details><summary><code>client.WebAuthn().<a href="webauthn.go">ListCredentials</a>(ctx, userId) -> (*ListCredentialsResponse, error)</code></summary>
+<details><summary><code>client.WebAuthn().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/webauthn.go">ListCredentials</a>(ctx, userId) -> (*ListCredentialsResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -5307,7 +5307,7 @@ Lists passkey credentials for a user. If `userId` is empty, the API may list cre
 </dl>
 </details>
 
-<details><summary><code>client.WebAuthn().<a href="webauthn.go">UpdateCredential</a>(ctx, credentialId, displayName) -> (*UpdateCredentialResponse, error)</code></summary>
+<details><summary><code>client.WebAuthn().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/webauthn.go">UpdateCredential</a>(ctx, credentialId, displayName) -> (*UpdateCredentialResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -5360,7 +5360,7 @@ Updates the display name of a passkey credential.
 </dl>
 </details>
 
-<details><summary><code>client.WebAuthn().<a href="webauthn.go">DeleteCredential</a>(ctx, credentialId) -> (*DeleteCredentialResponse, error)</code></summary>
+<details><summary><code>client.WebAuthn().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/webauthn.go">DeleteCredential</a>(ctx, credentialId) -> (*DeleteCredentialResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -5407,7 +5407,7 @@ Deletes a passkey credential by credential ID.
 
 ## Auth
 
-<details><summary><code>client.Auth().<a href="auth_service.go">UpdateLoginUserDetails</a>(ctx, req) -> error</code></summary>
+<details><summary><code>client.Auth().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/auth_service.go">UpdateLoginUserDetails</a>(ctx, req) -> error</code></summary>
 <dl>
 <dd>
 
