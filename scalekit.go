@@ -92,10 +92,11 @@ type AuthenticationOptions struct {
 }
 
 type AuthenticationResponse struct {
-	User        User
-	IdToken     string
-	AccessToken string
-	ExpiresIn   int
+	User         User
+	IdToken      string
+	AccessToken  string
+	ExpiresIn    int
+	RefreshToken string
 }
 
 type (
@@ -315,10 +316,11 @@ func (s *scalekitClient) AuthenticateWithCode(
 	}
 
 	return &AuthenticationResponse{
-		User:        *claims,
-		IdToken:     authResp.IdToken,
-		AccessToken: authResp.AccessToken,
-		ExpiresIn:   authResp.ExpiresIn,
+		User:         *claims,
+		IdToken:      authResp.IdToken,
+		AccessToken:  authResp.AccessToken,
+		ExpiresIn:    authResp.ExpiresIn,
+		RefreshToken: authResp.RefreshToken,
 	}, nil
 }
 
