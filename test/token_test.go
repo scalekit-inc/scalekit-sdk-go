@@ -9,6 +9,7 @@ import (
 	"github.com/scalekit-inc/scalekit-sdk-go/v2"
 	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/users"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCreateToken(t *testing.T) {
@@ -17,16 +18,17 @@ func TestCreateToken(t *testing.T) {
 	created, err := client.Token().CreateToken(ctx, testOrg, scalekit.CreateTokenOptions{
 		Description: "test token",
 	})
-	assert.NoError(t, err)
-	assert.NotNil(t, created)
+	require.NoError(t, err)
+	require.NotNil(t, created)
+
+	t.Cleanup(func() {
+		client.Token().InvalidateToken(ctx, created.Token)
+	})
+
 	assert.NotEmpty(t, created.Token)
 	assert.NotEmpty(t, created.TokenId)
 	assert.NotNil(t, created.TokenInfo)
 	assert.Equal(t, testOrg, created.TokenInfo.OrganizationId)
-
-	// Cleanup
-	err = client.Token().InvalidateToken(ctx, created.Token)
-	assert.NoError(t, err)
 }
 
 func TestCreateTokenWithCustomClaims(t *testing.T) {
@@ -41,17 +43,18 @@ func TestCreateTokenWithCustomClaims(t *testing.T) {
 		Description:  "token with claims",
 		CustomClaims: claims,
 	})
-	assert.NoError(t, err)
-	assert.NotNil(t, created)
+	require.NoError(t, err)
+	require.NotNil(t, created)
+
+	t.Cleanup(func() {
+		client.Token().InvalidateToken(ctx, created.Token)
+	})
+
 	assert.NotEmpty(t, created.Token)
 	assert.NotEmpty(t, created.TokenId)
 	assert.NotNil(t, created.TokenInfo)
 	assert.Equal(t, "engineering", created.TokenInfo.CustomClaims["team"])
 	assert.Equal(t, "test", created.TokenInfo.CustomClaims["environment"])
-
-	// Cleanup
-	err = client.Token().InvalidateToken(ctx, created.Token)
-	assert.NoError(t, err)
 }
 
 func TestCreateUserScopedToken(t *testing.T) {
@@ -68,8 +71,13 @@ func TestCreateUserScopedToken(t *testing.T) {
 	}
 
 	createdUser, err := client.User().CreateUserAndMembership(ctx, testOrg, newUser, false)
-	assert.NoError(t, err)
-	assert.NotNil(t, createdUser)
+	require.NoError(t, err)
+	require.NotNil(t, createdUser)
+
+	t.Cleanup(func() {
+		client.User().DeleteUser(ctx, createdUser.User.Id)
+	})
+
 	userId := createdUser.User.Id
 
 	// Create a user-scoped token
@@ -77,20 +85,19 @@ func TestCreateUserScopedToken(t *testing.T) {
 		UserId:      userId,
 		Description: "user scoped token",
 	})
-	assert.NoError(t, err)
-	assert.NotNil(t, created)
+	require.NoError(t, err)
+	require.NotNil(t, created)
+
+	t.Cleanup(func() {
+		client.Token().InvalidateToken(ctx, created.Token)
+	})
+
 	assert.NotEmpty(t, created.Token)
 	assert.NotEmpty(t, created.TokenId)
 	assert.NotNil(t, created.TokenInfo)
 	assert.Equal(t, testOrg, created.TokenInfo.OrganizationId)
 	assert.NotNil(t, created.TokenInfo.UserId)
 	assert.Equal(t, userId, *created.TokenInfo.UserId)
-
-	// Cleanup
-	err = client.Token().InvalidateToken(ctx, created.Token)
-	assert.NoError(t, err)
-	err = client.User().DeleteUser(ctx, userId)
-	assert.NoError(t, err)
 }
 
 func TestValidateTokenByOpaqueToken(t *testing.T) {
@@ -99,7 +106,12 @@ func TestValidateTokenByOpaqueToken(t *testing.T) {
 	created, err := client.Token().CreateToken(ctx, testOrg, scalekit.CreateTokenOptions{
 		Description: "validate test token",
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
+	require.NotNil(t, created)
+
+	t.Cleanup(func() {
+		client.Token().InvalidateToken(ctx, created.Token)
+	})
 
 	validated, err := client.Token().ValidateToken(ctx, created.Token)
 	assert.NoError(t, err)
@@ -107,10 +119,6 @@ func TestValidateTokenByOpaqueToken(t *testing.T) {
 	assert.NotNil(t, validated.TokenInfo)
 	assert.Equal(t, created.TokenId, validated.TokenInfo.TokenId)
 	assert.Equal(t, testOrg, validated.TokenInfo.OrganizationId)
-
-	// Cleanup
-	err = client.Token().InvalidateToken(ctx, created.Token)
-	assert.NoError(t, err)
 }
 
 func TestValidateTokenByTokenId(t *testing.T) {
@@ -119,7 +127,12 @@ func TestValidateTokenByTokenId(t *testing.T) {
 	created, err := client.Token().CreateToken(ctx, testOrg, scalekit.CreateTokenOptions{
 		Description: "validate by id test",
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
+	require.NotNil(t, created)
+
+	t.Cleanup(func() {
+		client.Token().InvalidateToken(ctx, created.Token)
+	})
 
 	validated, err := client.Token().ValidateToken(ctx, created.TokenId)
 	assert.NoError(t, err)
@@ -127,10 +140,6 @@ func TestValidateTokenByTokenId(t *testing.T) {
 	assert.NotNil(t, validated.TokenInfo)
 	assert.Equal(t, created.TokenId, validated.TokenInfo.TokenId)
 	assert.Equal(t, testOrg, validated.TokenInfo.OrganizationId)
-
-	// Cleanup
-	err = client.Token().InvalidateToken(ctx, created.Token)
-	assert.NoError(t, err)
 }
 
 func TestListTokens(t *testing.T) {
@@ -140,7 +149,12 @@ func TestListTokens(t *testing.T) {
 	created, err := client.Token().CreateToken(ctx, testOrg, scalekit.CreateTokenOptions{
 		Description: "list test token",
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
+	require.NotNil(t, created)
+
+	t.Cleanup(func() {
+		client.Token().InvalidateToken(ctx, created.Token)
+	})
 
 	listed, err := client.Token().ListTokens(ctx, testOrg, scalekit.ListTokensOptions{})
 	assert.NoError(t, err)
@@ -153,23 +167,20 @@ func TestListTokens(t *testing.T) {
 		assert.NotEmpty(t, token.TokenId)
 		assert.Equal(t, testOrg, token.OrganizationId)
 	}
-
-	// Cleanup
-	err = client.Token().InvalidateToken(ctx, created.Token)
-	assert.NoError(t, err)
 }
 
 func TestListTokensWithPagination(t *testing.T) {
 	ctx := context.Background()
 
 	// Create 3 tokens
-	var tokenOpaques []string
 	for i := 0; i < 3; i++ {
 		created, err := client.Token().CreateToken(ctx, testOrg, scalekit.CreateTokenOptions{
 			Description: fmt.Sprintf("pagination test token %d", i),
 		})
-		assert.NoError(t, err)
-		tokenOpaques = append(tokenOpaques, created.Token)
+		require.NoError(t, err)
+		t.Cleanup(func() {
+			client.Token().InvalidateToken(ctx, created.Token)
+		})
 	}
 
 	// List with page size 1
@@ -192,12 +203,6 @@ func TestListTokensWithPagination(t *testing.T) {
 
 	// Ensure different tokens on different pages
 	assert.NotEqual(t, page1.Tokens[0].TokenId, page2.Tokens[0].TokenId)
-
-	// Cleanup
-	for _, opaque := range tokenOpaques {
-		err = client.Token().InvalidateToken(ctx, opaque)
-		assert.NoError(t, err)
-	}
 }
 
 func TestInvalidateToken(t *testing.T) {
@@ -206,7 +211,13 @@ func TestInvalidateToken(t *testing.T) {
 	created, err := client.Token().CreateToken(ctx, testOrg, scalekit.CreateTokenOptions{
 		Description: "invalidate test token",
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
+	require.NotNil(t, created)
+
+	t.Cleanup(func() {
+		// Safe to call even if already invalidated (idempotent)
+		client.Token().InvalidateToken(ctx, created.Token)
+	})
 
 	// Invalidate the token
 	err = client.Token().InvalidateToken(ctx, created.Token)
@@ -224,7 +235,8 @@ func TestInvalidateTokenIdempotent(t *testing.T) {
 	created, err := client.Token().CreateToken(ctx, testOrg, scalekit.CreateTokenOptions{
 		Description: "idempotent invalidate test",
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
+	require.NotNil(t, created)
 
 	// Invalidate twice - second should not error
 	err = client.Token().InvalidateToken(ctx, created.Token)
