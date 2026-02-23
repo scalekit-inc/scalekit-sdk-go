@@ -3,8 +3,8 @@ package scalekit
 import (
 	"context"
 	"errors"
-	"fmt"
 
+	connect "connectrpc.com/connect"
 	tokensv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/tokens"
 	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/tokens/tokensconnect"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -88,7 +88,13 @@ func (t *tokenService) ValidateToken(ctx context.Context, token string) (*Valida
 		},
 	).exec(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %v", ErrTokenValidationFailed, err)
+		var cErr *connect.Error
+		if errors.As(err, &cErr) && (cErr.Code() == connect.CodeUnauthenticated ||
+			cErr.Code() == connect.CodeNotFound ||
+			cErr.Code() == connect.CodePermissionDenied) {
+			return nil, errors.Join(ErrTokenValidationFailed, err)
+		}
+		return nil, err
 	}
 	return result, nil
 }
