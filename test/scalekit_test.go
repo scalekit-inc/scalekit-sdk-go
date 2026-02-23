@@ -3,16 +3,21 @@ package test
 import (
 	"context"
 	"crypto/hmac"
+	"crypto/rand"
+	"crypto/rsa"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
+	"github.com/go-jose/go-jose/v4"
 	"github.com/scalekit-inc/scalekit-sdk-go/v2"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAuthenticateWithCode(t *testing.T) {
@@ -23,45 +28,94 @@ func TestAuthenticateWithCode(t *testing.T) {
 		assertFn func(t *testing.T, resp *scalekit.AuthenticationResponse, err error)
 	}{
 		{
-			name: "successful authentication",
+			name: "successful_authentication",
 			req: func() (string, string, scalekit.AuthenticationOptions) {
 				return "test_code", "http://localhost/callback", scalekit.AuthenticationOptions{}
 			},
-			mockFn: func(w http.ResponseWriter, r *http.Request) {
-				switch r.URL.Path {
-				case "/keys":
-					w.Header().Set("Content-Type", "application/json")
-					resp := `{"keys":[{"use":"sig","kty":"RSA","kid":"snk_17002334227791972","alg":"RS256","n":"8HgCyscnWpT78Jscy7GOSrdK30R8AkBu7BSsXPnWNTCBMmdoRYa2kJf4al9XXW28FNYwM9oHAxCFsiRQna_ouClsRyW1_rYXxqQeeW4GvI1uRpq-3kgRvDm1cjekXH4a0bu_cGNcdTVherrUiBH3WoHxnIMTO0i__BD0qbyh4teUfYaoRgE8T-zsBB_QGdDfMl7EfGLIFgI8eTZFGn_-ONpV9Z9HvVefnyr4Oibyu58z77cOytd6r4lCF0dErAUkjiPNk-cTUDv-QRBNLG4uNcLEqgKL-nvNW-7JrUMiWCcrkHKUlwUncuMvbwWrLlT_dJp7XRjN8RampGUEQUbzGw","e":"AQAB"}]}`
-					w.Write([]byte(resp))
-				case "/oauth/token":
-					w.Header().Set("Content-Type", "application/json")
-					resp := `{
-                        "access_token": "mock_access_token",
-                        "id_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6InNua18xNzAwMjMzNDIyNzc5MTk3MiIsInR5cCI6IkpXVCJ9.eyJhbXIiOlsiY29ubl82MDM1ODU1NTczOTM4ODIxMCJdLCJhdF9oYXNoIjoid2hCTHlyWVJFdGtXaHY2ekM2T09hdyIsImF1ZCI6WyJwcmRfc2tjXzE3MDAyMzM0MjI3ODU3NTA4Il0sImF6cCI6InByZF9za2NfMTcwMDIzMzQyMjc4NTc1MDgiLCJjX2hhc2giOiJHY2NRZW9tSG1JNmNqNTUyOUtnenFRIiwiY2xpZW50X2lkIjoicHJkX3NrY18xNzAwMjMzNDIyNzg1NzUwOCIsImVtYWlsIjoic3JpbnZhc2thcnJhQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJleHAiOjE3NDg1NDE4NzIsImdpdmVuX25hbWUiOiJzcmludmFza2FycmEiLCJpYXQiOjE3NDg1NDAwNzIsImlzcyI6Imh0dHA6Ly9haXJkZXYubG9jYWxob3N0Ojg4ODgiLCJuYW1lIjoiZ21haWwiLCJvaWQiOiJvcmdfNzIyOTgzMDI5ODAyMjcxNzUiLCJzaWQiOiJzZXNfNzQ2MTI5NDQ4OTMxMTY1MTgiLCJzdWIiOiJ1c3JfNzIyOTc4NTM0NjgyNzg4ODcifQ.Arti6kfBAjJI2sxy97bTGJwANKOdjfxfIBAdpEeL931pG-Rc89iN9vyyKK6V2W4CSAIF1qsWYJwVeSg0yKBC-w94n-79x5D1f3AydVE_Pp-YSN_8asLJlWQrbnQPOI6SSlItVQdV_1ag2D_CcpQpkYNhrv_AHC9fmIhlabMWCYx-vRFKqr0Jj9BWVjkynIG6wb3m7lbijt2_bnF135-3ob7dRJ0B_f0ZdIBli_numj6ik5Q-PpHrUP5UcZHO0ieE2jqC_z9sF-Msmn2xUYPhJCd2JkFOaEKDULI5k_-01Gyk-1zFWNBDJjKiFu8SjIQDU5nGVc2Hrbptxu7Aoqx8BA",
-                        "expires_in": 3600
-                    }`
-					w.Write([]byte(resp))
+			mockFn: func() func(http.ResponseWriter, *http.Request) {
+				// One key pair for both /keys and /oauth/token so JWKS matches signed tokens
+				privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+				if err != nil {
+					return func(w http.ResponseWriter, _ *http.Request) {
+						http.Error(w, err.Error(), http.StatusInternalServerError)
+					}
 				}
-			},
+				keyID := "mock-kid"
+				signer, err := jose.NewSigner(jose.SigningKey{Algorithm: jose.RS256, Key: privateKey}, (&jose.SignerOptions{}).WithHeader("kid", keyID))
+				if err != nil {
+					return func(w http.ResponseWriter, _ *http.Request) {
+						http.Error(w, err.Error(), http.StatusInternalServerError)
+					}
+				}
+				jwk := jose.JSONWebKey{
+					Key:       privateKey.Public(),
+					KeyID:     keyID,
+					Algorithm: string(jose.RS256),
+					Use:       "sig",
+				}
+				keySet := &jose.JSONWebKeySet{Keys: []jose.JSONWebKey{jwk}}
+
+				return func(w http.ResponseWriter, r *http.Request) {
+					switch r.URL.Path {
+					case "/keys":
+						w.Header().Set("Content-Type", "application/json")
+						_ = json.NewEncoder(w).Encode(keySet)
+					case "/oauth/token":
+						now := time.Now()
+						iat := now.Unix()
+						exp := now.Add(time.Hour).Unix()
+						idClaims := map[string]interface{}{
+							"sub":            "usr_mock123",
+							"name":           "Mock User",
+							"email":          "mock@example.com",
+							"given_name":     "Mock",
+							"family_name":   "User",
+							"email_verified": true,
+							"iat":            iat,
+							"exp":            exp,
+							"oid":            "org_mock456",
+							"sid":            "ses_mock789",
+						}
+						idTokenPayload, _ := json.Marshal(idClaims)
+						idToken, err := signer.Sign(idTokenPayload)
+						if err != nil {
+							http.Error(w, err.Error(), http.StatusInternalServerError)
+							return
+						}
+						idTokenCompact, _ := idToken.CompactSerialize()
+
+						atClaims := map[string]interface{}{
+							"sub": "conn_1;user@example.com",
+							"iss": "https://mock.example.com",
+							"aud": []string{"prd_skc_mock"},
+							"iat": iat,
+							"exp": exp,
+						}
+						atPayload, _ := json.Marshal(atClaims)
+						atSigned, _ := signer.Sign(atPayload)
+						accessToken, _ := atSigned.CompactSerialize()
+
+						w.Header().Set("Content-Type", "application/json")
+						resp := map[string]interface{}{
+							"access_token": accessToken,
+							"id_token":     idTokenCompact,
+							"expires_in":   3600,
+						}
+						_ = json.NewEncoder(w).Encode(resp)
+					}
+				}
+			}(),
 			assertFn: func(t *testing.T, resp *scalekit.AuthenticationResponse, err error) {
-				assert.NoError(t, err)
-				assert.NotNil(t, resp)
-				assert.Equal(t, "mock_access_token", resp.AccessToken)
+				require.NoError(t, err)
+				require.NotNil(t, resp)
 				assert.Equal(t, 3600, resp.ExpiresIn)
-
-				// Verify parsed claims
-				assert.Equal(t, "usr_72297853468278887", resp.User.Id)
-				assert.Equal(t, "gmail", resp.User.Name)
-				assert.Equal(t, "srinvaskarra@gmail.com", resp.User.Email)
-
-				// Verify custom claims
-				rawClaims := resp.User.Claims
-				assert.Equal(t, "usr_72297853468278887", rawClaims["sub"])
-				assert.Equal(t, "org_72298302980227175", rawClaims["oid"])
-				assert.Equal(t, "ses_74612944893116518", rawClaims["sid"])
+				assert.NotEmpty(t, resp.AccessToken)
+				assert.NotEmpty(t, resp.IdToken)
+				assert.Equal(t, "usr_mock123", resp.User.Id)
+				assert.Equal(t, "Mock User", resp.User.Name)
+				assert.Equal(t, "mock@example.com", resp.User.Email)
 			},
 		},
-		// Add more test cases here as needed
 	}
 
 	for _, tt := range tests {
