@@ -126,7 +126,7 @@ func main() {
     code := r.URL.Query().Get("code")
     state := r.URL.Query().Get("state")
 
-    authResp, _ := scalekitClient.AuthenticateWithCode(code, redirectUri)
+    authResp, _ := scalekitClient.AuthenticateWithCode(r.Context(), code, redirectUri, scalekit.AuthenticationOptions{})
 
     http.SetCookie(w, &http.Cookie{
       Name: "access_token",

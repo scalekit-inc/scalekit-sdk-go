@@ -107,7 +107,7 @@ func (r *connectExecuter[TRequest, TResponse]) exec(ctx context.Context) (*TResp
 			}
 
 			if isUnAuthenticatedError {
-				_ = r.coreClient.authenticateClient()
+				_ = r.coreClient.authenticateClient(ctx)
 				r.retries++
 				return r.exec(ctx)
 			}

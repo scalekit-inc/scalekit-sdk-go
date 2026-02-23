@@ -1,6 +1,7 @@
 package test
 
 import (
+	"context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
@@ -70,7 +71,7 @@ func TestAuthenticateWithCode(t *testing.T) {
 
 			client := scalekit.NewScalekitClient(server.URL, "client_id", "client_secret")
 			code, redirectUri, options := tt.req()
-			resp, err := client.AuthenticateWithCode(code, redirectUri, options)
+			resp, err := client.AuthenticateWithCode(context.Background(), code, redirectUri, options)
 			tt.assertFn(t, resp, err)
 		})
 	}
@@ -118,7 +119,7 @@ func TestGetAccessToken(t *testing.T) {
 			defer server.Close()
 
 			client := scalekit.NewScalekitClient(server.URL, "client_id", "client_secret")
-			token, err := client.GetAccessTokenClaims(tt.token)
+			token, err := client.GetAccessTokenClaims(context.Background(), tt.token)
 			tt.assertFn(t, token, err)
 		})
 	}
@@ -331,7 +332,7 @@ func TestGetIdpInitiatedLoginClaims(t *testing.T) {
 			defer server.Close()
 
 			client := scalekit.NewScalekitClient(server.URL, "client_id", "client_secret")
-			claims, err := client.GetIdpInitiatedLoginClaims(tt.token)
+			claims, err := client.GetIdpInitiatedLoginClaims(context.Background(), tt.token)
 			tt.assertFn(t, claims, err)
 		})
 	}
@@ -414,7 +415,7 @@ func TestValidateAccessToken(t *testing.T) {
 			defer server.Close()
 
 			client := scalekit.NewScalekitClient(server.URL, "client_id", "client_secret")
-			isValid, err := client.ValidateAccessToken(tt.token)
+			isValid, err := client.ValidateAccessToken(context.Background(), tt.token)
 			tt.assertFn(t, isValid, err)
 		})
 	}

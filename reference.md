@@ -162,7 +162,7 @@ if err != nil {
 </dl>
 </details>
 
-<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">AuthenticateWithCode</a>(code, redirectUri, options) -> (*AuthenticationResponse, error)</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">AuthenticateWithCode</a>(ctx, code, redirectUri, options) -> (*AuthenticationResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -192,6 +192,7 @@ Call this in your redirect handler after receiving the `code` query parameter.
 
 ```go
 resp, err := client.AuthenticateWithCode(
+  ctx,
   code,
   "https://yourapp.com/auth/callback",
   scalekit.AuthenticationOptions{},
@@ -246,7 +247,7 @@ _ = user
 </dl>
 </details>
 
-<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">GetIdpInitiatedLoginClaims</a>(idpInitiatedLoginToken) -> (*IdpInitiatedLoginClaims, error)</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">GetIdpInitiatedLoginClaims</a>(ctx, idpInitiatedLoginToken) -> (*IdpInitiatedLoginClaims, error)</code></summary>
 <dl>
 <dd>
 
@@ -275,7 +276,7 @@ Use this method when handling IdP-initiated SSO flows, where authentication is i
 <dd>
 
 ```go
-claims, err := client.GetIdpInitiatedLoginClaims(idpInitiatedLoginToken)
+claims, err := client.GetIdpInitiatedLoginClaims(ctx, idpInitiatedLoginToken)
 if err != nil {
   // handle
 }
@@ -307,7 +308,7 @@ _ = claims
 </dl>
 </details>
 
-<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">GetAccessTokenClaims</a>(accessToken) -> (*AccessTokenClaims, error)</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">GetAccessTokenClaims</a>(ctx, accessToken) -> (*AccessTokenClaims, error)</code></summary>
 <dl>
 <dd>
 
@@ -334,7 +335,7 @@ Parses and validates an access token and returns its claims.
 <dd>
 
 ```go
-claims, err := client.GetAccessTokenClaims(accessToken)
+claims, err := client.GetAccessTokenClaims(ctx, accessToken)
 if err != nil {
   // handle
 }
@@ -364,7 +365,7 @@ _ = claims
 </dl>
 </details>
 
-<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">ValidateAccessToken</a>(accessToken) -> (bool, error)</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">ValidateAccessToken</a>(ctx, accessToken) -> (bool, error)</code></summary>
 <dl>
 <dd>
 
@@ -391,7 +392,7 @@ Validates an access token (including expiration checks) and returns whether it i
 <dd>
 
 ```go
-ok, err := client.ValidateAccessToken(accessToken)
+ok, err := client.ValidateAccessToken(ctx, accessToken)
 if err != nil {
   // invalid
 }
@@ -421,7 +422,7 @@ _ = ok
 </dl>
 </details>
 
-<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">RefreshAccessToken</a>(refreshToken) -> (*TokenResponse, error)</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">RefreshAccessToken</a>(ctx, refreshToken) -> (*TokenResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -448,7 +449,7 @@ Exchanges a refresh token for a new access token (and optionally a new refresh t
 <dd>
 
 ```go
-tokens, err := client.RefreshAccessToken(refreshToken)
+tokens, err := client.RefreshAccessToken(ctx, refreshToken)
 if err != nil {
   // handle
 }
