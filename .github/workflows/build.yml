@@ -38,6 +38,10 @@ jobs:
         run: go vet ./...
 
       - name: Run tests
+        env:
+          SCALEKIT_ENVIRONMENT_URL: ${{ secrets.SCALEKIT_ENVIRONMENT_URL }}
+          SCALEKIT_CLIENT_ID: ${{ secrets.SCALEKIT_CLIENT_ID }}
+          SCALEKIT_CLIENT_SECRET: ${{ secrets.SCALEKIT_CLIENT_SECRET }}
         run: go test -race -v ./...
 
       - name: Go modules sync

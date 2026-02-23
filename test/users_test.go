@@ -61,25 +61,25 @@ func TestUser_ListOrganizationUsers(t *testing.T) {
 	assert.Equal(t, firstUser.Email, user.User.Email)
 	assert.NotEmpty(t, user.User.EnvironmentId)
 
-	// Update first user profile
-	firstName := "John"
-	lastName := "Doe"
+	// Update first user profile (use GivenName/FamilyName; FirstName/LastName are deprecated)
+	givenName := "John"
+	familyName := "Doe"
 	name := "John Doe"
 	locale := "en-US"
 	updateRequest := &users.UpdateUser{
 		UserProfile: &users.UpdateUserProfile{
-			FirstName: &firstName,
-			LastName:  &lastName,
-			Name:      &name,
-			Locale:    &locale,
+			GivenName:  &givenName,
+			FamilyName: &familyName,
+			Name:       &name,
+			Locale:     &locale,
 		},
 	}
 	updatedUser, err := client.User().UpdateUser(ctx, firstUser.Id, updateRequest)
 	require.NoError(t, err)
 	require.NotNil(t, updatedUser)
 	require.NotNil(t, updatedUser.User.UserProfile)
-	assert.Equal(t, "John", updatedUser.User.UserProfile.FirstName)
-	assert.Equal(t, "Doe", updatedUser.User.UserProfile.LastName)
+	assert.Equal(t, "John", updatedUser.User.UserProfile.GivenName)
+	assert.Equal(t, "Doe", updatedUser.User.UserProfile.FamilyName)
 	assert.Equal(t, "John Doe", updatedUser.User.UserProfile.Name)
 	assert.Equal(t, "en-US", updatedUser.User.UserProfile.Locale)
 
