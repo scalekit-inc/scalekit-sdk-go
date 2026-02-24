@@ -3,6 +3,7 @@ package scalekit
 import (
 	"context"
 	"errors"
+	"time"
 
 	connect "connectrpc.com/connect"
 	tokensv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/tokens"
@@ -18,7 +19,7 @@ type TokenInfo = tokensv1.Token
 type CreateTokenOptions struct {
 	UserId       string
 	CustomClaims map[string]string
-	Expiry       *timestamppb.Timestamp
+	Expiry       *time.Time
 	Description  string
 }
 
@@ -61,7 +62,7 @@ func (t *tokenService) CreateToken(ctx context.Context, organizationId string, o
 		createToken.CustomClaims = options.CustomClaims
 	}
 	if options.Expiry != nil {
-		createToken.Expiry = options.Expiry
+		createToken.Expiry = timestamppb.New(*options.Expiry)
 	}
 	if options.Description != "" {
 		createToken.Description = options.Description
