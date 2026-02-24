@@ -23,6 +23,7 @@ func TestOrganization_EndToEndIntegration(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NotNil(t, createdOrganization)
+	require.NotNil(t, createdOrganization.GetOrganization())
 	defer DeleteTestOrganization(t, ctx, createdOrganization.GetOrganization().GetId())
 
 	assert.Equal(t, TestOrgName, createdOrganization.GetOrganization().GetDisplayName())
@@ -30,6 +31,7 @@ func TestOrganization_EndToEndIntegration(t *testing.T) {
 
 	retrievedOrganizationById, err := client.Organization().GetOrganization(ctx, createdOrganization.GetOrganization().GetId())
 	require.NoError(t, err)
+	require.NotNil(t, retrievedOrganizationById.GetOrganization())
 	assert.Equal(t, createdOrganization.GetOrganization().GetId(), retrievedOrganizationById.GetOrganization().GetId())
 	assert.Equal(t, createdOrganization.GetOrganization().GetExternalId(), retrievedOrganizationById.GetOrganization().GetExternalId())
 
@@ -92,8 +94,12 @@ func TestOrganization_UpdateOrganizationSettings(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, updatedOrganization)
 	require.True(t, len(updatedOrganization.GetOrganization().GetSettings().GetFeatures()) >= 2)
-	assert.True(t, updatedOrganization.GetOrganization().GetSettings().GetFeatures()[0].GetEnabled())
-	assert.True(t, updatedOrganization.GetOrganization().GetSettings().GetFeatures()[1].GetEnabled())
+	enabledFeatures := map[string]bool{}
+	for _, f := range updatedOrganization.GetOrganization().GetSettings().GetFeatures() {
+		enabledFeatures[f.GetName()] = f.GetEnabled()
+	}
+	assert.True(t, enabledFeatures["sso"])
+	assert.True(t, enabledFeatures["dir_sync"])
 
 	featuresDisable := scalekit.OrganizationSettings{
 		Features: []scalekit.Feature{
@@ -103,8 +109,12 @@ func TestOrganization_UpdateOrganizationSettings(t *testing.T) {
 	}
 	updatedOrganization, err = client.Organization().UpdateOrganizationSettings(ctx, orgId, featuresDisable)
 	require.NoError(t, err)
-	assert.False(t, updatedOrganization.GetOrganization().GetSettings().GetFeatures()[0].GetEnabled())
-	assert.False(t, updatedOrganization.GetOrganization().GetSettings().GetFeatures()[1].GetEnabled())
+	disabledFeatures := map[string]bool{}
+	for _, f := range updatedOrganization.GetOrganization().GetSettings().GetFeatures() {
+		disabledFeatures[f.GetName()] = f.GetEnabled()
+	}
+	assert.False(t, disabledFeatures["sso"])
+	assert.False(t, disabledFeatures["dir_sync"])
 }
 
 func TestOrganization_UpsertUserManagementSettings(t *testing.T) {
@@ -128,6 +138,7 @@ func TestOrganization_UpsertUserManagementSettings(t *testing.T) {
 		MaxAllowedUsers: toInt32Ptr(updatedMaxUsers),
 	})
 	require.NoError(t, err)
+	require.NotNil(t, settings.GetMaxAllowedUsers())
 	assert.Equal(t, updatedMaxUsers, settings.GetMaxAllowedUsers().GetValue())
 }
 
@@ -140,6 +151,7 @@ func TestOrganization_CreateOrganization_WithMetadata(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NotNil(t, createdOrganization)
+	require.NotNil(t, createdOrganization.GetOrganization())
 	defer DeleteTestOrganization(t, ctx, createdOrganization.GetOrganization().GetId())
 
 	assert.Equal(t, TestOrgName, createdOrganization.GetOrganization().GetDisplayName())

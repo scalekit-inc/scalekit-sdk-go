@@ -41,6 +41,7 @@ func TestDirectory_EndToEndIntegration(t *testing.T) {
 
 	listResp, err := client.Directory().ListDirectories(ctx, orgId)
 	require.NoError(t, err)
+	require.NotNil(t, listResp)
 	require.True(t, len(listResp.GetDirectories()) > 0)
 	var found bool
 	for _, d := range listResp.GetDirectories() {
@@ -91,6 +92,7 @@ func TestDirectory_GetPrimaryDirectoryByOrganizationId(t *testing.T) {
 		t.Skipf("CreateDirectory not supported: %v", err)
 	}
 	require.NotNil(t, createResp)
+	require.NotNil(t, createResp.GetDirectory())
 	defer DeleteTestDirectory(t, ctx, orgId, createResp.GetDirectory().GetId())
 
 	primary, err := client.Directory().GetPrimaryDirectoryByOrganizationId(ctx, orgId)
@@ -117,6 +119,7 @@ func TestDirectory_ListDirectoryUsers_UpdatedAfter(t *testing.T) {
 		t.Skipf("CreateDirectory not supported: %v", err)
 	}
 	require.NotNil(t, createResp)
+	require.NotNil(t, createResp.GetDirectory())
 	defer DeleteTestDirectory(t, ctx, orgId, createResp.GetDirectory().GetId())
 
 	updatedAfter := time.Unix(1729851960, 0)

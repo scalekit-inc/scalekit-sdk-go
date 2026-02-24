@@ -109,6 +109,7 @@ func TestDomain_EndToEndIntegration(t *testing.T) {
 	created, err := client.Domain().CreateDomain(ctx, orgId, domainName)
 	require.NoError(t, err)
 	require.NotNil(t, created)
+	require.NotNil(t, created.GetDomain())
 	domainId := created.GetDomain().GetId()
 	require.NotEmpty(t, domainId)
 
@@ -135,6 +136,7 @@ func TestDomain_ListDomainsWithFilters(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NotNil(t, orgDomain)
+	require.NotNil(t, orgDomain.GetDomain())
 	defer DeleteTestDomain(t, ctx, orgId, orgDomain.GetDomain().GetId())
 
 	allowedName := uniqueDomainName("list-allowed")
@@ -143,6 +145,7 @@ func TestDomain_ListDomainsWithFilters(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NotNil(t, allowedDomain)
+	require.NotNil(t, allowedDomain.GetDomain())
 	defer DeleteTestDomain(t, ctx, orgId, allowedDomain.GetDomain().GetId())
 
 	allList, err := client.Domain().ListDomains(ctx, orgId)
@@ -201,6 +204,7 @@ func TestDomain_CreateDomain_BackwardCompatibility(t *testing.T) {
 	withOpts, err := client.Domain().CreateDomain(ctx, orgId, withOptsName, opts)
 	require.NoError(t, err)
 	require.NotNil(t, withOpts)
+	require.NotNil(t, withOpts.GetDomain())
 	defer DeleteTestDomain(t, ctx, orgId, withOpts.GetDomain().GetId())
 	assert.Equal(t, withOptsName, withOpts.GetDomain().GetDomain())
 	assert.Equal(t, domains.DomainType_ALLOWED_EMAIL_DOMAIN, withOpts.GetDomain().GetDomainType())
