@@ -133,6 +133,181 @@ func TestAuthenticateWithCode(t *testing.T) {
 	}
 }
 
+func TestAuthenticateWithCode_ClientSecretBehaviorByClientType(t *testing.T) {
+	type testCase struct {
+		name                  string
+		clientType            string
+		usePKCE               bool
+		includeSecretAtInit   bool
+		expectSecretInTokenRq bool
+	}
+
+	tests := []testCase{
+		{
+			name:                  "WEB_APP with PKCE should not send client_secret",
+			clientType:            "WEB_APP",
+			usePKCE:               true,
+			includeSecretAtInit:   false,
+			expectSecretInTokenRq: false,
+		},
+		{
+			name:                  "WEB_APP without PKCE should send client_secret",
+			clientType:            "WEB_APP",
+			usePKCE:               false,
+			includeSecretAtInit:   true,
+			expectSecretInTokenRq: true,
+		},
+		{
+			name:                  "SPA with PKCE should not send client_secret",
+			clientType:            "SPA",
+			usePKCE:               true,
+			includeSecretAtInit:   false,
+			expectSecretInTokenRq: false,
+		},
+		{
+			name:                  "NTV with PKCE should not send client_secret",
+			clientType:            "NTV",
+			usePKCE:               true,
+			includeSecretAtInit:   false,
+			expectSecretInTokenRq: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+			require.NoError(t, err)
+
+			keyID := "mock-kid"
+			signer, err := jose.NewSigner(
+				jose.SigningKey{Algorithm: jose.RS256, Key: privateKey},
+				(&jose.SignerOptions{}).WithHeader("kid", keyID),
+			)
+			require.NoError(t, err)
+
+			jwk := jose.JSONWebKey{
+				Key:       privateKey.Public(),
+				KeyID:     keyID,
+				Algorithm: string(jose.RS256),
+				Use:       "sig",
+			}
+			keySet := &jose.JSONWebKeySet{Keys: []jose.JSONWebKey{jwk}}
+
+			var expectedVerifier string
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				switch r.URL.Path {
+				case "/keys":
+					w.Header().Set("Content-Type", "application/json")
+					_ = json.NewEncoder(w).Encode(keySet)
+				case "/oauth/token":
+					require.NoError(t, r.ParseForm())
+					assert.Equal(t, "test_code", r.FormValue("code"))
+					assert.Equal(t, "http://localhost/callback", r.FormValue("redirect_uri"))
+					assert.Equal(t, "authorization_code", r.FormValue("grant_type"))
+					assert.Equal(t, "client_id", r.FormValue("client_id"))
+
+					if tt.expectSecretInTokenRq {
+						assert.Equal(t, "client_secret", r.FormValue("client_secret"))
+					} else {
+						assert.Empty(t, r.FormValue("client_secret"))
+					}
+
+					if tt.usePKCE {
+						assert.Equal(t, expectedVerifier, r.FormValue("code_verifier"))
+					} else {
+						assert.Empty(t, r.FormValue("code_verifier"))
+					}
+
+					now := time.Now()
+					iat := now.Unix()
+					exp := now.Add(time.Hour).Unix()
+
+					idClaims := map[string]interface{}{
+						"sub":            "usr_mock123",
+						"name":           "Mock User",
+						"email":          "mock@example.com",
+						"given_name":     "Mock",
+						"family_name":    "User",
+						"email_verified": true,
+						"iat":            iat,
+						"exp":            exp,
+					}
+					idTokenPayload, _ := json.Marshal(idClaims)
+					idToken, signErr := signer.Sign(idTokenPayload)
+					require.NoError(t, signErr)
+					idTokenCompact, _ := idToken.CompactSerialize()
+
+					atClaims := map[string]interface{}{
+						"sub": "conn_1;user@example.com",
+						"iss": "https://mock.example.com",
+						"aud": []string{"prd_skc_mock"},
+						"iat": iat,
+						"exp": exp,
+					}
+					atPayload, _ := json.Marshal(atClaims)
+					atSigned, signErr := signer.Sign(atPayload)
+					require.NoError(t, signErr)
+					accessToken, _ := atSigned.CompactSerialize()
+
+					w.Header().Set("Content-Type", "application/json")
+					_ = json.NewEncoder(w).Encode(map[string]interface{}{
+						"access_token": accessToken,
+						"id_token":     idTokenCompact,
+						"expires_in":   3600,
+					})
+				default:
+					http.NotFound(w, r)
+				}
+			}))
+			defer server.Close()
+
+			var multiAppClient scalekit.Scalekit
+			if tt.includeSecretAtInit {
+				multiAppClient = scalekit.NewScalekitClient(server.URL, "client_id", "client_secret")
+			} else {
+				multiAppClient = scalekit.NewScalekitClient(server.URL, "client_id")
+			}
+
+			authOptions := scalekit.AuthorizationUrlOptions{
+				State: "state-" + strings.ToLower(tt.clientType),
+			}
+			codeOptions := scalekit.AuthenticationOptions{}
+
+			if tt.usePKCE {
+				pkceCfg, pkceErr := multiAppClient.GeneratePKCEConfiguration(scalekit.PKCEOptions{})
+				require.NoError(t, pkceErr)
+				expectedVerifier = pkceCfg.CodeVerifier
+				authOptions.CodeChallenge = pkceCfg.CodeChallenge
+				authOptions.CodeChallengeMethod = pkceCfg.CodeChallengeMethod
+				codeOptions.CodeVerifier = pkceCfg.CodeVerifier
+			}
+
+			authURL, err := multiAppClient.GetAuthorizationUrl("http://localhost/callback", authOptions)
+			require.NoError(t, err)
+			require.NotNil(t, authURL)
+
+			if tt.usePKCE {
+				assert.Equal(t, authOptions.CodeChallenge, authURL.Query().Get("code_challenge"))
+				assert.Equal(t, authOptions.CodeChallengeMethod, authURL.Query().Get("code_challenge_method"))
+			} else {
+				assert.Empty(t, authURL.Query().Get("code_challenge"))
+				assert.Empty(t, authURL.Query().Get("code_challenge_method"))
+			}
+
+			resp, err := multiAppClient.AuthenticateWithCode(
+				context.Background(),
+				"test_code",
+				"http://localhost/callback",
+				codeOptions,
+			)
+			require.NoError(t, err)
+			require.NotNil(t, resp)
+			assert.Equal(t, "usr_mock123", resp.User.Id)
+			assert.Equal(t, "Mock User", resp.User.Name)
+		})
+	}
+}
+
 func TestGetAccessToken(t *testing.T) {
 	type testCase struct {
 		name     string
