@@ -14,7 +14,6 @@ import (
 )
 
 func TestUser_ListOrganizationUsers(t *testing.T) {
-	SkipIfNoIntegrationEnv(t)
 	ctx := context.Background()
 	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
 	defer DeleteTestOrganization(t, ctx, orgId)
@@ -25,13 +24,13 @@ func TestUser_ListOrganizationUsers(t *testing.T) {
 	user1, err := client.User().CreateUserAndMembership(ctx, orgId, &users.CreateUser{Email: email1, Metadata: map[string]string{"source": "list_test"}}, false)
 	require.NoError(t, err)
 	require.NotNil(t, user1)
-	require.NotEmpty(t, user1.User.Id)
-	defer func() { _ = client.User().DeleteUser(ctx, user1.User.Id) }()
+	require.NotEmpty(t, user1.GetUser().GetId())
+	defer func() { _ = client.User().DeleteUser(ctx, user1.GetUser().GetId()) }()
 	user2, err := client.User().CreateUserAndMembership(ctx, orgId, &users.CreateUser{Email: email2, Metadata: map[string]string{"source": "list_test"}}, false)
 	require.NoError(t, err)
 	require.NotNil(t, user2)
-	require.NotEmpty(t, user2.User.Id)
-	defer func() { _ = client.User().DeleteUser(ctx, user2.User.Id) }()
+	require.NotEmpty(t, user2.GetUser().GetId())
+	defer func() { _ = client.User().DeleteUser(ctx, user2.GetUser().GetId()) }()
 
 	usersList, err := client.User().ListOrganizationUsers(ctx, orgId, &scalekit.ListUsersOptions{
 		PageSize:  10,
@@ -39,27 +38,27 @@ func TestUser_ListOrganizationUsers(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NotNil(t, usersList)
-	require.GreaterOrEqual(t, len(usersList.Users), 2, "expected at least 2 users from list")
+	require.GreaterOrEqual(t, len(usersList.GetUsers()), 2, "expected at least 2 users from list")
 
 	// Verify both created users appear in list
 	ids := make(map[string]bool)
-	for _, u := range usersList.Users {
-		ids[u.Id] = true
-		require.NotEmpty(t, u.Id)
-		require.NotEmpty(t, u.Email)
+	for _, u := range usersList.GetUsers() {
+		ids[u.GetId()] = true
+		require.NotEmpty(t, u.GetId())
+		require.NotEmpty(t, u.GetEmail())
 	}
-	require.True(t, ids[user1.User.Id], "user1 should be in list")
-	require.True(t, ids[user2.User.Id], "user2 should be in list")
+	require.True(t, ids[user1.GetUser().GetId()], "user1 should be in list")
+	require.True(t, ids[user2.GetUser().GetId()], "user2 should be in list")
 
 	// Get and verify first user
-	firstUser := usersList.Users[0]
-	user, err := client.User().GetUser(ctx, firstUser.Id)
+	firstUser := usersList.GetUsers()[0]
+	user, err := client.User().GetUser(ctx, firstUser.GetId())
 	require.NoError(t, err)
 	require.NotNil(t, user)
-	require.NotNil(t, user.User)
-	assert.Equal(t, firstUser.Id, user.User.Id)
-	assert.Equal(t, firstUser.Email, user.User.Email)
-	assert.NotEmpty(t, user.User.EnvironmentId)
+	require.NotNil(t, user.GetUser())
+	assert.Equal(t, firstUser.GetId(), user.GetUser().GetId())
+	assert.Equal(t, firstUser.GetEmail(), user.GetUser().GetEmail())
+	assert.NotEmpty(t, user.GetUser().GetEnvironmentId())
 
 	// Update first user profile (use GivenName/FamilyName; FirstName/LastName are deprecated)
 	givenName := "John"
@@ -74,32 +73,31 @@ func TestUser_ListOrganizationUsers(t *testing.T) {
 			Locale:     &locale,
 		},
 	}
-	updatedUser, err := client.User().UpdateUser(ctx, firstUser.Id, updateRequest)
+	updatedUser, err := client.User().UpdateUser(ctx, firstUser.GetId(), updateRequest)
 	require.NoError(t, err)
 	require.NotNil(t, updatedUser)
-	require.NotNil(t, updatedUser.User.UserProfile)
-	assert.Equal(t, "John", updatedUser.User.UserProfile.GivenName)
-	assert.Equal(t, "Doe", updatedUser.User.UserProfile.FamilyName)
-	assert.Equal(t, "John Doe", updatedUser.User.UserProfile.Name)
-	assert.Equal(t, "en-US", updatedUser.User.UserProfile.Locale)
+	require.NotNil(t, updatedUser.GetUser().GetUserProfile())
+	assert.Equal(t, "John", updatedUser.GetUser().GetUserProfile().GetGivenName())
+	assert.Equal(t, "Doe", updatedUser.GetUser().GetUserProfile().GetFamilyName())
+	assert.Equal(t, "John Doe", updatedUser.GetUser().GetUserProfile().GetName())
+	assert.Equal(t, "en-US", updatedUser.GetUser().GetUserProfile().GetLocale())
 
 	// If pagination is supported, exercise it
-	if usersList.NextPageToken != "" {
+	if usersList.GetNextPageToken() != "" {
 		paginatedUsers, err := client.User().ListOrganizationUsers(ctx, orgId, &scalekit.ListUsersOptions{
 			PageSize:  5,
-			PageToken: usersList.NextPageToken,
+			PageToken: usersList.GetNextPageToken(),
 		})
 		require.NoError(t, err)
 		require.NotNil(t, paginatedUsers)
-		for _, u := range paginatedUsers.Users {
-			assert.NotEmpty(t, u.Id)
-			assert.NotEmpty(t, u.Email)
+		for _, u := range paginatedUsers.GetUsers() {
+			assert.NotEmpty(t, u.GetId())
+			assert.NotEmpty(t, u.GetEmail())
 		}
 	}
 }
 
 func TestUser_EndToEndIntegration(t *testing.T) {
-	SkipIfNoIntegrationEnv(t)
 	ctx := context.Background()
 	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
 	defer DeleteTestOrganization(t, ctx, orgId)
@@ -115,16 +113,16 @@ func TestUser_EndToEndIntegration(t *testing.T) {
 	createdUser, err := client.User().CreateUserAndMembership(ctx, orgId, newUser, false)
 	require.NoError(t, err)
 	require.NotNil(t, createdUser)
-	require.NotNil(t, createdUser.User)
-	require.NotEmpty(t, createdUser.User.Id)
-	assert.Equal(t, uniqueEmail, createdUser.User.Email)
-	userId := createdUser.User.Id
+	require.NotNil(t, createdUser.GetUser())
+	require.NotEmpty(t, createdUser.GetUser().GetId())
+	assert.Equal(t, uniqueEmail, createdUser.GetUser().GetEmail())
+	userId := createdUser.GetUser().GetId()
 
 	user, err := client.User().GetUser(ctx, userId)
 	require.NoError(t, err)
 	require.NotNil(t, user)
-	assert.Equal(t, userId, user.User.Id)
-	assert.Equal(t, uniqueEmail, user.User.Email)
+	assert.Equal(t, userId, user.GetUser().GetId())
+	assert.Equal(t, uniqueEmail, user.GetUser().GetEmail())
 
 	err = client.User().DeleteUser(ctx, userId)
 	require.NoError(t, err)
@@ -134,7 +132,6 @@ func TestUser_EndToEndIntegration(t *testing.T) {
 }
 
 func TestUser_MembershipOperations(t *testing.T) {
-	SkipIfNoIntegrationEnv(t)
 	ctx := context.Background()
 	orgId1 := createOrg(t, ctx, TestOrgName, UniqueSuffix())
 	defer DeleteTestOrganization(t, ctx, orgId1)
@@ -152,8 +149,8 @@ func TestUser_MembershipOperations(t *testing.T) {
 	createdUser, err := client.User().CreateUserAndMembership(ctx, orgId1, newUser, false)
 	require.NoError(t, err)
 	require.NotNil(t, createdUser)
-	require.NotEmpty(t, createdUser.User.Id)
-	userId := createdUser.User.Id
+	require.NotEmpty(t, createdUser.GetUser().GetId())
+	userId := createdUser.GetUser().GetId()
 	defer func() {
 		_ = client.User().DeleteUser(ctx, userId)
 	}()
@@ -170,8 +167,8 @@ func TestUser_MembershipOperations(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, membershipResponse)
 	if membershipResponse != nil {
-		assert.Equal(t, userId, membershipResponse.User.Id)
-		assert.Equal(t, uniqueEmail, membershipResponse.User.Email)
+		assert.Equal(t, userId, membershipResponse.GetUser().GetId())
+		assert.Equal(t, uniqueEmail, membershipResponse.GetUser().GetEmail())
 	}
 
 	updateMembership := &users.UpdateMembership{
@@ -192,11 +189,10 @@ func TestUser_MembershipOperations(t *testing.T) {
 	userAfterDelete, err := client.User().GetUser(ctx, userId)
 	require.NoError(t, err)
 	require.NotNil(t, userAfterDelete)
-	assert.Equal(t, userId, userAfterDelete.User.Id)
+	assert.Equal(t, userId, userAfterDelete.GetUser().GetId())
 }
 
 func TestUser_ResendInvite(t *testing.T) {
-	SkipIfNoIntegrationEnv(t)
 	ctx := context.Background()
 	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
 	defer DeleteTestOrganization(t, ctx, orgId)
@@ -212,8 +208,8 @@ func TestUser_ResendInvite(t *testing.T) {
 	createdUser, err := client.User().CreateUserAndMembership(ctx, orgId, newUser, true)
 	require.NoError(t, err)
 	require.NotNil(t, createdUser)
-	require.NotEmpty(t, createdUser.User.Id)
-	userId := createdUser.User.Id
+	require.NotEmpty(t, createdUser.GetUser().GetId())
+	userId := createdUser.GetUser().GetId()
 	defer func() {
 		_ = client.User().DeleteUser(ctx, userId)
 	}()
@@ -221,10 +217,10 @@ func TestUser_ResendInvite(t *testing.T) {
 	resendResponse, err := client.User().ResendInvite(ctx, orgId, userId)
 	require.NoError(t, err)
 	require.NotNil(t, resendResponse)
-	require.NotNil(t, resendResponse.Invite)
-	assert.Equal(t, userId, resendResponse.Invite.UserId)
-	assert.Equal(t, orgId, resendResponse.Invite.OrganizationId)
-	assert.Equal(t, "PENDING_INVITE", resendResponse.Invite.Status)
-	assert.NotNil(t, resendResponse.Invite.CreatedAt)
-	assert.NotNil(t, resendResponse.Invite.ExpiresAt)
+	require.NotNil(t, resendResponse.GetInvite())
+	assert.Equal(t, userId, resendResponse.GetInvite().GetUserId())
+	assert.Equal(t, orgId, resendResponse.GetInvite().GetOrganizationId())
+	assert.Equal(t, "PENDING_INVITE", resendResponse.GetInvite().GetStatus())
+	assert.NotNil(t, resendResponse.GetInvite().GetCreatedAt())
+	assert.NotNil(t, resendResponse.GetInvite().GetExpiresAt())
 }

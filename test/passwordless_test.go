@@ -10,10 +10,6 @@ import (
 )
 
 func TestSendPasswordlessEmail(t *testing.T) {
-	if client == nil {
-		t.Skip("Client not initialized, skipping integration test")
-	}
-
 	passwordlessService := client.Passwordless()
 	ctx := context.Background()
 	email := "dhaneshbabu007@gmail.com"
@@ -31,25 +27,22 @@ func TestSendPasswordlessEmail(t *testing.T) {
 
 	response, err := passwordlessService.SendPasswordlessEmail(ctx, email, options)
 	if err != nil {
+		// TODO: Fix with an email provider so this test can run reliably in CI.
 		return
 	}
 
 	// Assert response is not nil and contains expected fields
 	assert.NotNil(t, response)
-	assert.NotEmpty(t, response.AuthRequestId)
-	assert.True(t, response.ExpiresAt > 0)
-	assert.True(t, response.ExpiresIn > 0)
-	assert.NotEmpty(t, response.PasswordlessType)
+	assert.NotEmpty(t, response.GetAuthRequestId())
+	assert.True(t, response.GetExpiresAt() > 0)
+	assert.True(t, response.GetExpiresIn() > 0)
+	assert.NotEmpty(t, response.GetPasswordlessType().String())
 
 	// Log the auth request ID for manual testing
-	t.Logf("Auth Request ID: %s", response.AuthRequestId)
+	t.Logf("Auth Request ID: %s", response.GetAuthRequestId())
 }
 
 func TestResendPasswordlessEmail(t *testing.T) {
-	if client == nil {
-		t.Skip("Client not initialized, skipping integration test")
-	}
-
 	passwordlessService := client.Passwordless()
 	ctx := context.Background()
 	email := "dhaneshbabu007@gmail.com"
@@ -73,11 +66,11 @@ func TestResendPasswordlessEmail(t *testing.T) {
 
 	// Assert initial response has required fields
 	assert.NotNil(t, response)
-	assert.NotEmpty(t, response.AuthRequestId)
+	assert.NotEmpty(t, response.GetAuthRequestId())
 
 	verifyCodeResponse, err := passwordlessService.VerifyPasswordlessEmail(ctx, &scalekit.VerifyPasswordlessOptions{
 		Code:          "000000", // Invalid code
-		AuthRequestId: response.AuthRequestId,
+		AuthRequestId: response.GetAuthRequestId(),
 	})
 
 	// Assert that verification with invalid code fails as expected
@@ -87,23 +80,20 @@ func TestResendPasswordlessEmail(t *testing.T) {
 	// Wait a bit before resending to avoid rate limiting
 	time.Sleep(2 * time.Second)
 
-	resendResponse, err := passwordlessService.ResendPasswordlessEmail(ctx, response.AuthRequestId)
+	resendResponse, err := passwordlessService.ResendPasswordlessEmail(ctx, response.GetAuthRequestId())
 	if err != nil {
+		// TODO: Fix with an email provider so this test can run reliably in CI.
 		return
 	}
 
 	// Assert resend response is not nil and contains expected fields
 	assert.NotNil(t, resendResponse)
-	assert.NotEmpty(t, resendResponse.AuthRequestId)
-	assert.True(t, resendResponse.ExpiresAt > 0)
-	assert.True(t, resendResponse.ExpiresIn > 0)
+	assert.NotEmpty(t, resendResponse.GetAuthRequestId())
+	assert.True(t, resendResponse.GetExpiresAt() > 0)
+	assert.True(t, resendResponse.GetExpiresIn() > 0)
 }
 
 func TestVerifyPasswordlessEmail_InvalidCode(t *testing.T) {
-	if client == nil {
-		t.Skip("Client not initialized, skipping integration test")
-	}
-
 	passwordlessService := client.Passwordless()
 	ctx := context.Background()
 	verifyOptions := &scalekit.VerifyPasswordlessOptions{
@@ -119,10 +109,6 @@ func TestVerifyPasswordlessEmail_InvalidCode(t *testing.T) {
 }
 
 func TestVerifyPasswordlessEmail_InvalidLinkToken(t *testing.T) {
-	if client == nil {
-		t.Skip("Client not initialized, skipping integration test")
-	}
-
 	passwordlessService := client.Passwordless()
 	ctx := context.Background()
 	verifyLinkOptions := &scalekit.VerifyPasswordlessOptions{
@@ -138,9 +124,6 @@ func TestVerifyPasswordlessEmail_InvalidLinkToken(t *testing.T) {
 
 // TestVerifyPasswordlessEmail_ValidCode runs against real API; fails without valid code + auth request ID (e.g. OTP 424242 in dev).
 func TestVerifyPasswordlessEmail_ValidCode(t *testing.T) {
-	if client == nil {
-		t.Skip("Client not initialized, skipping integration test")
-	}
 	ctx := context.Background()
 	verifyOptions := &scalekit.VerifyPasswordlessOptions{
 		Code:          "424242",
@@ -148,29 +131,28 @@ func TestVerifyPasswordlessEmail_ValidCode(t *testing.T) {
 	}
 	response, err := client.Passwordless().VerifyPasswordlessEmail(ctx, verifyOptions)
 	if err != nil {
+		// TODO: Fix with an email provider so this test can run reliably in CI.
 		t.Logf("Expected to fail without real auth request: %v", err)
 		return
 	}
 	assert.NotNil(t, response)
-	assert.NotEmpty(t, response.Email)
-	assert.NotEmpty(t, response.PasswordlessType)
+	assert.NotEmpty(t, response.GetEmail())
+	assert.NotEmpty(t, response.GetPasswordlessType().String())
 }
 
 // TestVerifyPasswordlessEmail_ValidLinkToken runs against real API; fails without valid link token from email.
 func TestVerifyPasswordlessEmail_ValidLinkToken(t *testing.T) {
-	if client == nil {
-		t.Skip("Client not initialized, skipping integration test")
-	}
 	ctx := context.Background()
 	verifyOptions := &scalekit.VerifyPasswordlessOptions{
 		LinkToken: "placeholder_link_token",
 	}
 	response, err := client.Passwordless().VerifyPasswordlessEmail(ctx, verifyOptions)
 	if err != nil {
+		// TODO: Fix with an email provider so this test can run reliably in CI.
 		t.Logf("Expected to fail without real link token: %v", err)
 		return
 	}
 	assert.NotNil(t, response)
-	assert.NotEmpty(t, response.Email)
-	assert.NotEmpty(t, response.PasswordlessType)
+	assert.NotEmpty(t, response.GetEmail())
+	assert.NotEmpty(t, response.GetPasswordlessType().String())
 }

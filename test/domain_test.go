@@ -33,7 +33,7 @@ func TestDomain_CreateDomain(t *testing.T) {
 					domains.DomainType_DOMAIN_TYPE_UNSPECIFIED,
 					domains.DomainType_ALLOWED_EMAIL_DOMAIN,
 					domains.DomainType_ORGANIZATION_DOMAIN,
-				}, d.DomainType)
+				}, d.GetDomainType())
 			},
 		},
 		{
@@ -41,7 +41,7 @@ func TestDomain_CreateDomain(t *testing.T) {
 			domain: uniqueDomainName("allowed-email"),
 			opts:   &scalekit.CreateDomainOptions{DomainType: scalekit.DomainTypeAllowedEmail},
 			check: func(t *testing.T, d *domains.Domain) {
-				assert.Equal(t, domains.DomainType_ALLOWED_EMAIL_DOMAIN, d.DomainType)
+				assert.Equal(t, domains.DomainType_ALLOWED_EMAIL_DOMAIN, d.GetDomainType())
 			},
 		},
 		{
@@ -49,7 +49,7 @@ func TestDomain_CreateDomain(t *testing.T) {
 			domain: uniqueDomainName("org-domain"),
 			opts:   &scalekit.CreateDomainOptions{DomainType: scalekit.DomainTypeOrganization},
 			check: func(t *testing.T, d *domains.Domain) {
-				assert.Equal(t, domains.DomainType_ORGANIZATION_DOMAIN, d.DomainType)
+				assert.Equal(t, domains.DomainType_ORGANIZATION_DOMAIN, d.GetDomainType())
 			},
 		},
 		{
@@ -61,7 +61,7 @@ func TestDomain_CreateDomain(t *testing.T) {
 					domains.DomainType_DOMAIN_TYPE_UNSPECIFIED,
 					domains.DomainType_ALLOWED_EMAIL_DOMAIN,
 					domains.DomainType_ORGANIZATION_DOMAIN,
-				}, d.DomainType)
+				}, d.GetDomainType())
 			},
 		},
 		{
@@ -69,7 +69,7 @@ func TestDomain_CreateDomain(t *testing.T) {
 			domain: uniqueDomainName("string-domain"),
 			opts:   &scalekit.CreateDomainOptions{DomainType: "ALLOWED_EMAIL_DOMAIN"},
 			check: func(t *testing.T, d *domains.Domain) {
-				assert.Equal(t, domains.DomainType_ALLOWED_EMAIL_DOMAIN, d.DomainType)
+				assert.Equal(t, domains.DomainType_ALLOWED_EMAIL_DOMAIN, d.GetDomainType())
 			},
 		},
 		{
@@ -77,13 +77,12 @@ func TestDomain_CreateDomain(t *testing.T) {
 			domain: uniqueDomainName("string-org"),
 			opts:   &scalekit.CreateDomainOptions{DomainType: "ORGANIZATION_DOMAIN"},
 			check: func(t *testing.T, d *domains.Domain) {
-				assert.Equal(t, domains.DomainType_ORGANIZATION_DOMAIN, d.DomainType)
+				assert.Equal(t, domains.DomainType_ORGANIZATION_DOMAIN, d.GetDomainType())
 			},
 		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			SkipIfNoIntegrationEnv(t)
 			ctx := context.Background()
 			orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
 			defer DeleteTestOrganization(t, ctx, orgId)
@@ -91,18 +90,17 @@ func TestDomain_CreateDomain(t *testing.T) {
 			created, err := client.Domain().CreateDomain(ctx, orgId, tc.domain, tc.opts)
 			require.NoError(t, err)
 			require.NotNil(t, created)
-			require.NotNil(t, created.Domain)
-			defer DeleteTestDomain(t, ctx, orgId, created.Domain.Id)
+			require.NotNil(t, created.GetDomain())
+			defer DeleteTestDomain(t, ctx, orgId, created.GetDomain().GetId())
 
-			assert.Equal(t, tc.domain, created.Domain.Domain)
-			assert.Equal(t, orgId, created.Domain.OrganizationId)
-			tc.check(t, created.Domain)
+			assert.Equal(t, tc.domain, created.GetDomain().GetDomain())
+			assert.Equal(t, orgId, created.GetDomain().GetOrganizationId())
+			tc.check(t, created.GetDomain())
 		})
 	}
 }
 
 func TestDomain_EndToEndIntegration(t *testing.T) {
-	SkipIfNoIntegrationEnv(t)
 	ctx := context.Background()
 	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
 	defer DeleteTestOrganization(t, ctx, orgId)
@@ -111,13 +109,13 @@ func TestDomain_EndToEndIntegration(t *testing.T) {
 	created, err := client.Domain().CreateDomain(ctx, orgId, domainName)
 	require.NoError(t, err)
 	require.NotNil(t, created)
-	domainId := created.Domain.Id
+	domainId := created.GetDomain().GetId()
 	require.NotEmpty(t, domainId)
 
 	retrieved, err := client.Domain().GetDomain(ctx, domainId, orgId)
 	require.NoError(t, err)
 	require.NotNil(t, retrieved)
-	assert.Equal(t, domainName, retrieved.Domain.Domain)
+	assert.Equal(t, domainName, retrieved.GetDomain().GetDomain())
 
 	err = client.Domain().DeleteDomain(ctx, domainId, orgId)
 	require.NoError(t, err)
@@ -127,7 +125,6 @@ func TestDomain_EndToEndIntegration(t *testing.T) {
 }
 
 func TestDomain_ListDomainsWithFilters(t *testing.T) {
-	SkipIfNoIntegrationEnv(t)
 	ctx := context.Background()
 	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
 	defer DeleteTestOrganization(t, ctx, orgId)
@@ -138,7 +135,7 @@ func TestDomain_ListDomainsWithFilters(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NotNil(t, orgDomain)
-	defer DeleteTestDomain(t, ctx, orgId, orgDomain.Domain.Id)
+	defer DeleteTestDomain(t, ctx, orgId, orgDomain.GetDomain().GetId())
 
 	allowedName := uniqueDomainName("list-allowed")
 	allowedDomain, err := client.Domain().CreateDomain(ctx, orgId, allowedName, &scalekit.CreateDomainOptions{
@@ -146,22 +143,22 @@ func TestDomain_ListDomainsWithFilters(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NotNil(t, allowedDomain)
-	defer DeleteTestDomain(t, ctx, orgId, allowedDomain.Domain.Id)
+	defer DeleteTestDomain(t, ctx, orgId, allowedDomain.GetDomain().GetId())
 
 	allList, err := client.Domain().ListDomains(ctx, orgId)
 	require.NoError(t, err)
-	require.True(t, len(allList.Domains) > 0)
+	require.True(t, len(allList.GetDomains()) > 0)
 
 	orgList, err := client.Domain().ListDomains(ctx, orgId, &scalekit.ListDomainOptions{
 		DomainType: scalekit.DomainTypeOrganization,
 	})
 	require.NoError(t, err)
-	for _, d := range orgList.Domains {
-		assert.Equal(t, domains.DomainType_ORGANIZATION_DOMAIN, d.DomainType)
+	for _, d := range orgList.GetDomains() {
+		assert.Equal(t, domains.DomainType_ORGANIZATION_DOMAIN, d.GetDomainType())
 	}
 	var foundOrg bool
-	for _, d := range orgList.Domains {
-		if d.Id == orgDomain.Domain.Id {
+	for _, d := range orgList.GetDomains() {
+		if d.GetId() == orgDomain.GetDomain().GetId() {
 			foundOrg = true
 			break
 		}
@@ -172,12 +169,12 @@ func TestDomain_ListDomainsWithFilters(t *testing.T) {
 		DomainType: scalekit.DomainTypeAllowedEmail,
 	})
 	require.NoError(t, err)
-	for _, d := range allowedList.Domains {
-		assert.Equal(t, domains.DomainType_ALLOWED_EMAIL_DOMAIN, d.DomainType)
+	for _, d := range allowedList.GetDomains() {
+		assert.Equal(t, domains.DomainType_ALLOWED_EMAIL_DOMAIN, d.GetDomainType())
 	}
 	var foundAllowed bool
-	for _, d := range allowedList.Domains {
-		if d.Id == allowedDomain.Domain.Id {
+	for _, d := range allowedList.GetDomains() {
+		if d.GetId() == allowedDomain.GetDomain().GetId() {
 			foundAllowed = true
 			break
 		}
@@ -186,7 +183,6 @@ func TestDomain_ListDomainsWithFilters(t *testing.T) {
 }
 
 func TestDomain_CreateDomain_BackwardCompatibility(t *testing.T) {
-	SkipIfNoIntegrationEnv(t)
 	ctx := context.Background()
 	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
 	defer DeleteTestOrganization(t, ctx, orgId)
@@ -195,17 +191,17 @@ func TestDomain_CreateDomain_BackwardCompatibility(t *testing.T) {
 	created, err := client.Domain().CreateDomain(ctx, orgId, domainName)
 	require.NoError(t, err)
 	require.NotNil(t, created)
-	require.NotNil(t, created.Domain)
-	defer DeleteTestDomain(t, ctx, orgId, created.Domain.Id)
-	assert.Equal(t, domainName, created.Domain.Domain)
-	assert.Equal(t, orgId, created.Domain.OrganizationId)
+	require.NotNil(t, created.GetDomain())
+	defer DeleteTestDomain(t, ctx, orgId, created.GetDomain().GetId())
+	assert.Equal(t, domainName, created.GetDomain().GetDomain())
+	assert.Equal(t, orgId, created.GetDomain().GetOrganizationId())
 
 	withOptsName := fmt.Sprintf("with-options-%d.com", time.Now().Unix())
 	opts := &scalekit.CreateDomainOptions{DomainType: "ALLOWED_EMAIL_DOMAIN"}
 	withOpts, err := client.Domain().CreateDomain(ctx, orgId, withOptsName, opts)
 	require.NoError(t, err)
 	require.NotNil(t, withOpts)
-	defer DeleteTestDomain(t, ctx, orgId, withOpts.Domain.Id)
-	assert.Equal(t, withOptsName, withOpts.Domain.Domain)
-	assert.Equal(t, domains.DomainType_ALLOWED_EMAIL_DOMAIN, withOpts.Domain.DomainType)
+	defer DeleteTestDomain(t, ctx, orgId, withOpts.GetDomain().GetId())
+	assert.Equal(t, withOptsName, withOpts.GetDomain().GetDomain())
+	assert.Equal(t, domains.DomainType_ALLOWED_EMAIL_DOMAIN, withOpts.GetDomain().GetDomainType())
 }

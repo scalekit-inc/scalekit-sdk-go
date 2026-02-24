@@ -12,7 +12,6 @@ import (
 )
 
 func TestOrganization_EndToEndIntegration(t *testing.T) {
-	SkipIfNoIntegrationEnv(t)
 	ctx := context.Background()
 	name := TestOrgName
 	externalId := UniqueSuffix()
@@ -24,42 +23,42 @@ func TestOrganization_EndToEndIntegration(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NotNil(t, createdOrganization)
-	defer DeleteTestOrganization(t, ctx, createdOrganization.Organization.Id)
+	defer DeleteTestOrganization(t, ctx, createdOrganization.GetOrganization().GetId())
 
-	assert.Equal(t, TestOrgName, createdOrganization.Organization.DisplayName)
-	assert.Equal(t, "value", createdOrganization.Organization.Metadata["key"])
+	assert.Equal(t, TestOrgName, createdOrganization.GetOrganization().GetDisplayName())
+	assert.Equal(t, "value", createdOrganization.GetOrganization().GetMetadata()["key"])
 
-	retrievedOrganizationById, err := client.Organization().GetOrganization(ctx, createdOrganization.Organization.Id)
+	retrievedOrganizationById, err := client.Organization().GetOrganization(ctx, createdOrganization.GetOrganization().GetId())
 	require.NoError(t, err)
-	assert.Equal(t, createdOrganization.Organization.Id, retrievedOrganizationById.Organization.Id)
-	assert.Equal(t, createdOrganization.Organization.ExternalId, retrievedOrganizationById.Organization.ExternalId)
+	assert.Equal(t, createdOrganization.GetOrganization().GetId(), retrievedOrganizationById.GetOrganization().GetId())
+	assert.Equal(t, createdOrganization.GetOrganization().GetExternalId(), retrievedOrganizationById.GetOrganization().GetExternalId())
 
-	retrieveByExternalId, err := client.Organization().GetOrganizationByExternalId(ctx, *createdOrganization.Organization.ExternalId)
+	retrieveByExternalId, err := client.Organization().GetOrganizationByExternalId(ctx, createdOrganization.GetOrganization().GetExternalId())
 	require.NoError(t, err)
-	assert.Equal(t, retrievedOrganizationById.Organization.Id, retrieveByExternalId.Organization.Id)
+	assert.Equal(t, retrievedOrganizationById.GetOrganization().GetId(), retrieveByExternalId.GetOrganization().GetId())
 
-	updatedOrganizationById, err := client.Organization().UpdateOrganization(ctx, createdOrganization.Organization.Id, &organizations.UpdateOrganization{
+	updatedOrganizationById, err := client.Organization().UpdateOrganization(ctx, createdOrganization.GetOrganization().GetId(), &organizations.UpdateOrganization{
 		DisplayName: toPtr("Updated name"),
 	})
 	require.NoError(t, err)
-	assert.Equal(t, "Updated name", updatedOrganizationById.Organization.DisplayName)
+	assert.Equal(t, "Updated name", updatedOrganizationById.GetOrganization().GetDisplayName())
 
-	updatedOrganizationByExternalId, err := client.Organization().UpdateOrganizationByExternalId(ctx, createdOrganization.Organization.GetExternalId(), &organizations.UpdateOrganization{
+	updatedOrganizationByExternalId, err := client.Organization().UpdateOrganizationByExternalId(ctx, createdOrganization.GetOrganization().GetExternalId(), &organizations.UpdateOrganization{
 		DisplayName: toPtr("Updated name again"),
 	})
 	require.NoError(t, err)
-	assert.Equal(t, "Updated name again", updatedOrganizationByExternalId.Organization.DisplayName)
+	assert.Equal(t, "Updated name again", updatedOrganizationByExternalId.GetOrganization().GetDisplayName())
 
-	err = client.Organization().DeleteOrganization(ctx, createdOrganization.Organization.Id)
+	err = client.Organization().DeleteOrganization(ctx, createdOrganization.GetOrganization().GetId())
 	require.NoError(t, err)
 
 	reCreatedOrganization, err := client.Organization().CreateOrganization(ctx, name, scalekit.CreateOrganizationOptions{
 		ExternalId: externalId,
 	})
 	require.NoError(t, err)
-	defer DeleteTestOrganization(t, ctx, reCreatedOrganization.Organization.Id)
+	defer DeleteTestOrganization(t, ctx, reCreatedOrganization.GetOrganization().GetId())
 
-	_, err = client.Organization().GetOrganization(ctx, createdOrganization.Organization.Id)
+	_, err = client.Organization().GetOrganization(ctx, createdOrganization.GetOrganization().GetId())
 	assert.Error(t, err)
 
 	organizationsList, err := client.Organization().ListOrganization(ctx, &scalekit.ListOrganizationOptions{
@@ -71,7 +70,6 @@ func TestOrganization_EndToEndIntegration(t *testing.T) {
 }
 
 func TestOrganization_CreateOrganization_InvalidExternalID(t *testing.T) {
-	SkipIfNoIntegrationEnv(t)
 	ctx := context.Background()
 	_, err := client.Organization().CreateOrganization(ctx, "Exception Test", scalekit.CreateOrganizationOptions{
 		ExternalId: "123",
@@ -80,7 +78,6 @@ func TestOrganization_CreateOrganization_InvalidExternalID(t *testing.T) {
 }
 
 func TestOrganization_UpdateOrganizationSettings(t *testing.T) {
-	SkipIfNoIntegrationEnv(t)
 	ctx := context.Background()
 	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
 	defer DeleteTestOrganization(t, ctx, orgId)
@@ -94,9 +91,9 @@ func TestOrganization_UpdateOrganizationSettings(t *testing.T) {
 	updatedOrganization, err := client.Organization().UpdateOrganizationSettings(ctx, orgId, featuresEnable)
 	require.NoError(t, err)
 	require.NotNil(t, updatedOrganization)
-	require.True(t, len(updatedOrganization.Organization.Settings.Features) >= 2)
-	assert.True(t, updatedOrganization.Organization.Settings.Features[0].Enabled)
-	assert.True(t, updatedOrganization.Organization.Settings.Features[1].Enabled)
+	require.True(t, len(updatedOrganization.GetOrganization().GetSettings().GetFeatures()) >= 2)
+	assert.True(t, updatedOrganization.GetOrganization().GetSettings().GetFeatures()[0].GetEnabled())
+	assert.True(t, updatedOrganization.GetOrganization().GetSettings().GetFeatures()[1].GetEnabled())
 
 	featuresDisable := scalekit.OrganizationSettings{
 		Features: []scalekit.Feature{
@@ -106,12 +103,11 @@ func TestOrganization_UpdateOrganizationSettings(t *testing.T) {
 	}
 	updatedOrganization, err = client.Organization().UpdateOrganizationSettings(ctx, orgId, featuresDisable)
 	require.NoError(t, err)
-	assert.False(t, updatedOrganization.Organization.Settings.Features[0].Enabled)
-	assert.False(t, updatedOrganization.Organization.Settings.Features[1].Enabled)
+	assert.False(t, updatedOrganization.GetOrganization().GetSettings().GetFeatures()[0].GetEnabled())
+	assert.False(t, updatedOrganization.GetOrganization().GetSettings().GetFeatures()[1].GetEnabled())
 }
 
 func TestOrganization_UpsertUserManagementSettings(t *testing.T) {
-	SkipIfNoIntegrationEnv(t)
 	ctx := context.Background()
 	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
 	defer DeleteTestOrganization(t, ctx, orgId)
@@ -124,19 +120,18 @@ func TestOrganization_UpsertUserManagementSettings(t *testing.T) {
 		t.Skipf("skipping UpsertUserManagementSettings test due to error: %v", err)
 	}
 	require.NotNil(t, settings)
-	require.NotNil(t, settings.MaxAllowedUsers)
-	assert.Equal(t, maxUsers, settings.MaxAllowedUsers.Value)
+	require.NotNil(t, settings.GetMaxAllowedUsers())
+	assert.Equal(t, maxUsers, settings.GetMaxAllowedUsers().GetValue())
 
 	updatedMaxUsers := int32(0)
 	settings, err = client.Organization().UpsertUserManagementSettings(ctx, orgId, scalekit.OrganizationUserManagementSettings{
 		MaxAllowedUsers: toInt32Ptr(updatedMaxUsers),
 	})
 	require.NoError(t, err)
-	assert.Equal(t, updatedMaxUsers, settings.MaxAllowedUsers.Value)
+	assert.Equal(t, updatedMaxUsers, settings.GetMaxAllowedUsers().GetValue())
 }
 
 func TestOrganization_CreateOrganization_WithMetadata(t *testing.T) {
-	SkipIfNoIntegrationEnv(t)
 	ctx := context.Background()
 	externalId := UniqueSuffix()
 	createdOrganization, err := client.Organization().CreateOrganization(ctx, TestOrgName, scalekit.CreateOrganizationOptions{
@@ -145,8 +140,8 @@ func TestOrganization_CreateOrganization_WithMetadata(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NotNil(t, createdOrganization)
-	defer DeleteTestOrganization(t, ctx, createdOrganization.Organization.Id)
+	defer DeleteTestOrganization(t, ctx, createdOrganization.GetOrganization().GetId())
 
-	assert.Equal(t, TestOrgName, createdOrganization.Organization.DisplayName)
-	assert.Equal(t, "meta_val", createdOrganization.Organization.Metadata["meta_key"])
+	assert.Equal(t, TestOrgName, createdOrganization.GetOrganization().GetDisplayName())
+	assert.Equal(t, "meta_val", createdOrganization.GetOrganization().GetMetadata()["meta_key"])
 }

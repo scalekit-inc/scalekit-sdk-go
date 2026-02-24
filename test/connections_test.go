@@ -18,7 +18,6 @@ func shortDomain() string {
 }
 
 func TestConnection_EndToEndIntegration(t *testing.T) {
-	SkipIfNoIntegrationEnv(t)
 	ctx := context.Background()
 
 	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
@@ -28,7 +27,7 @@ func TestConnection_EndToEndIntegration(t *testing.T) {
 	domainResp, err := client.Domain().CreateDomain(ctx, orgId, domainName, nil)
 	require.NoError(t, err)
 	require.NotNil(t, domainResp)
-	defer DeleteTestDomain(t, ctx, orgId, domainResp.Domain.Id)
+	defer DeleteTestDomain(t, ctx, orgId, domainResp.GetDomain().GetId())
 
 	connResp, err := client.Connection().CreateConnection(ctx, orgId, &connections.CreateConnection{
 		Provider:    connections.ConnectionProvider_IDP_SIMULATOR,
@@ -39,24 +38,24 @@ func TestConnection_EndToEndIntegration(t *testing.T) {
 		t.Skipf("CreateConnection not supported or requires config: %v", err)
 	}
 	require.NotNil(t, connResp)
-	require.NotNil(t, connResp.Connection)
-	defer DeleteTestConnection(t, ctx, orgId, connResp.Connection.Id)
+	require.NotNil(t, connResp.GetConnection())
+	defer DeleteTestConnection(t, ctx, orgId, connResp.GetConnection().GetId())
 
-	got, err := client.Connection().GetConnection(ctx, orgId, connResp.Connection.Id)
+	got, err := client.Connection().GetConnection(ctx, orgId, connResp.GetConnection().GetId())
 	require.NoError(t, err)
 	require.NotNil(t, got)
-	assert.Equal(t, connResp.Connection.Id, got.Connection.Id)
-	assert.NotEmpty(t, got.Connection.Id)
-	assert.NotEmpty(t, got.Connection.TestConnectionUri)
-	expectedURL := os.Getenv("SCALEKIT_ENVIRONMENT_URL") + "/sso/v1/oidc/" + got.Connection.Id + "/test"
-	assert.Equal(t, expectedURL, got.Connection.TestConnectionUri)
+	assert.Equal(t, connResp.GetConnection().GetId(), got.GetConnection().GetId())
+	assert.NotEmpty(t, got.GetConnection().GetId())
+	assert.NotEmpty(t, got.GetConnection().GetTestConnectionUri())
+	expectedURL := os.Getenv(EnvEnvironmentURL) + "/sso/v1/oidc/" + got.GetConnection().GetId() + "/test"
+	assert.Equal(t, expectedURL, got.GetConnection().GetTestConnectionUri())
 
 	listByOrg, err := client.Connection().ListConnections(ctx, orgId)
 	require.NoError(t, err)
 	require.NotNil(t, listByOrg)
 	var found bool
-	for _, c := range listByOrg.Connections {
-		if c.Id == connResp.Connection.Id {
+	for _, c := range listByOrg.GetConnections() {
+		if c.GetId() == connResp.GetConnection().GetId() {
 			found = true
 			break
 		}
@@ -66,13 +65,13 @@ func TestConnection_EndToEndIntegration(t *testing.T) {
 	_, err = client.Connection().ListConnectionsByDomain(ctx, domainName)
 	assert.NoError(t, err)
 
-	enableResp, err := client.Connection().EnableConnection(ctx, orgId, connResp.Connection.Id)
+	enableResp, err := client.Connection().EnableConnection(ctx, orgId, connResp.GetConnection().GetId())
 	if err == nil {
-		assert.True(t, enableResp.Enabled)
-		disableResp, err := client.Connection().DisableConnection(ctx, orgId, connResp.Connection.Id)
+		assert.True(t, enableResp.GetEnabled())
+		disableResp, err := client.Connection().DisableConnection(ctx, orgId, connResp.GetConnection().GetId())
 		if err == nil {
-			assert.False(t, disableResp.Enabled)
-			_, _ = client.Connection().EnableConnection(ctx, orgId, connResp.Connection.Id)
+			assert.False(t, disableResp.GetEnabled())
+			_, _ = client.Connection().EnableConnection(ctx, orgId, connResp.GetConnection().GetId())
 		}
 	}
 }
