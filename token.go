@@ -123,7 +123,7 @@ func (t *tokenService) ListTokens(ctx context.Context, organizationId string, op
 		OrganizationId: organizationId,
 	}
 	if options.UserId != "" {
-		request.UserId = options.UserId
+		request.UserId = &options.UserId
 	}
 	if options.PageSize > 0 {
 		request.PageSize = options.PageSize
