@@ -11,6 +11,13 @@ import (
 )
 
 func TestConnections(t *testing.T) {
+	if domain == "" {
+		t.Skip("TEST_DOMAIN is not set")
+	}
+	if testConnection == "" {
+		t.Skip("TEST_CONNECTION is not set")
+	}
+
 	// Test listing connections by domain
 	connectionsByDomain, err := client.Connection().ListConnectionsByDomain(context.Background(), domain)
 	assert.NoError(t, err)

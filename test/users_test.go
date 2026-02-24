@@ -123,6 +123,10 @@ func TestUserOperations(t *testing.T) {
 }
 
 func TestMembershipOperations(t *testing.T) {
+	if testOrg2 == "" {
+		t.Skip("TEST_ORGANIZATION_2 is not set")
+	}
+
 	// Create a new user first with unique email using timestamp
 	timestamp := time.Now().Unix()
 	uniqueEmail := fmt.Sprintf("membership.test.%d@example.com", timestamp)
