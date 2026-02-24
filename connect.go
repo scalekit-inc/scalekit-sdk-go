@@ -27,10 +27,10 @@ type connectExecuter[TRequest interface{}, TResponse interface{}] struct {
 func newConnectClient[T interface{}](
 	c *coreClient,
 	fn func(
-	httpClient connect.HTTPClient,
-	baseURL string,
-	opts ...connect.ClientOption,
-) T,
+		httpClient connect.HTTPClient,
+		baseURL string,
+		opts ...connect.ClientOption,
+	) T,
 ) T {
 	return fn(
 		http.DefaultClient,
