@@ -40,6 +40,7 @@ type Scalekit interface {
 	User() UserService
 	Passwordless() PasswordlessService
 	Auth() AuthService
+	Client() ClientService
 	Session() SessionService
 	Role() RoleService
 	Permission() PermissionService
@@ -71,6 +72,7 @@ type scalekitClient struct {
 	user         UserService
 	passwordless PasswordlessService
 	auth         AuthService
+	oidcClient   ClientService
 	session      SessionService
 	role         RoleService
 	permission   PermissionService
@@ -201,6 +203,7 @@ func NewScalekitClient(envUrl, clientId string, opts ...any) Scalekit {
 		user:         newUserClient(coreClient),
 		passwordless: newPasswordlessClient(coreClient),
 		auth:         newAuthService(coreClient),
+		oidcClient:   newClientService(coreClient),
 		session:      newSessionClient(coreClient),
 		role:         newRoleService(coreClient),
 		permission:   newPermissionService(coreClient),
@@ -239,6 +242,10 @@ func (s *scalekitClient) Passwordless() PasswordlessService {
 
 func (s *scalekitClient) Auth() AuthService {
 	return s.auth
+}
+
+func (s *scalekitClient) Client() ClientService {
+	return s.oidcClient
 }
 
 func (s *scalekitClient) Session() SessionService {
