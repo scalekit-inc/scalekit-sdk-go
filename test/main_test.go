@@ -1,36 +1,49 @@
 package test
 
 import (
+	"context"
+	"fmt"
 	"os"
 	"testing"
 
 	"github.com/scalekit-inc/scalekit-sdk-go/v2"
 )
 
+// Required integration test environment variables (single source of truth).
+const (
+	EnvEnvironmentURL = "SCALEKIT_ENVIRONMENT_URL"
+	EnvClientID       = "SCALEKIT_CLIENT_ID"
+	EnvClientSecret   = "SCALEKIT_CLIENT_SECRET"
+)
+
 var (
-	client         scalekit.Scalekit
-	domain         string
-	testOrg        string
-	testConnection string
-	testDirectory  string
-	testOrg2       string
+	client scalekit.Scalekit
 )
 
 func TestMain(m *testing.M) {
-	// Init client
-	environmentUrl := os.Getenv("SCALEKIT_ENVIRONMENT_URL")
-	clientId := os.Getenv("SCALEKIT_CLIENT_ID")
-	apiSecret := os.Getenv("SCALEKIT_CLIENT_SECRET")
-	domain = os.Getenv("TEST_DOMAIN")
-	testOrg = os.Getenv("TEST_ORGANIZATION")
-	testOrg2 = os.Getenv("TEST_ORGANIZATION_2")
-	testConnection = os.Getenv("TEST_CONNECTION")
-	testDirectory = os.Getenv("TEST_DIRECTORY")
-
+	environmentUrl := os.Getenv(EnvEnvironmentURL)
+	clientId := os.Getenv(EnvClientID)
+	apiSecret := os.Getenv(EnvClientSecret)
+	if environmentUrl == "" || clientId == "" || apiSecret == "" {
+		fmt.Fprintf(os.Stderr, "integration tests require %s, %s, %s\n", EnvEnvironmentURL, EnvClientID, EnvClientSecret)
+		os.Exit(1)
+	}
 	client = scalekit.NewScalekitClient(environmentUrl, clientId, apiSecret)
-
 	code := m.Run()
 	os.Exit(code)
+}
+
+// createOrg creates an organization and returns its ID. Caller must defer DeleteTestOrganization(t, ctx, orgId).
+func createOrg(t *testing.T, ctx context.Context, name, externalID string) string {
+	t.Helper()
+	resp, err := client.Organization().CreateOrganization(ctx, name, scalekit.CreateOrganizationOptions{ExternalId: externalID})
+	if err != nil {
+		t.Fatalf("createOrg: %v", err)
+	}
+	if resp == nil || resp.GetOrganization() == nil {
+		t.Fatal("createOrg: nil response")
+	}
+	return resp.GetOrganization().GetId()
 }
 
 func toPtr(s string) *string {

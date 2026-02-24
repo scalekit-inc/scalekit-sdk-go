@@ -10,13 +10,16 @@ import (
 type ListConnectionsResponse = connectionsv1.ListConnectionsResponse
 type GetConnectionResponse = connectionsv1.GetConnectionResponse
 type ToggleConnectionResponse = connectionsv1.ToggleConnectionResponse
+type CreateConnectionResponse = connectionsv1.CreateConnectionResponse
 
 type Connection interface {
+	CreateConnection(ctx context.Context, organizationId string, connection *connectionsv1.CreateConnection) (*CreateConnectionResponse, error)
 	GetConnection(ctx context.Context, organizationId string, id string) (*GetConnectionResponse, error)
 	ListConnectionsByDomain(ctx context.Context, domain string) (*ListConnectionsResponse, error)
 	ListConnections(ctx context.Context, organizationId string) (*ListConnectionsResponse, error)
 	EnableConnection(ctx context.Context, organizationId string, id string) (*ToggleConnectionResponse, error)
 	DisableConnection(ctx context.Context, organizationId string, id string) (*ToggleConnectionResponse, error)
+	DeleteConnection(ctx context.Context, organizationId string, id string) error
 }
 
 type connection struct {
@@ -29,6 +32,17 @@ func newConnectionClient(coreClient *coreClient) Connection {
 		coreClient: coreClient,
 		client:     newConnectClient(coreClient, connectionsconnect.NewConnectionServiceClient),
 	}
+}
+
+func (c *connection) CreateConnection(ctx context.Context, organizationId string, connection *connectionsv1.CreateConnection) (*CreateConnectionResponse, error) {
+	return newConnectExecuter(
+		c.coreClient,
+		c.client.CreateConnection,
+		&connectionsv1.CreateConnectionRequest{
+			OrganizationId: organizationId,
+			Connection:     connection,
+		},
+	).exec(ctx)
 }
 
 func (c *connection) GetConnection(ctx context.Context, organizationId string, id string) (*GetConnectionResponse, error) {
@@ -86,4 +100,16 @@ func (c *connection) DisableConnection(ctx context.Context, organizationId strin
 			OrganizationId: organizationId,
 		},
 	).exec(ctx)
+}
+
+func (c *connection) DeleteConnection(ctx context.Context, organizationId string, id string) error {
+	_, err := newConnectExecuter(
+		c.coreClient,
+		c.client.DeleteConnection,
+		&connectionsv1.DeleteConnectionRequest{
+			OrganizationId: organizationId,
+			Id:             id,
+		},
+	).exec(ctx)
+	return err
 }

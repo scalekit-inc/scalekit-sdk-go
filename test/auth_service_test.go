@@ -39,7 +39,7 @@ func TestAuthServiceUpdateLoginUserDetailsValidation(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			err := authService.UpdateLoginUserDetails(ctx, tc.req)
-			assert.True(t, err != nil)
+			assert.Error(t, err)
 		})
 	}
 }

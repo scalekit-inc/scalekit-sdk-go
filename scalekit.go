@@ -1,6 +1,7 @@
 package scalekit
 
 import (
+	"context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
@@ -45,17 +46,18 @@ type Scalekit interface {
 	WebAuthn() WebAuthnService
 	GetAuthorizationUrl(redirectUri string, options AuthorizationUrlOptions) (*url.URL, error)
 	AuthenticateWithCode(
+		ctx context.Context,
 		code string,
 		redirectUri string,
 		options AuthenticationOptions,
 	) (*AuthenticationResponse, error)
-	GetIdpInitiatedLoginClaims(idpInitiateLoginToken string) (*IdpInitiatedLoginClaims, error)
-	ValidateAccessToken(accessToken string) (bool, error)
+	GetIdpInitiatedLoginClaims(ctx context.Context, idpInitiateLoginToken string) (*IdpInitiatedLoginClaims, error)
+	ValidateAccessToken(ctx context.Context, accessToken string) (bool, error)
 	VerifyWebhookPayload(secret string, headers map[string]string, payload []byte) (bool, error)
 	VerifyInterceptorPayload(secret string, headers map[string]string, payload []byte) (bool, error)
-	RefreshAccessToken(refreshToken string) (*TokenResponse, error)
+	RefreshAccessToken(ctx context.Context, refreshToken string) (*TokenResponse, error)
 	GetLogoutUrl(options LogoutUrlOptions) (*url.URL, error)
-	GetAccessTokenClaims(accessToken string) (*AccessTokenClaims, error)
+	GetAccessTokenClaims(ctx context.Context, accessToken string) (*AccessTokenClaims, error)
 }
 
 type scalekitClient struct {
@@ -290,6 +292,7 @@ func (s *scalekitClient) GetAuthorizationUrl(redirectUri string, options Authori
 }
 
 func (s *scalekitClient) AuthenticateWithCode(
+	ctx context.Context,
 	code string,
 	redirectUri string,
 	options AuthenticationOptions,
@@ -306,11 +309,11 @@ func (s *scalekitClient) AuthenticateWithCode(
 	if options.CodeVerifier != "" {
 		qs.Add("code_verifier", options.CodeVerifier)
 	}
-	authResp, err := s.coreClient.authenticate(qs)
+	authResp, err := s.coreClient.authenticate(ctx, qs)
 	if err != nil {
 		return nil, err
 	}
-	claims, err := ValidateToken[IdTokenClaims](authResp.IdToken, s.coreClient.GetJwks)
+	claims, err := ValidateToken[IdTokenClaims](ctx, authResp.IdToken, s.coreClient.GetJwks)
 	if err != nil {
 		return nil, err
 	}
@@ -324,20 +327,20 @@ func (s *scalekitClient) AuthenticateWithCode(
 	}, nil
 }
 
-func (s *scalekitClient) GetIdpInitiatedLoginClaims(idpInitiateLoginToken string) (*IdpInitiatedLoginClaims, error) {
-	return ValidateToken[IdpInitiatedLoginClaims](idpInitiateLoginToken, s.coreClient.GetJwks)
+func (s *scalekitClient) GetIdpInitiatedLoginClaims(ctx context.Context, idpInitiateLoginToken string) (*IdpInitiatedLoginClaims, error) {
+	return ValidateToken[IdpInitiatedLoginClaims](ctx, idpInitiateLoginToken, s.coreClient.GetJwks)
 }
 
-func (s *scalekitClient) GetAccessTokenClaims(accessToken string) (*AccessTokenClaims, error) {
-	at, err := ValidateToken[AccessTokenClaims](accessToken, s.coreClient.GetJwks)
+func (s *scalekitClient) GetAccessTokenClaims(ctx context.Context, accessToken string) (*AccessTokenClaims, error) {
+	at, err := ValidateToken[AccessTokenClaims](ctx, accessToken, s.coreClient.GetJwks)
 	if err != nil {
 		return nil, err
 	}
 	return at, nil
 }
 
-func (s *scalekitClient) ValidateAccessToken(accessToken string) (bool, error) {
-	_, err := ValidateToken[AccessTokenClaims](accessToken, s.coreClient.GetJwks)
+func (s *scalekitClient) ValidateAccessToken(ctx context.Context, accessToken string) (bool, error) {
+	_, err := ValidateToken[AccessTokenClaims](ctx, accessToken, s.coreClient.GetJwks)
 	if err != nil {
 		return false, err
 	}
@@ -420,9 +423,9 @@ func verifyTimestamp(timestampStr string) (*time.Time, error) {
 	return &timestamp, nil
 }
 
-func ValidateToken[T interface{}](token string, jwksFn func() (*jose.JSONWebKeySet, error)) (*T, error) {
+func ValidateToken[T interface{}](ctx context.Context, token string, jwksFn func(context.Context) (*jose.JSONWebKeySet, error)) (*T, error) {
 	var claims T
-	keySet, err := jwksFn()
+	keySet, err := jwksFn(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -469,7 +472,7 @@ func computeSignature(secret []byte, data string) string {
 	return base64.StdEncoding.EncodeToString(signature)
 }
 
-func (s *scalekitClient) RefreshAccessToken(refreshToken string) (*TokenResponse, error) {
+func (s *scalekitClient) RefreshAccessToken(ctx context.Context, refreshToken string) (*TokenResponse, error) {
 	if refreshToken == "" {
 		return nil, ErrRefreshTokenRequired
 	}
@@ -480,7 +483,7 @@ func (s *scalekitClient) RefreshAccessToken(refreshToken string) (*TokenResponse
 	qs.Add("client_id", s.coreClient.clientId)
 	qs.Add("client_secret", s.coreClient.clientSecret)
 
-	authResp, err := s.coreClient.authenticate(qs)
+	authResp, err := s.coreClient.authenticate(ctx, qs)
 	if err != nil {
 		return nil, err
 	}

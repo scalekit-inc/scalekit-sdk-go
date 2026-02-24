@@ -1,6 +1,7 @@
 package scalekit
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -15,7 +16,7 @@ import (
 const (
 	tokenEndpoint = "oauth/token"
 	jwksEndpoint  = "keys"
-	sdkVersion    = "Scalekit-Go/2.0.10"
+	sdkVersion    = "Scalekit-Go/2.1.0"
 )
 
 type coreClient struct {
@@ -92,12 +93,12 @@ func newCoreClient(envUrl, clientId, clientSecret string) *coreClient {
 	return client
 }
 
-func (c *coreClient) authenticateClient() error {
+func (c *coreClient) authenticateClient(ctx context.Context) error {
 	requestData := url.Values{}
 	requestData.Set("grant_type", "client_credentials")
 	requestData.Set("client_id", c.clientId)
 	requestData.Set("client_secret", c.clientSecret)
-	res, err := c.authenticate(requestData)
+	res, err := c.authenticate(ctx, requestData)
 	if err != nil {
 		return err
 	}
@@ -106,8 +107,8 @@ func (c *coreClient) authenticateClient() error {
 	return nil
 }
 
-func (c *coreClient) authenticate(requestData url.Values) (*authenticationResponse, error) {
-	request, err := http.NewRequest(
+func (c *coreClient) authenticate(ctx context.Context, requestData url.Values) (*authenticationResponse, error) {
+	request, err := http.NewRequestWithContext(ctx,
 		http.MethodPost,
 		fmt.Sprintf("%s/%s", c.envUrl, tokenEndpoint),
 		strings.NewReader(requestData.Encode()),
@@ -133,11 +134,11 @@ func (c *coreClient) authenticate(requestData url.Values) (*authenticationRespon
 	return &responseData, nil
 }
 
-func (c *coreClient) GetJwks() (*jose.JSONWebKeySet, error) {
+func (c *coreClient) GetJwks(ctx context.Context) (*jose.JSONWebKeySet, error) {
 	if c.jsonWebKeySet != nil {
 		return c.jsonWebKeySet, nil
 	}
-	request, err := http.NewRequest(
+	request, err := http.NewRequestWithContext(ctx,
 		http.MethodGet,
 		fmt.Sprintf("%s/%s", c.envUrl, jwksEndpoint),
 		nil,

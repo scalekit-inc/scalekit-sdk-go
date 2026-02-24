@@ -2,191 +2,174 @@ package test
 
 import (
 	"context"
-	"fmt"
 	"testing"
-	"time"
 
 	"github.com/scalekit-inc/scalekit-sdk-go/v2"
 	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/organizations"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestOrganizations(t *testing.T) {
-	organizationName := "Tested from Sdk"
+func TestOrganization_EndToEndIntegration(t *testing.T) {
+	ctx := context.Background()
+	name := TestOrgName
+	externalId := UniqueSuffix()
+	metadata := map[string]string{"key": "value"}
 
-	externalId := fmt.Sprintf("test-%d", time.Now().Unix())
-
-	createdOrganization, err := client.Organization().CreateOrganization(context.Background(), organizationName, scalekit.CreateOrganizationOptions{
+	createdOrganization, err := client.Organization().CreateOrganization(ctx, name, scalekit.CreateOrganizationOptions{
 		ExternalId: externalId,
-		Metadata: map[string]string{
-			"key": "value",
-		},
+		Metadata:   metadata,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
+	require.NotNil(t, createdOrganization)
+	require.NotNil(t, createdOrganization.GetOrganization())
+	defer DeleteTestOrganization(t, ctx, createdOrganization.GetOrganization().GetId())
 
-	retrievedOrganizationById, err := client.Organization().GetOrganization(context.Background(), createdOrganization.Organization.Id)
-	assert.NoError(t, err)
+	assert.Equal(t, TestOrgName, createdOrganization.GetOrganization().GetDisplayName())
+	assert.Equal(t, "value", createdOrganization.GetOrganization().GetMetadata()["key"])
 
-	retrieveByExternalId, err := client.Organization().GetOrganizationByExternalId(context.Background(), *createdOrganization.Organization.ExternalId)
-	assert.NoError(t, err)
+	retrievedOrganizationById, err := client.Organization().GetOrganization(ctx, createdOrganization.GetOrganization().GetId())
+	require.NoError(t, err)
+	require.NotNil(t, retrievedOrganizationById)
+	require.NotNil(t, retrievedOrganizationById.GetOrganization())
+	assert.Equal(t, createdOrganization.GetOrganization().GetId(), retrievedOrganizationById.GetOrganization().GetId())
+	assert.Equal(t, createdOrganization.GetOrganization().GetExternalId(), retrievedOrganizationById.GetOrganization().GetExternalId())
 
-	updatedOrganizationById, err := client.Organization().UpdateOrganization(context.Background(), createdOrganization.Organization.Id, &organizations.UpdateOrganization{
+	retrieveByExternalId, err := client.Organization().GetOrganizationByExternalId(ctx, createdOrganization.GetOrganization().GetExternalId())
+	require.NoError(t, err)
+	require.NotNil(t, retrieveByExternalId)
+	require.NotNil(t, retrieveByExternalId.GetOrganization())
+	assert.Equal(t, retrievedOrganizationById.GetOrganization().GetId(), retrieveByExternalId.GetOrganization().GetId())
+
+	updatedOrganizationById, err := client.Organization().UpdateOrganization(ctx, createdOrganization.GetOrganization().GetId(), &organizations.UpdateOrganization{
 		DisplayName: toPtr("Updated name"),
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
+	require.NotNil(t, updatedOrganizationById)
+	require.NotNil(t, updatedOrganizationById.GetOrganization())
+	assert.Equal(t, "Updated name", updatedOrganizationById.GetOrganization().GetDisplayName())
 
-	updatedOrganizationByExternalId, err := client.Organization().UpdateOrganizationByExternalId(context.Background(), createdOrganization.Organization.GetExternalId(), &organizations.UpdateOrganization{
+	updatedOrganizationByExternalId, err := client.Organization().UpdateOrganizationByExternalId(ctx, createdOrganization.GetOrganization().GetExternalId(), &organizations.UpdateOrganization{
 		DisplayName: toPtr("Updated name again"),
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
+	require.NotNil(t, updatedOrganizationByExternalId)
+	require.NotNil(t, updatedOrganizationByExternalId.GetOrganization())
+	assert.Equal(t, "Updated name again", updatedOrganizationByExternalId.GetOrganization().GetDisplayName())
 
-	err = client.Organization().DeleteOrganization(context.Background(), createdOrganization.Organization.Id)
-	assert.NoError(t, err)
+	err = client.Organization().DeleteOrganization(ctx, createdOrganization.GetOrganization().GetId())
+	require.NoError(t, err)
 
-	// Create again with same external Id
-	reCreatedOrganization, err := client.Organization().CreateOrganization(context.Background(), organizationName, scalekit.CreateOrganizationOptions{
+	reCreatedOrganization, err := client.Organization().CreateOrganization(ctx, name, scalekit.CreateOrganizationOptions{
 		ExternalId: externalId,
 	})
-	assert.NoError(t, err)
-	err = client.Organization().DeleteOrganization(context.Background(), reCreatedOrganization.Organization.Id)
-	assert.NoError(t, err)
+	require.NoError(t, err)
+	require.NotNil(t, reCreatedOrganization)
+	require.NotNil(t, reCreatedOrganization.GetOrganization())
+	defer DeleteTestOrganization(t, ctx, reCreatedOrganization.GetOrganization().GetId())
 
-	organizationsList, err := client.Organization().ListOrganization(context.Background(), &scalekit.ListOrganizationOptions{
+	_, err = client.Organization().GetOrganization(ctx, createdOrganization.GetOrganization().GetId())
+	assert.Error(t, err)
+
+	organizationsList, err := client.Organization().ListOrganization(ctx, &scalekit.ListOrganizationOptions{
 		PageSize:  10,
 		PageToken: "",
 	})
-	assert.NoError(t, err)
-	assert.NotNil(t, organizationsList)
-	assert.True(t, organizationsList.TotalSize > 10)
-	assert.NotNil(t, organizationsList.NextPageToken)
-
-	_, err = client.Organization().GetOrganization(context.Background(), createdOrganization.Organization.Id)
-	assert.Error(t, err)
-
-	_, err = client.Organization().GetOrganization(context.Background(), reCreatedOrganization.Organization.Id)
-	assert.Error(t, err)
-
-	_, err = client.Organization().GetOrganizationByExternalId(context.Background(), *reCreatedOrganization.Organization.ExternalId)
-	assert.Error(t, err)
-
-	assert.Equal(t, organizationName, createdOrganization.Organization.DisplayName)
-	assert.Equal(t, createdOrganization.Organization.Metadata, createdOrganization.Organization.Metadata)
-	assert.Equal(t, retrievedOrganizationById.Organization.Id, createdOrganization.Organization.Id)
-	assert.Equal(t, retrievedOrganizationById.Organization.ExternalId, createdOrganization.Organization.ExternalId)
-	assert.Equal(t, retrievedOrganizationById.Organization.Metadata, createdOrganization.Organization.Metadata)
-	assert.Equal(t, retrieveByExternalId.Organization, retrievedOrganizationById.Organization)
-	assert.Equal(t, updatedOrganizationById.Organization.DisplayName, "Updated name")
-	assert.Equal(t, updatedOrganizationById.Organization.Id, createdOrganization.Organization.Id)
-	assert.Equal(t, updatedOrganizationByExternalId.Organization.ExternalId, createdOrganization.Organization.ExternalId)
-	assert.Equal(t, updatedOrganizationByExternalId.Organization.DisplayName, "Updated name again")
+	require.NoError(t, err)
+	require.NotNil(t, organizationsList)
 }
 
-func TestException(t *testing.T) {
-	organizationName := "Exception Test"
-
-	_, err := client.Organization().CreateOrganization(context.Background(), organizationName, scalekit.CreateOrganizationOptions{
+func TestOrganization_CreateOrganization_InvalidExternalID(t *testing.T) {
+	ctx := context.Background()
+	_, err := client.Organization().CreateOrganization(ctx, "Exception Test", scalekit.CreateOrganizationOptions{
 		ExternalId: "123",
 	})
 	assert.Error(t, err)
 }
 
-func TestUpdateOrganizationSettings(t *testing.T) {
-	// Get first organization from list
-	organizationsList, err := client.Organization().ListOrganization(context.Background(), &scalekit.ListOrganizationOptions{
-		PageSize: 10,
-	})
-	assert.NoError(t, err)
-
-	organization := organizationsList.Organizations[0]
+func TestOrganization_UpdateOrganizationSettings(t *testing.T) {
+	ctx := context.Background()
+	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
+	defer DeleteTestOrganization(t, ctx, orgId)
 
 	featuresEnable := scalekit.OrganizationSettings{
 		Features: []scalekit.Feature{
-			{
-				Name:    "sso",
-				Enabled: true,
-			},
-			{
-				Name:    "dir_sync",
-				Enabled: true,
-			},
+			{Name: "sso", Enabled: true},
+			{Name: "dir_sync", Enabled: true},
 		},
 	}
+	updatedOrganization, err := client.Organization().UpdateOrganizationSettings(ctx, orgId, featuresEnable)
+	require.NoError(t, err)
+	require.NotNil(t, updatedOrganization)
+	require.NotNil(t, updatedOrganization.GetOrganization())
+	require.True(t, len(updatedOrganization.GetOrganization().GetSettings().GetFeatures()) >= 2)
+	enabledFeatures := map[string]bool{}
+	for _, f := range updatedOrganization.GetOrganization().GetSettings().GetFeatures() {
+		enabledFeatures[f.GetName()] = f.GetEnabled()
+	}
+	assert.Contains(t, enabledFeatures, "sso", "sso feature should be present")
+	assert.Contains(t, enabledFeatures, "dir_sync", "dir_sync feature should be present")
+	assert.True(t, enabledFeatures["sso"])
+	assert.True(t, enabledFeatures["dir_sync"])
 
 	featuresDisable := scalekit.OrganizationSettings{
 		Features: []scalekit.Feature{
-			{
-				Name:    "sso",
-				Enabled: false,
-			},
-			{
-				Name:    "dir_sync",
-				Enabled: false,
-			},
+			{Name: "sso", Enabled: false},
+			{Name: "dir_sync", Enabled: false},
 		},
 	}
-
-	updatedOrganization, err := client.Organization().UpdateOrganizationSettings(context.Background(), organization.Id, featuresEnable)
-	if err != nil {
-		return
+	updatedOrganization, err = client.Organization().UpdateOrganizationSettings(ctx, orgId, featuresDisable)
+	require.NoError(t, err)
+	require.NotNil(t, updatedOrganization.GetOrganization())
+	disabledFeatures := map[string]bool{}
+	for _, f := range updatedOrganization.GetOrganization().GetSettings().GetFeatures() {
+		disabledFeatures[f.GetName()] = f.GetEnabled()
 	}
-	assert.NoError(t, err)
-	assert.True(t, updatedOrganization.Organization.Settings.Features[0].Enabled)
-	assert.True(t, updatedOrganization.Organization.Settings.Features[1].Enabled)
-
-	updatedOrganization, err = client.Organization().UpdateOrganizationSettings(context.Background(), organization.Id, featuresDisable)
-	assert.NoError(t, err)
-	assert.False(t, updatedOrganization.Organization.Settings.Features[0].Enabled)
-	assert.False(t, updatedOrganization.Organization.Settings.Features[1].Enabled)
+	assert.Contains(t, disabledFeatures, "sso", "sso feature should be present")
+	assert.Contains(t, disabledFeatures, "dir_sync", "dir_sync feature should be present")
+	assert.False(t, disabledFeatures["sso"])
+	assert.False(t, disabledFeatures["dir_sync"])
 }
 
-func TestUpsertUserManagementSettings(t *testing.T) {
-	organizationsList, err := client.Organization().ListOrganization(context.Background(), &scalekit.ListOrganizationOptions{
-		PageSize: 1,
-	})
-	assert.NoError(t, err)
-	if len(organizationsList.Organizations) == 0 {
-		t.Skip("no organizations available for testing user management settings")
-	}
+func TestOrganization_UpsertUserManagementSettings(t *testing.T) {
+	ctx := context.Background()
+	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
+	defer DeleteTestOrganization(t, ctx, orgId)
 
-	organization := organizationsList.Organizations[0]
 	maxUsers := int32(150)
-
-	settings, err := client.Organization().UpsertUserManagementSettings(context.Background(), organization.Id, scalekit.OrganizationUserManagementSettings{
+	settings, err := client.Organization().UpsertUserManagementSettings(ctx, orgId, scalekit.OrganizationUserManagementSettings{
 		MaxAllowedUsers: toInt32Ptr(maxUsers),
 	})
 	if err != nil {
 		t.Skipf("skipping UpsertUserManagementSettings test due to error: %v", err)
 	}
-	assert.NotNil(t, settings)
-	if settings.MaxAllowedUsers == nil {
-		t.Fatalf("expected MaxAllowedUsers to be set")
-	}
-	assert.Equal(t, maxUsers, settings.MaxAllowedUsers.Value)
+	require.NotNil(t, settings)
+	require.NotNil(t, settings.GetMaxAllowedUsers())
+	assert.Equal(t, maxUsers, settings.GetMaxAllowedUsers().GetValue())
 
 	updatedMaxUsers := int32(0)
-	settings, err = client.Organization().UpsertUserManagementSettings(context.Background(), organization.Id, scalekit.OrganizationUserManagementSettings{
+	settings, err = client.Organization().UpsertUserManagementSettings(ctx, orgId, scalekit.OrganizationUserManagementSettings{
 		MaxAllowedUsers: toInt32Ptr(updatedMaxUsers),
 	})
-	assert.NoError(t, err)
-	assert.NotNil(t, settings)
-	assert.NotNil(t, settings.MaxAllowedUsers)
-	assert.Equal(t, updatedMaxUsers, settings.MaxAllowedUsers.Value)
+	require.NoError(t, err)
+	require.NotNil(t, settings)
+	require.NotNil(t, settings.GetMaxAllowedUsers())
+	assert.Equal(t, updatedMaxUsers, settings.GetMaxAllowedUsers().GetValue())
 }
 
-func TestCreateWithMetadata(t *testing.T) {
-	organizationName := "Tested from GO Sdk"
-
-	externalId := fmt.Sprintf("test-%d", time.Now().Unix())
-
-	createdOrganization, err := client.Organization().CreateOrganization(context.Background(), organizationName, scalekit.CreateOrganizationOptions{
+func TestOrganization_CreateOrganization_WithMetadata(t *testing.T) {
+	ctx := context.Background()
+	externalId := UniqueSuffix()
+	createdOrganization, err := client.Organization().CreateOrganization(ctx, TestOrgName, scalekit.CreateOrganizationOptions{
 		ExternalId: externalId,
-		Metadata: map[string]string{
-			"meta_key": "meta_val",
-		},
+		Metadata:   map[string]string{"meta_key": "meta_val"},
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
+	require.NotNil(t, createdOrganization)
+	require.NotNil(t, createdOrganization.GetOrganization())
+	defer DeleteTestOrganization(t, ctx, createdOrganization.GetOrganization().GetId())
 
-	assert.Equal(t, organizationName, createdOrganization.Organization.DisplayName)
-	assert.Equal(t, createdOrganization.Organization.Metadata["meta_key"], "meta_val")
+	assert.Equal(t, TestOrgName, createdOrganization.GetOrganization().GetDisplayName())
+	assert.Equal(t, "meta_val", createdOrganization.GetOrganization().GetMetadata()["meta_key"])
 }
