@@ -11,6 +11,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -69,7 +71,7 @@ func TestAuthenticateWithCode(t *testing.T) {
 							"name":           "Mock User",
 							"email":          "mock@example.com",
 							"given_name":     "Mock",
-							"family_name":   "User",
+							"family_name":    "User",
 							"email_verified": true,
 							"iat":            iat,
 							"exp":            exp,
@@ -471,6 +473,141 @@ func TestValidateAccessToken(t *testing.T) {
 			client := scalekit.NewScalekitClient(server.URL, "client_id", "client_secret")
 			isValid, err := client.ValidateAccessToken(context.Background(), tt.token)
 			tt.assertFn(t, isValid, err)
+		})
+	}
+}
+
+func TestGeneratePKCEConfiguration(t *testing.T) {
+	type testCase struct {
+		name     string
+		options  scalekit.PKCEOptions
+		assertFn func(t *testing.T, cfg *scalekit.PKCEConfiguration, err error)
+	}
+
+	validVerifier := strings.Repeat("a", 43)
+
+	tests := []testCase{
+		{
+			name:    "defaults to S256 with generated verifier",
+			options: scalekit.PKCEOptions{},
+			assertFn: func(t *testing.T, cfg *scalekit.PKCEConfiguration, err error) {
+				assert.NoError(t, err)
+				assert.NotNil(t, cfg)
+				assert.Equal(t, "S256", cfg.CodeChallengeMethod)
+				assert.Len(t, cfg.CodeVerifier, 64)
+
+				hash := sha256.Sum256([]byte(cfg.CodeVerifier))
+				expectedChallenge := base64.RawURLEncoding.EncodeToString(hash[:])
+				assert.Equal(t, expectedChallenge, cfg.CodeChallenge)
+			},
+		},
+		{
+			name: "uses provided verifier with S256 method",
+			options: scalekit.PKCEOptions{
+				CodeChallengeMethod: "S256",
+				CodeVerifier:        validVerifier,
+			},
+			assertFn: func(t *testing.T, cfg *scalekit.PKCEConfiguration, err error) {
+				assert.NoError(t, err)
+				assert.NotNil(t, cfg)
+				assert.Equal(t, "S256", cfg.CodeChallengeMethod)
+				assert.Equal(t, validVerifier, cfg.CodeVerifier)
+
+				hash := sha256.Sum256([]byte(validVerifier))
+				expectedChallenge := base64.RawURLEncoding.EncodeToString(hash[:])
+				assert.Equal(t, expectedChallenge, cfg.CodeChallenge)
+			},
+		},
+		{
+			name: "fails for plain method",
+			options: scalekit.PKCEOptions{
+				CodeChallengeMethod: "plain",
+				CodeVerifier:        validVerifier,
+			},
+			assertFn: func(t *testing.T, cfg *scalekit.PKCEConfiguration, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, cfg)
+			},
+		},
+		{
+			name: "fails for unsupported method",
+			options: scalekit.PKCEOptions{
+				CodeChallengeMethod: "sha512",
+			},
+			assertFn: func(t *testing.T, cfg *scalekit.PKCEConfiguration, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, cfg)
+			},
+		},
+		{
+			name: "fails for invalid verifier length",
+			options: scalekit.PKCEOptions{
+				VerifierLength: 42,
+			},
+			assertFn: func(t *testing.T, cfg *scalekit.PKCEConfiguration, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, cfg)
+			},
+		},
+		{
+			name: "fails for invalid verifier characters",
+			options: scalekit.PKCEOptions{
+				CodeVerifier: strings.Repeat("a", 42) + "+",
+			},
+			assertFn: func(t *testing.T, cfg *scalekit.PKCEConfiguration, err error) {
+				assert.Error(t, err)
+				assert.Nil(t, cfg)
+			},
+		},
+	}
+
+	client := scalekit.NewScalekitClient("http://test.com", "client_id", "client_secret")
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg, err := client.GeneratePKCEConfiguration(tt.options)
+			tt.assertFn(t, cfg, err)
+		})
+	}
+}
+
+func TestNewScalekitClientSecretCompatibilityAndWithSecret(t *testing.T) {
+	tests := []struct {
+		name           string
+		expectedSecret string
+		clientFn       func() scalekit.Scalekit
+	}{
+		{
+			name:           "uses variadic string as backward-compatible client_secret",
+			expectedSecret: "legacy_secret",
+			clientFn: func() scalekit.Scalekit {
+				return scalekit.NewScalekitClient(os.Getenv(EnvEnvironmentURL), "client_id", "client_secret")
+			},
+		},
+		{
+			name:           "WithSecret overwrites client_secret",
+			expectedSecret: "new_secret",
+			clientFn: func() scalekit.Scalekit {
+				return scalekit.NewScalekitClient(os.Getenv(EnvEnvironmentURL), "client_id").WithSecret("new_secret")
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				require.Equal(t, "/oauth/token", r.URL.Path)
+				require.NoError(t, r.ParseForm())
+				assert.Equal(t, tt.expectedSecret, r.FormValue("client_secret"))
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = w.Write([]byte(`{"access_token":"at","refresh_token":"rt","expires_in":3600}`))
+			}))
+			defer server.Close()
+
+			testClient := tt.clientFn()
+			resp, err := testClient.RefreshAccessToken(context.Background(), "refresh_token")
+			require.NoError(t, err)
+			require.NotNil(t, resp)
 		})
 	}
 }

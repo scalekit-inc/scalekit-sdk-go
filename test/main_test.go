@@ -1,9 +1,11 @@
 package test
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/scalekit-inc/scalekit-sdk-go/v2"
@@ -21,6 +23,8 @@ var (
 )
 
 func TestMain(m *testing.M) {
+	loadEnvIfPresent("test/.env", ".env")
+
 	environmentUrl := os.Getenv(EnvEnvironmentURL)
 	clientId := os.Getenv(EnvClientID)
 	apiSecret := os.Getenv(EnvClientSecret)
@@ -52,4 +56,41 @@ func toPtr(s string) *string {
 
 func toInt32Ptr(i int32) *int32 {
 	return &i
+}
+
+func loadEnvIfPresent(paths ...string) {
+	for _, path := range paths {
+		file, err := os.Open(path)
+		if err != nil {
+			continue
+		}
+
+		scanner := bufio.NewScanner(file)
+		for scanner.Scan() {
+			line := strings.TrimSpace(scanner.Text())
+			if line == "" || strings.HasPrefix(line, "#") {
+				continue
+			}
+
+			key, value, ok := strings.Cut(line, "=")
+			if !ok {
+				continue
+			}
+
+			key = strings.TrimSpace(key)
+			value = strings.TrimSpace(value)
+			value = strings.Trim(value, `"'`)
+			if key == "" {
+				continue
+			}
+
+			// Keep explicitly provided environment values.
+			if _, exists := os.LookupEnv(key); exists {
+				continue
+			}
+			_ = os.Setenv(key, value)
+		}
+
+		_ = file.Close()
+	}
 }

@@ -58,6 +58,8 @@ type Scalekit interface {
 	RefreshAccessToken(ctx context.Context, refreshToken string) (*TokenResponse, error)
 	GetLogoutUrl(options LogoutUrlOptions) (*url.URL, error)
 	GetAccessTokenClaims(ctx context.Context, accessToken string) (*AccessTokenClaims, error)
+	GeneratePKCEConfiguration(options PKCEOptions) (*PKCEConfiguration, error)
+	WithSecret(clientSecret string) Scalekit
 }
 
 type scalekitClient struct {
@@ -178,7 +180,17 @@ type LogoutUrlOptions struct {
 	State                 string
 }
 
-func NewScalekitClient(envUrl, clientId, clientSecret string) Scalekit {
+// NewScalekitClient creates a new Scalekit client.
+//
+// For backward compatibility, when a value is provided in opts and opts[0] is a
+// string, it is treated as client_secret.
+func NewScalekitClient(envUrl, clientId string, opts ...any) Scalekit {
+	clientSecret := ""
+	if len(opts) > 0 {
+		if secret, ok := opts[0].(string); ok {
+			clientSecret = secret
+		}
+	}
 	coreClient := newCoreClient(envUrl, clientId, clientSecret)
 	return &scalekitClient{
 		coreClient:   coreClient,
@@ -194,6 +206,11 @@ func NewScalekitClient(envUrl, clientId, clientSecret string) Scalekit {
 		permission:   newPermissionService(coreClient),
 		webauthn:     newWebAuthnClient(coreClient),
 	}
+}
+
+func (s *scalekitClient) WithSecret(clientSecret string) Scalekit {
+	s.coreClient.clientSecret = clientSecret
+	return s
 }
 
 func (s *scalekitClient) Connection() Connection {
@@ -305,7 +322,9 @@ func (s *scalekitClient) AuthenticateWithCode(
 	qs.Add("redirect_uri", redirectUri)
 	qs.Add("grant_type", GrantTypeAuthorizationCode)
 	qs.Add("client_id", s.coreClient.clientId)
-	qs.Add("client_secret", s.coreClient.clientSecret)
+	if s.coreClient.clientSecret != "" {
+		qs.Add("client_secret", s.coreClient.clientSecret)
+	}
 	if options.CodeVerifier != "" {
 		qs.Add("code_verifier", options.CodeVerifier)
 	}
@@ -481,8 +500,9 @@ func (s *scalekitClient) RefreshAccessToken(ctx context.Context, refreshToken st
 	qs.Add("refresh_token", refreshToken)
 	qs.Add("grant_type", GrantTypeRefreshToken)
 	qs.Add("client_id", s.coreClient.clientId)
-	qs.Add("client_secret", s.coreClient.clientSecret)
-
+	if s.coreClient.clientSecret != "" {
+		qs.Add("client_secret", s.coreClient.clientSecret)
+	}
 	authResp, err := s.coreClient.authenticate(ctx, qs)
 	if err != nil {
 		return nil, err

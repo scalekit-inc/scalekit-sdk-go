@@ -94,6 +94,9 @@ func newCoreClient(envUrl, clientId, clientSecret string) *coreClient {
 }
 
 func (c *coreClient) authenticateClient(ctx context.Context) error {
+	if c.clientSecret == "" {
+		return fmt.Errorf("client secret is required for authentication")
+	}
 	requestData := url.Values{}
 	requestData.Set("grant_type", "client_credentials")
 	requestData.Set("client_id", c.clientId)
@@ -159,4 +162,8 @@ func (c *coreClient) GetJwks(ctx context.Context) (*jose.JSONWebKeySet, error) {
 	c.jsonWebKeySet = &responseData
 
 	return &responseData, nil
+}
+
+func (c *coreClient) hasAccessToken() bool {
+	return c.accessToken != nil && *c.accessToken != ""
 }
