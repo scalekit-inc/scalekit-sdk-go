@@ -121,6 +121,7 @@ func TestUser_EndToEndIntegration(t *testing.T) {
 	user, err := client.User().GetUser(ctx, userId)
 	require.NoError(t, err)
 	require.NotNil(t, user)
+	require.NotNil(t, user.GetUser())
 	assert.Equal(t, userId, user.GetUser().GetId())
 	assert.Equal(t, uniqueEmail, user.GetUser().GetEmail())
 
@@ -166,10 +167,9 @@ func TestUser_MembershipOperations(t *testing.T) {
 	membershipResponse, err := client.User().CreateMembership(ctx, orgId2, userId, membership, false)
 	require.NoError(t, err)
 	require.NotNil(t, membershipResponse)
-	if membershipResponse != nil {
-		assert.Equal(t, userId, membershipResponse.GetUser().GetId())
-		assert.Equal(t, uniqueEmail, membershipResponse.GetUser().GetEmail())
-	}
+	require.NotNil(t, membershipResponse.GetUser())
+	assert.Equal(t, userId, membershipResponse.GetUser().GetId())
+	assert.Equal(t, uniqueEmail, membershipResponse.GetUser().GetEmail())
 
 	updateMembership := &users.UpdateMembership{
 		Roles: []*commons.Role{
@@ -189,6 +189,7 @@ func TestUser_MembershipOperations(t *testing.T) {
 	userAfterDelete, err := client.User().GetUser(ctx, userId)
 	require.NoError(t, err)
 	require.NotNil(t, userAfterDelete)
+	require.NotNil(t, userAfterDelete.GetUser())
 	assert.Equal(t, userId, userAfterDelete.GetUser().GetId())
 }
 
@@ -208,6 +209,7 @@ func TestUser_ResendInvite(t *testing.T) {
 	createdUser, err := client.User().CreateUserAndMembership(ctx, orgId, newUser, true)
 	require.NoError(t, err)
 	require.NotNil(t, createdUser)
+	require.NotNil(t, createdUser.GetUser())
 	require.NotEmpty(t, createdUser.GetUser().GetId())
 	userId := createdUser.GetUser().GetId()
 	defer func() {
@@ -221,6 +223,6 @@ func TestUser_ResendInvite(t *testing.T) {
 	assert.Equal(t, userId, resendResponse.GetInvite().GetUserId())
 	assert.Equal(t, orgId, resendResponse.GetInvite().GetOrganizationId())
 	assert.Equal(t, "PENDING_INVITE", resendResponse.GetInvite().GetStatus())
-	assert.NotNil(t, resendResponse.GetInvite().GetCreatedAt())
-	assert.NotNil(t, resendResponse.GetInvite().GetExpiresAt())
+	require.NotNil(t, resendResponse.GetInvite().GetCreatedAt())
+	require.NotNil(t, resendResponse.GetInvite().GetExpiresAt())
 }

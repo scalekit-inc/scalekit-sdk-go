@@ -92,7 +92,10 @@ func (r *connectExecuter[TRequest, TResponse]) exec(ctx context.Context) (*TResp
 				if connectErr.Code() == connect.CodeInvalidArgument {
 					messages := []string{connectErr.Message()}
 					for _, detail := range connectErr.Details() {
-						msg, _ := detail.Value()
+						msg, err := detail.Value()
+						if err != nil {
+							continue
+						}
 						if info, ok := msg.(*errdetails.ErrorInfo); ok {
 							if info.ValidationErrorInfo != nil {
 								for _, field := range info.ValidationErrorInfo.FieldViolations {

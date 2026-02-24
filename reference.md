@@ -219,6 +219,14 @@ _ = user
 <dl>
 <dd>
 
+**ctx:** `context.Context` - Request context for cancellation and timeout propagation
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **code:** `string` - The authorization code received in the callback URL
 
 </dd>
@@ -297,6 +305,14 @@ _ = claims
 <dl>
 <dd>
 
+**ctx:** `context.Context` - Request context for cancellation and timeout propagation
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **idpInitiatedLoginToken:** `string` - The token received via IdP-initiated login
 
 </dd>
@@ -350,6 +366,14 @@ _ = claims
 
 <dl>
 <dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context` - Request context for cancellation and timeout propagation
+
+</dd>
+</dl>
 
 <dl>
 <dd>
@@ -411,6 +435,14 @@ _ = ok
 <dl>
 <dd>
 
+**ctx:** `context.Context` - Request context for cancellation and timeout propagation
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **accessToken:** `string` - The JWT access token
 
 </dd>
@@ -464,6 +496,14 @@ _ = tokens.AccessToken
 
 <dl>
 <dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context` - Request context for cancellation and timeout propagation
+
+</dd>
+</dl>
 
 <dl>
 <dd>

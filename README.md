@@ -63,7 +63,7 @@ func main() {
     "<SCALEKIT_CLIENT_SECRET>",
   )
 
-  // Use the sc object to interact with the Scalekit API
+  // Use scalekitClient to interact with the Scalekit API
   authUrl, _ := scalekitClient.GetAuthorizationUrl(
     "https://acme-corp.com/redirect-uri",
     scalekit.AuthorizationUrlOptions{
@@ -81,9 +81,9 @@ Before integrating the Scalekit Go SDK, ensure your development environment meet
 
 | Component | Version |
 | --------- | ------- |
-| Go        | 1.22+   |
+| Go        | 1.24+   |
 
-> **Note:** Go 1.22+ provides the essential features required by this SDK. For optimal performance and security, consider using the latest stable release.
+> **Note:** Go 1.24+ provides the essential features required by this SDK. For optimal performance and security, consider using the latest stable release.
 
 
 ## Examples - SSO with Go HTTP Server
@@ -101,7 +101,7 @@ import (
 )
 
 func main() {
-  sc := scalekit.NewScalekit(
+  scalekitClient := scalekit.NewScalekitClient(
     "<SCALEKIT_ENV_URL>",
     "<SCALEKIT_CLIENT_ID>",
     "<SCALEKIT_CLIENT_SECRET>",
@@ -118,13 +118,13 @@ func main() {
         ConnectionId: "con_123456789",
       },
     )
-    http.Redirect(w, r, authUrl, http.StatusSeeOther)
+    http.Redirect(w, r, authUrl.String(), http.StatusSeeOther)
   })
 
-  // Handle the callback from the Scalekit
+  // Handle the callback from Scalekit
   http.HandleFunc("/auth/callback", func(w http.ResponseWriter, r *http.Request) {
     code := r.URL.Query().Get("code")
-    state := r.URL.Query().Get("state")
+    _ = r.URL.Query().Get("state") // validate state against the value set in /auth/login
 
     authResp, _ := scalekitClient.AuthenticateWithCode(r.Context(), code, redirectUri, scalekit.AuthenticationOptions{})
 

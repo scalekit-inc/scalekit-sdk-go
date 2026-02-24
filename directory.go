@@ -158,11 +158,11 @@ func (d *directory) GetPrimaryDirectoryByOrganizationId(ctx context.Context, org
 	if err != nil {
 		return nil, err
 	}
-	if len(listDirectories.Directories) == 0 {
+	if len(listDirectories.GetDirectories()) == 0 {
 		return nil, errors.New("directory does not exist for organization")
 	}
 	response := &GetDirectoryResponse{
-		Directory: listDirectories.Directories[0],
+		Directory: listDirectories.GetDirectories()[0],
 	}
 	return response, nil
 }

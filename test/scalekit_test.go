@@ -152,8 +152,8 @@ func TestGetAccessToken(t *testing.T) {
 				}
 			},
 			assertFn: func(t *testing.T, token *scalekit.AccessTokenClaims, err error) {
-				assert.NoError(t, err)
-				assert.NotNil(t, token)
+				require.NoError(t, err)
+				require.NotNil(t, token)
 				assert.Equal(t, 1906804837, token.Exp)
 
 				// Verify parsed claims
@@ -325,8 +325,8 @@ func TestGetAuthorizationUrl(t *testing.T) {
 				return
 			}
 
-			assert.NoError(t, err)
-			assert.NotNil(t, got)
+			require.NoError(t, err)
+			require.NotNil(t, got)
 			assert.Equal(t, tt.wantUrl, got.String())
 		})
 	}
@@ -353,8 +353,8 @@ func TestGetIdpInitiatedLoginClaims(t *testing.T) {
 				}
 			},
 			assertFn: func(t *testing.T, claims *scalekit.IdpInitiatedLoginClaims, err error) {
-				assert.NoError(t, err)
-				assert.NotNil(t, claims)
+				require.NoError(t, err)
+				require.NotNil(t, claims)
 
 				// Verify parsed claims
 				assert.Equal(t, "conn_75416579042474204", claims.ConnectionID)

@@ -31,24 +31,31 @@ func TestOrganization_EndToEndIntegration(t *testing.T) {
 
 	retrievedOrganizationById, err := client.Organization().GetOrganization(ctx, createdOrganization.GetOrganization().GetId())
 	require.NoError(t, err)
+	require.NotNil(t, retrievedOrganizationById)
 	require.NotNil(t, retrievedOrganizationById.GetOrganization())
 	assert.Equal(t, createdOrganization.GetOrganization().GetId(), retrievedOrganizationById.GetOrganization().GetId())
 	assert.Equal(t, createdOrganization.GetOrganization().GetExternalId(), retrievedOrganizationById.GetOrganization().GetExternalId())
 
 	retrieveByExternalId, err := client.Organization().GetOrganizationByExternalId(ctx, createdOrganization.GetOrganization().GetExternalId())
 	require.NoError(t, err)
+	require.NotNil(t, retrieveByExternalId)
+	require.NotNil(t, retrieveByExternalId.GetOrganization())
 	assert.Equal(t, retrievedOrganizationById.GetOrganization().GetId(), retrieveByExternalId.GetOrganization().GetId())
 
 	updatedOrganizationById, err := client.Organization().UpdateOrganization(ctx, createdOrganization.GetOrganization().GetId(), &organizations.UpdateOrganization{
 		DisplayName: toPtr("Updated name"),
 	})
 	require.NoError(t, err)
+	require.NotNil(t, updatedOrganizationById)
+	require.NotNil(t, updatedOrganizationById.GetOrganization())
 	assert.Equal(t, "Updated name", updatedOrganizationById.GetOrganization().GetDisplayName())
 
 	updatedOrganizationByExternalId, err := client.Organization().UpdateOrganizationByExternalId(ctx, createdOrganization.GetOrganization().GetExternalId(), &organizations.UpdateOrganization{
 		DisplayName: toPtr("Updated name again"),
 	})
 	require.NoError(t, err)
+	require.NotNil(t, updatedOrganizationByExternalId)
+	require.NotNil(t, updatedOrganizationByExternalId.GetOrganization())
 	assert.Equal(t, "Updated name again", updatedOrganizationByExternalId.GetOrganization().GetDisplayName())
 
 	err = client.Organization().DeleteOrganization(ctx, createdOrganization.GetOrganization().GetId())
@@ -58,6 +65,8 @@ func TestOrganization_EndToEndIntegration(t *testing.T) {
 		ExternalId: externalId,
 	})
 	require.NoError(t, err)
+	require.NotNil(t, reCreatedOrganization)
+	require.NotNil(t, reCreatedOrganization.GetOrganization())
 	defer DeleteTestOrganization(t, ctx, reCreatedOrganization.GetOrganization().GetId())
 
 	_, err = client.Organization().GetOrganization(ctx, createdOrganization.GetOrganization().GetId())
@@ -68,7 +77,7 @@ func TestOrganization_EndToEndIntegration(t *testing.T) {
 		PageToken: "",
 	})
 	require.NoError(t, err)
-	assert.NotNil(t, organizationsList)
+	require.NotNil(t, organizationsList)
 }
 
 func TestOrganization_CreateOrganization_InvalidExternalID(t *testing.T) {
@@ -93,11 +102,14 @@ func TestOrganization_UpdateOrganizationSettings(t *testing.T) {
 	updatedOrganization, err := client.Organization().UpdateOrganizationSettings(ctx, orgId, featuresEnable)
 	require.NoError(t, err)
 	require.NotNil(t, updatedOrganization)
+	require.NotNil(t, updatedOrganization.GetOrganization())
 	require.True(t, len(updatedOrganization.GetOrganization().GetSettings().GetFeatures()) >= 2)
 	enabledFeatures := map[string]bool{}
 	for _, f := range updatedOrganization.GetOrganization().GetSettings().GetFeatures() {
 		enabledFeatures[f.GetName()] = f.GetEnabled()
 	}
+	assert.Contains(t, enabledFeatures, "sso", "sso feature should be present")
+	assert.Contains(t, enabledFeatures, "dir_sync", "dir_sync feature should be present")
 	assert.True(t, enabledFeatures["sso"])
 	assert.True(t, enabledFeatures["dir_sync"])
 
@@ -109,10 +121,13 @@ func TestOrganization_UpdateOrganizationSettings(t *testing.T) {
 	}
 	updatedOrganization, err = client.Organization().UpdateOrganizationSettings(ctx, orgId, featuresDisable)
 	require.NoError(t, err)
+	require.NotNil(t, updatedOrganization.GetOrganization())
 	disabledFeatures := map[string]bool{}
 	for _, f := range updatedOrganization.GetOrganization().GetSettings().GetFeatures() {
 		disabledFeatures[f.GetName()] = f.GetEnabled()
 	}
+	assert.Contains(t, disabledFeatures, "sso", "sso feature should be present")
+	assert.Contains(t, disabledFeatures, "dir_sync", "dir_sync feature should be present")
 	assert.False(t, disabledFeatures["sso"])
 	assert.False(t, disabledFeatures["dir_sync"])
 }
@@ -138,6 +153,7 @@ func TestOrganization_UpsertUserManagementSettings(t *testing.T) {
 		MaxAllowedUsers: toInt32Ptr(updatedMaxUsers),
 	})
 	require.NoError(t, err)
+	require.NotNil(t, settings)
 	require.NotNil(t, settings.GetMaxAllowedUsers())
 	assert.Equal(t, updatedMaxUsers, settings.GetMaxAllowedUsers().GetValue())
 }

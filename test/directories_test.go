@@ -34,10 +34,11 @@ func TestDirectory_EndToEndIntegration(t *testing.T) {
 	got, err := client.Directory().GetDirectory(ctx, orgId, createResp.GetDirectory().GetId())
 	require.NoError(t, err)
 	require.NotNil(t, got)
+	require.NotNil(t, got.GetDirectory())
 	assert.Equal(t, createResp.GetDirectory().GetId(), got.GetDirectory().GetId())
 	assert.Equal(t, orgId, got.GetDirectory().GetOrganizationId())
 	assert.NotEmpty(t, got.GetDirectory().GetId())
-	assert.NotNil(t, got.GetDirectory().GetStats())
+	require.NotNil(t, got.GetDirectory().GetStats())
 
 	listResp, err := client.Directory().ListDirectories(ctx, orgId)
 	require.NoError(t, err)
@@ -57,22 +58,24 @@ func TestDirectory_EndToEndIntegration(t *testing.T) {
 		PageToken:     "",
 		IncludeDetail: boolPtr(true),
 	})
-	assert.NoError(t, err)
-	assert.NotNil(t, usersResp)
+	require.NoError(t, err)
+	require.NotNil(t, usersResp)
 
 	groupsResp, err := client.Directory().ListDirectoryGroups(ctx, orgId, createResp.GetDirectory().GetId(), &scalekit.ListDirectoryGroupsOptions{
 		PageSize:      10,
 		PageToken:     "",
 		IncludeDetail: boolPtr(true),
 	})
-	assert.NoError(t, err)
-	assert.NotNil(t, groupsResp)
+	require.NoError(t, err)
+	require.NotNil(t, groupsResp)
 
 	enableResp, err := client.Directory().EnableDirectory(ctx, orgId, createResp.GetDirectory().GetId())
 	if err == nil {
+		require.NotNil(t, enableResp)
 		assert.True(t, enableResp.GetEnabled())
 		disableResp, err := client.Directory().DisableDirectory(ctx, orgId, createResp.GetDirectory().GetId())
 		if err == nil {
+			require.NotNil(t, disableResp)
 			assert.False(t, disableResp.GetEnabled())
 			_, _ = client.Directory().EnableDirectory(ctx, orgId, createResp.GetDirectory().GetId())
 		}
@@ -103,6 +106,8 @@ func TestDirectory_GetPrimaryDirectoryByOrganizationId(t *testing.T) {
 
 	byId, err := client.Directory().GetDirectory(ctx, orgId, primary.GetDirectory().GetId())
 	require.NoError(t, err)
+	require.NotNil(t, byId)
+	require.NotNil(t, byId.GetDirectory())
 	assert.Equal(t, primary.GetDirectory().GetId(), byId.GetDirectory().GetId())
 }
 

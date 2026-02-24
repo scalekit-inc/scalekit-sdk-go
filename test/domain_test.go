@@ -116,6 +116,7 @@ func TestDomain_EndToEndIntegration(t *testing.T) {
 	retrieved, err := client.Domain().GetDomain(ctx, domainId, orgId)
 	require.NoError(t, err)
 	require.NotNil(t, retrieved)
+	require.NotNil(t, retrieved.GetDomain())
 	assert.Equal(t, domainName, retrieved.GetDomain().GetDomain())
 
 	err = client.Domain().DeleteDomain(ctx, domainId, orgId)
@@ -150,12 +151,14 @@ func TestDomain_ListDomainsWithFilters(t *testing.T) {
 
 	allList, err := client.Domain().ListDomains(ctx, orgId)
 	require.NoError(t, err)
+	require.NotNil(t, allList)
 	require.True(t, len(allList.GetDomains()) > 0)
 
 	orgList, err := client.Domain().ListDomains(ctx, orgId, &scalekit.ListDomainOptions{
 		DomainType: scalekit.DomainTypeOrganization,
 	})
 	require.NoError(t, err)
+	require.NotNil(t, orgList)
 	for _, d := range orgList.GetDomains() {
 		assert.Equal(t, domains.DomainType_ORGANIZATION_DOMAIN, d.GetDomainType())
 	}
@@ -172,6 +175,7 @@ func TestDomain_ListDomainsWithFilters(t *testing.T) {
 		DomainType: scalekit.DomainTypeAllowedEmail,
 	})
 	require.NoError(t, err)
+	require.NotNil(t, allowedList)
 	for _, d := range allowedList.GetDomains() {
 		assert.Equal(t, domains.DomainType_ALLOWED_EMAIL_DOMAIN, d.GetDomainType())
 	}

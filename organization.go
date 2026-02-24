@@ -153,8 +153,11 @@ func (o *organization) GeneratePortalLink(ctx context.Context, organizationId st
 			Id: organizationId,
 		},
 	).exec(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-	return resp.Link, err
+	return resp.Link, nil
 }
 
 func (o *organization) UpdateOrganizationSettings(ctx context.Context, id string, settings OrganizationSettings) (*GetOrganizationResponse, error) {

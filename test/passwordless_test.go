@@ -7,12 +7,13 @@ import (
 
 	"github.com/scalekit-inc/scalekit-sdk-go/v2"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSendPasswordlessEmail(t *testing.T) {
 	passwordlessService := client.Passwordless()
 	ctx := context.Background()
-	email := "dhaneshbabu007@gmail.com"
+	email := TestUserEmailJohn
 	templateType := scalekit.TemplateTypeSignin
 	options := &scalekit.SendPasswordlessOptions{
 		Template:         &templateType,
@@ -32,7 +33,7 @@ func TestSendPasswordlessEmail(t *testing.T) {
 	}
 
 	// Assert response is not nil and contains expected fields
-	assert.NotNil(t, response)
+	require.NotNil(t, response)
 	assert.NotEmpty(t, response.GetAuthRequestId())
 	assert.True(t, response.GetExpiresAt() > 0)
 	assert.True(t, response.GetExpiresIn() > 0)
@@ -45,7 +46,7 @@ func TestSendPasswordlessEmail(t *testing.T) {
 func TestResendPasswordlessEmail(t *testing.T) {
 	passwordlessService := client.Passwordless()
 	ctx := context.Background()
-	email := "dhaneshbabu007@gmail.com"
+	email := TestUserEmailJohn
 	templateType := scalekit.TemplateTypeSignin
 	options := &scalekit.SendPasswordlessOptions{
 		Template:         &templateType,
@@ -65,7 +66,7 @@ func TestResendPasswordlessEmail(t *testing.T) {
 	}
 
 	// Assert initial response has required fields
-	assert.NotNil(t, response)
+	require.NotNil(t, response)
 	assert.NotEmpty(t, response.GetAuthRequestId())
 
 	verifyCodeResponse, err := passwordlessService.VerifyPasswordlessEmail(ctx, &scalekit.VerifyPasswordlessOptions{
@@ -87,7 +88,7 @@ func TestResendPasswordlessEmail(t *testing.T) {
 	}
 
 	// Assert resend response is not nil and contains expected fields
-	assert.NotNil(t, resendResponse)
+	require.NotNil(t, resendResponse)
 	assert.NotEmpty(t, resendResponse.GetAuthRequestId())
 	assert.True(t, resendResponse.GetExpiresAt() > 0)
 	assert.True(t, resendResponse.GetExpiresIn() > 0)
@@ -135,7 +136,7 @@ func TestVerifyPasswordlessEmail_ValidCode(t *testing.T) {
 		t.Logf("Expected to fail without real auth request: %v", err)
 		return
 	}
-	assert.NotNil(t, response)
+	require.NotNil(t, response)
 	assert.NotEmpty(t, response.GetEmail())
 	assert.NotEmpty(t, response.GetPasswordlessType().String())
 }
@@ -152,7 +153,7 @@ func TestVerifyPasswordlessEmail_ValidLinkToken(t *testing.T) {
 		t.Logf("Expected to fail without real link token: %v", err)
 		return
 	}
-	assert.NotNil(t, response)
+	require.NotNil(t, response)
 	assert.NotEmpty(t, response.GetEmail())
 	assert.NotEmpty(t, response.GetPasswordlessType().String())
 }

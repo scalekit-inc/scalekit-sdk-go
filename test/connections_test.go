@@ -27,6 +27,7 @@ func TestConnection_EndToEndIntegration(t *testing.T) {
 	domainResp, err := client.Domain().CreateDomain(ctx, orgId, domainName, nil)
 	require.NoError(t, err)
 	require.NotNil(t, domainResp)
+	require.NotNil(t, domainResp.GetDomain())
 	defer DeleteTestDomain(t, ctx, orgId, domainResp.GetDomain().GetId())
 
 	connResp, err := client.Connection().CreateConnection(ctx, orgId, &connections.CreateConnection{
@@ -44,6 +45,7 @@ func TestConnection_EndToEndIntegration(t *testing.T) {
 	got, err := client.Connection().GetConnection(ctx, orgId, connResp.GetConnection().GetId())
 	require.NoError(t, err)
 	require.NotNil(t, got)
+	require.NotNil(t, got.GetConnection())
 	assert.Equal(t, connResp.GetConnection().GetId(), got.GetConnection().GetId())
 	assert.NotEmpty(t, got.GetConnection().GetId())
 	assert.NotEmpty(t, got.GetConnection().GetTestConnectionUri())
@@ -67,9 +69,11 @@ func TestConnection_EndToEndIntegration(t *testing.T) {
 
 	enableResp, err := client.Connection().EnableConnection(ctx, orgId, connResp.GetConnection().GetId())
 	if err == nil {
+		require.NotNil(t, enableResp)
 		assert.True(t, enableResp.GetEnabled())
 		disableResp, err := client.Connection().DisableConnection(ctx, orgId, connResp.GetConnection().GetId())
 		if err == nil {
+			require.NotNil(t, disableResp)
 			assert.False(t, disableResp.GetEnabled())
 			_, _ = client.Connection().EnableConnection(ctx, orgId, connResp.GetConnection().GetId())
 		}
