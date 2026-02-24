@@ -96,7 +96,7 @@ func TestCreateUserScopedToken(t *testing.T) {
 	assert.NotEmpty(t, created.TokenId)
 	assert.NotNil(t, created.TokenInfo)
 	assert.Equal(t, testOrg, created.TokenInfo.OrganizationId)
-	assert.NotNil(t, created.TokenInfo.UserId)
+	require.NotNil(t, created.TokenInfo.UserId)
 	assert.Equal(t, userId, *created.TokenInfo.UserId)
 }
 
