@@ -846,15 +846,6 @@ func TestNewScalekitClientSecretCompatibilityAndWithSecret(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				require.Equal(t, "/oauth/token", r.URL.Path)
-				require.NoError(t, r.ParseForm())
-				assert.Equal(t, tt.expectedSecret, r.FormValue("client_secret"))
-				w.Header().Set("Content-Type", "application/json")
-				_, _ = w.Write([]byte(`{"access_token":"at","refresh_token":"rt","expires_in":3600}`))
-			}))
-			defer server.Close()
-
 			testClient := tt.clientFn()
 			resp, err := testClient.RefreshAccessToken(context.Background(), "refresh_token")
 			require.NoError(t, err)

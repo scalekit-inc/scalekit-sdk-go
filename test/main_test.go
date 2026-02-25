@@ -23,7 +23,7 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	loadEnvIfPresent("test/.env", ".env")
+	loadEnvIfPresent(".env", "../.env")
 
 	environmentUrl := os.Getenv(EnvEnvironmentURL)
 	clientId := os.Getenv(EnvClientID)

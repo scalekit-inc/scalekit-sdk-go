@@ -8,7 +8,7 @@ PROTO_REPO_URL := https://github.com/scalekit-inc/scalekit.git
 PROTO_REF := v0.1.103
 PROTO_SUBDIR := proto
 PROTO_REMOTE_INPUT := $(PROTO_REPO_URL)\#ref=$(PROTO_REF),subdir=$(PROTO_SUBDIR)
-PROTO_LOCAL_PATH ?= /Users/akshayparihar/Documents/repos/scalekit/proto
+PROTO_LOCAL_PATH ?= ../scalekit/proto #or paste absolute path to protos
 
 BUF := PATH="$(TOOLS_BIN):$$PATH" buf
 
