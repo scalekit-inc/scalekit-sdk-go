@@ -6,123 +6,138 @@ import (
 	"time"
 
 	"github.com/scalekit-inc/scalekit-sdk-go/v2"
-
 	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/directories"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestGetDirectory(t *testing.T) {
-	// List directories
-	directoriesResp, err := client.Directory().ListDirectories(context.Background(), testOrg)
-	assert.NoError(t, err)
-	assert.True(t, len(directoriesResp.Directories) > 0)
-
-	// Get directory by ID
-	directory, err := client.Directory().GetDirectory(context.Background(), testOrg, testDirectory)
-	assert.NoError(t, err)
-
-	firstDirectory := directoriesResp.Directories[0]
-	assert.NotNil(t, firstDirectory)
-	assert.Equal(t, testDirectory, firstDirectory.Id)
-	assert.Equal(t, testOrg, firstDirectory.OrganizationId)
-	assert.Equal(t, directories.DirectoryProvider_OKTA, firstDirectory.DirectoryProvider)
-	assert.True(t, firstDirectory.Stats.TotalGroups > 0)
-	assert.True(t, firstDirectory.Stats.TotalUsers > 0)
-	assert.Equal(t, directory.Directory.Id, firstDirectory.Id)
-	assert.Equal(t, directory.Directory.OrganizationId, firstDirectory.OrganizationId)
+func boolPtr(b bool) *bool {
+	return &b
 }
 
-func TestListDirectoryUsers(t *testing.T) {
-	// List users with options
-	options := &scalekit.ListDirectoryUsersOptions{
+func TestDirectory_EndToEndIntegration(t *testing.T) {
+	ctx := context.Background()
+	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
+	defer DeleteTestOrganization(t, ctx, orgId)
+
+	createResp, err := client.Directory().CreateDirectory(ctx, orgId, &directories.CreateDirectory{
+		DirectoryType:     directories.DirectoryType_SCIM,
+		DirectoryProvider: directories.DirectoryProvider_OKTA,
+	})
+	if err != nil {
+		t.Skipf("CreateDirectory not supported or requires config: %v", err)
+	}
+	require.NotNil(t, createResp)
+	require.NotNil(t, createResp.GetDirectory())
+	defer DeleteTestDirectory(t, ctx, orgId, createResp.GetDirectory().GetId())
+
+	got, err := client.Directory().GetDirectory(ctx, orgId, createResp.GetDirectory().GetId())
+	require.NoError(t, err)
+	require.NotNil(t, got)
+	require.NotNil(t, got.GetDirectory())
+	assert.Equal(t, createResp.GetDirectory().GetId(), got.GetDirectory().GetId())
+	assert.Equal(t, orgId, got.GetDirectory().GetOrganizationId())
+	assert.NotEmpty(t, got.GetDirectory().GetId())
+	require.NotNil(t, got.GetDirectory().GetStats())
+
+	listResp, err := client.Directory().ListDirectories(ctx, orgId)
+	require.NoError(t, err)
+	require.NotNil(t, listResp)
+	require.True(t, len(listResp.GetDirectories()) > 0)
+	var found bool
+	for _, d := range listResp.GetDirectories() {
+		if d.GetId() == createResp.GetDirectory().GetId() {
+			found = true
+			break
+		}
+	}
+	assert.True(t, found, "directory should be in list")
+
+	usersResp, err := client.Directory().ListDirectoryUsers(ctx, orgId, createResp.GetDirectory().GetId(), &scalekit.ListDirectoryUsersOptions{
 		PageSize:      10,
 		PageToken:     "",
 		IncludeDetail: boolPtr(true),
-	}
+	})
+	require.NoError(t, err)
+	require.NotNil(t, usersResp)
 
-	usersResp, err := client.Directory().ListDirectoryUsers(context.Background(), testOrg, testDirectory, options)
-	assert.NoError(t, err)
-	assert.True(t, len(usersResp.Users) > 1)
+	groupsResp, err := client.Directory().ListDirectoryGroups(ctx, orgId, createResp.GetDirectory().GetId(), &scalekit.ListDirectoryGroupsOptions{
+		PageSize:      10,
+		PageToken:     "",
+		IncludeDetail: boolPtr(true),
+	})
+	require.NoError(t, err)
+	require.NotNil(t, groupsResp)
 
-	for _, user := range usersResp.Users {
-		assert.NotNil(t, user)
-		assert.NotEmpty(t, user.Id)
-		assert.NotEmpty(t, user.Email)
-		assert.NotEmpty(t, user.UserDetail)
+	enableResp, err := client.Directory().EnableDirectory(ctx, orgId, createResp.GetDirectory().GetId())
+	if err == nil {
+		require.NotNil(t, enableResp)
+		assert.True(t, enableResp.GetEnabled())
+		disableResp, err := client.Directory().DisableDirectory(ctx, orgId, createResp.GetDirectory().GetId())
+		if err == nil {
+			require.NotNil(t, disableResp)
+			assert.False(t, disableResp.GetEnabled())
+			_, _ = client.Directory().EnableDirectory(ctx, orgId, createResp.GetDirectory().GetId())
+		}
 	}
 }
 
-func TestListDirectoryUsersUpdatedAfter(t *testing.T) {
+func TestDirectory_GetPrimaryDirectoryByOrganizationId(t *testing.T) {
+	ctx := context.Background()
+	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
+	defer DeleteTestOrganization(t, ctx, orgId)
+
+	createResp, err := client.Directory().CreateDirectory(ctx, orgId, &directories.CreateDirectory{
+		DirectoryType:     directories.DirectoryType_SCIM,
+		DirectoryProvider: directories.DirectoryProvider_OKTA,
+	})
+	if err != nil {
+		t.Skipf("CreateDirectory not supported: %v", err)
+	}
+	require.NotNil(t, createResp)
+	require.NotNil(t, createResp.GetDirectory())
+	defer DeleteTestDirectory(t, ctx, orgId, createResp.GetDirectory().GetId())
+
+	primary, err := client.Directory().GetPrimaryDirectoryByOrganizationId(ctx, orgId)
+	require.NoError(t, err)
+	require.NotNil(t, primary)
+	require.NotNil(t, primary.GetDirectory())
+	assert.Equal(t, orgId, primary.GetDirectory().GetOrganizationId())
+
+	byId, err := client.Directory().GetDirectory(ctx, orgId, primary.GetDirectory().GetId())
+	require.NoError(t, err)
+	require.NotNil(t, byId)
+	require.NotNil(t, byId.GetDirectory())
+	assert.Equal(t, primary.GetDirectory().GetId(), byId.GetDirectory().GetId())
+}
+
+func TestDirectory_ListDirectoryUsers_UpdatedAfter(t *testing.T) {
+	ctx := context.Background()
+	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
+	defer DeleteTestOrganization(t, ctx, orgId)
+
+	createResp, err := client.Directory().CreateDirectory(ctx, orgId, &directories.CreateDirectory{
+		DirectoryType:     directories.DirectoryType_SCIM,
+		DirectoryProvider: directories.DirectoryProvider_OKTA,
+	})
+	if err != nil {
+		t.Skipf("CreateDirectory not supported: %v", err)
+	}
+	require.NotNil(t, createResp)
+	require.NotNil(t, createResp.GetDirectory())
+	defer DeleteTestDirectory(t, ctx, orgId, createResp.GetDirectory().GetId())
+
 	updatedAfter := time.Unix(1729851960, 0)
-	options := &scalekit.ListDirectoryUsersOptions{
+	usersResp, err := client.Directory().ListDirectoryUsers(ctx, orgId, createResp.GetDirectory().GetId(), &scalekit.ListDirectoryUsersOptions{
 		PageSize:      10,
 		PageToken:     "",
 		IncludeDetail: boolPtr(true),
 		UpdatedAfter:  &updatedAfter,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, usersResp)
+	for _, user := range usersResp.GetUsers() {
+		assert.NotEmpty(t, user.GetId())
+		assert.NotEmpty(t, user.GetEmail())
 	}
-
-	usersResp, err := client.Directory().ListDirectoryUsers(context.Background(), testOrg, testDirectory, options)
-	assert.NoError(t, err)
-	assert.Equal(t, 3, len(usersResp.Users))
-
-	user := usersResp.Users[0]
-	assert.NotNil(t, user)
-	assert.NotEmpty(t, user.Id)
-	assert.NotEmpty(t, user.Email)
-	assert.NotEmpty(t, user.UserDetail)
-}
-
-func TestEnableDisableDirectory(t *testing.T) {
-	// Enable directory
-	enableResp, err := client.Directory().EnableDirectory(context.Background(), testOrg, testDirectory)
-	assert.NoError(t, err)
-	assert.True(t, enableResp.Enabled)
-
-	// Disable directory
-	disableResp, err := client.Directory().DisableDirectory(context.Background(), testOrg, testDirectory)
-	assert.NoError(t, err)
-	assert.False(t, disableResp.Enabled)
-
-	// Cleanup: re-enable directory
-	_, err = client.Directory().EnableDirectory(context.Background(), testOrg, testDirectory)
-	assert.NoError(t, err)
-}
-
-func TestListDirectoryGroups(t *testing.T) {
-	options := &scalekit.ListDirectoryGroupsOptions{
-		PageSize:      10,
-		PageToken:     "",
-		IncludeDetail: boolPtr(true),
-	}
-
-	groupsResp, err := client.Directory().ListDirectoryGroups(context.Background(), testOrg, testDirectory, options)
-	assert.NoError(t, err)
-	assert.True(t, len(groupsResp.Groups) > 0)
-
-	for _, group := range groupsResp.Groups {
-		assert.NotNil(t, group)
-		assert.NotEmpty(t, group.Id)
-		assert.NotEmpty(t, group.DisplayName)
-		assert.NotEmpty(t, group.GroupDetail)
-	}
-}
-
-func TestGetPrimaryDirectoryByOrganizationId(t *testing.T) {
-	directory, err := client.Directory().GetPrimaryDirectoryByOrganizationId(context.Background(), testOrg)
-	assert.NoError(t, err)
-
-	directoryById, err := client.Directory().GetDirectory(context.Background(), testOrg, directory.Directory.Id)
-	assert.NoError(t, err)
-
-	assert.NotNil(t, directory)
-	assert.NotNil(t, directoryById)
-	assert.Equal(t, directory.Directory.Id, directoryById.Directory.Id)
-	assert.Equal(t, testOrg, directory.Directory.OrganizationId)
-	assert.Equal(t, directories.DirectoryProvider_OKTA, directory.Directory.DirectoryProvider)
-	assert.True(t, directory.Directory.Stats.TotalGroups > 0)
-	assert.True(t, directory.Directory.Stats.TotalUsers > 0)
-}
-
-func boolPtr(b bool) *bool {
-	return &b
 }

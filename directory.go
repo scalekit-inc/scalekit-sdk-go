@@ -15,6 +15,7 @@ type GetDirectoryResponse = directoriesv1.GetDirectoryResponse
 type ListDirectoryUsersResponse = directoriesv1.ListDirectoryUsersResponse
 type ListDirectoryGroupsResponse = directoriesv1.ListDirectoryGroupsResponse
 type ToggleDirectoryResponse = directoriesv1.ToggleDirectoryResponse
+type CreateDirectoryResponse = directoriesv1.CreateDirectoryResponse
 
 type ListDirectoryUsersOptions struct {
 	PageSize         uint32
@@ -32,6 +33,7 @@ type ListDirectoryGroupsOptions struct {
 }
 
 type Directory interface {
+	CreateDirectory(ctx context.Context, organizationId string, directory *directoriesv1.CreateDirectory) (*CreateDirectoryResponse, error)
 	ListDirectories(ctx context.Context, organizationId string) (*ListDirectoriesResponse, error)
 	ListDirectoryUsers(ctx context.Context, organizationId string, directoryId string, options *ListDirectoryUsersOptions) (*ListDirectoryUsersResponse, error)
 	ListDirectoryGroups(ctx context.Context, organizationId string, directoryId string, options *ListDirectoryGroupsOptions) (*ListDirectoryGroupsResponse, error)
@@ -39,6 +41,7 @@ type Directory interface {
 	EnableDirectory(ctx context.Context, organizationId string, directoryId string) (*ToggleDirectoryResponse, error)
 	DisableDirectory(ctx context.Context, organizationId string, directoryId string) (*ToggleDirectoryResponse, error)
 	GetDirectory(ctx context.Context, organizationId string, directoryId string) (*GetDirectoryResponse, error)
+	DeleteDirectory(ctx context.Context, organizationId string, directoryId string) error
 }
 
 type directory struct {
@@ -51,6 +54,17 @@ func newDirectoryClient(coreClient *coreClient) Directory {
 		coreClient: coreClient,
 		client:     newConnectClient(coreClient, directoriesconnect.NewDirectoryServiceClient),
 	}
+}
+
+func (d *directory) CreateDirectory(ctx context.Context, organizationId string, directory *directoriesv1.CreateDirectory) (*CreateDirectoryResponse, error) {
+	return newConnectExecuter(
+		d.coreClient,
+		d.client.CreateDirectory,
+		&directoriesv1.CreateDirectoryRequest{
+			OrganizationId: organizationId,
+			Directory:      directory,
+		},
+	).exec(ctx)
 }
 
 func (d *directory) ListDirectories(ctx context.Context, organizationId string) (*ListDirectoriesResponse, error) {
@@ -144,11 +158,23 @@ func (d *directory) GetPrimaryDirectoryByOrganizationId(ctx context.Context, org
 	if err != nil {
 		return nil, err
 	}
-	if len(listDirectories.Directories) == 0 {
+	if len(listDirectories.GetDirectories()) == 0 {
 		return nil, errors.New("directory does not exist for organization")
 	}
 	response := &GetDirectoryResponse{
-		Directory: listDirectories.Directories[0],
+		Directory: listDirectories.GetDirectories()[0],
 	}
 	return response, nil
+}
+
+func (d *directory) DeleteDirectory(ctx context.Context, organizationId string, directoryId string) error {
+	_, err := newConnectExecuter(
+		d.coreClient,
+		d.client.DeleteDirectory,
+		&directoriesv1.DeleteDirectoryRequest{
+			OrganizationId: organizationId,
+			Id:             directoryId,
+		},
+	).exec(ctx)
+	return err
 }
