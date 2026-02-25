@@ -54,6 +54,7 @@ type Scalekit interface {
 	) (*AuthenticationResponse, error)
 	GetIdpInitiatedLoginClaims(ctx context.Context, idpInitiateLoginToken string) (*IdpInitiatedLoginClaims, error)
 	ValidateAccessToken(ctx context.Context, accessToken string) (bool, error)
+	ValidateAccessTokenWithOptions(ctx context.Context, accessToken string, options ValidateAccessTokenOptions) (bool, error)
 	VerifyWebhookPayload(secret string, headers map[string]string, payload []byte) (bool, error)
 	VerifyInterceptorPayload(secret string, headers map[string]string, payload []byte) (bool, error)
 	RefreshAccessToken(ctx context.Context, refreshToken string) (*TokenResponse, error)
@@ -95,6 +96,10 @@ type AuthorizationUrlOptions struct {
 
 type AuthenticationOptions struct {
 	CodeVerifier string
+}
+
+type ValidateAccessTokenOptions struct {
+	Audience []string
 }
 
 type AuthenticationResponse struct {
@@ -370,6 +375,33 @@ func (s *scalekitClient) ValidateAccessToken(ctx context.Context, accessToken st
 	if err != nil {
 		return false, err
 	}
+	return true, nil
+}
+
+func (s *scalekitClient) ValidateAccessTokenWithOptions(ctx context.Context, accessToken string, options ValidateAccessTokenOptions) (bool, error) {
+	isValid, err := s.ValidateAccessToken(ctx, accessToken)
+	if err != nil {
+		return false, err
+	}
+	if len(options.Audience) == 0 {
+		return isValid, nil
+	}
+
+	claims, err := s.GetAccessTokenClaims(ctx, accessToken)
+	if err != nil {
+		return false, err
+	}
+	audienceSet := map[string]struct{}{}
+	for _, audience := range claims.Audience {
+		audienceSet[audience] = struct{}{}
+	}
+
+	for _, audience := range options.Audience {
+		if _, ok := audienceSet[audience]; !ok {
+			return false, fmt.Errorf("audience %s is not present in token aud claim", audience)
+		}
+	}
+
 	return true, nil
 }
 
