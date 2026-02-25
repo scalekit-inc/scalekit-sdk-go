@@ -23,11 +23,49 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: "go.mod"
+
+      - name: Go modules sync
+        run: |
+          go mod tidy
+          git diff --exit-code -- go.mod go.sum
+
+      - name: Setup build tools
+        run: make setup
+
+      - name: Fail fast for fork PRs (secrets unavailable)
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork }}
+        run: |
+          echo "Fork PR checks requiring secrets cannot run. Reach out to support@scalekit.com to get your PR reviewed with checks."
+          exit 1
+
+      - name: Verify generated code is up to date
+        if: ${{ github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork }}
+        env:
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          if [ -z "$PAT_TOKEN" ]; then
+            echo "PAT_TOKEN is required to run make generate against private proto repository."
+            exit 1
+          fi
+
+          auth_header="$(printf "x-access-token:%s" "$PAT_TOKEN" | base64 | tr -d '\n')"
+
+          cleanup() {
+            git config --global --unset-all http.https://github.com/.extraheader || true
+          }
+          trap cleanup EXIT
+
+          git config --global http.https://github.com/.extraheader "AUTHORIZATION: basic ${auth_header}"
+
+          make generate
+          git diff --exit-code
 
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v6
@@ -43,11 +81,6 @@ jobs:
           SCALEKIT_CLIENT_ID: ${{ secrets.SCALEKIT_CLIENT_ID }}
           SCALEKIT_CLIENT_SECRET: ${{ secrets.SCALEKIT_CLIENT_SECRET }}
         run: go test -race -v ./...
-
-      - name: Go modules sync
-        run: |
-          go mod tidy
-          git diff --exit-code -- go.mod go.sum
 
       - name: Run Go vulnerability check
         run: |
