@@ -652,18 +652,61 @@ func TestValidateAccessToken(t *testing.T) {
 	}
 }
 
-func TestValidateAccessTokenWithOptions(t *testing.T) {
+func TestValidateTokenWithOptions(t *testing.T) {
+	validIDToken, validIDTokenJWKS := func() (string, string) {
+		privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+		require.NoError(t, err)
+
+		keyID := "mock-id-token-kid"
+		signer, err := jose.NewSigner(
+			jose.SigningKey{Algorithm: jose.RS256, Key: privateKey},
+			(&jose.SignerOptions{}).WithHeader("kid", keyID),
+		)
+		require.NoError(t, err)
+
+		now := time.Now()
+		idClaims := map[string]interface{}{
+			"sub":            "usr_mock123",
+			"name":           "Mock User",
+			"email":          "mock@example.com",
+			"given_name":     "Mock",
+			"family_name":    "User",
+			"email_verified": true,
+			"iat":            now.Unix(),
+			"exp":            now.Add(time.Hour).Unix(),
+		}
+
+		idTokenPayload, err := json.Marshal(idClaims)
+		require.NoError(t, err)
+		idToken, err := signer.Sign(idTokenPayload)
+		require.NoError(t, err)
+		idTokenCompact, err := idToken.CompactSerialize()
+		require.NoError(t, err)
+
+		jwk := jose.JSONWebKey{
+			Key:       privateKey.Public(),
+			KeyID:     keyID,
+			Algorithm: string(jose.RS256),
+			Use:       "sig",
+		}
+		keySet := &jose.JSONWebKeySet{Keys: []jose.JSONWebKey{jwk}}
+		keySetBytes, err := json.Marshal(keySet)
+		require.NoError(t, err)
+
+		return idTokenCompact, string(keySetBytes)
+	}()
+
 	tests := []struct {
 		name     string
 		token    string
-		options  scalekit.ValidateAccessTokenOptions
+		options  scalekit.ValidateTokenOptions
 		mockFn   func(w http.ResponseWriter, r *http.Request)
 		assertFn func(t *testing.T, isValid bool, err error)
 	}{
 		{
 			name:  "valid access token with matching audience",
 			token: "eyJhbGciOiJSUzI1NiIsImtpZCI6InNua18xNzAwMjMzNDIyNzc5MTk3MiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vYWlyZGV2LmxvY2FsaG9zdDo4ODg4Iiwic3ViIjoiY29ubl83NTQxNjU3OTA0MjQ3NDIwNDtzcmluaXZhcy5rYXJyZUBzY2FsZWtpdC5jb20iLCJhdWQiOlsicHJkX3NrY18xNzAwMjMzNDIyNzg1NzUwOCJdLCJleHAiOjE5MDY4MDQ4MzcsImlhdCI6MTc0OTAyMDA3NywibmJmIjoxNzQ5MDIwMDc3LCJjbGllbnRfaWQiOiJwcmRfc2tjXzE3MDAyMzM0MjI3ODU3NTA4IiwianRpIjoidGtuXzc1NDE4NDE0MTAwODA1ODUyIn0.SxlKHr1EFBAvfm3Zm7CliKcSWZ8LUFWx8Cs3_3bf1SVouVvRu-zE2_ghB4iAmarsxErurU0kHDEX-Fpx6euemiWXN3Z-mECB4clmb1PF8RThh7bbHx1zxqp3z_MIcDbO4ZKTXMSRx39JbcWyThQSTbeAo50TEFpIT7RsWhNYrBnhsZNibrfZXWUVDBYB930LZMzhdKPRUXBhA-HuKIjggg2jWEAv2leJ3UPbLVccbKrdq2qSzGaxLpvlPoX6RpcrA2Cbuig4vJ7bCy46M-DUg73NO91arPpl5BOnHHx2Oappk_i2S4cMOGdSyX3s50owX1xRDyELNMEIo-VoQ7rfww",
-			options: scalekit.ValidateAccessTokenOptions{
+			options: scalekit.ValidateTokenOptions{
 				Audience: []string{"prd_skc_17002334227857508"},
 			},
 			mockFn: func(w http.ResponseWriter, r *http.Request) {
@@ -681,7 +724,7 @@ func TestValidateAccessTokenWithOptions(t *testing.T) {
 		{
 			name:  "valid access token with missing audience",
 			token: "eyJhbGciOiJSUzI1NiIsImtpZCI6InNua18xNzAwMjMzNDIyNzc5MTk3MiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vYWlyZGV2LmxvY2FsaG9zdDo4ODg4Iiwic3ViIjoiY29ubl83NTQxNjU3OTA0MjQ3NDIwNDtzcmluaXZhcy5rYXJyZUBzY2FsZWtpdC5jb20iLCJhdWQiOlsicHJkX3NrY18xNzAwMjMzNDIyNzg1NzUwOCJdLCJleHAiOjE5MDY4MDQ4MzcsImlhdCI6MTc0OTAyMDA3NywibmJmIjoxNzQ5MDIwMDc3LCJjbGllbnRfaWQiOiJwcmRfc2tjXzE3MDAyMzM0MjI3ODU3NTA4IiwianRpIjoidGtuXzc1NDE4NDE0MTAwODA1ODUyIn0.SxlKHr1EFBAvfm3Zm7CliKcSWZ8LUFWx8Cs3_3bf1SVouVvRu-zE2_ghB4iAmarsxErurU0kHDEX-Fpx6euemiWXN3Z-mECB4clmb1PF8RThh7bbHx1zxqp3z_MIcDbO4ZKTXMSRx39JbcWyThQSTbeAo50TEFpIT7RsWhNYrBnhsZNibrfZXWUVDBYB930LZMzhdKPRUXBhA-HuKIjggg2jWEAv2leJ3UPbLVccbKrdq2qSzGaxLpvlPoX6RpcrA2Cbuig4vJ7bCy46M-DUg73NO91arPpl5BOnHHx2Oappk_i2S4cMOGdSyX3s50owX1xRDyELNMEIo-VoQ7rfww",
-			options: scalekit.ValidateAccessTokenOptions{
+			options: scalekit.ValidateTokenOptions{
 				Audience: []string{"non_matching_audience"},
 			},
 			mockFn: func(w http.ResponseWriter, r *http.Request) {
@@ -699,7 +742,7 @@ func TestValidateAccessTokenWithOptions(t *testing.T) {
 		{
 			name:  "invalid token should return original validation error",
 			token: "invalid.token.format",
-			options: scalekit.ValidateAccessTokenOptions{
+			options: scalekit.ValidateTokenOptions{
 				Audience: []string{"prd_skc_17002334227857508"},
 			},
 			mockFn: func(w http.ResponseWriter, r *http.Request) {
@@ -714,6 +757,21 @@ func TestValidateAccessTokenWithOptions(t *testing.T) {
 				assert.False(t, isValid)
 			},
 		},
+		{
+			name:    "valid id token with no audience checks",
+			token:   validIDToken,
+			options: scalekit.ValidateTokenOptions{},
+			mockFn: func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == "/keys" {
+					w.Header().Set("Content-Type", "application/json")
+					_, _ = w.Write([]byte(validIDTokenJWKS))
+				}
+			},
+			assertFn: func(t *testing.T, isValid bool, err error) {
+				assert.NoError(t, err)
+				assert.True(t, isValid)
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -722,7 +780,7 @@ func TestValidateAccessTokenWithOptions(t *testing.T) {
 			defer server.Close()
 
 			client := scalekit.NewScalekitClient(server.URL, "client_id", "client_secret")
-			isValid, err := client.ValidateAccessTokenWithOptions(context.Background(), tt.token, tt.options)
+			isValid, err := client.ValidateTokenWithOptions(context.Background(), tt.token, tt.options)
 			tt.assertFn(t, isValid, err)
 		})
 	}

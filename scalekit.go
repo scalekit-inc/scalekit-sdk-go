@@ -54,7 +54,7 @@ type Scalekit interface {
 	) (*AuthenticationResponse, error)
 	GetIdpInitiatedLoginClaims(ctx context.Context, idpInitiateLoginToken string) (*IdpInitiatedLoginClaims, error)
 	ValidateAccessToken(ctx context.Context, accessToken string) (bool, error)
-	ValidateAccessTokenWithOptions(ctx context.Context, accessToken string, options ValidateAccessTokenOptions) (bool, error)
+	ValidateTokenWithOptions(ctx context.Context, token string, options ValidateTokenOptions) (bool, error)
 	VerifyWebhookPayload(secret string, headers map[string]string, payload []byte) (bool, error)
 	VerifyInterceptorPayload(secret string, headers map[string]string, payload []byte) (bool, error)
 	RefreshAccessToken(ctx context.Context, refreshToken string) (*TokenResponse, error)
@@ -98,7 +98,8 @@ type AuthenticationOptions struct {
 	CodeVerifier string
 }
 
-type ValidateAccessTokenOptions struct {
+// ValidateTokenOptions defines optional validations for token verification.
+type ValidateTokenOptions struct {
 	Audience []string
 }
 
@@ -114,6 +115,7 @@ type (
 	Claims  map[string]interface{}
 	idAlias IdTokenClaims
 	atAlias AccessTokenClaims
+	tkAlias TokenClaims
 )
 
 type IdTokenClaims struct {
@@ -155,6 +157,19 @@ type AccessTokenClaims struct {
 
 func (a *AccessTokenClaims) UnmarshalJSON(data []byte) error {
 	return unmarshalJson(data, (*atAlias)(a), &a.Claims)
+}
+
+type TokenClaims struct {
+	Sub      string   `json:"sub"`
+	Iss      string   `json:"iss"`
+	Audience Audience `json:"aud,omitempty"`
+	Iat      int      `json:"iat"`
+	Exp      int      `json:"exp"`
+	Claims   Claims   `json:"-"`
+}
+
+func (t *TokenClaims) UnmarshalJSON(data []byte) error {
+	return unmarshalJson(data, (*tkAlias)(t), &t.Claims)
 }
 
 type User = IdTokenClaims
@@ -378,19 +393,17 @@ func (s *scalekitClient) ValidateAccessToken(ctx context.Context, accessToken st
 	return true, nil
 }
 
-func (s *scalekitClient) ValidateAccessTokenWithOptions(ctx context.Context, accessToken string, options ValidateAccessTokenOptions) (bool, error) {
-	isValid, err := s.ValidateAccessToken(ctx, accessToken)
+// ValidateTokenWithOptions validates a signed JWT (access token or ID token)
+// and enforces optional checks such as audience validation.
+func (s *scalekitClient) ValidateTokenWithOptions(ctx context.Context, token string, options ValidateTokenOptions) (bool, error) {
+	claims, err := ValidateToken[TokenClaims](ctx, token, s.coreClient.GetJwks)
 	if err != nil {
 		return false, err
 	}
 	if len(options.Audience) == 0 {
-		return isValid, nil
+		return true, nil
 	}
 
-	claims, err := s.GetAccessTokenClaims(ctx, accessToken)
-	if err != nil {
-		return false, err
-	}
 	audienceSet := map[string]struct{}{}
 	for _, audience := range claims.Audience {
 		audienceSet[audience] = struct{}{}
