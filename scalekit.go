@@ -409,10 +409,15 @@ func (s *scalekitClient) ValidateTokenWithOptions(ctx context.Context, token str
 		audienceSet[audience] = struct{}{}
 	}
 
+	matched := false
 	for _, audience := range options.Audience {
-		if _, ok := audienceSet[audience]; !ok {
-			return false, fmt.Errorf("audience %s is not present in token aud claim", audience)
+		if _, ok := audienceSet[audience]; ok {
+			matched = true
+			break
 		}
+	}
+	if !matched {
+		return false, fmt.Errorf("none of the expected audiences found in token aud claim")
 	}
 
 	return true, nil

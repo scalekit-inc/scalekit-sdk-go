@@ -722,7 +722,7 @@ func TestValidateTokenWithOptions(t *testing.T) {
 			},
 		},
 		{
-			name:  "valid access token with missing audience",
+			name:  "valid access token with none of the expected audiences",
 			token: "eyJhbGciOiJSUzI1NiIsImtpZCI6InNua18xNzAwMjMzNDIyNzc5MTk3MiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vYWlyZGV2LmxvY2FsaG9zdDo4ODg4Iiwic3ViIjoiY29ubl83NTQxNjU3OTA0MjQ3NDIwNDtzcmluaXZhcy5rYXJyZUBzY2FsZWtpdC5jb20iLCJhdWQiOlsicHJkX3NrY18xNzAwMjMzNDIyNzg1NzUwOCJdLCJleHAiOjE5MDY4MDQ4MzcsImlhdCI6MTc0OTAyMDA3NywibmJmIjoxNzQ5MDIwMDc3LCJjbGllbnRfaWQiOiJwcmRfc2tjXzE3MDAyMzM0MjI3ODU3NTA4IiwianRpIjoidGtuXzc1NDE4NDE0MTAwODA1ODUyIn0.SxlKHr1EFBAvfm3Zm7CliKcSWZ8LUFWx8Cs3_3bf1SVouVvRu-zE2_ghB4iAmarsxErurU0kHDEX-Fpx6euemiWXN3Z-mECB4clmb1PF8RThh7bbHx1zxqp3z_MIcDbO4ZKTXMSRx39JbcWyThQSTbeAo50TEFpIT7RsWhNYrBnhsZNibrfZXWUVDBYB930LZMzhdKPRUXBhA-HuKIjggg2jWEAv2leJ3UPbLVccbKrdq2qSzGaxLpvlPoX6RpcrA2Cbuig4vJ7bCy46M-DUg73NO91arPpl5BOnHHx2Oappk_i2S4cMOGdSyX3s50owX1xRDyELNMEIo-VoQ7rfww",
 			options: scalekit.ValidateTokenOptions{
 				Audience: []string{"non_matching_audience"},
@@ -737,6 +737,25 @@ func TestValidateTokenWithOptions(t *testing.T) {
 			assertFn: func(t *testing.T, isValid bool, err error) {
 				assert.Error(t, err)
 				assert.False(t, isValid)
+				assert.EqualError(t, err, "none of the expected audiences found in token aud claim")
+			},
+		},
+		{
+			name:  "valid access token when any expected audience matches",
+			token: "eyJhbGciOiJSUzI1NiIsImtpZCI6InNua18xNzAwMjMzNDIyNzc5MTk3MiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vYWlyZGV2LmxvY2FsaG9zdDo4ODg4Iiwic3ViIjoiY29ubl83NTQxNjU3OTA0MjQ3NDIwNDtzcmluaXZhcy5rYXJyZUBzY2FsZWtpdC5jb20iLCJhdWQiOlsicHJkX3NrY18xNzAwMjMzNDIyNzg1NzUwOCJdLCJleHAiOjE5MDY4MDQ4MzcsImlhdCI6MTc0OTAyMDA3NywibmJmIjoxNzQ5MDIwMDc3LCJjbGllbnRfaWQiOiJwcmRfc2tjXzE3MDAyMzM0MjI3ODU3NTA4IiwianRpIjoidGtuXzc1NDE4NDE0MTAwODA1ODUyIn0.SxlKHr1EFBAvfm3Zm7CliKcSWZ8LUFWx8Cs3_3bf1SVouVvRu-zE2_ghB4iAmarsxErurU0kHDEX-Fpx6euemiWXN3Z-mECB4clmb1PF8RThh7bbHx1zxqp3z_MIcDbO4ZKTXMSRx39JbcWyThQSTbeAo50TEFpIT7RsWhNYrBnhsZNibrfZXWUVDBYB930LZMzhdKPRUXBhA-HuKIjggg2jWEAv2leJ3UPbLVccbKrdq2qSzGaxLpvlPoX6RpcrA2Cbuig4vJ7bCy46M-DUg73NO91arPpl5BOnHHx2Oappk_i2S4cMOGdSyX3s50owX1xRDyELNMEIo-VoQ7rfww",
+			options: scalekit.ValidateTokenOptions{
+				Audience: []string{"non_matching_audience", "prd_skc_17002334227857508"},
+			},
+			mockFn: func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == "/keys" {
+					w.Header().Set("Content-Type", "application/json")
+					resp := `{"keys":[{"use":"sig","kty":"RSA","kid":"snk_17002334227791972","alg":"RS256","n":"8HgCyscnWpT78Jscy7GOSrdK30R8AkBu7BSsXPnWNTCBMmdoRYa2kJf4al9XXW28FNYwM9oHAxCFsiRQna_ouClsRyW1_rYXxqQeeW4GvI1uRpq-3kgRvDm1cjekXH4a0bu_cGNcdTVherrUiBH3WoHxnIMTO0i__BD0qbyh4teUfYaoRgE8T-zsBB_QGdDfMl7EfGLIFgI8eTZFGn_-ONpV9Z9HvVefnyr4Oibyu58z77cOytd6r4lCF0dErAUkjiPNk-cTUDv-QRBNLG4uNcLEqgKL-nvNW-7JrUMiWCcrkHKUlwUncuMvbwWrLlT_dJp7XRjN8RampGUEQUbzGw","e":"AQAB"}]}`
+					_, _ = w.Write([]byte(resp))
+				}
+			},
+			assertFn: func(t *testing.T, isValid bool, err error) {
+				assert.NoError(t, err)
+				assert.True(t, isValid)
 			},
 		},
 		{
