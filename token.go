@@ -3,6 +3,7 @@ package scalekit
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	connect "connectrpc.com/connect"
@@ -79,7 +80,7 @@ func (t *tokenService) CreateToken(ctx context.Context, organizationId string, o
 
 func (t *tokenService) ValidateToken(ctx context.Context, token string) (*ValidateTokenResponse, error) {
 	if token == "" {
-		return nil, errors.New("token is required")
+		return nil, fmt.Errorf("token is required: %w", ErrTokenValidationFailed)
 	}
 	result, err := newConnectExecuter(
 		t.coreClient,
