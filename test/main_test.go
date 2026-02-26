@@ -17,7 +17,8 @@ const (
 )
 
 var (
-	client scalekit.Scalekit
+	client  scalekit.Scalekit
+	testOrg string
 )
 
 func TestMain(m *testing.M) {
@@ -29,7 +30,17 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 	client = scalekit.NewScalekitClient(environmentUrl, clientId, apiSecret)
+
+	ctx := context.Background()
+	orgResp, err := client.Organization().CreateOrganization(ctx, TestOrgName, scalekit.CreateOrganizationOptions{ExternalId: UniqueSuffix()})
+	if err != nil || orgResp == nil || orgResp.GetOrganization() == nil {
+		fmt.Fprintf(os.Stderr, "failed to create shared test org: %v\n", err)
+		os.Exit(1)
+	}
+	testOrg = orgResp.GetOrganization().GetId()
+
 	code := m.Run()
+	client.Organization().DeleteOrganization(ctx, testOrg)
 	os.Exit(code)
 }
 
