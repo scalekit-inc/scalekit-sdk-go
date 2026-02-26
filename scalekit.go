@@ -49,7 +49,7 @@ type Scalekit interface {
 	AuthenticateWithCode(ctx context.Context, code string, redirectUri string, options AuthenticationOptions) (*AuthenticationResponse, error)
 	GetIdpInitiatedLoginClaims(ctx context.Context, idpInitiateLoginToken string) (*IdpInitiatedLoginClaims, error)
 	ValidateAccessToken(ctx context.Context, accessToken string) (bool, error)
-	ValidateTokenWithOptions(ctx context.Context, token string, options ValidateTokenOptions) (bool, error)
+	ValidateTokenWithOptions(ctx context.Context, token string, options *ValidateTokenOptions) (bool, error)
 	VerifyWebhookPayload(secret string, headers map[string]string, payload []byte) (bool, error)
 	VerifyInterceptorPayload(secret string, headers map[string]string, payload []byte) (bool, error)
 	RefreshAccessToken(ctx context.Context, refreshToken string) (*TokenResponse, error)
@@ -187,6 +187,7 @@ type IdpInitiatedLoginClaims struct {
 
 type TokenResponse struct {
 	AccessToken  string
+	IdToken      string
 	RefreshToken string
 	ExpiresIn    int
 }
@@ -395,10 +396,13 @@ func (s *scalekitClient) ValidateAccessToken(ctx context.Context, accessToken st
 
 // ValidateTokenWithOptions validates a signed JWT (access token or ID token)
 // and enforces optional checks such as audience validation.
-func (s *scalekitClient) ValidateTokenWithOptions(ctx context.Context, token string, options ValidateTokenOptions) (bool, error) {
+func (s *scalekitClient) ValidateTokenWithOptions(ctx context.Context, token string, options *ValidateTokenOptions) (bool, error) {
 	claims, err := ValidateToken[TokenClaims](ctx, token, s.coreClient.GetJwks)
 	if err != nil {
 		return false, err
+	}
+	if options == nil {
+		return true, nil
 	}
 	if len(options.Audience) == 0 {
 		return true, nil
@@ -569,6 +573,7 @@ func (s *scalekitClient) RefreshAccessToken(ctx context.Context, refreshToken st
 		AccessToken:  authResp.AccessToken,
 		RefreshToken: authResp.RefreshToken,
 		ExpiresIn:    authResp.ExpiresIn,
+		IdToken:      authResp.IdToken,
 	}, nil
 }
 
