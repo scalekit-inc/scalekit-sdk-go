@@ -40,7 +40,7 @@ func TestMain(m *testing.M) {
 	testOrg = orgResp.GetOrganization().GetId()
 
 	code := m.Run()
-	client.Organization().DeleteOrganization(ctx, testOrg)
+	_ = client.Organization().DeleteOrganization(ctx, testOrg)
 	os.Exit(code)
 }
 

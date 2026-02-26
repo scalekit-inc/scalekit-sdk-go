@@ -80,10 +80,20 @@ func TestOrganization_EndToEndIntegration(t *testing.T) {
 	require.NotNil(t, organizationsList)
 }
 
-func TestOrganization_CreateOrganization_InvalidExternalID(t *testing.T) {
+func TestOrganization_CreateOrganization_DuplicateExternalID(t *testing.T) {
 	ctx := context.Background()
-	_, err := client.Organization().CreateOrganization(ctx, "Exception Test", scalekit.CreateOrganizationOptions{
-		ExternalId: "123",
+	externalId := UniqueSuffix()
+
+	first, err := client.Organization().CreateOrganization(ctx, TestOrgName, scalekit.CreateOrganizationOptions{
+		ExternalId: externalId,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, first)
+	require.NotNil(t, first.GetOrganization())
+	defer DeleteTestOrganization(t, ctx, first.GetOrganization().GetId())
+
+	_, err = client.Organization().CreateOrganization(ctx, "Duplicate Org", scalekit.CreateOrganizationOptions{
+		ExternalId: externalId,
 	})
 	assert.Error(t, err)
 }

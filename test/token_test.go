@@ -22,7 +22,7 @@ func TestCreateToken(t *testing.T) {
 	require.NotNil(t, created)
 
 	t.Cleanup(func() {
-		client.Token().InvalidateToken(ctx, created.Token)
+		_ = client.Token().InvalidateToken(ctx, created.Token)
 	})
 
 	assert.NotEmpty(t, created.Token)
@@ -47,7 +47,7 @@ func TestCreateTokenWithCustomClaims(t *testing.T) {
 	require.NotNil(t, created)
 
 	t.Cleanup(func() {
-		client.Token().InvalidateToken(ctx, created.Token)
+		_ = client.Token().InvalidateToken(ctx, created.Token)
 	})
 
 	assert.NotEmpty(t, created.Token)
@@ -75,7 +75,7 @@ func TestCreateUserScopedToken(t *testing.T) {
 	require.NotNil(t, createdUser)
 
 	t.Cleanup(func() {
-		client.User().DeleteUser(ctx, createdUser.User.Id)
+		_ = client.User().DeleteUser(ctx, createdUser.User.Id)
 	})
 
 	userId := createdUser.User.Id
@@ -89,7 +89,7 @@ func TestCreateUserScopedToken(t *testing.T) {
 	require.NotNil(t, created)
 
 	t.Cleanup(func() {
-		client.Token().InvalidateToken(ctx, created.Token)
+		_ = client.Token().InvalidateToken(ctx, created.Token)
 	})
 
 	assert.NotEmpty(t, created.Token)
@@ -110,7 +110,7 @@ func TestValidateTokenByOpaqueToken(t *testing.T) {
 	require.NotNil(t, created)
 
 	t.Cleanup(func() {
-		client.Token().InvalidateToken(ctx, created.Token)
+		_ = client.Token().InvalidateToken(ctx, created.Token)
 	})
 
 	validated, err := client.Token().ValidateToken(ctx, created.Token)
@@ -131,7 +131,7 @@ func TestValidateTokenByTokenId(t *testing.T) {
 	require.NotNil(t, created)
 
 	t.Cleanup(func() {
-		client.Token().InvalidateToken(ctx, created.Token)
+		_ = client.Token().InvalidateToken(ctx, created.Token)
 	})
 
 	validated, err := client.Token().ValidateToken(ctx, created.TokenId)
@@ -153,7 +153,7 @@ func TestListTokens(t *testing.T) {
 	require.NotNil(t, created)
 
 	t.Cleanup(func() {
-		client.Token().InvalidateToken(ctx, created.Token)
+		_ = client.Token().InvalidateToken(ctx, created.Token)
 	})
 
 	listed, err := client.Token().ListTokens(ctx, testOrg, scalekit.ListTokensOptions{})
@@ -179,7 +179,7 @@ func TestListTokensWithPagination(t *testing.T) {
 		})
 		require.NoError(t, err)
 		t.Cleanup(func() {
-			client.Token().InvalidateToken(ctx, created.Token)
+			_ = client.Token().InvalidateToken(ctx, created.Token)
 		})
 	}
 
@@ -216,7 +216,7 @@ func TestInvalidateToken(t *testing.T) {
 
 	t.Cleanup(func() {
 		// Safe to call even if already invalidated (idempotent)
-		client.Token().InvalidateToken(ctx, created.Token)
+		_ = client.Token().InvalidateToken(ctx, created.Token)
 	})
 
 	// Invalidate the token
