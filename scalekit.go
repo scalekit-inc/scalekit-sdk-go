@@ -46,12 +46,7 @@ type Scalekit interface {
 	Permission() PermissionService
 	WebAuthn() WebAuthnService
 	GetAuthorizationUrl(redirectUri string, options AuthorizationUrlOptions) (*url.URL, error)
-	AuthenticateWithCode(
-		ctx context.Context,
-		code string,
-		redirectUri string,
-		options AuthenticationOptions,
-	) (*AuthenticationResponse, error)
+	AuthenticateWithCode(ctx context.Context, code string, redirectUri string, options AuthenticationOptions) (*AuthenticationResponse, error)
 	GetIdpInitiatedLoginClaims(ctx context.Context, idpInitiateLoginToken string) (*IdpInitiatedLoginClaims, error)
 	ValidateAccessToken(ctx context.Context, accessToken string) (bool, error)
 	ValidateTokenWithOptions(ctx context.Context, token string, options ValidateTokenOptions) (bool, error)
@@ -213,7 +208,10 @@ func NewScalekitClient(envUrl, clientId string, opts ...any) Scalekit {
 			clientSecret = secret
 		}
 	}
-	coreClient := newCoreClient(envUrl, clientId, clientSecret)
+	return newScalekitClient(newCoreClient(envUrl, clientId, clientSecret))
+}
+
+func newScalekitClient(coreClient *coreClient) *scalekitClient {
 	return &scalekitClient{
 		coreClient:   coreClient,
 		connection:   newConnectionClient(coreClient),
@@ -232,8 +230,10 @@ func NewScalekitClient(envUrl, clientId string, opts ...any) Scalekit {
 }
 
 func (s *scalekitClient) WithSecret(clientSecret string) Scalekit {
-	s.coreClient.clientSecret = clientSecret
-	return s
+	coreCopy := *s.coreClient
+	coreCopy.clientSecret = clientSecret
+
+	return newScalekitClient(&coreCopy)
 }
 
 func (s *scalekitClient) Connection() Connection {

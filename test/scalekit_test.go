@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -903,30 +902,81 @@ func TestNewScalekitClientSecretCompatibilityAndWithSecret(t *testing.T) {
 	tests := []struct {
 		name           string
 		expectedSecret string
-		clientFn       func() scalekit.Scalekit
+		clientFn       func(serverURL string) scalekit.Scalekit
+		assertFn       func(t *testing.T, serverURL string)
 	}{
 		{
 			name:           "uses variadic string as backward-compatible client_secret",
-			expectedSecret: "legacy_secret",
-			clientFn: func() scalekit.Scalekit {
-				return scalekit.NewScalekitClient(os.Getenv(EnvEnvironmentURL), "client_id", "client_secret")
+			expectedSecret: "client_secret",
+			clientFn: func(serverURL string) scalekit.Scalekit {
+				return scalekit.NewScalekitClient(serverURL, "client_id", "client_secret")
+			},
+			assertFn: func(t *testing.T, serverURL string) {
+				client := scalekit.NewScalekitClient(serverURL, "client_id", "client_secret")
+				resp, err := client.RefreshAccessToken(context.Background(), "refresh_token")
+				require.NoError(t, err)
+				require.NotNil(t, resp)
 			},
 		},
 		{
 			name:           "WithSecret overwrites client_secret",
 			expectedSecret: "new_secret",
-			clientFn: func() scalekit.Scalekit {
-				return scalekit.NewScalekitClient(os.Getenv(EnvEnvironmentURL), "client_id").WithSecret("new_secret")
+			clientFn: func(serverURL string) scalekit.Scalekit {
+				return scalekit.NewScalekitClient(serverURL, "client_id").WithSecret("new_secret")
+			},
+			assertFn: func(t *testing.T, serverURL string) {
+				client := scalekit.NewScalekitClient(serverURL, "client_id").WithSecret("new_secret")
+				resp, err := client.RefreshAccessToken(context.Background(), "refresh_token")
+				require.NoError(t, err)
+				require.NotNil(t, resp)
+			},
+		},
+		{
+			name:           "WithSecret returns isolated client and does not mutate original",
+			expectedSecret: "base_secret",
+			clientFn: func(serverURL string) scalekit.Scalekit {
+				return scalekit.NewScalekitClient(serverURL, "client_id", "base_secret")
+			},
+			assertFn: func(t *testing.T, serverURL string) {
+				baseClient := scalekit.NewScalekitClient(serverURL, "client_id", "base_secret")
+				derivedClient := baseClient.WithSecret("new_secret")
+
+				_, err := baseClient.RefreshAccessToken(context.Background(), "refresh_token")
+				require.NoError(t, err)
+				_, err = derivedClient.RefreshAccessToken(context.Background(), "refresh_token")
+				require.NoError(t, err)
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			testClient := tt.clientFn()
-			resp, err := testClient.RefreshAccessToken(context.Background(), "refresh_token")
-			require.NoError(t, err)
-			require.NotNil(t, resp)
+			clientSecrets := []string{}
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				require.Equal(t, "/oauth/token", r.URL.Path)
+				require.NoError(t, r.ParseForm())
+				clientSecrets = append(clientSecrets, r.FormValue("client_secret"))
+
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = w.Write([]byte(`{"access_token":"at","refresh_token":"rt","expires_in":3600}`))
+			}))
+			defer server.Close()
+
+			if tt.assertFn != nil {
+				tt.assertFn(t, server.URL)
+			} else {
+				testClient := tt.clientFn(server.URL)
+				resp, err := testClient.RefreshAccessToken(context.Background(), "refresh_token")
+				require.NoError(t, err)
+				require.NotNil(t, resp)
+			}
+
+			if tt.name == "WithSecret returns isolated client and does not mutate original" {
+				require.Equal(t, []string{"base_secret", "new_secret"}, clientSecrets)
+				return
+			}
+			require.NotEmpty(t, clientSecrets)
+			require.Equal(t, tt.expectedSecret, clientSecrets[0])
 		})
 	}
 }
