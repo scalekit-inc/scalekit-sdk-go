@@ -8,4 +8,5 @@ var (
 	ErrTokenExpired          = errors.New("token has expired")
 	ErrInvalidExpClaimFormat = errors.New("invalid exp claim format")
 	ErrAuthRequestIdRequired = errors.New("authRequestId is required")
+	ErrTokenValidationFailed = errors.New("token validation failed")
 )
