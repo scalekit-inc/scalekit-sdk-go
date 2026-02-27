@@ -1013,3 +1013,67 @@ func TestNewScalekitClientSecretCompatibilityAndWithSecret(t *testing.T) {
 		})
 	}
 }
+
+func TestGenerateClientToken(t *testing.T) {
+	tests := []struct {
+		name         string
+		clientSecret string
+		options      *scalekit.GenerateClientTokenOptions
+		mockFn       func(t *testing.T, w http.ResponseWriter, r *http.Request, requestCount *int)
+		assertFn     func(t *testing.T, resp *scalekit.ClientTokenResponse, err error, requestCount int)
+	}{
+		{
+			name:         "generates client token",
+			clientSecret: "client_secret",
+			options:      nil,
+			mockFn: func(t *testing.T, w http.ResponseWriter, r *http.Request, requestCount *int) {
+				*requestCount++
+				require.Equal(t, "/oauth/token", r.URL.Path)
+				require.NoError(t, r.ParseForm())
+				assert.Equal(t, "client_credentials", r.FormValue("grant_type"))
+				assert.Equal(t, "client_id", r.FormValue("client_id"))
+				assert.Equal(t, "client_secret", r.FormValue("client_secret"))
+				assert.Equal(t, "", r.FormValue("scope"))
+
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = w.Write([]byte(`{"access_token":"at","token_type":"Bearer","expires_in":86399}`))
+			},
+			assertFn: func(t *testing.T, resp *scalekit.ClientTokenResponse, err error, requestCount int) {
+				require.NoError(t, err)
+				require.NotNil(t, resp)
+				assert.Equal(t, "at", resp.AccessToken)
+				assert.Equal(t, 86399, resp.ExpiresIn)
+				assert.Equal(t, 1, requestCount)
+			},
+		},
+		{
+			name:         "returns error when client secret is not configured on client",
+			clientSecret: "",
+			options:      &scalekit.GenerateClientTokenOptions{},
+			mockFn: func(t *testing.T, w http.ResponseWriter, r *http.Request, requestCount *int) {
+				// this is still needed so that if future changes cause api call, this test should fail
+				*requestCount++
+			},
+			assertFn: func(t *testing.T, resp *scalekit.ClientTokenResponse, err error, requestCount int) {
+				require.Error(t, err)
+				assert.Nil(t, resp)
+				assert.ErrorIs(t, err, scalekit.ErrClientSecretRequired)
+				assert.Equal(t, 0, requestCount)
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			requestCount := 0
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				tt.mockFn(t, w, r, &requestCount)
+			}))
+			defer server.Close()
+
+			skClient := scalekit.NewScalekitClient(server.URL, "client_id", tt.clientSecret)
+			resp, err := skClient.GenerateClientToken(context.Background(), tt.options)
+			tt.assertFn(t, resp, err, requestCount)
+		})
+	}
+}

@@ -53,6 +53,7 @@ type Scalekit interface {
 	VerifyWebhookPayload(secret string, headers map[string]string, payload []byte) (bool, error)
 	VerifyInterceptorPayload(secret string, headers map[string]string, payload []byte) (bool, error)
 	RefreshAccessToken(ctx context.Context, refreshToken string) (*TokenResponse, error)
+	GenerateClientToken(ctx context.Context, options *GenerateClientTokenOptions) (*ClientTokenResponse, error)
 	GetLogoutUrl(options LogoutUrlOptions) (*url.URL, error)
 	GetAccessTokenClaims(ctx context.Context, accessToken string) (*AccessTokenClaims, error)
 	GeneratePKCEConfiguration(options PKCEOptions) (*PKCEConfiguration, error)
@@ -91,6 +92,12 @@ type AuthorizationUrlOptions struct {
 
 type AuthenticationOptions struct {
 	CodeVerifier string
+}
+
+// GenerateClientTokenOptions defines optional fields for client-credentials token generation.
+// The token endpoint does not currently support additional options for this grant type,
+// but this struct is intentionally kept for forward compatibility.
+type GenerateClientTokenOptions struct {
 }
 
 // ValidateTokenOptions defines optional validations for token verification.
@@ -190,6 +197,11 @@ type TokenResponse struct {
 	IdToken      string
 	RefreshToken string
 	ExpiresIn    int
+}
+
+type ClientTokenResponse struct {
+	AccessToken string
+	ExpiresIn   int
 }
 
 type LogoutUrlOptions struct {
@@ -574,6 +586,35 @@ func (s *scalekitClient) RefreshAccessToken(ctx context.Context, refreshToken st
 		RefreshToken: authResp.RefreshToken,
 		ExpiresIn:    authResp.ExpiresIn,
 		IdToken:      authResp.IdToken,
+	}, nil
+}
+
+// GenerateClientToken generates a client-credentials token using the client_id and
+// client_secret configured on the Scalekit client.
+//
+// The options parameter is reserved for future server-supported fields. For example,
+// a future version may support scopes like "usr:read" and "usr:write".
+func (s *scalekitClient) GenerateClientToken(
+	ctx context.Context,
+	_ *GenerateClientTokenOptions,
+) (*ClientTokenResponse, error) {
+	if s.coreClient.clientSecret == "" {
+		return nil, ErrClientSecretRequired
+	}
+
+	qs := url.Values{}
+	qs.Add("grant_type", GrantTypeClientCredentials)
+	qs.Add("client_id", s.coreClient.clientId)
+	qs.Add("client_secret", s.coreClient.clientSecret)
+
+	authResp, err := s.coreClient.authenticate(ctx, qs)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ClientTokenResponse{
+		AccessToken: authResp.AccessToken,
+		ExpiresIn:   authResp.ExpiresIn,
 	}, nil
 }
 
