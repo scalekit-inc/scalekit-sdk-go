@@ -40,25 +40,25 @@ type Scalekit interface {
 	User() UserService
 	Passwordless() PasswordlessService
 	Auth() AuthService
+	Client() ClientService
 	Session() SessionService
 	Role() RoleService
 	Permission() PermissionService
 	WebAuthn() WebAuthnService
 	Token() TokenService
 	GetAuthorizationUrl(redirectUri string, options AuthorizationUrlOptions) (*url.URL, error)
-	AuthenticateWithCode(
-		ctx context.Context,
-		code string,
-		redirectUri string,
-		options AuthenticationOptions,
-	) (*AuthenticationResponse, error)
+	AuthenticateWithCode(ctx context.Context, code string, redirectUri string, options AuthenticationOptions) (*AuthenticationResponse, error)
 	GetIdpInitiatedLoginClaims(ctx context.Context, idpInitiateLoginToken string) (*IdpInitiatedLoginClaims, error)
 	ValidateAccessToken(ctx context.Context, accessToken string) (bool, error)
+	ValidateTokenWithOptions(ctx context.Context, token string, options *ValidateTokenOptions) (bool, error)
 	VerifyWebhookPayload(secret string, headers map[string]string, payload []byte) (bool, error)
 	VerifyInterceptorPayload(secret string, headers map[string]string, payload []byte) (bool, error)
 	RefreshAccessToken(ctx context.Context, refreshToken string) (*TokenResponse, error)
+	GenerateClientToken(ctx context.Context, options *GenerateClientTokenOptions) (*ClientTokenResponse, error)
 	GetLogoutUrl(options LogoutUrlOptions) (*url.URL, error)
 	GetAccessTokenClaims(ctx context.Context, accessToken string) (*AccessTokenClaims, error)
+	GeneratePKCEConfiguration(options PKCEOptions) (*PKCEConfiguration, error)
+	WithSecret(clientSecret string) Scalekit
 }
 
 type scalekitClient struct {
@@ -70,6 +70,7 @@ type scalekitClient struct {
 	user         UserService
 	passwordless PasswordlessService
 	auth         AuthService
+	oidcClient   ClientService
 	session      SessionService
 	role         RoleService
 	permission   PermissionService
@@ -95,6 +96,17 @@ type AuthenticationOptions struct {
 	CodeVerifier string
 }
 
+// GenerateClientTokenOptions defines optional fields for client-credentials token generation.
+// The token endpoint does not currently support additional options for this grant type,
+// but this struct is intentionally kept for forward compatibility.
+type GenerateClientTokenOptions struct {
+}
+
+// ValidateTokenOptions defines optional validations for token verification.
+type ValidateTokenOptions struct {
+	Audience []string
+}
+
 type AuthenticationResponse struct {
 	User         User
 	IdToken      string
@@ -107,6 +119,7 @@ type (
 	Claims  map[string]interface{}
 	idAlias IdTokenClaims
 	atAlias AccessTokenClaims
+	tkAlias TokenClaims
 )
 
 type IdTokenClaims struct {
@@ -150,6 +163,19 @@ func (a *AccessTokenClaims) UnmarshalJSON(data []byte) error {
 	return unmarshalJson(data, (*atAlias)(a), &a.Claims)
 }
 
+type TokenClaims struct {
+	Sub      string   `json:"sub"`
+	Iss      string   `json:"iss"`
+	Audience Audience `json:"aud,omitempty"`
+	Iat      int      `json:"iat"`
+	Exp      int      `json:"exp"`
+	Claims   Claims   `json:"-"`
+}
+
+func (t *TokenClaims) UnmarshalJSON(data []byte) error {
+	return unmarshalJson(data, (*tkAlias)(t), &t.Claims)
+}
+
 type User = IdTokenClaims
 
 type Identity struct {
@@ -170,8 +196,14 @@ type IdpInitiatedLoginClaims struct {
 
 type TokenResponse struct {
 	AccessToken  string
+	IdToken      string
 	RefreshToken string
 	ExpiresIn    int
+}
+
+type ClientTokenResponse struct {
+	AccessToken string
+	ExpiresIn   int
 }
 
 type LogoutUrlOptions struct {
@@ -180,8 +212,21 @@ type LogoutUrlOptions struct {
 	State                 string
 }
 
-func NewScalekitClient(envUrl, clientId, clientSecret string) Scalekit {
-	coreClient := newCoreClient(envUrl, clientId, clientSecret)
+// NewScalekitClient creates a new Scalekit client.
+//
+// For backward compatibility, when a value is provided in opts and opts[0] is a
+// string, it is treated as client_secret.
+func NewScalekitClient(envUrl, clientId string, opts ...any) Scalekit {
+	clientSecret := ""
+	if len(opts) > 0 {
+		if secret, ok := opts[0].(string); ok {
+			clientSecret = secret
+		}
+	}
+	return newScalekitClient(newCoreClient(envUrl, clientId, clientSecret))
+}
+
+func newScalekitClient(coreClient *coreClient) *scalekitClient {
 	return &scalekitClient{
 		coreClient:   coreClient,
 		connection:   newConnectionClient(coreClient),
@@ -191,12 +236,20 @@ func NewScalekitClient(envUrl, clientId, clientSecret string) Scalekit {
 		user:         newUserClient(coreClient),
 		passwordless: newPasswordlessClient(coreClient),
 		auth:         newAuthService(coreClient),
+		oidcClient:   newClientService(coreClient),
 		session:      newSessionClient(coreClient),
 		role:         newRoleService(coreClient),
 		permission:   newPermissionService(coreClient),
 		webauthn:     newWebAuthnClient(coreClient),
 		token:        newTokenService(coreClient),
 	}
+}
+
+func (s *scalekitClient) WithSecret(clientSecret string) Scalekit {
+	coreCopy := *s.coreClient
+	coreCopy.clientSecret = clientSecret
+
+	return newScalekitClient(&coreCopy)
 }
 
 func (s *scalekitClient) Connection() Connection {
@@ -225,6 +278,10 @@ func (s *scalekitClient) Passwordless() PasswordlessService {
 
 func (s *scalekitClient) Auth() AuthService {
 	return s.auth
+}
+
+func (s *scalekitClient) Client() ClientService {
+	return s.oidcClient
 }
 
 func (s *scalekitClient) Session() SessionService {
@@ -312,7 +369,9 @@ func (s *scalekitClient) AuthenticateWithCode(
 	qs.Add("redirect_uri", redirectUri)
 	qs.Add("grant_type", GrantTypeAuthorizationCode)
 	qs.Add("client_id", s.coreClient.clientId)
-	qs.Add("client_secret", s.coreClient.clientSecret)
+	if s.coreClient.clientSecret != "" {
+		qs.Add("client_secret", s.coreClient.clientSecret)
+	}
 	if options.CodeVerifier != "" {
 		qs.Add("code_verifier", options.CodeVerifier)
 	}
@@ -351,6 +410,39 @@ func (s *scalekitClient) ValidateAccessToken(ctx context.Context, accessToken st
 	if err != nil {
 		return false, err
 	}
+	return true, nil
+}
+
+// ValidateTokenWithOptions validates a signed JWT (access token or ID token)
+// and enforces optional checks such as audience validation.
+func (s *scalekitClient) ValidateTokenWithOptions(ctx context.Context, token string, options *ValidateTokenOptions) (bool, error) {
+	claims, err := ValidateToken[TokenClaims](ctx, token, s.coreClient.GetJwks)
+	if err != nil {
+		return false, err
+	}
+	if options == nil {
+		return true, nil
+	}
+	if len(options.Audience) == 0 {
+		return true, nil
+	}
+
+	audienceSet := map[string]struct{}{}
+	for _, audience := range claims.Audience {
+		audienceSet[audience] = struct{}{}
+	}
+
+	matched := false
+	for _, audience := range options.Audience {
+		if _, ok := audienceSet[audience]; ok {
+			matched = true
+			break
+		}
+	}
+	if !matched {
+		return false, fmt.Errorf("none of the expected audiences found in token aud claim")
+	}
+
 	return true, nil
 }
 
@@ -488,8 +580,9 @@ func (s *scalekitClient) RefreshAccessToken(ctx context.Context, refreshToken st
 	qs.Add("refresh_token", refreshToken)
 	qs.Add("grant_type", GrantTypeRefreshToken)
 	qs.Add("client_id", s.coreClient.clientId)
-	qs.Add("client_secret", s.coreClient.clientSecret)
-
+	if s.coreClient.clientSecret != "" {
+		qs.Add("client_secret", s.coreClient.clientSecret)
+	}
 	authResp, err := s.coreClient.authenticate(ctx, qs)
 	if err != nil {
 		return nil, err
@@ -499,6 +592,36 @@ func (s *scalekitClient) RefreshAccessToken(ctx context.Context, refreshToken st
 		AccessToken:  authResp.AccessToken,
 		RefreshToken: authResp.RefreshToken,
 		ExpiresIn:    authResp.ExpiresIn,
+		IdToken:      authResp.IdToken,
+	}, nil
+}
+
+// GenerateClientToken generates a client-credentials token using the client_id and
+// client_secret configured on the Scalekit client.
+//
+// The options parameter is reserved for future server-supported fields. For example,
+// a future version may support scopes like "usr:read" and "usr:write".
+func (s *scalekitClient) GenerateClientToken(
+	ctx context.Context,
+	_ *GenerateClientTokenOptions,
+) (*ClientTokenResponse, error) {
+	if s.coreClient.clientSecret == "" {
+		return nil, ErrClientSecretRequired
+	}
+
+	qs := url.Values{}
+	qs.Add("grant_type", GrantTypeClientCredentials)
+	qs.Add("client_id", s.coreClient.clientId)
+	qs.Add("client_secret", s.coreClient.clientSecret)
+
+	authResp, err := s.coreClient.authenticate(ctx, qs)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ClientTokenResponse{
+		AccessToken: authResp.AccessToken,
+		ExpiresIn:   authResp.ExpiresIn,
 	}, nil
 }
 

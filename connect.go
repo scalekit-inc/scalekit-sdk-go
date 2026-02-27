@@ -27,10 +27,10 @@ type connectExecuter[TRequest interface{}, TResponse interface{}] struct {
 func newConnectClient[T interface{}](
 	c *coreClient,
 	fn func(
-		httpClient connect.HTTPClient,
-		baseURL string,
-		opts ...connect.ClientOption,
-	) T,
+	httpClient connect.HTTPClient,
+	baseURL string,
+	opts ...connect.ClientOption,
+) T,
 ) T {
 	return fn(
 		http.DefaultClient,
@@ -76,6 +76,13 @@ func newConnectExecuter[TRequest interface{}, TResponse interface{}](
 }
 
 func (r *connectExecuter[TRequest, TResponse]) exec(ctx context.Context) (*TResponse, error) {
+	if r.coreClient.clientSecret == "" {
+		return nil, ErrClientSecretRequired
+	}
+	if !r.coreClient.hasAccessToken() {
+		// explicitly making a call before the actual call to ensure that the access token is available. Not consuming the error, so that the call can go into retries
+		_ = r.coreClient.authenticateClient(ctx)
+	}
 	data, err := r.fn(ctx, connect.NewRequest(r.data))
 	if err != nil {
 		if r.maxRetry-r.retries > 0 {
