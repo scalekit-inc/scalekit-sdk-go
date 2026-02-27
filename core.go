@@ -95,7 +95,7 @@ func newCoreClient(envUrl, clientId, clientSecret string) *coreClient {
 
 func (c *coreClient) authenticateClient(ctx context.Context) error {
 	if c.clientSecret == "" {
-		return fmt.Errorf("client secret is required for authentication")
+		return ErrClientSecretRequired
 	}
 	requestData := url.Values{}
 	requestData.Set("grant_type", "client_credentials")
