@@ -6,10 +6,13 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"connectrpc.com/connect"
 	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/errdetails"
 )
+
+const maxTransientRetries = 3
 
 type fn[TRequest interface{}, TResponse interface{}] func(
 	context.Context,
@@ -17,11 +20,12 @@ type fn[TRequest interface{}, TResponse interface{}] func(
 ) (*connect.Response[TResponse], error)
 
 type connectExecuter[TRequest interface{}, TResponse interface{}] struct {
-	coreClient *coreClient
-	data       *TRequest
-	retries    int
-	maxRetry   int
-	fn         fn[TRequest, TResponse]
+	coreClient       *coreClient
+	data             *TRequest
+	retries          int // 
+	maxRetry         int
+	transientRetries int // retries for transient Connect errors (ResourceExhausted, Unavailable)
+	fn               fn[TRequest, TResponse]
 }
 
 func newConnectClient[T interface{}](
@@ -46,15 +50,17 @@ func newHeaderInterceptor(c *coreClient) connect.UnaryInterceptorFunc {
 			ctx context.Context,
 			req connect.AnyRequest,
 		) (connect.AnyResponse, error) {
+			ctx, cancel := withDefaultTimeout(ctx)
+			defer cancel()
 			if req.Spec().IsClient {
 				req.Header().Set("user-agent", c.userAgent)
 				req.Header().Set("x-sdk-version", c.sdkVersion)
 				req.Header().Set("x-api-version", c.apiVersion)
-				if c.accessToken != nil {
-					req.Header().Set(
-						"Authorization",
-						fmt.Sprintf("Bearer %s", *c.accessToken),
-					)
+				c.tokenMu.RLock()
+				token := c.accessToken
+				c.tokenMu.RUnlock()
+				if token != nil {
+					req.Header().Set("Authorization", fmt.Sprintf("Bearer %s", *token))
 				}
 			}
 			return next(ctx, req)
@@ -75,45 +81,75 @@ func newConnectExecuter[TRequest interface{}, TResponse interface{}](
 	}
 }
 
+// validationErrorMessage builds a single string from a Connect InvalidArgument
+// error message and its validation field violations.
+func validationErrorMessage(ce *connect.Error) string {
+	messages := []string{ce.Message()}
+	for _, detail := range ce.Details() {
+		msg, err := detail.Value()
+		if err != nil {
+			continue
+		}
+		info, ok := msg.(*errdetails.ErrorInfo)
+		if !ok || info.ValidationErrorInfo == nil {
+			continue
+		}
+		for _, field := range info.ValidationErrorInfo.FieldViolations {
+			messages = append(messages, fmt.Sprintf("%s: %s", field.Field, field.Description))
+		}
+	}
+	return strings.Join(messages, "\n")
+}
+
+// isTransientCode reports whether the Connect code indicates a transient error
+// that may succeed on retry (ResourceExhausted, Unavailable).
+func isTransientCode(code connect.Code) bool {
+	switch code {
+	case connect.CodeResourceExhausted, connect.CodeUnavailable:
+		return true
+	default:
+		return false
+	}
+}
+
+// isUnauthenticated reports whether err indicates an authentication failure
+// (HTTP 401 or Connect CodeUnauthenticated).
+func isUnauthenticated(err error) bool {
+	var httpErr *httpError
+	if errors.As(err, &httpErr) && httpErr.StatusCode == http.StatusUnauthorized {
+		return true
+	}
+	var connectErr *connect.Error
+	return errors.As(err, &connectErr) && connectErr.Code() == connect.CodeUnauthenticated
+}
+
 func (r *connectExecuter[TRequest, TResponse]) exec(ctx context.Context) (*TResponse, error) {
 	data, err := r.fn(ctx, connect.NewRequest(r.data))
 	if err != nil {
-		if r.maxRetry-r.retries > 0 {
-			var isUnAuthenticatedError bool
-			if httpErr, ok := err.(*httpError); ok {
-				if httpErr.StatusCode != http.StatusUnauthorized {
-					isUnAuthenticatedError = true
-				}
-			}
-			if connectErr, ok := err.(*connect.Error); ok {
-				if connectErr.Code() == connect.CodeUnauthenticated {
-					isUnAuthenticatedError = true
-				}
-				if connectErr.Code() == connect.CodeInvalidArgument {
-					messages := []string{connectErr.Message()}
-					for _, detail := range connectErr.Details() {
-						msg, err := detail.Value()
-						if err != nil {
-							continue
-						}
-						if info, ok := msg.(*errdetails.ErrorInfo); ok {
-							if info.ValidationErrorInfo != nil {
-								for _, field := range info.ValidationErrorInfo.FieldViolations {
-									messages = append(messages, fmt.Sprintf("%s:  %s", field.Field, field.Description))
-								}
-							}
-						}
-					}
+		var connectErr *connect.Error
+		_ = errors.As(err, &connectErr)
 
-					return nil, errors.New(strings.Join(messages, "\n"))
-				}
-			}
+		if connectErr != nil && connectErr.Code() == connect.CodeInvalidArgument {
+			return nil, fmt.Errorf("%s: %w", validationErrorMessage(connectErr), connectErr)
+		}
 
-			if isUnAuthenticatedError {
-				_ = r.coreClient.authenticateClient(ctx)
-				r.retries++
-				return r.exec(ctx)
+		if connectErr != nil && isTransientCode(connectErr.Code()) && r.transientRetries < maxTransientRetries {
+			backoff := time.Duration(1<<r.transientRetries) * 100 * time.Millisecond
+			select {
+			case <-time.After(backoff):
+			case <-ctx.Done():
+				return nil, ctx.Err()
 			}
+			r.transientRetries++
+			return r.exec(ctx)
+		}
+
+		if r.maxRetry-r.retries > 0 && isUnauthenticated(err) {
+			if authErr := r.coreClient.authenticateClient(ctx); authErr != nil {
+				return nil, fmt.Errorf("reauthentication failed: %w", authErr)
+			}
+			r.retries++
+			return r.exec(ctx)
 		}
 
 		return nil, err

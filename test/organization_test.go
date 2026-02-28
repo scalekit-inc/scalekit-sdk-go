@@ -2,6 +2,7 @@ package test
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/scalekit-inc/scalekit-sdk-go/v2"
@@ -80,6 +81,36 @@ func TestOrganization_EndToEndIntegration(t *testing.T) {
 	require.NotNil(t, organizationsList)
 }
 
+func TestOrganization_ListOrganization_NilOptions(t *testing.T) {
+	ctx := context.Background()
+	// nil options must not panic and must return a valid (possibly empty) list.
+	orgs, err := client.Organization().ListOrganization(ctx, nil)
+	require.NoError(t, err)
+	require.NotNil(t, orgs)
+}
+
+func TestOrganization_ListOrganization_ByExternalId(t *testing.T) {
+	ctx := context.Background()
+	externalId := UniqueSuffix()
+	orgId := createOrg(t, ctx, TestOrgName, externalId)
+	defer DeleteTestOrganization(t, ctx, orgId)
+
+	orgs, err := client.Organization().ListOrganization(ctx, &scalekit.ListOrganizationOptions{
+		ExternalId: externalId,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, orgs)
+	var found *organizations.Organization
+	for _, o := range orgs.Organizations {
+		if o.GetExternalId() == externalId {
+			found = o
+			break
+		}
+	}
+	require.NotNil(t, found, "organization with external_id %q should be in list", externalId)
+	assert.Equal(t, orgId, found.GetId())
+}
+
 func TestOrganization_CreateOrganization_DuplicateExternalID(t *testing.T) {
 	ctx := context.Background()
 	externalId := UniqueSuffix()
@@ -95,7 +126,10 @@ func TestOrganization_CreateOrganization_DuplicateExternalID(t *testing.T) {
 	_, err = client.Organization().CreateOrganization(ctx, "Duplicate Org", scalekit.CreateOrganizationOptions{
 		ExternalId: externalId,
 	})
-	assert.Error(t, err)
+	require.Error(t, err)
+	errMsg := strings.ToLower(err.Error())
+	assert.True(t, strings.Contains(errMsg, "external") || strings.Contains(errMsg, "duplicate") || strings.Contains(errMsg, "already exists"),
+		"error message should mention external/duplicate/already exists, got: %s", err.Error())
 }
 
 func TestOrganization_UpdateOrganizationSettings(t *testing.T) {

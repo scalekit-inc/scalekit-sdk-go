@@ -4,31 +4,50 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/go-jose/go-jose/v4"
 )
 
 const (
-	tokenEndpoint = "oauth/token"
-	jwksEndpoint  = "keys"
-	sdkVersion    = "Scalekit-Go/2.2.0"
+	tokenEndpoint      = "oauth/token"
+	jwksEndpoint       = "keys"
+	sdkVersion         = "Scalekit-Go/2.2.0"
+	defaultHTTPTimeout = 10 * time.Second
 )
 
+// withDefaultTimeout attaches a defaultHTTPTimeout deadline to ctx if it has
+// no deadline yet, returning the wrapped context and its cancel function.
+// If ctx already has a deadline it is returned unchanged alongside a no-op
+// cancel, so callers can always safely defer cancel() in both cases.
+func withDefaultTimeout(ctx context.Context) (context.Context, context.CancelFunc) {
+	if _, ok := ctx.Deadline(); ok {
+		return ctx, func() {}
+	}
+	return context.WithTimeout(ctx, defaultHTTPTimeout)
+}
+
 type coreClient struct {
-	envUrl        string
-	clientId      string
-	clientSecret  string
-	sdkVersion    string
-	apiVersion    string
-	userAgent     string
-	accessToken   *string
-	httpClient    *http.Client
+	envUrl       string
+	clientId     string
+	clientSecret string
+	sdkVersion   string
+	apiVersion   string
+	userAgent    string
+
+	tokenMu     sync.RWMutex
+	accessToken *string
+
+	jwksMu        sync.RWMutex
 	jsonWebKeySet *jose.JSONWebKeySet
+
+	httpClient *http.Client
 }
 
 type authenticationResponse struct {
@@ -48,27 +67,48 @@ type httpError struct {
 	StatusCode int
 }
 
-// Error implements error.
 func (h *httpError) Error() string {
 	return h.err.Error()
+}
+
+// Unwrap exposes the underlying error so errors.As and errors.Is can traverse the chain.
+func (h *httpError) Unwrap() error {
+	return h.err
+}
+
+// httpErrorFromResponse reads the response body and returns an httpError for
+// non-success responses. The prefix is used in the error message (e.g. "authentication failed").
+func httpErrorFromResponse(resp *http.Response, prefix string) *httpError {
+	body, readErr := io.ReadAll(resp.Body)
+	if readErr != nil {
+		return &httpError{
+			err:        fmt.Errorf("%s: HTTP %d: body read error: %w", prefix, resp.StatusCode, readErr),
+			StatusCode: resp.StatusCode,
+		}
+	}
+	return &httpError{
+		err:        fmt.Errorf("%s: HTTP %d: %s", prefix, resp.StatusCode, strings.TrimSpace(string(body))),
+		StatusCode: resp.StatusCode,
+	}
 }
 
 func (h *headerInterceptor) RoundTrip(r *http.Request) (*http.Response, error) {
 	r.Header.Add("user-agent", h.client.userAgent)
 	r.Header.Add("x-sdk-version", h.client.sdkVersion)
 	r.Header.Add("x-api-version", h.client.apiVersion)
-	if h.client.accessToken != nil {
-		r.Header.Add("Authorization", fmt.Sprintf("Bearer %s", *h.client.accessToken))
+	// Read the token pointer under a read lock. Defer is deliberately not used:
+	// using defer would hold the lock across the subsequent network call.
+	h.client.tokenMu.RLock()
+	token := h.client.accessToken
+	h.client.tokenMu.RUnlock()
+	if token != nil {
+		r.Header.Add("Authorization", fmt.Sprintf("Bearer %s", *token))
 	}
 
-	resp, err := h.t.RoundTrip(r)
-	if err != nil {
-		return nil, &httpError{
-			err: err,
-		}
-	}
+	ctx, cancel := withDefaultTimeout(r.Context())
+	defer cancel()
 
-	return resp, nil
+	return h.t.RoundTrip(r.WithContext(ctx))
 }
 
 func newCoreClient(envUrl, clientId, clientSecret string) *coreClient {
@@ -83,7 +123,6 @@ func newCoreClient(envUrl, clientId, clientSecret string) *coreClient {
 		clientSecret: clientSecret,
 	}
 	client.httpClient = &http.Client{
-		Timeout: 10 * time.Second,
 		Transport: &headerInterceptor{
 			t:      http.DefaultTransport,
 			client: client,
@@ -102,7 +141,10 @@ func (c *coreClient) authenticateClient(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	// Lock scope is a single pointer assignment; explicit unlock is used for clarity rather than defer.
+	c.tokenMu.Lock()
 	c.accessToken = &res.AccessToken
+	c.tokenMu.Unlock()
 
 	return nil
 }
@@ -125,6 +167,9 @@ func (c *coreClient) authenticate(ctx context.Context, requestData url.Values) (
 		return nil, err
 	}
 	defer response.Body.Close()
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		return nil, httpErrorFromResponse(response, "authentication failed")
+	}
 	var responseData authenticationResponse
 	err = json.NewDecoder(response.Body).Decode(&responseData)
 	if err != nil {
@@ -135,9 +180,24 @@ func (c *coreClient) authenticate(ctx context.Context, requestData url.Values) (
 }
 
 func (c *coreClient) GetJwks(ctx context.Context) (*jose.JSONWebKeySet, error) {
+	// Read lock is released explicitly rather than deferred because this goroutine
+	// acquires a write lock below — promoting from RLock to Lock on the same mutex deadlocks.
+	// The pointer is copied under the read lock so the returned value remains valid after the lock is released.
+	c.jwksMu.RLock()
+	if c.jsonWebKeySet != nil {
+		jwks := c.jsonWebKeySet
+		c.jwksMu.RUnlock()
+		return jwks, nil
+	}
+	c.jwksMu.RUnlock()
+
+	c.jwksMu.Lock()
+	defer c.jwksMu.Unlock()
+	// Double-checked locking: another goroutine may have populated jsonWebKeySet while this goroutine waited for the write lock.
 	if c.jsonWebKeySet != nil {
 		return c.jsonWebKeySet, nil
 	}
+
 	request, err := http.NewRequestWithContext(ctx,
 		http.MethodGet,
 		fmt.Sprintf("%s/%s", c.envUrl, jwksEndpoint),
@@ -151,6 +211,9 @@ func (c *coreClient) GetJwks(ctx context.Context) (*jose.JSONWebKeySet, error) {
 		return nil, err
 	}
 	defer response.Body.Close()
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		return nil, httpErrorFromResponse(response, "failed to fetch JWKS")
+	}
 	var responseData jose.JSONWebKeySet
 	err = json.NewDecoder(response.Body).Decode(&responseData)
 	if err != nil {

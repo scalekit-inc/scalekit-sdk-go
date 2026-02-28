@@ -227,7 +227,7 @@ func TestVerifyWebhookPayload(t *testing.T) {
 			},
 			payload:       []byte("{}"),
 			expectedValid: false,
-			expectedError: "Missing required headers",
+			expectedError: "missing required headers",
 		},
 		{
 			name:   "invalid secret",
@@ -251,7 +251,7 @@ func TestVerifyWebhookPayload(t *testing.T) {
 			},
 			payload:       []byte("{}"),
 			expectedValid: false,
-			expectedError: "Message timestamp too old",
+			expectedError: "message timestamp too old",
 		},
 	}
 
@@ -473,4 +473,118 @@ func TestValidateAccessToken(t *testing.T) {
 			tt.assertFn(t, isValid, err)
 		})
 	}
+}
+
+func TestAuthenticateWithCode_Non2xx(t *testing.T) {
+	tests := []struct {
+		name           string
+		statusCode     int
+		body           string
+		wantErrContain string
+	}{
+		{
+			name:           "401 unauthorized",
+			statusCode:     http.StatusUnauthorized,
+			body:           `{"error":"invalid_client"}`,
+			wantErrContain: "authentication failed: HTTP 401",
+		},
+		{
+			name:           "400 bad request",
+			statusCode:     http.StatusBadRequest,
+			body:           `{"error":"invalid_grant"}`,
+			wantErrContain: "authentication failed: HTTP 400",
+		},
+		{
+			name:           "503 unavailable with empty body",
+			statusCode:     http.StatusServiceUnavailable,
+			body:           "",
+			wantErrContain: "authentication failed: HTTP 503",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(tt.statusCode)
+				_, _ = w.Write([]byte(tt.body))
+			}))
+			defer server.Close()
+
+			client := scalekit.NewScalekitClient(server.URL, "client_id", "client_secret")
+			_, err := client.AuthenticateWithCode(context.Background(), "code", "http://localhost/cb", scalekit.AuthenticationOptions{})
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), tt.wantErrContain)
+		})
+	}
+}
+
+func TestValidateAccessToken_JwksError(t *testing.T) {
+	tests := []struct {
+		name           string
+		jwksStatus     int
+		wantErrContain string
+		wantStatus     int
+	}{
+		{
+			name:           "JWKS 500 internal server error",
+			jwksStatus:     http.StatusInternalServerError,
+			wantErrContain: "failed to fetch JWKS: HTTP 500",
+			wantStatus:     http.StatusInternalServerError,
+		},
+		{
+			name:           "JWKS 403 forbidden",
+			jwksStatus:     http.StatusForbidden,
+			wantErrContain: "failed to fetch JWKS: HTTP 403",
+			wantStatus:     http.StatusForbidden,
+		},
+	}
+
+	token := "eyJhbGciOiJSUzI1NiIsImtpZCI6InNua18xNzAwMjMzNDIyNzc5MTk3MiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vYWlyZGV2LmxvY2FsaG9zdDo4ODg4Iiwic3ViIjoiY29ubl83NTQxNjU3OTA0MjQ3NDIwNDtzcmluaXZhcy5rYXJyZUBzY2FsZWtpdC5jb20iLCJhdWQiOlsicHJkX3NrY18xNzAwMjMzNDIyNzg1NzUwOCJdLCJleHAiOjE5MDY4MDQ4MzcsImlhdCI6MTc0OTAyMDA3NywibmJmIjoxNzQ5MDIwMDc3LCJjbGllbnRfaWQiOiJwcmRfc2tjXzE3MDAyMzM0MjI3ODU3NTA4IiwianRpIjoidGtuXzc1NDE4NDE0MTAwODA1ODUyIn0.SxlKHr1EFBAvfm3Zm7CliKcSWZ8LUFWx8Cs3_3bf1SVouVvRu-zE2_ghB4iAmarsxErurU0kHDEX-Fpx6euemiWXN3Z-mECB4clmb1PF8RThh7bbHx1zxqp3z_MIcDbO4ZKTXMSRx39JbcWyThQSTbeAo50TEFpIT7RsWhNYrBnhsZNibrfZXWUVDBYB930LZMzhdKPRUXBhA-HuKIjggg2jWEAv2leJ3UPbLVccbKrdq2qSzGaxLpvlPoX6RpcrA2Cbuig4vJ7bCy46M-DUg73NO91arPpl5BOnHHx2Oappk_i2S4cMOGdSyX3s50owX1xRDyELNMEIo-VoQ7rfww"
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(tt.jwksStatus)
+			}))
+			defer server.Close()
+
+			client := scalekit.NewScalekitClient(server.URL, "client_id", "client_secret")
+			_, err := client.ValidateAccessToken(context.Background(), token)
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), tt.wantErrContain)
+			assert.Contains(t, err.Error(), fmt.Sprintf("HTTP %d", tt.wantStatus))
+		})
+	}
+}
+
+func TestSentinelErrors(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+	client := scalekit.NewScalekitClient(server.URL, "client_id", "client_secret")
+
+	t.Run("ErrTokenRequired on empty ValidateToken", func(t *testing.T) {
+		_, err := client.Token().ValidateToken(context.Background(), "")
+		require.Error(t, err)
+		assert.ErrorIs(t, err, scalekit.ErrTokenRequired)
+	})
+
+	t.Run("ErrTokenRequired on empty InvalidateToken", func(t *testing.T) {
+		err := client.Token().InvalidateToken(context.Background(), "")
+		require.Error(t, err)
+		assert.ErrorIs(t, err, scalekit.ErrTokenRequired)
+	})
+
+	t.Run("ErrRefreshTokenRequired on empty refresh token", func(t *testing.T) {
+		_, err := client.RefreshAccessToken(context.Background(), "")
+		require.Error(t, err)
+		assert.ErrorIs(t, err, scalekit.ErrRefreshTokenRequired)
+	})
+
+	t.Run("ErrCodeOrLinkTokenRequired on nil options", func(t *testing.T) {
+		_, err := client.Passwordless().VerifyPasswordlessEmail(context.Background(), nil)
+		require.Error(t, err)
+		assert.ErrorIs(t, err, scalekit.ErrCodeOrLinkTokenRequired)
+	})
 }

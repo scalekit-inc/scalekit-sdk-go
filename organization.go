@@ -14,7 +14,13 @@ type CreateOrganizationResponse = organizationsv1.CreateOrganizationResponse
 type UpdateOrganizationResponse = organizationsv1.UpdateOrganizationResponse
 type Link = organizationsv1.Link
 type UpdateOrganization = organizationsv1.UpdateOrganization
-type ListOrganizationOptions = organizationsv1.ListOrganizationsRequest
+// ListOrganizationOptions controls pagination and optional filtering for ListOrganization.
+// All fields are optional; pass nil to use server defaults.
+type ListOrganizationOptions struct {
+	PageSize   uint32
+	PageToken  string
+	ExternalId string // Filter to a single organization by its external ID. Empty means no filter.
+}
 type OrganizationSettings struct {
 	Features []Feature
 }
@@ -71,13 +77,18 @@ func (o *organization) CreateOrganization(ctx context.Context, name string, opti
 }
 
 func (o *organization) ListOrganization(ctx context.Context, options *ListOrganizationOptions) (*ListOrganizationsResponse, error) {
+	request := &organizationsv1.ListOrganizationsRequest{}
+	if options != nil {
+		request.PageSize = options.PageSize
+		request.PageToken = options.PageToken
+		if options.ExternalId != "" {
+			request.ExternalId = &options.ExternalId
+		}
+	}
 	return newConnectExecuter(
 		o.coreClient,
 		o.client.ListOrganization,
-		&organizationsv1.ListOrganizationsRequest{
-			PageSize:  options.PageSize,
-			PageToken: options.PageToken,
-		},
+		request,
 	).exec(ctx)
 }
 
