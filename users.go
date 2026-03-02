@@ -146,7 +146,9 @@ func (u *userService) UpdateMembership(ctx context.Context, organizationId strin
 	).exec(ctx)
 }
 
-// DeleteMembership deletes a user's membership from an organization
+// DeleteMembership deletes a user's membership from an organization.
+// cascade, when true, also removes the user from any sub-organizations or nested groups
+// within the organization. Pass false to remove only the direct membership.
 func (u *userService) DeleteMembership(ctx context.Context, organizationId string, userId string, cascade bool) error {
 	request := &usersv1.DeleteMembershipRequest{
 		OrganizationId: organizationId,
