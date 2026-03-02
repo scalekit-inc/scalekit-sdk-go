@@ -20,7 +20,8 @@ var (
 	ErrAuthRequestIdRequired = errors.New("authRequestId is required")
 
 	// ErrTokenValidationFailed is returned when opaque-token validation fails due to the token
-	// being invalid, revoked, expired, or not found (wraps the original Connect error).
+	// being invalid, revoked, expired, or not found (joined with the original Connect error
+	// via errors.Join; use errors.Is or errors.As to inspect the underlying cause).
 	ErrTokenValidationFailed = errors.New("token validation failed")
 
 	// ErrCodeOrLinkTokenRequired is returned when VerifyPasswordlessEmail is called without
@@ -33,6 +34,10 @@ var (
 	// ErrDirectoryNotFound is returned when no directory exists for the given organization.
 	ErrDirectoryNotFound = errors.New("directory does not exist for organization")
 
-	// Deprecated: use ErrMissingExpClaim instead.
+	// Deprecated: ErrInvalidExpClaimFormat is now an alias for ErrMissingExpClaim; they are
+	// the same error value so existing errors.Is checks continue to work unchanged.
+	// Note: the previous error fired when exp was present but had an unexpected type; that
+	// path is eliminated — exp parse errors now surface as json.Unmarshal errors.
+	// Use ErrMissingExpClaim to check for an absent exp claim.
 	ErrInvalidExpClaimFormat = ErrMissingExpClaim
 )

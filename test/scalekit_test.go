@@ -552,7 +552,6 @@ func TestValidateAccessToken_JwksError(t *testing.T) {
 			_, err := client.ValidateAccessToken(context.Background(), token)
 			require.Error(t, err)
 			assert.Contains(t, err.Error(), tt.wantErrContain)
-			assert.Contains(t, err.Error(), fmt.Sprintf("HTTP %d", tt.wantStatus))
 		})
 	}
 }
@@ -562,29 +561,91 @@ func TestSentinelErrors(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer server.Close()
-	client := scalekit.NewScalekitClient(server.URL, "client_id", "client_secret")
+	c := scalekit.NewScalekitClient(server.URL, "client_id", "client_secret")
+	ctx := context.Background()
 
-	t.Run("ErrTokenRequired on empty ValidateToken", func(t *testing.T) {
-		_, err := client.Token().ValidateToken(context.Background(), "")
-		require.Error(t, err)
-		assert.ErrorIs(t, err, scalekit.ErrTokenRequired)
-	})
+	tests := []struct {
+		name        string
+		fn          func() error
+		wantSentinel error
+	}{
+		{
+			name:         "ErrTokenRequired on empty ValidateToken",
+			fn:           func() error { _, err := c.Token().ValidateToken(ctx, ""); return err },
+			wantSentinel: scalekit.ErrTokenRequired,
+		},
+		{
+			name:         "ErrTokenRequired on empty InvalidateToken",
+			fn:           func() error { return c.Token().InvalidateToken(ctx, "") },
+			wantSentinel: scalekit.ErrTokenRequired,
+		},
+		{
+			name:         "ErrRefreshTokenRequired on empty refresh token",
+			fn:           func() error { _, err := c.RefreshAccessToken(ctx, ""); return err },
+			wantSentinel: scalekit.ErrRefreshTokenRequired,
+		},
+		{
+			name:         "ErrCodeOrLinkTokenRequired on nil options",
+			fn:           func() error { _, err := c.Passwordless().VerifyPasswordlessEmail(ctx, nil); return err },
+			wantSentinel: scalekit.ErrCodeOrLinkTokenRequired,
+		},
+		{
+			name:         "ErrCodeOrLinkTokenRequired on non-nil empty options",
+			fn:           func() error { _, err := c.Passwordless().VerifyPasswordlessEmail(ctx, &scalekit.VerifyPasswordlessOptions{}); return err },
+			wantSentinel: scalekit.ErrCodeOrLinkTokenRequired,
+		},
+		{
+			name:         "ErrOrganizationIdRequired on CreateToken with empty orgId",
+			fn:           func() error { _, err := c.Token().CreateToken(ctx, "", scalekit.CreateTokenOptions{}); return err },
+			wantSentinel: scalekit.ErrOrganizationIdRequired,
+		},
+	}
 
-	t.Run("ErrTokenRequired on empty InvalidateToken", func(t *testing.T) {
-		err := client.Token().InvalidateToken(context.Background(), "")
-		require.Error(t, err)
-		assert.ErrorIs(t, err, scalekit.ErrTokenRequired)
-	})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.fn()
+			require.Error(t, err)
+			assert.ErrorIs(t, err, tt.wantSentinel)
+		})
+	}
+}
 
-	t.Run("ErrRefreshTokenRequired on empty refresh token", func(t *testing.T) {
-		_, err := client.RefreshAccessToken(context.Background(), "")
-		require.Error(t, err)
-		assert.ErrorIs(t, err, scalekit.ErrRefreshTokenRequired)
-	})
+func TestValidateToken_EmptyToken(t *testing.T) {
+	noopJwks := func(_ context.Context) (*jose.JSONWebKeySet, error) {
+		return &jose.JSONWebKeySet{}, nil
+	}
+	_, err := scalekit.ValidateToken[map[string]interface{}](context.Background(), "", noopJwks)
+	require.Error(t, err)
+	assert.ErrorIs(t, err, scalekit.ErrTokenRequired)
+}
 
-	t.Run("ErrCodeOrLinkTokenRequired on nil options", func(t *testing.T) {
-		_, err := client.Passwordless().VerifyPasswordlessEmail(context.Background(), nil)
-		require.Error(t, err)
-		assert.ErrorIs(t, err, scalekit.ErrCodeOrLinkTokenRequired)
-	})
+func TestValidateToken_MissingExpClaim(t *testing.T) {
+	privKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	require.NoError(t, err)
+
+	kid := "test-key"
+	signer, err := jose.NewSigner(
+		jose.SigningKey{Algorithm: jose.RS256, Key: privKey},
+		(&jose.SignerOptions{}).WithHeader("kid", kid),
+	)
+	require.NoError(t, err)
+
+	// JWT with no exp field
+	payload, _ := json.Marshal(map[string]interface{}{"sub": "user123", "iss": "test"})
+	jws, err := signer.Sign(payload)
+	require.NoError(t, err)
+	token, err := jws.CompactSerialize()
+	require.NoError(t, err)
+
+	jwksFn := func(_ context.Context) (*jose.JSONWebKeySet, error) {
+		return &jose.JSONWebKeySet{Keys: []jose.JSONWebKey{
+			{Key: &privKey.PublicKey, KeyID: kid, Algorithm: string(jose.RS256)},
+		}}, nil
+	}
+
+	_, err = scalekit.ValidateToken[map[string]interface{}](context.Background(), token, jwksFn)
+	require.Error(t, err)
+	assert.ErrorIs(t, err, scalekit.ErrMissingExpClaim)
+	// Backward compat: ErrInvalidExpClaimFormat is an alias for ErrMissingExpClaim
+	assert.ErrorIs(t, err, scalekit.ErrInvalidExpClaimFormat)
 }

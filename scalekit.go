@@ -304,8 +304,11 @@ func (s *scalekitClient) AuthenticateWithCode(
 	redirectUri string,
 	options AuthenticationOptions,
 ) (*AuthenticationResponse, error) {
-	if code == "" || redirectUri == "" {
-		return nil, errors.New("code and redirect uri is required")
+	if code == "" {
+		return nil, errors.New("code is required")
+	}
+	if redirectUri == "" {
+		return nil, errors.New("redirectUri is required")
 	}
 	qs := url.Values{}
 	qs.Add("code", code)
@@ -319,6 +322,9 @@ func (s *scalekitClient) AuthenticateWithCode(
 	authResp, err := s.coreClient.authenticate(ctx, qs)
 	if err != nil {
 		return nil, err
+	}
+	if authResp.IdToken == "" {
+		return nil, errors.New("authentication response missing id_token")
 	}
 	claims, err := ValidateToken[IdTokenClaims](ctx, authResp.IdToken, s.coreClient.GetJwks)
 	if err != nil {
@@ -432,8 +438,12 @@ func verifyTimestamp(timestampStr string) (*time.Time, error) {
 
 // ValidateToken verifies a JWT's signature using keys from jwksFn, unmarshals the claims
 // into T, and checks that the token has a valid, non-expired exp claim.
-// Returns ErrMissingExpClaim if exp is absent, or ErrTokenExpired if it is in the past.
+// Returns ErrTokenRequired if token is empty, ErrMissingExpClaim if exp is absent,
+// or ErrTokenExpired if it is in the past.
 func ValidateToken[T interface{}](ctx context.Context, token string, jwksFn func(context.Context) (*jose.JSONWebKeySet, error)) (*T, error) {
+	if token == "" {
+		return nil, ErrTokenRequired
+	}
 	var claims T
 	keySet, err := jwksFn(ctx)
 	if err != nil {

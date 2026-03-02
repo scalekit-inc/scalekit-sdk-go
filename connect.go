@@ -22,9 +22,9 @@ type fn[TRequest interface{}, TResponse interface{}] func(
 type connectExecuter[TRequest interface{}, TResponse interface{}] struct {
 	coreClient       *coreClient
 	data             *TRequest
-	retries          int // 
+	retries          int // retries for unauthenticated errors; compared against maxRetry.
 	maxRetry         int
-	transientRetries int // retries for transient Connect errors (ResourceExhausted, Unavailable)
+	transientRetries int // retries for transient Connect errors (ResourceExhausted, Unavailable); capped at maxTransientRetries with exponential backoff starting at 100ms.
 	fn               fn[TRequest, TResponse]
 }
 
@@ -88,6 +88,7 @@ func validationErrorMessage(ce *connect.Error) string {
 	for _, detail := range ce.Details() {
 		msg, err := detail.Value()
 		if err != nil {
+			messages = append(messages, fmt.Sprintf("[unreadable validation detail: %v]", err))
 			continue
 		}
 		info, ok := msg.(*errdetails.ErrorInfo)
@@ -135,20 +136,28 @@ func (r *connectExecuter[TRequest, TResponse]) exec(ctx context.Context) (*TResp
 
 		if connectErr != nil && isTransientCode(connectErr.Code()) && r.transientRetries < maxTransientRetries {
 			backoff := time.Duration(1<<r.transientRetries) * 100 * time.Millisecond
+			timer := time.NewTimer(backoff)
 			select {
-			case <-time.After(backoff):
+			case <-timer.C:
 			case <-ctx.Done():
-				return nil, ctx.Err()
+				timer.Stop()
+				return nil, fmt.Errorf("context cancelled during retry backoff (attempt %d/%d): %w",
+					r.transientRetries+1, maxTransientRetries, ctx.Err())
 			}
 			r.transientRetries++
 			return r.exec(ctx)
 		}
 
+		if connectErr != nil && isTransientCode(connectErr.Code()) {
+			return nil, fmt.Errorf("operation failed after %d transient retries: %w", r.transientRetries, err)
+		}
+
 		if r.maxRetry-r.retries > 0 && isUnauthenticated(err) {
 			if authErr := r.coreClient.authenticateClient(ctx); authErr != nil {
-				return nil, fmt.Errorf("reauthentication failed: %w", authErr)
+				return nil, fmt.Errorf("reauthentication failed after %v: %w", err, authErr)
 			}
 			r.retries++
+			r.transientRetries = 0 // reset for fresh attempt after re-auth
 			return r.exec(ctx)
 		}
 

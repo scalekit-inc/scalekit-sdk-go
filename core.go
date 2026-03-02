@@ -3,6 +3,7 @@ package scalekit
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -78,6 +79,7 @@ func (h *httpError) Unwrap() error {
 
 // httpErrorFromResponse reads the response body and returns an httpError for
 // non-success responses. The prefix is used in the error message (e.g. "authentication failed").
+// The caller is responsible for closing resp.Body; this function reads but does not close it.
 func httpErrorFromResponse(resp *http.Response, prefix string) *httpError {
 	body, readErr := io.ReadAll(resp.Body)
 	if readErr != nil {
@@ -175,6 +177,9 @@ func (c *coreClient) authenticate(ctx context.Context, requestData url.Values) (
 	if err != nil {
 		return nil, err
 	}
+	if responseData.AccessToken == "" {
+		return nil, errors.New("authentication response missing access_token")
+	}
 
 	return &responseData, nil
 }
@@ -218,6 +223,9 @@ func (c *coreClient) GetJwks(ctx context.Context) (*jose.JSONWebKeySet, error) {
 	err = json.NewDecoder(response.Body).Decode(&responseData)
 	if err != nil {
 		return nil, err
+	}
+	if len(responseData.Keys) == 0 {
+		return nil, errors.New("JWKS endpoint returned empty key set")
 	}
 	c.jsonWebKeySet = &responseData
 
