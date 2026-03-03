@@ -83,7 +83,7 @@ func (h *httpError) Unwrap() error {
 // non-success responses. The prefix is used in the error message (e.g. "authentication failed").
 // The caller is responsible for closing resp.Body; this function reads but does not close it.
 func httpErrorFromResponse(resp *http.Response, prefix string) *httpError {
-	body, readErr := io.ReadAll(io.LimitReader(resp.Body, maxErrorBodyBytes))
+	body, readErr := io.ReadAll(io.LimitReader(resp.Body, maxErrorBodyBytes+1))
 	if readErr != nil {
 		return &httpError{
 			err:        fmt.Errorf("%s: HTTP %d: body read error: %w", prefix, resp.StatusCode, readErr),
@@ -91,8 +91,8 @@ func httpErrorFromResponse(resp *http.Response, prefix string) *httpError {
 		}
 	}
 	msg := strings.TrimSpace(string(body))
-	if len(body) == maxErrorBodyBytes {
-		msg += " …(truncated)"
+	if len(body) > maxErrorBodyBytes {
+		msg = strings.TrimSpace(string(body[:maxErrorBodyBytes])) + " …(truncated)"
 	}
 	return &httpError{
 		err:        fmt.Errorf("%s: HTTP %d: %s", prefix, resp.StatusCode, msg),
