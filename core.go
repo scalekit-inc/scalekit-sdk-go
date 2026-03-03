@@ -168,7 +168,7 @@ func (c *coreClient) authenticate(ctx context.Context, requestData url.Values) (
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() { _ = response.Body.Close() }()
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
 		return nil, httpErrorFromResponse(response, "authentication failed")
 	}
@@ -215,7 +215,7 @@ func (c *coreClient) GetJwks(ctx context.Context) (*jose.JSONWebKeySet, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer func() { _ = response.Body.Close() }()
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
 		return nil, httpErrorFromResponse(response, "failed to fetch JWKS")
 	}

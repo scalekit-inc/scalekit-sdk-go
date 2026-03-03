@@ -26,8 +26,8 @@ const (
 )
 
 var (
-	webhookToleranceInSeconds = 5 * time.Minute
-	webhookSignatureVersion   = "v1"
+	webhookTolerance         = 5 * time.Minute
+	webhookSignatureVersion  = "v1"
 )
 
 type GrantType = string
@@ -427,10 +427,10 @@ func verifyTimestamp(timestampStr string) (*time.Time, error) {
 		return nil, err
 	}
 	timestamp := time.Unix(unixTimestamp, 0)
-	if now.Sub(timestamp) > webhookToleranceInSeconds {
+	if now.Sub(timestamp) > webhookTolerance {
 		return nil, errors.New("message timestamp too old")
 	}
-	if timestamp.Unix() > now.Add(webhookToleranceInSeconds).Unix() {
+	if timestamp.Unix() > now.Add(webhookTolerance).Unix() {
 		return nil, errors.New("message timestamp too new")
 	}
 	return &timestamp, nil
