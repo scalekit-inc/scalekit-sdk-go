@@ -100,6 +100,20 @@ func httpErrorFromResponse(resp *http.Response, prefix string) *httpError {
 	}
 }
 
+// cancelOnClose wraps an io.ReadCloser and invokes cancel when Close is
+// called.  This defers context cancellation until after the caller has
+// finished reading the response body, rather than cancelling at the point
+// RoundTrip returns (before the body has been consumed).
+type cancelOnClose struct {
+	io.ReadCloser
+	cancel context.CancelFunc
+}
+
+func (c *cancelOnClose) Close() error {
+	defer c.cancel()
+	return c.ReadCloser.Close()
+}
+
 func (h *headerInterceptor) RoundTrip(r *http.Request) (*http.Response, error) {
 	r.Header.Add("user-agent", h.client.userAgent)
 	r.Header.Add("x-sdk-version", h.client.sdkVersion)
@@ -114,9 +128,13 @@ func (h *headerInterceptor) RoundTrip(r *http.Request) (*http.Response, error) {
 	}
 
 	ctx, cancel := withDefaultTimeout(r.Context())
-	defer cancel()
-
-	return h.t.RoundTrip(r.WithContext(ctx))
+	resp, err := h.t.RoundTrip(r.WithContext(ctx))
+	if err != nil {
+		cancel()
+		return nil, err
+	}
+	resp.Body = &cancelOnClose{ReadCloser: resp.Body, cancel: cancel}
+	return resp, nil
 }
 
 func newCoreClient(envUrl, clientId, clientSecret string) *coreClient {
