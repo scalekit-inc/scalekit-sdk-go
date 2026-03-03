@@ -647,5 +647,5 @@ func TestValidateToken_MissingExpClaim(t *testing.T) {
 	require.Error(t, err)
 	assert.ErrorIs(t, err, scalekit.ErrMissingExpClaim)
 	// Backward compat: ErrInvalidExpClaimFormat is an alias for ErrMissingExpClaim
-	assert.ErrorIs(t, err, scalekit.ErrMissingExpClaim) //nolint:staticcheck // testing deprecated alias
+	assert.ErrorIs(t, err, scalekit.ErrInvalidExpClaimFormat) //nolint:staticcheck // testing deprecated alias
 }

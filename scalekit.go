@@ -444,6 +444,9 @@ func ValidateToken[T interface{}](ctx context.Context, token string, jwksFn func
 	if token == "" {
 		return nil, ErrTokenRequired
 	}
+	if jwksFn == nil {
+		return nil, errors.New("jwks function is required")
+	}
 	var claims T
 	keySet, err := jwksFn(ctx)
 	if err != nil {

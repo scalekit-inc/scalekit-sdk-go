@@ -1111,10 +1111,13 @@ for _, org := range orgs.Organizations {
   _ = org.Id
 }
 
-// Filter by external ID (pass nil options for server defaults)
+// Filter by external ID
 orgs, err = client.Organization().ListOrganization(ctx, &scalekit.ListOrganizationOptions{
   ExternalId: "customer_12345",
 })
+
+// Use server defaults
+orgs, err = client.Organization().ListOrganization(ctx, nil)
 ```
 </dd>
 </dl>

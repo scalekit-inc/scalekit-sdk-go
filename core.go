@@ -21,6 +21,7 @@ const (
 	jwksEndpoint       = "keys"
 	sdkVersion         = "Scalekit-Go/2.2.0"
 	defaultHTTPTimeout = 10 * time.Second
+	maxErrorBodyBytes  = 8 * 1024
 )
 
 // withDefaultTimeout attaches a defaultHTTPTimeout deadline to ctx if it has
@@ -77,19 +78,24 @@ func (h *httpError) Unwrap() error {
 	return h.err
 }
 
-// httpErrorFromResponse reads the response body and returns an httpError for
+// httpErrorFromResponse reads the response body (capped at maxErrorBodyBytes to avoid
+// unbounded memory use on server-controlled error payloads) and returns an httpError for
 // non-success responses. The prefix is used in the error message (e.g. "authentication failed").
 // The caller is responsible for closing resp.Body; this function reads but does not close it.
 func httpErrorFromResponse(resp *http.Response, prefix string) *httpError {
-	body, readErr := io.ReadAll(resp.Body)
+	body, readErr := io.ReadAll(io.LimitReader(resp.Body, maxErrorBodyBytes))
 	if readErr != nil {
 		return &httpError{
 			err:        fmt.Errorf("%s: HTTP %d: body read error: %w", prefix, resp.StatusCode, readErr),
 			StatusCode: resp.StatusCode,
 		}
 	}
+	msg := strings.TrimSpace(string(body))
+	if len(body) == maxErrorBodyBytes {
+		msg += " …(truncated)"
+	}
 	return &httpError{
-		err:        fmt.Errorf("%s: HTTP %d: %s", prefix, resp.StatusCode, strings.TrimSpace(string(body))),
+		err:        fmt.Errorf("%s: HTTP %d: %s", prefix, resp.StatusCode, msg),
 		StatusCode: resp.StatusCode,
 	}
 }
@@ -187,10 +193,10 @@ func (c *coreClient) authenticate(ctx context.Context, requestData url.Values) (
 func (c *coreClient) GetJwks(ctx context.Context) (*jose.JSONWebKeySet, error) {
 	// Read lock is released explicitly rather than deferred because this goroutine
 	// acquires a write lock below — promoting from RLock to Lock on the same mutex deadlocks.
-	// The pointer is copied under the read lock so the returned value remains valid after the lock is released.
+	// Return a copy so callers cannot mutate the internal cache.
 	c.jwksMu.RLock()
 	if c.jsonWebKeySet != nil {
-		jwks := c.jsonWebKeySet
+		jwks := copyJSONWebKeySet(c.jsonWebKeySet)
 		c.jwksMu.RUnlock()
 		return jwks, nil
 	}
@@ -200,7 +206,7 @@ func (c *coreClient) GetJwks(ctx context.Context) (*jose.JSONWebKeySet, error) {
 	defer c.jwksMu.Unlock()
 	// Double-checked locking: another goroutine may have populated jsonWebKeySet while this goroutine waited for the write lock.
 	if c.jsonWebKeySet != nil {
-		return c.jsonWebKeySet, nil
+		return copyJSONWebKeySet(c.jsonWebKeySet), nil
 	}
 
 	request, err := http.NewRequestWithContext(ctx,
@@ -229,5 +235,15 @@ func (c *coreClient) GetJwks(ctx context.Context) (*jose.JSONWebKeySet, error) {
 	}
 	c.jsonWebKeySet = &responseData
 
-	return &responseData, nil
+	return copyJSONWebKeySet(&responseData), nil
+}
+
+// copyJSONWebKeySet returns a shallow copy of the key set so callers cannot mutate the internal cache (e.g. the Keys slice).
+func copyJSONWebKeySet(src *jose.JSONWebKeySet) *jose.JSONWebKeySet {
+	if src == nil {
+		return nil
+	}
+	keys := make([]jose.JSONWebKey, len(src.Keys))
+	copy(keys, src.Keys)
+	return &jose.JSONWebKeySet{Keys: keys}
 }
