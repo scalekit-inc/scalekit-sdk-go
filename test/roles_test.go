@@ -17,10 +17,11 @@ func uniqueRoleName() string {
 
 func createEnvRole(t *testing.T, ctx context.Context, name string) {
 	t.Helper()
+	desc := "Integration test role"
 	_, err := client.Role().CreateRole(ctx, &rolesv1.CreateRole{
 		Name:        name,
 		DisplayName: fmt.Sprintf("Test Role %s", name),
-		Description: "Integration test role",
+		Description: &desc,
 	})
 	require.NoError(t, err)
 }
@@ -40,11 +41,12 @@ func TestRole_DeleteRoleBase(t *testing.T) {
 
 	// Create a child role that extends the base
 	childName := uniqueRoleName()
+	childDesc := "Child role for DeleteRoleBase test"
 	_, err := client.Role().CreateRole(ctx, &rolesv1.CreateRole{
 		Name:        childName,
 		DisplayName: fmt.Sprintf("Child Role %s", childName),
-		Description: "Child role for DeleteRoleBase test",
-		Extends:     baseName,
+		Description: &childDesc,
+		Extends:     &baseName,
 	})
 	require.NoError(t, err)
 	defer deleteEnvRole(t, ctx, childName)
