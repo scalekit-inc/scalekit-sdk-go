@@ -10,7 +10,6 @@ import (
 	"net/url"
 	"runtime"
 	"strings"
-	"sync"
 	"sync/atomic"
 	"time"
 
@@ -48,8 +47,8 @@ type coreClient struct {
 	accessToken atomic.Pointer[string]
 	authGroup   singleflight.Group
 
-	jwksMu        sync.RWMutex
-	jsonWebKeySet *jose.JSONWebKeySet
+	jwksGroup    singleflight.Group
+	jsonWebKeySet atomic.Pointer[jose.JSONWebKeySet]
 
 	httpClient *http.Client
 }
@@ -202,51 +201,44 @@ func (c *coreClient) authenticate(ctx context.Context, requestData url.Values) (
 }
 
 func (c *coreClient) GetJwks(ctx context.Context) (*jose.JSONWebKeySet, error) {
-	// Read lock is released explicitly rather than deferred because this goroutine
-	// acquires a write lock below — promoting from RLock to Lock on the same mutex deadlocks.
-	// Return a copy so callers cannot mutate the internal cache.
-	c.jwksMu.RLock()
-	if c.jsonWebKeySet != nil {
-		jwks := copyJSONWebKeySet(c.jsonWebKeySet)
-		c.jwksMu.RUnlock()
-		return jwks, nil
+	if cached := c.jsonWebKeySet.Load(); cached != nil {
+		return copyJSONWebKeySet(cached), nil
 	}
-	c.jwksMu.RUnlock()
-
-	c.jwksMu.Lock()
-	defer c.jwksMu.Unlock()
-	// Double-checked locking: another goroutine may have populated jsonWebKeySet while this goroutine waited for the write lock.
-	if c.jsonWebKeySet != nil {
-		return copyJSONWebKeySet(c.jsonWebKeySet), nil
-	}
-
-	request, err := http.NewRequestWithContext(ctx,
-		http.MethodGet,
-		fmt.Sprintf("%s/%s", c.envUrl, jwksEndpoint),
-		nil,
-	)
+	v, err, _ := c.jwksGroup.Do("jwks", func() (any, error) {
+		if cached := c.jsonWebKeySet.Load(); cached != nil {
+			return copyJSONWebKeySet(cached), nil
+		}
+		request, err := http.NewRequestWithContext(ctx,
+			http.MethodGet,
+			fmt.Sprintf("%s/%s", c.envUrl, jwksEndpoint),
+			nil,
+		)
+		if err != nil {
+			return nil, err
+		}
+		response, err := c.httpClient.Do(request)
+		if err != nil {
+			return nil, err
+		}
+		defer func() { _ = response.Body.Close() }()
+		if response.StatusCode < 200 || response.StatusCode >= 300 {
+			return nil, httpErrorFromResponse(response, "failed to fetch JWKS")
+		}
+		var responseData jose.JSONWebKeySet
+		err = json.NewDecoder(response.Body).Decode(&responseData)
+		if err != nil {
+			return nil, err
+		}
+		if len(responseData.Keys) == 0 {
+			return nil, errors.New("JWKS endpoint returned empty key set")
+		}
+		c.jsonWebKeySet.Store(&responseData)
+		return copyJSONWebKeySet(&responseData), nil
+	})
 	if err != nil {
 		return nil, err
 	}
-	response, err := c.httpClient.Do(request)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = response.Body.Close() }()
-	if response.StatusCode < 200 || response.StatusCode >= 300 {
-		return nil, httpErrorFromResponse(response, "failed to fetch JWKS")
-	}
-	var responseData jose.JSONWebKeySet
-	err = json.NewDecoder(response.Body).Decode(&responseData)
-	if err != nil {
-		return nil, err
-	}
-	if len(responseData.Keys) == 0 {
-		return nil, errors.New("JWKS endpoint returned empty key set")
-	}
-	c.jsonWebKeySet = &responseData
-
-	return copyJSONWebKeySet(&responseData), nil
+	return v.(*jose.JSONWebKeySet), nil
 }
 
 // copyJSONWebKeySet returns a shallow copy of the key set so callers cannot mutate the internal cache (e.g. the Keys slice).
