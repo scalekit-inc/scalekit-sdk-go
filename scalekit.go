@@ -194,11 +194,6 @@ type TokenResponse struct {
 	ExpiresIn    int
 }
 
-type ClientTokenResponse struct {
-	AccessToken string
-	ExpiresIn   int
-}
-
 type LogoutUrlOptions struct {
 	IdTokenHint           string
 	PostLogoutRedirectUri string
