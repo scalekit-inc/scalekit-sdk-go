@@ -6,13 +6,10 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
 
 	"connectrpc.com/connect"
 	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/errdetails"
 )
-
-const maxTransientRetries = 3
 
 type fn[TRequest interface{}, TResponse interface{}] func(
 	context.Context,
@@ -20,12 +17,11 @@ type fn[TRequest interface{}, TResponse interface{}] func(
 ) (*connect.Response[TResponse], error)
 
 type connectExecuter[TRequest interface{}, TResponse interface{}] struct {
-	coreClient       *coreClient
-	data             *TRequest
-	retries          int // retries for unauthenticated errors; compared against maxRetry.
-	maxRetries         int
-	transientRetries int // retries for transient Connect errors (ResourceExhausted, Unavailable); capped at maxTransientRetries with exponential backoff starting at 100ms.
-	fn               fn[TRequest, TResponse]
+	coreClient *coreClient
+	data       *TRequest
+	retries    int // retries for unauthenticated errors; compared against maxRetry.
+	maxRetries int
+	fn         fn[TRequest, TResponse]
 }
 
 func newConnectClient[T interface{}](
@@ -99,17 +95,6 @@ func validationErrorMessage(ce *connect.Error) string {
 	return strings.Join(messages, "\n")
 }
 
-// isTransientCode reports whether the Connect code indicates a transient error
-// that may succeed on retry (ResourceExhausted, Unavailable).
-func isTransientCode(code connect.Code) bool {
-	switch code {
-	case connect.CodeResourceExhausted, connect.CodeUnavailable:
-		return true
-	default:
-		return false
-	}
-}
-
 // isUnauthenticated reports whether err indicates an authentication failure
 // (HTTP 401 or Connect CodeUnauthenticated).
 func isUnauthenticated(err error) bool {
@@ -131,24 +116,6 @@ func (r *connectExecuter[TRequest, TResponse]) exec(ctx context.Context) (*TResp
 			return nil, fmt.Errorf("%s: %w", validationErrorMessage(connectErr), connectErr)
 		}
 
-		if connectErr != nil && isTransientCode(connectErr.Code()) && r.transientRetries < maxTransientRetries {
-			backoff := time.Duration(1<<r.transientRetries) * 100 * time.Millisecond
-			timer := time.NewTimer(backoff)
-			select {
-			case <-timer.C:
-			case <-ctx.Done():
-				timer.Stop()
-				return nil, fmt.Errorf("context cancelled during retry backoff (attempt %d/%d): %w",
-					r.transientRetries+1, maxTransientRetries, ctx.Err())
-			}
-			r.transientRetries++
-			return r.exec(ctx)
-		}
-
-		if connectErr != nil && isTransientCode(connectErr.Code()) {
-			return nil, fmt.Errorf("operation failed after %d transient retries: %w", r.transientRetries, err)
-		}
-
 		if r.maxRetries-r.retries > 0 && isUnauthenticated(err) {
 			_, authErr, _ := r.coreClient.authGroup.Do("auth", func() (any, error) {
 				return nil, r.coreClient.authenticateClient(ctx)
@@ -157,7 +124,6 @@ func (r *connectExecuter[TRequest, TResponse]) exec(ctx context.Context) (*TResp
 				return nil, fmt.Errorf("reauthentication failed after %v: %w", err, authErr)
 			}
 			r.retries++
-			r.transientRetries = 0 // reset for fresh attempt after re-auth
 			return r.exec(ctx)
 		}
 
