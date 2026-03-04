@@ -23,7 +23,7 @@ type connectExecuter[TRequest interface{}, TResponse interface{}] struct {
 	coreClient       *coreClient
 	data             *TRequest
 	retries          int // retries for unauthenticated errors; compared against maxRetry.
-	maxRetry         int
+	maxRetries         int
 	transientRetries int // retries for transient Connect errors (ResourceExhausted, Unavailable); capped at maxTransientRetries with exponential backoff starting at 100ms.
 	fn               fn[TRequest, TResponse]
 }
@@ -56,10 +56,7 @@ func newHeaderInterceptor(c *coreClient) connect.UnaryInterceptorFunc {
 				req.Header().Set("user-agent", c.userAgent)
 				req.Header().Set("x-sdk-version", c.sdkVersion)
 				req.Header().Set("x-api-version", c.apiVersion)
-				c.tokenMu.RLock()
-				token := c.accessToken
-				c.tokenMu.RUnlock()
-				if token != nil {
+				if token := c.accessToken.Load(); token != nil {
 					req.Header().Set("Authorization", fmt.Sprintf("Bearer %s", *token))
 				}
 			}
@@ -76,7 +73,7 @@ func newConnectExecuter[TRequest interface{}, TResponse interface{}](
 	return &connectExecuter[TRequest, TResponse]{
 		coreClient: coreClient,
 		data:       data,
-		maxRetry:   1,
+		maxRetries:   1,
 		fn:         fn,
 	}
 }
@@ -152,8 +149,11 @@ func (r *connectExecuter[TRequest, TResponse]) exec(ctx context.Context) (*TResp
 			return nil, fmt.Errorf("operation failed after %d transient retries: %w", r.transientRetries, err)
 		}
 
-		if r.maxRetry-r.retries > 0 && isUnauthenticated(err) {
-			if authErr := r.coreClient.authenticateClient(ctx); authErr != nil {
+		if r.maxRetries-r.retries > 0 && isUnauthenticated(err) {
+			_, authErr, _ := r.coreClient.authGroup.Do("auth", func() (any, error) {
+				return nil, r.coreClient.authenticateClient(ctx)
+			})
+			if authErr != nil {
 				return nil, fmt.Errorf("reauthentication failed after %v: %w", err, authErr)
 			}
 			r.retries++
@@ -168,6 +168,6 @@ func (r *connectExecuter[TRequest, TResponse]) exec(ctx context.Context) (*TResp
 }
 
 func (r *connectExecuter[TRequest, TResponse]) WithMaxRetry(retry int) *connectExecuter[TRequest, TResponse] {
-	r.maxRetry = retry
+	r.maxRetries = retry
 	return r
 }

@@ -11,9 +11,11 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/go-jose/go-jose/v4"
+	"golang.org/x/sync/singleflight"
 )
 
 const (
@@ -43,8 +45,8 @@ type coreClient struct {
 	apiVersion   string
 	userAgent    string
 
-	tokenMu     sync.RWMutex
-	accessToken *string
+	accessToken atomic.Pointer[string]
+	authGroup   singleflight.Group
 
 	jwksMu        sync.RWMutex
 	jsonWebKeySet *jose.JSONWebKeySet
@@ -118,12 +120,7 @@ func (h *headerInterceptor) RoundTrip(r *http.Request) (*http.Response, error) {
 	r.Header.Add("user-agent", h.client.userAgent)
 	r.Header.Add("x-sdk-version", h.client.sdkVersion)
 	r.Header.Add("x-api-version", h.client.apiVersion)
-	// Read the token pointer under a read lock. Defer is deliberately not used:
-	// using defer would hold the lock across the subsequent network call.
-	h.client.tokenMu.RLock()
-	token := h.client.accessToken
-	h.client.tokenMu.RUnlock()
-	if token != nil {
+	if token := h.client.accessToken.Load(); token != nil {
 		r.Header.Add("Authorization", fmt.Sprintf("Bearer %s", *token))
 	}
 
@@ -167,11 +164,7 @@ func (c *coreClient) authenticateClient(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	// Lock scope is a single pointer assignment; explicit unlock is used for clarity rather than defer.
-	c.tokenMu.Lock()
-	c.accessToken = &res.AccessToken
-	c.tokenMu.Unlock()
-
+	c.accessToken.Store(&res.AccessToken)
 	return nil
 }
 
