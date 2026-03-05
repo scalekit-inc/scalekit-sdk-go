@@ -177,7 +177,8 @@ func (c *coreClient) GetJwks(ctx context.Context) (*jose.JSONWebKeySet, error) {
 		if cached := c.jsonWebKeySet.Load(); cached != nil {
 			return copyJSONWebKeySet(cached), nil
 		}
-		request, err := http.NewRequestWithContext(ctx,
+		// Use WithoutCancel so one caller's context cancellation does not fail all waiters.
+		request, err := http.NewRequestWithContext(context.WithoutCancel(ctx),
 			http.MethodGet,
 			fmt.Sprintf("%s/%s", c.envUrl, jwksEndpoint),
 			nil,
@@ -200,7 +201,7 @@ func (c *coreClient) GetJwks(ctx context.Context) (*jose.JSONWebKeySet, error) {
 			return nil, err
 		}
 		if len(responseData.Keys) == 0 {
-			return nil, errors.New("JWKS endpoint returned empty key set")
+			return nil, ErrJwksEmptyKeySet
 		}
 		c.jsonWebKeySet.Store(&responseData)
 		return copyJSONWebKeySet(&responseData), nil

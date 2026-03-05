@@ -76,6 +76,9 @@ var (
 
 	// ErrAuthenticationResponseMissingAccessToken is returned when the authentication response has no access_token.
 	ErrAuthenticationResponseMissingAccessToken = errors.New("authentication response missing access_token")
+
+	// ErrJwksEmptyKeySet is returned when the JWKS endpoint returns a key set with no keys.
+	ErrJwksEmptyKeySet = errors.New("JWKS endpoint returned empty key set")
 )
 
 // errorCore holds the common fields for SDK errors. Unexported so HTTPError can embed it without

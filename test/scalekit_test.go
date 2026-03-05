@@ -3,6 +3,7 @@ package test
 import (
 	"context"
 	"crypto/hmac"
+	"errors"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
@@ -519,6 +520,10 @@ func TestAuthenticateWithCode_Non2xx(t *testing.T) {
 			_, err := client.AuthenticateWithCode(context.Background(), "code", "http://localhost/cb", scalekit.AuthenticationOptions{})
 			require.Error(t, err)
 			assert.Contains(t, err.Error(), tt.wantErrContain)
+			// Non-2xx responses must be extractable as *scalekit.Error with StatusCode set.
+			var sdkErr *scalekit.Error
+			require.True(t, errors.As(err, &sdkErr), "err should be *scalekit.Error for non-2xx")
+			assert.Equal(t, tt.statusCode, sdkErr.StatusCode)
 		})
 	}
 }
@@ -554,6 +559,9 @@ func TestValidateAccessToken_JwksError(t *testing.T) {
 			_, err := client.ValidateAccessToken(context.Background(), token)
 			require.Error(t, err)
 			assert.Contains(t, err.Error(), tt.wantErrContain)
+			var sdkErr *scalekit.Error
+			require.True(t, errors.As(err, &sdkErr), "JWKS non-2xx should be *scalekit.Error")
+			assert.Equal(t, tt.jwksStatus, sdkErr.StatusCode)
 		})
 	}
 }
@@ -665,6 +673,8 @@ func TestValidateToken_MissingExpClaim(t *testing.T) {
 }
 
 // TestConnectRetryOn401 verifies that a 401 on a Connect RPC triggers re-auth and one retry.
+// The success response uses manual gRPC wire framing; this is fragile against Connect protocol
+// changes. For stability, consider using connect/connecttest or a real connectrpc handler.
 func TestConnectRetryOn401(t *testing.T) {
 	listOrganizationPath := organizationsconnect.OrganizationServiceListOrganizationProcedure
 	var rpcCallCount atomic.Int32
@@ -680,18 +690,18 @@ func TestConnectRetryOn401(t *testing.T) {
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
-			// Second call: success with empty list (gRPC wire: 5-byte prefix + marshaled message).
+			// Second call: success with empty list (manual gRPC wire: 5-byte prefix + marshaled message).
+			// Connect expects Grpc-Status as a trailer (after the body); declare it and set it after writing.
 			msg, err := proto.Marshal(&organizationsv1.ListOrganizationsResponse{})
 			require.NoError(t, err)
 			w.Header().Set("Content-Type", "application/grpc")
-			// Advertise that we'll send a Grpc-Status trailer to satisfy Connect's gRPC framing checks.
-			w.Header().Add("Trailer", "Grpc-Status")
+			w.Header().Set("Trailer", "Grpc-Status")
+			w.WriteHeader(http.StatusOK)
 			prefix := make([]byte, 5)
 			prefix[0] = 0 // no compression
 			binary.BigEndian.PutUint32(prefix[1:5], uint32(len(msg)))
 			_, _ = w.Write(prefix)
 			_, _ = w.Write(msg)
-			// Send a successful gRPC status trailer so the client does not treat this as a protocol error.
 			w.Header().Set("Grpc-Status", "0")
 		default:
 			w.WriteHeader(http.StatusNotFound)
