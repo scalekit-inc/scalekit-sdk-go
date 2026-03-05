@@ -75,12 +75,7 @@ func (o *organization) CreateOrganization(ctx context.Context, name string, opti
 	).exec(ctx)
 }
 
-func (o *organization) ListOrganization(ctx context.Context, options *ListOrganizationOptions) (*ListOrganizationsResponse, error) {
-	request := &organizationsv1.ListOrganizationsRequest{}
-	if options != nil {
-		request.PageSize = options.PageSize
-		request.PageToken = options.PageToken
-	}
+func (o *organization) ListOrganization(ctx context.Context, request *ListOrganizationOptions) (*ListOrganizationsResponse, error) {
 	return newConnectExecuter(
 		o.coreClient,
 		o.client.ListOrganization,
