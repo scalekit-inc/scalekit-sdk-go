@@ -5,10 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"connectrpc.com/connect"
-	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/errdetails"
 )
 
 type fn[TRequest interface{}, TResponse interface{}] func(
@@ -74,27 +72,6 @@ func newConnectExecuter[TRequest interface{}, TResponse interface{}](
 	}
 }
 
-// validationErrorMessage builds a single string from a Connect InvalidArgument
-// error message and its validation field violations.
-func validationErrorMessage(ce *connect.Error) string {
-	messages := []string{ce.Message()}
-	for _, detail := range ce.Details() {
-		msg, err := detail.Value()
-		if err != nil {
-			messages = append(messages, fmt.Sprintf("[unreadable validation detail: %v]", err))
-			continue
-		}
-		info, ok := msg.(*errdetails.ErrorInfo)
-		if !ok || info.ValidationErrorInfo == nil {
-			continue
-		}
-		for _, field := range info.ValidationErrorInfo.FieldViolations {
-			messages = append(messages, fmt.Sprintf("%s: %s", field.Field, field.Description))
-		}
-	}
-	return strings.Join(messages, "\n")
-}
-
 // isUnauthenticated reports whether err indicates an authentication failure
 // (HTTP 401 or Connect CodeUnauthenticated).
 func isUnauthenticated(err error) bool {
@@ -109,13 +86,6 @@ func isUnauthenticated(err error) bool {
 func (r *connectExecuter[TRequest, TResponse]) exec(ctx context.Context) (*TResponse, error) {
 	data, err := r.fn(ctx, connect.NewRequest(r.data))
 	if err != nil {
-		var connectErr *connect.Error
-		_ = errors.As(err, &connectErr)
-
-		if connectErr != nil && connectErr.Code() == connect.CodeInvalidArgument {
-			return nil, fmt.Errorf("%s: %w", validationErrorMessage(connectErr), connectErr)
-		}
-
 		if r.maxRetries-r.retries > 0 && isUnauthenticated(err) {
 			_, authErr, _ := r.coreClient.authGroup.Do("auth", func() (any, error) {
 				return nil, r.coreClient.authenticateClient(ctx)
@@ -126,10 +96,8 @@ func (r *connectExecuter[TRequest, TResponse]) exec(ctx context.Context) (*TResp
 			r.retries++
 			return r.exec(ctx)
 		}
-
 		return nil, err
 	}
-
 	return data.Msg, nil
 }
 
