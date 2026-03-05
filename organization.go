@@ -19,7 +19,6 @@ type UpdateOrganization = organizationsv1.UpdateOrganization
 type ListOrganizationOptions struct {
 	PageSize   uint32
 	PageToken  string
-	ExternalId string // Filter to a single organization by its external ID. Empty means no filter.
 }
 type OrganizationSettings struct {
 	Features []Feature
@@ -81,9 +80,6 @@ func (o *organization) ListOrganization(ctx context.Context, options *ListOrgani
 	if options != nil {
 		request.PageSize = options.PageSize
 		request.PageToken = options.PageToken
-		if options.ExternalId != "" {
-			request.ExternalId = &options.ExternalId
-		}
 	}
 	return newConnectExecuter(
 		o.coreClient,
