@@ -87,11 +87,8 @@ func (r *connectExecuter[TRequest, TResponse]) exec(ctx context.Context) (*TResp
 	data, err := r.fn(ctx, connect.NewRequest(r.data))
 	if err != nil {
 		if r.maxRetries-r.retries > 0 && isUnauthenticated(err) {
-			_, authErr, _ := r.coreClient.authGroup.Do("auth", func() (any, error) {
-				return nil, r.coreClient.authenticateClient(ctx)
-			})
-			if authErr != nil {
-				return nil, fmt.Errorf("reauthentication failed after %v: %w", err, authErr)
+			if authErr := r.coreClient.authenticateClient(ctx); authErr != nil {
+				return nil, authErr
 			}
 			r.retries++
 			return r.exec(ctx)

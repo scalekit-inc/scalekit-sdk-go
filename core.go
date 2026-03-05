@@ -155,16 +155,19 @@ func newCoreClient(envUrl, clientId, clientSecret string) *coreClient {
 }
 
 func (c *coreClient) authenticateClient(ctx context.Context) error {
-	requestData := url.Values{}
-	requestData.Set("grant_type", "client_credentials")
-	requestData.Set("client_id", c.clientId)
-	requestData.Set("client_secret", c.clientSecret)
-	res, err := c.authenticate(ctx, requestData)
-	if err != nil {
-		return err
-	}
-	c.accessToken.Store(&res.AccessToken)
-	return nil
+	_, err, _ := c.authGroup.Do("auth", func() (any, error) {
+		requestData := url.Values{}
+		requestData.Set("grant_type", "client_credentials")
+		requestData.Set("client_id", c.clientId)
+		requestData.Set("client_secret", c.clientSecret)
+		res, err := c.authenticate(ctx, requestData)
+		if err != nil {
+			return nil, err
+		}
+		c.accessToken.Store(&res.AccessToken)
+		return nil, nil
+	})
+	return err
 }
 
 func (c *coreClient) authenticate(ctx context.Context, requestData url.Values) (*authenticationResponse, error) {
@@ -194,7 +197,7 @@ func (c *coreClient) authenticate(ctx context.Context, requestData url.Values) (
 		return nil, err
 	}
 	if responseData.AccessToken == "" {
-		return nil, errors.New("authentication response missing access_token")
+		return nil, ErrAuthenticationResponseMissingAccessToken
 	}
 
 	return &responseData, nil

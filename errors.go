@@ -67,4 +67,7 @@ var (
 
 	// ErrJwksFunctionRequired is returned when ValidateToken is called with a nil jwks function.
 	ErrJwksFunctionRequired = errors.New("jwks function is required")
+
+	// ErrAuthenticationResponseMissingAccessToken is returned when the authentication response has no access_token.
+	ErrAuthenticationResponseMissingAccessToken = errors.New("authentication response missing access_token")
 )

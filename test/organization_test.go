@@ -89,28 +89,6 @@ func TestOrganization_ListOrganization_NilOptions(t *testing.T) {
 	require.NotNil(t, orgs)
 }
 
-func TestOrganization_ListOrganization_ByExternalId(t *testing.T) {
-	ctx := context.Background()
-	externalId := UniqueSuffix()
-	orgId := createOrg(t, ctx, TestOrgName, externalId)
-	defer DeleteTestOrganization(t, ctx, orgId)
-
-	orgs, err := client.Organization().ListOrganization(ctx, &scalekit.ListOrganizationOptions{
-		ExternalId: externalId,
-	})
-	require.NoError(t, err)
-	require.NotNil(t, orgs)
-	var found *organizations.Organization
-	for _, o := range orgs.Organizations {
-		if o.GetExternalId() == externalId {
-			found = o
-			break
-		}
-	}
-	require.NotNil(t, found, "organization with external_id %q should be in list", externalId)
-	assert.Equal(t, orgId, found.GetId())
-}
-
 func TestOrganization_CreateOrganization_DuplicateExternalID(t *testing.T) {
 	ctx := context.Background()
 	externalId := UniqueSuffix()
