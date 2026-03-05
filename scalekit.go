@@ -6,7 +6,6 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/url"
 	"strconv"
@@ -305,10 +304,10 @@ func (s *scalekitClient) AuthenticateWithCode(
 	options AuthenticationOptions,
 ) (*AuthenticationResponse, error) {
 	if code == "" {
-		return nil, errors.New("code is required")
+		return nil, ErrCodeRequired
 	}
 	if redirectUri == "" {
-		return nil, errors.New("redirectUri is required")
+		return nil, ErrRedirectUriRequired
 	}
 	qs := url.Values{}
 	qs.Add("code", code)
@@ -324,7 +323,7 @@ func (s *scalekitClient) AuthenticateWithCode(
 		return nil, err
 	}
 	if authResp.IdToken == "" {
-		return nil, errors.New("authentication response missing id_token")
+		return nil, ErrAuthenticationResponseMissingIdToken
 	}
 	claims, err := ValidateToken[IdTokenClaims](ctx, authResp.IdToken, s.coreClient.GetJwks)
 	if err != nil {
@@ -377,11 +376,11 @@ func (s *scalekitClient) VerifyPayloadSignature(
 	webhookTimestamp := normalizedHeaders["webhook-timestamp"]
 	webhookSignature := normalizedHeaders["webhook-signature"]
 	if webhookId == "" || webhookTimestamp == "" || webhookSignature == "" {
-		return false, errors.New("missing required headers")
+		return false, ErrMissingRequiredHeaders
 	}
 	secretParts := strings.Split(secret, "_")
 	if len(secretParts) < 2 {
-		return false, errors.New("invalid secret")
+		return false, ErrInvalidSecret
 	}
 	secretBytes, err := base64.StdEncoding.DecodeString(secretParts[1])
 	if err != nil {
@@ -409,7 +408,7 @@ func (s *scalekitClient) VerifyPayloadSignature(
 		}
 	}
 
-	return false, errors.New("invalid signature")
+	return false, ErrInvalidSignature
 }
 
 func (s *scalekitClient) VerifyInterceptorPayload(
@@ -428,10 +427,10 @@ func verifyTimestamp(timestampStr string) (*time.Time, error) {
 	}
 	timestamp := time.Unix(unixTimestamp, 0)
 	if now.Sub(timestamp) > webhookTolerance {
-		return nil, errors.New("message timestamp too old")
+		return nil, ErrMessageTimestampTooOld
 	}
 	if timestamp.Unix() > now.Add(webhookTolerance).Unix() {
-		return nil, errors.New("message timestamp too new")
+		return nil, ErrMessageTimestampTooNew
 	}
 	return &timestamp, nil
 }
@@ -445,7 +444,7 @@ func ValidateToken[T interface{}](ctx context.Context, token string, jwksFn func
 		return nil, ErrTokenRequired
 	}
 	if jwksFn == nil {
-		return nil, errors.New("jwks function is required")
+		return nil, ErrJwksFunctionRequired
 	}
 	var claims T
 	keySet, err := jwksFn(ctx)

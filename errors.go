@@ -40,4 +40,31 @@ var (
 	// path is eliminated — exp parse errors now surface as json.Unmarshal errors.
 	// Use ErrMissingExpClaim to check for an absent exp claim.
 	ErrInvalidExpClaimFormat = ErrMissingExpClaim
+
+	// ErrCodeRequired is returned when AuthenticateWithCode is called with an empty code.
+	ErrCodeRequired = errors.New("code is required")
+
+	// ErrRedirectUriRequired is returned when AuthenticateWithCode is called with an empty redirectUri.
+	ErrRedirectUriRequired = errors.New("redirectUri is required")
+
+	// ErrAuthenticationResponseMissingIdToken is returned when the auth response has no id_token.
+	ErrAuthenticationResponseMissingIdToken = errors.New("authentication response missing id_token")
+
+	// ErrMissingRequiredHeaders is returned when webhook verification is missing required headers.
+	ErrMissingRequiredHeaders = errors.New("missing required headers")
+
+	// ErrInvalidSecret is returned when the webhook secret format is invalid.
+	ErrInvalidSecret = errors.New("invalid secret")
+
+	// ErrInvalidSignature is returned when the webhook signature does not match.
+	ErrInvalidSignature = errors.New("invalid signature")
+
+	// ErrMessageTimestampTooOld is returned when the webhook message timestamp is too far in the past.
+	ErrMessageTimestampTooOld = errors.New("message timestamp too old")
+
+	// ErrMessageTimestampTooNew is returned when the webhook message timestamp is too far in the future.
+	ErrMessageTimestampTooNew = errors.New("message timestamp too new")
+
+	// ErrJwksFunctionRequired is returned when ValidateToken is called with a nil jwks function.
+	ErrJwksFunctionRequired = errors.New("jwks function is required")
 )
