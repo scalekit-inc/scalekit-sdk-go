@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 	"strconv"
@@ -441,7 +442,9 @@ func verifyTimestamp(timestampStr string) (*time.Time, error) {
 // or ErrTokenExpired if it is in the past.
 func ValidateToken[T interface{}](ctx context.Context, token string, jwksFn func(context.Context) (*jose.JSONWebKeySet, error)) (*T, error) {
 	if token == "" {
-		return nil, ErrTokenRequired
+		// Join ErrTokenRequired with ErrTokenValidationFailed so callers can rely on either
+		// sentinel when handling empty tokens, preserving backward compatibility.
+		return nil, errors.Join(ErrTokenRequired, ErrTokenValidationFailed)
 	}
 	if jwksFn == nil {
 		return nil, ErrJwksFunctionRequired

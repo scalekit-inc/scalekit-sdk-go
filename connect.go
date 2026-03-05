@@ -17,7 +17,7 @@ type fn[TRequest interface{}, TResponse interface{}] func(
 type connectExecuter[TRequest interface{}, TResponse interface{}] struct {
 	coreClient *coreClient
 	data       *TRequest
-	retries    int // retries for unauthenticated errors; compared against maxRetry.
+	retries    int // retries for unauthenticated errors; compared against maxRetries.
 	maxRetries int
 	fn         fn[TRequest, TResponse]
 }
@@ -75,7 +75,7 @@ func newConnectExecuter[TRequest interface{}, TResponse interface{}](
 // isUnauthenticated reports whether err indicates an authentication failure
 // (HTTP 401 or Connect CodeUnauthenticated).
 func isUnauthenticated(err error) bool {
-	var httpErr *httpError
+	var httpErr *Error
 	if errors.As(err, &httpErr) && httpErr.StatusCode == http.StatusUnauthorized {
 		return true
 	}
@@ -83,6 +83,8 @@ func isUnauthenticated(err error) bool {
 	return errors.As(err, &connectErr) && connectErr.Code() == connect.CodeUnauthenticated
 }
 
+// exec runs the Connect RPC. Errors (including validation/CodeInvalidArgument) are returned
+// as-is; use errors.As(err, &connectErr) with *connect.Error to inspect Code() and Details().
 func (r *connectExecuter[TRequest, TResponse]) exec(ctx context.Context) (*TResponse, error) {
 	data, err := r.fn(ctx, connect.NewRequest(r.data))
 	if err != nil {

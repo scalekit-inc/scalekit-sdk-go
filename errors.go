@@ -1,6 +1,12 @@
 package scalekit
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+	"io"
+	"net/http"
+	"strings"
+)
 
 // Sentinel errors returned by SDK methods. Use errors.Is to check for specific conditions.
 var (
@@ -71,3 +77,45 @@ var (
 	// ErrAuthenticationResponseMissingAccessToken is returned when the authentication response has no access_token.
 	ErrAuthenticationResponseMissingAccessToken = errors.New("authentication response missing access_token")
 )
+
+// errorCore holds the common fields for SDK errors. Unexported so HTTPError can embed it without
+// the embedded field name shadowing the Error() method (embedding "Error" would shadow).
+type errorCore struct {
+	StatusCode int
+	Message    string
+	Err        error
+}
+
+func (e *errorCore) Error() string {
+	if e.Err != nil {
+		return e.Err.Error()
+	}
+	return e.Message
+}
+
+func (e *errorCore) Unwrap() error {
+	return e.Err
+}
+
+// Error represents an error returned by the SDK. Currently it only covers non-2xx HTTP responses.
+// Use errors.As(err, &e) to extract: var e *scalekit.Error; if errors.As(err, &e) { code := e.StatusCode }.
+type Error struct {
+	errorCore
+}
+
+// httpErrorFromResponse reads the response body (capped at maxErrorBodyBytes to avoid
+// unbounded memory use on server-controlled error payloads) and returns an HTTPError for
+// non-success responses. The prefix is used in the error message (e.g. "authentication failed").
+// The caller is responsible for closing resp.Body; this function may consume part or all of it.
+func httpErrorFromResponse(resp *http.Response, prefix string) *Error {
+	body, readErr := io.ReadAll(io.LimitReader(resp.Body, maxErrorBodyBytes+1))
+	if readErr != nil {
+		return &Error{errorCore: errorCore{StatusCode: resp.StatusCode, Message: readErr.Error(), Err: readErr}}
+	}
+	msg := strings.TrimSpace(string(body))
+	if len(body) > maxErrorBodyBytes {
+		msg = strings.TrimSpace(string(body[:maxErrorBodyBytes])) + " …(truncated)"
+	}
+	err := fmt.Errorf("%s: HTTP %d: %s", prefix, resp.StatusCode, msg)
+	return &Error{errorCore: errorCore{StatusCode: resp.StatusCode, Message: err.Error(), Err: err}}
+}

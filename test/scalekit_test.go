@@ -7,17 +7,22 @@ import (
 	"crypto/rsa"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/go-jose/go-jose/v4"
 	"github.com/scalekit-inc/scalekit-sdk-go/v2"
+	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/organizations/organizationsconnect"
+	organizationsv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/organizations"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/proto"
 )
 
 func TestAuthenticateWithCode(t *testing.T) {
@@ -523,19 +528,16 @@ func TestValidateAccessToken_JwksError(t *testing.T) {
 		name           string
 		jwksStatus     int
 		wantErrContain string
-		wantStatus     int
 	}{
 		{
 			name:           "JWKS 500 internal server error",
 			jwksStatus:     http.StatusInternalServerError,
 			wantErrContain: "failed to fetch JWKS: HTTP 500",
-			wantStatus:     http.StatusInternalServerError,
 		},
 		{
 			name:           "JWKS 403 forbidden",
 			jwksStatus:     http.StatusForbidden,
 			wantErrContain: "failed to fetch JWKS: HTTP 403",
-			wantStatus:     http.StatusForbidden,
 		},
 	}
 
@@ -599,6 +601,16 @@ func TestSentinelErrors(t *testing.T) {
 			fn:           func() error { _, err := c.Token().CreateToken(ctx, "", scalekit.CreateTokenOptions{}); return err },
 			wantSentinel: scalekit.ErrOrganizationIdRequired,
 		},
+		{
+			name:         "ErrCodeRequired on AuthenticateWithCode with empty code",
+			fn:           func() error { _, err := c.AuthenticateWithCode(ctx, "", "http://localhost/cb", scalekit.AuthenticationOptions{}); return err },
+			wantSentinel: scalekit.ErrCodeRequired,
+		},
+		{
+			name:         "ErrRedirectUriRequired on AuthenticateWithCode with empty redirectUri",
+			fn:           func() error { _, err := c.AuthenticateWithCode(ctx, "code", "", scalekit.AuthenticationOptions{}); return err },
+			wantSentinel: scalekit.ErrRedirectUriRequired,
+		},
 	}
 
 	for _, tt := range tests {
@@ -617,6 +629,8 @@ func TestValidateToken_EmptyToken(t *testing.T) {
 	_, err := scalekit.ValidateToken[map[string]interface{}](context.Background(), "", noopJwks)
 	require.Error(t, err)
 	assert.ErrorIs(t, err, scalekit.ErrTokenRequired)
+	// Backward compatibility: empty token also matches ErrTokenValidationFailed (joined by SDK).
+	assert.ErrorIs(t, err, scalekit.ErrTokenValidationFailed)
 }
 
 func TestValidateToken_MissingExpClaim(t *testing.T) {
@@ -648,4 +662,47 @@ func TestValidateToken_MissingExpClaim(t *testing.T) {
 	assert.ErrorIs(t, err, scalekit.ErrMissingExpClaim)
 	// Backward compat: ErrInvalidExpClaimFormat is an alias for ErrMissingExpClaim
 	assert.ErrorIs(t, err, scalekit.ErrInvalidExpClaimFormat) //nolint:staticcheck // testing deprecated alias
+}
+
+// TestConnectRetryOn401 verifies that a 401 on a Connect RPC triggers re-auth and one retry.
+func TestConnectRetryOn401(t *testing.T) {
+	listOrganizationPath := organizationsconnect.OrganizationServiceListOrganizationProcedure
+	var rpcCallCount atomic.Int32
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/oauth/token" && r.Method == http.MethodPost:
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"access_token":"new_token","expires_in":3600}`))
+		case r.URL.Path == listOrganizationPath:
+			n := rpcCallCount.Add(1)
+			if n == 1 {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			// Second call: success with empty list (gRPC wire: 5-byte prefix + marshaled message).
+			msg, err := proto.Marshal(&organizationsv1.ListOrganizationsResponse{})
+			require.NoError(t, err)
+			w.Header().Set("Content-Type", "application/grpc")
+			// Advertise that we'll send a Grpc-Status trailer to satisfy Connect's gRPC framing checks.
+			w.Header().Add("Trailer", "Grpc-Status")
+			prefix := make([]byte, 5)
+			prefix[0] = 0 // no compression
+			binary.BigEndian.PutUint32(prefix[1:5], uint32(len(msg)))
+			_, _ = w.Write(prefix)
+			_, _ = w.Write(msg)
+			// Send a successful gRPC status trailer so the client does not treat this as a protocol error.
+			w.Header().Set("Grpc-Status", "0")
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer server.Close()
+
+	client := scalekit.NewScalekitClient(server.URL, "client_id", "client_secret")
+	ctx := context.Background()
+	resp, err := client.Organization().ListOrganization(ctx, nil)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	assert.Equal(t, int32(2), rpcCallCount.Load(), "ListOrganization should be called twice (401 then retry)")
 }

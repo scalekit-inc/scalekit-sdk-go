@@ -79,7 +79,8 @@ func (t *tokenService) CreateToken(ctx context.Context, organizationId string, o
 
 func (t *tokenService) ValidateToken(ctx context.Context, token string) (*ValidateTokenResponse, error) {
 	if token == "" {
-		return nil, ErrTokenRequired
+		// Join so both errors.Is(err, ErrTokenRequired) and errors.Is(err, ErrTokenValidationFailed) match for backward compatibility.
+		return nil, errors.Join(ErrTokenRequired, ErrTokenValidationFailed)
 	}
 	result, err := newConnectExecuter(
 		t.coreClient,

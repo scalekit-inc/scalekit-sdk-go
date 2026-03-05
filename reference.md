@@ -1111,11 +1111,6 @@ for _, org := range orgs.Organizations {
   _ = org.Id
 }
 
-// Filter by external ID
-orgs, err = client.Organization().ListOrganization(ctx, &scalekit.ListOrganizationOptions{
-  ExternalId: "customer_12345",
-})
-
 // Use server defaults
 orgs, err = client.Organization().ListOrganization(ctx, nil)
 ```
@@ -1143,7 +1138,6 @@ orgs, err = client.Organization().ListOrganization(ctx, nil)
 **options:** `*ListOrganizationOptions` — all fields optional; pass `nil` to use server defaults.
 - `PageSize uint32` — number of results per page (0 = server default)
 - `PageToken string` — cursor from a previous response's `NextPageToken`
-- `ExternalId string` — filter to a single organization by its external ID; empty = no filter
 
 </dd>
 </dl>

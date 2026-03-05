@@ -65,42 +65,6 @@ type headerInterceptor struct {
 	client *coreClient
 }
 
-type httpError struct {
-	err        error
-	StatusCode int
-}
-
-func (h *httpError) Error() string {
-	return h.err.Error()
-}
-
-// Unwrap exposes the underlying error so errors.As and errors.Is can traverse the chain.
-func (h *httpError) Unwrap() error {
-	return h.err
-}
-
-// httpErrorFromResponse reads the response body (capped at maxErrorBodyBytes to avoid
-// unbounded memory use on server-controlled error payloads) and returns an httpError for
-// non-success responses. The prefix is used in the error message (e.g. "authentication failed").
-// The caller is responsible for closing resp.Body; this function reads but does not close it.
-func httpErrorFromResponse(resp *http.Response, prefix string) *httpError {
-	body, readErr := io.ReadAll(io.LimitReader(resp.Body, maxErrorBodyBytes+1))
-	if readErr != nil {
-		return &httpError{
-			err:        fmt.Errorf("%s: HTTP %d: body read error: %w", prefix, resp.StatusCode, readErr),
-			StatusCode: resp.StatusCode,
-		}
-	}
-	msg := strings.TrimSpace(string(body))
-	if len(body) > maxErrorBodyBytes {
-		msg = strings.TrimSpace(string(body[:maxErrorBodyBytes])) + " …(truncated)"
-	}
-	return &httpError{
-		err:        fmt.Errorf("%s: HTTP %d: %s", prefix, resp.StatusCode, msg),
-		StatusCode: resp.StatusCode,
-	}
-}
-
 // cancelOnClose wraps an io.ReadCloser and invokes cancel when Close is
 // called.  This defers context cancellation until after the caller has
 // finished reading the response body, rather than cancelling at the point
@@ -160,7 +124,8 @@ func (c *coreClient) authenticateClient(ctx context.Context) error {
 		requestData.Set("grant_type", "client_credentials")
 		requestData.Set("client_id", c.clientId)
 		requestData.Set("client_secret", c.clientSecret)
-		res, err := c.authenticate(ctx, requestData)
+		// Use WithoutCancel so one caller's context cancellation does not fail all waiters.
+		res, err := c.authenticate(context.WithoutCancel(ctx), requestData)
 		if err != nil {
 			return nil, err
 		}
@@ -187,6 +152,7 @@ func (c *coreClient) authenticate(ctx context.Context, requestData url.Values) (
 	if err != nil {
 		return nil, err
 	}
+	// Close errors are intentionally ignored; the response body is fully consumed or discarded below.
 	defer func() { _ = response.Body.Close() }()
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
 		return nil, httpErrorFromResponse(response, "authentication failed")
@@ -223,6 +189,7 @@ func (c *coreClient) GetJwks(ctx context.Context) (*jose.JSONWebKeySet, error) {
 		if err != nil {
 			return nil, err
 		}
+		// Close errors are intentionally ignored; the response body is fully consumed or discarded below.
 		defer func() { _ = response.Body.Close() }()
 		if response.StatusCode < 200 || response.StatusCode >= 300 {
 			return nil, httpErrorFromResponse(response, "failed to fetch JWKS")
@@ -241,7 +208,11 @@ func (c *coreClient) GetJwks(ctx context.Context) (*jose.JSONWebKeySet, error) {
 	if err != nil {
 		return nil, err
 	}
-	return v.(*jose.JSONWebKeySet), nil
+	jwks, ok := v.(*jose.JSONWebKeySet)
+	if !ok {
+		return nil, errors.New("internal: unexpected JWKS result type")
+	}
+	return jwks, nil
 }
 
 // copyJSONWebKeySet returns a shallow copy of the key set so callers cannot mutate the internal cache (e.g. the Keys slice).
