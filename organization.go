@@ -15,12 +15,8 @@ type CreateOrganizationResponse = organizationsv1.CreateOrganizationResponse
 type UpdateOrganizationResponse = organizationsv1.UpdateOrganizationResponse
 type Link = organizationsv1.Link
 type UpdateOrganization = organizationsv1.UpdateOrganization
-// ListOrganizationOptions controls pagination for ListOrganization.
-// All fields are optional; pass nil to use server defaults.
-type ListOrganizationOptions struct {
-	PageSize   uint32
-	PageToken  string
-}
+type ListOrganizationOptions = organizationsv1.ListOrganizationsRequest
+
 type OrganizationSettings struct {
 	Features []Feature
 }
