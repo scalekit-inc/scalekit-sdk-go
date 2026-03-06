@@ -2,6 +2,7 @@ package scalekit
 
 import (
 	"context"
+	"errors"
 
 	organizationsv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/organizations"
 	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/organizations/organizationsconnect"
@@ -15,6 +16,7 @@ type UpdateOrganizationResponse = organizationsv1.UpdateOrganizationResponse
 type Link = organizationsv1.Link
 type UpdateOrganization = organizationsv1.UpdateOrganization
 type ListOrganizationOptions = organizationsv1.ListOrganizationsRequest
+
 type OrganizationSettings struct {
 	Features []Feature
 }
@@ -57,27 +59,27 @@ func newOrganizationClient(coreClient *coreClient) Organization {
 }
 
 func (o *organization) CreateOrganization(ctx context.Context, name string, options CreateOrganizationOptions) (*CreateOrganizationResponse, error) {
+	req := &organizationsv1.CreateOrganizationRequest{
+		Organization: &organizationsv1.CreateOrganization{
+			DisplayName: name,
+			Metadata:    options.Metadata,
+		},
+	}
+	if options.ExternalId != "" {
+		req.Organization.ExternalId = &options.ExternalId
+	}
 	return newConnectExecuter(
 		o.coreClient,
 		o.client.CreateOrganization,
-		&organizationsv1.CreateOrganizationRequest{
-			Organization: &organizationsv1.CreateOrganization{
-				DisplayName: name,
-				ExternalId:  &options.ExternalId,
-				Metadata:    options.Metadata,
-			},
-		},
+		req,
 	).exec(ctx)
 }
 
-func (o *organization) ListOrganization(ctx context.Context, options *ListOrganizationOptions) (*ListOrganizationsResponse, error) {
+func (o *organization) ListOrganization(ctx context.Context, request *ListOrganizationOptions) (*ListOrganizationsResponse, error) {
 	return newConnectExecuter(
 		o.coreClient,
 		o.client.ListOrganization,
-		&organizationsv1.ListOrganizationsRequest{
-			PageSize:  options.PageSize,
-			PageToken: options.PageToken,
-		},
+		request,
 	).exec(ctx)
 }
 
@@ -156,7 +158,9 @@ func (o *organization) GeneratePortalLink(ctx context.Context, organizationId st
 	if err != nil {
 		return nil, err
 	}
-
+	if resp.Link == nil {
+		return nil, errors.New("generate portal link: response missing link")
+	}
 	return resp.Link, nil
 }
 
@@ -199,6 +203,8 @@ func (o *organization) UpsertUserManagementSettings(ctx context.Context, organiz
 	if err != nil {
 		return nil, err
 	}
-
+	if resp.Settings == nil {
+		return nil, errors.New("upsert user management settings: response missing settings")
+	}
 	return resp.Settings, nil
 }

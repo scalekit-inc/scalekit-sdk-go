@@ -98,21 +98,23 @@ func (p *passwordlessService) SendPasswordlessEmail(ctx context.Context, email s
 
 // VerifyPasswordlessEmail verifies a passwordless authentication
 func (p *passwordlessService) VerifyPasswordlessEmail(ctx context.Context, options *VerifyPasswordlessOptions) (*VerifyPasswordLessResponse, error) {
+	if options == nil || (options.Code == "" && options.LinkToken == "") {
+		return nil, ErrCodeOrLinkTokenRequired
+	}
+
 	request := &authv1.VerifyPasswordLessRequest{}
 
-	if options != nil {
-		if options.Code != "" {
-			request.AuthCredential = &authv1.VerifyPasswordLessRequest_Code{
-				Code: options.Code,
-			}
-		} else if options.LinkToken != "" {
-			request.AuthCredential = &authv1.VerifyPasswordLessRequest_LinkToken{
-				LinkToken: options.LinkToken,
-			}
+	if options.Code != "" {
+		request.AuthCredential = &authv1.VerifyPasswordLessRequest_Code{
+			Code: options.Code,
 		}
-		if options.AuthRequestId != "" {
-			request.AuthRequestId = &options.AuthRequestId
+	} else if options.LinkToken != "" {
+		request.AuthCredential = &authv1.VerifyPasswordLessRequest_LinkToken{
+			LinkToken: options.LinkToken,
 		}
+	}
+	if options.AuthRequestId != "" {
+		request.AuthRequestId = &options.AuthRequestId
 	}
 
 	return newConnectExecuter(

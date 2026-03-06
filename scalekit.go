@@ -26,8 +26,8 @@ const (
 )
 
 var (
-	webhookToleranceInSeconds = 5 * time.Minute
-	webhookSignatureVersion   = "v1"
+	webhookTolerance         = 5 * time.Minute
+	webhookSignatureVersion  = "v1"
 )
 
 type GrantType = string
@@ -304,8 +304,11 @@ func (s *scalekitClient) AuthenticateWithCode(
 	redirectUri string,
 	options AuthenticationOptions,
 ) (*AuthenticationResponse, error) {
-	if code == "" || redirectUri == "" {
-		return nil, errors.New("code and redirect uri is required")
+	if code == "" {
+		return nil, ErrCodeRequired
+	}
+	if redirectUri == "" {
+		return nil, ErrRedirectUriRequired
 	}
 	qs := url.Values{}
 	qs.Add("code", code)
@@ -319,6 +322,9 @@ func (s *scalekitClient) AuthenticateWithCode(
 	authResp, err := s.coreClient.authenticate(ctx, qs)
 	if err != nil {
 		return nil, err
+	}
+	if authResp.IdToken == "" {
+		return nil, ErrAuthenticationResponseMissingIdToken
 	}
 	claims, err := ValidateToken[IdTokenClaims](ctx, authResp.IdToken, s.coreClient.GetJwks)
 	if err != nil {
@@ -339,11 +345,7 @@ func (s *scalekitClient) GetIdpInitiatedLoginClaims(ctx context.Context, idpInit
 }
 
 func (s *scalekitClient) GetAccessTokenClaims(ctx context.Context, accessToken string) (*AccessTokenClaims, error) {
-	at, err := ValidateToken[AccessTokenClaims](ctx, accessToken, s.coreClient.GetJwks)
-	if err != nil {
-		return nil, err
-	}
-	return at, nil
+	return ValidateToken[AccessTokenClaims](ctx, accessToken, s.coreClient.GetJwks)
 }
 
 func (s *scalekitClient) ValidateAccessToken(ctx context.Context, accessToken string) (bool, error) {
@@ -367,15 +369,19 @@ func (s *scalekitClient) VerifyPayloadSignature(
 	headers map[string]string,
 	payload []byte,
 ) (bool, error) {
-	webhookId := headers["webhook-id"]
-	webhookTimestamp := headers["webhook-timestamp"]
-	webhookSignature := headers["webhook-signature"]
+	normalizedHeaders := make(map[string]string, len(headers))
+	for k, v := range headers {
+		normalizedHeaders[strings.ToLower(k)] = v
+	}
+	webhookId := normalizedHeaders["webhook-id"]
+	webhookTimestamp := normalizedHeaders["webhook-timestamp"]
+	webhookSignature := normalizedHeaders["webhook-signature"]
 	if webhookId == "" || webhookTimestamp == "" || webhookSignature == "" {
-		return false, errors.New("Missing required headers")
+		return false, ErrMissingRequiredHeaders
 	}
 	secretParts := strings.Split(secret, "_")
 	if len(secretParts) < 2 {
-		return false, errors.New("Invalid secret")
+		return false, ErrInvalidSecret
 	}
 	secretBytes, err := base64.StdEncoding.DecodeString(secretParts[1])
 	if err != nil {
@@ -387,8 +393,8 @@ func (s *scalekitClient) VerifyPayloadSignature(
 	}
 	data := fmt.Sprintf("%s.%d.%s", webhookId, timestamp.Unix(), payload)
 	computedSignature := computeSignature(secretBytes, data)
-	recievedSignatures := strings.Split(webhookSignature, " ")
-	for _, versionedSignature := range recievedSignatures {
+	receivedSignatures := strings.Split(webhookSignature, " ")
+	for _, versionedSignature := range receivedSignatures {
 		signatureParts := strings.Split(versionedSignature, ",")
 		if len(signatureParts) < 2 {
 			continue
@@ -403,7 +409,7 @@ func (s *scalekitClient) VerifyPayloadSignature(
 		}
 	}
 
-	return false, errors.New("Invalid signature")
+	return false, ErrInvalidSignature
 }
 
 func (s *scalekitClient) VerifyInterceptorPayload(
@@ -421,16 +427,28 @@ func verifyTimestamp(timestampStr string) (*time.Time, error) {
 		return nil, err
 	}
 	timestamp := time.Unix(unixTimestamp, 0)
-	if now.Sub(timestamp) > webhookToleranceInSeconds {
-		return nil, errors.New("Message timestamp too old")
+	if now.Sub(timestamp) > webhookTolerance {
+		return nil, ErrMessageTimestampTooOld
 	}
-	if timestamp.Unix() > now.Add(webhookToleranceInSeconds).Unix() {
-		return nil, errors.New("Message timestamp too new")
+	if timestamp.Unix() > now.Add(webhookTolerance).Unix() {
+		return nil, ErrMessageTimestampTooNew
 	}
 	return &timestamp, nil
 }
 
+// ValidateToken verifies a JWT's signature using keys from jwksFn, unmarshals the claims
+// into T, and checks that the token has a valid, non-expired exp claim.
+// Returns ErrTokenRequired if token is empty, ErrMissingExpClaim if exp is absent,
+// or ErrTokenExpired if it is in the past.
 func ValidateToken[T interface{}](ctx context.Context, token string, jwksFn func(context.Context) (*jose.JSONWebKeySet, error)) (*T, error) {
+	if token == "" {
+		// Join ErrTokenRequired with ErrTokenValidationFailed so callers can rely on either
+		// sentinel when handling empty tokens, preserving backward compatibility.
+		return nil, errors.Join(ErrTokenRequired, ErrTokenValidationFailed)
+	}
+	if jwksFn == nil {
+		return nil, ErrJwksFunctionRequired
+	}
 	var claims T
 	keySet, err := jwksFn(ctx)
 	if err != nil {
@@ -449,23 +467,19 @@ func ValidateToken[T interface{}](ctx context.Context, token string, jwksFn func
 		return nil, err
 	}
 
-	// Check token expiration
-	var rawClaims map[string]interface{}
-	err = json.Unmarshal(jwt, &rawClaims)
-	if err != nil {
+	// Check token expiration. Use a typed struct so json.Unmarshal handles
+	// the numeric conversion directly — no type assertion needed.
+	var expClaims struct {
+		Exp *float64 `json:"exp"`
+	}
+	if err = json.Unmarshal(jwt, &expClaims); err != nil {
 		return nil, err
 	}
-
-	if exp, ok := rawClaims["exp"]; ok {
-		expFloat, ok := exp.(float64)
-		if !ok {
-			return nil, ErrInvalidExpClaimFormat
-		}
-
-		expTime := int64(expFloat)
-		if time.Now().Unix() >= expTime {
-			return nil, ErrTokenExpired
-		}
+	if expClaims.Exp == nil {
+		return nil, ErrMissingExpClaim
+	}
+	if time.Now().Unix() >= int64(*expClaims.Exp) {
+		return nil, ErrTokenExpired
 	}
 
 	return &claims, nil
