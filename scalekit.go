@@ -511,6 +511,9 @@ func (s *scalekitClient) GenerateClientToken(ctx context.Context, clientId strin
 	if err != nil {
 		return "", err
 	}
+	if authResp.AccessToken == "" {
+		return "", fmt.Errorf("empty access_token in authentication response")
+	}
 
 	return authResp.AccessToken, nil
 }
