@@ -28,7 +28,10 @@ func createEnvRole(t *testing.T, ctx context.Context, name string) {
 
 func deleteEnvRole(t *testing.T, ctx context.Context, name string) {
 	t.Helper()
-	_ = client.Role().DeleteRole(ctx, name)
+	err := client.Role().DeleteRole(ctx, name)
+	if err != nil {
+		t.Fatalf("deleteEnvRole: failed to delete role %q: %v", name, err)
+	}
 }
 
 func TestRole_DeleteRoleBase(t *testing.T) {
