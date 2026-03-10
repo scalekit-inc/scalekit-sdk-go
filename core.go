@@ -20,7 +20,7 @@ import (
 const (
 	tokenEndpoint      = "oauth/token"
 	jwksEndpoint       = "keys"
-	sdkVersion         = "Scalekit-Go/2.2.0"
+	sdkVersion         = "Scalekit-Go/2.3.0"
 	defaultHTTPTimeout = 10 * time.Second
 	maxErrorBodyBytes  = 8 * 1024
 )
