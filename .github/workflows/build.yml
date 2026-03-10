@@ -30,10 +30,9 @@ jobs:
           go-version-file: "go.mod"
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v6.5.2
         with:
-          version: latest
-          install-mode: goinstall
+          version: v2.11.3
 
       - name: Run Go vet
         run: go vet ./...
