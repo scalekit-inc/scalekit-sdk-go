@@ -7,18 +7,24 @@ import (
 	"crypto/rsa"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/binary"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/go-jose/go-jose/v4"
 	"github.com/scalekit-inc/scalekit-sdk-go/v2"
+	organizationsv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/organizations"
+	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/organizations/organizationsconnect"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/proto"
 )
 
 func TestAuthenticateWithCode(t *testing.T) {
@@ -403,7 +409,7 @@ func TestVerifyWebhookPayload(t *testing.T) {
 			},
 			payload:       []byte("{}"),
 			expectedValid: false,
-			expectedError: "Missing required headers",
+			expectedError: "missing required headers",
 		},
 		{
 			name:   "invalid secret",
@@ -427,7 +433,7 @@ func TestVerifyWebhookPayload(t *testing.T) {
 			},
 			payload:       []byte("{}"),
 			expectedValid: false,
-			expectedError: "Message timestamp too old",
+			expectedError: "message timestamp too old",
 		},
 	}
 
@@ -1012,4 +1018,249 @@ func TestNewScalekitClientSecretCompatibilityAndWithSecret(t *testing.T) {
 			require.Equal(t, tt.expectedSecret, clientSecrets[0])
 		})
 	}
+}
+
+func TestAuthenticateWithCode_Non2xx(t *testing.T) {
+	tests := []struct {
+		name           string
+		statusCode     int
+		body           string
+		wantErrContain string
+	}{
+		{
+			name:           "401 unauthorized",
+			statusCode:     http.StatusUnauthorized,
+			body:           `{"error":"invalid_client"}`,
+			wantErrContain: "authentication failed: HTTP 401",
+		},
+		{
+			name:           "400 bad request",
+			statusCode:     http.StatusBadRequest,
+			body:           `{"error":"invalid_grant"}`,
+			wantErrContain: "authentication failed: HTTP 400",
+		},
+		{
+			name:           "503 unavailable with empty body",
+			statusCode:     http.StatusServiceUnavailable,
+			body:           "",
+			wantErrContain: "authentication failed: HTTP 503",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(tt.statusCode)
+				_, _ = w.Write([]byte(tt.body))
+			}))
+			defer server.Close()
+
+			client := scalekit.NewScalekitClient(server.URL, "client_id", "client_secret")
+			_, err := client.AuthenticateWithCode(context.Background(), "code", "http://localhost/cb", scalekit.AuthenticationOptions{})
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), tt.wantErrContain)
+			// Non-2xx responses must be extractable as *scalekit.Error with StatusCode set.
+			var sdkErr *scalekit.Error
+			require.True(t, errors.As(err, &sdkErr), "err should be *scalekit.Error for non-2xx")
+			assert.Equal(t, tt.statusCode, sdkErr.StatusCode)
+		})
+	}
+}
+
+func TestValidateAccessToken_JwksError(t *testing.T) {
+	tests := []struct {
+		name           string
+		jwksStatus     int
+		wantErrContain string
+	}{
+		{
+			name:           "JWKS 500 internal server error",
+			jwksStatus:     http.StatusInternalServerError,
+			wantErrContain: "failed to fetch JWKS: HTTP 500",
+		},
+		{
+			name:           "JWKS 403 forbidden",
+			jwksStatus:     http.StatusForbidden,
+			wantErrContain: "failed to fetch JWKS: HTTP 403",
+		},
+	}
+
+	token := "eyJhbGciOiJSUzI1NiIsImtpZCI6InNua18xNzAwMjMzNDIyNzc5MTk3MiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vYWlyZGV2LmxvY2FsaG9zdDo4ODg4Iiwic3ViIjoiY29ubl83NTQxNjU3OTA0MjQ3NDIwNDtzcmluaXZhcy5rYXJyZUBzY2FsZWtpdC5jb20iLCJhdWQiOlsicHJkX3NrY18xNzAwMjMzNDIyNzg1NzUwOCJdLCJleHAiOjE5MDY4MDQ4MzcsImlhdCI6MTc0OTAyMDA3NywibmJmIjoxNzQ5MDIwMDc3LCJjbGllbnRfaWQiOiJwcmRfc2tjXzE3MDAyMzM0MjI3ODU3NTA4IiwianRpIjoidGtuXzc1NDE4NDE0MTAwODA1ODUyIn0.SxlKHr1EFBAvfm3Zm7CliKcSWZ8LUFWx8Cs3_3bf1SVouVvRu-zE2_ghB4iAmarsxErurU0kHDEX-Fpx6euemiWXN3Z-mECB4clmb1PF8RThh7bbHx1zxqp3z_MIcDbO4ZKTXMSRx39JbcWyThQSTbeAo50TEFpIT7RsWhNYrBnhsZNibrfZXWUVDBYB930LZMzhdKPRUXBhA-HuKIjggg2jWEAv2leJ3UPbLVccbKrdq2qSzGaxLpvlPoX6RpcrA2Cbuig4vJ7bCy46M-DUg73NO91arPpl5BOnHHx2Oappk_i2S4cMOGdSyX3s50owX1xRDyELNMEIo-VoQ7rfww"
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(tt.jwksStatus)
+			}))
+			defer server.Close()
+
+			client := scalekit.NewScalekitClient(server.URL, "client_id", "client_secret")
+			_, err := client.ValidateAccessToken(context.Background(), token)
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), tt.wantErrContain)
+			var sdkErr *scalekit.Error
+			require.True(t, errors.As(err, &sdkErr), "JWKS non-2xx should be *scalekit.Error")
+			assert.Equal(t, tt.jwksStatus, sdkErr.StatusCode)
+		})
+	}
+}
+
+func TestSentinelErrors(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+	c := scalekit.NewScalekitClient(server.URL, "client_id", "client_secret")
+	ctx := context.Background()
+
+	tests := []struct {
+		name         string
+		fn           func() error
+		wantSentinel error
+	}{
+		{
+			name:         "ErrTokenRequired on empty ValidateToken",
+			fn:           func() error { _, err := c.Token().ValidateToken(ctx, ""); return err },
+			wantSentinel: scalekit.ErrTokenRequired,
+		},
+		{
+			name:         "ErrTokenRequired on empty InvalidateToken",
+			fn:           func() error { return c.Token().InvalidateToken(ctx, "") },
+			wantSentinel: scalekit.ErrTokenRequired,
+		},
+		{
+			name:         "ErrRefreshTokenRequired on empty refresh token",
+			fn:           func() error { _, err := c.RefreshAccessToken(ctx, ""); return err },
+			wantSentinel: scalekit.ErrRefreshTokenRequired,
+		},
+		{
+			name:         "ErrCodeOrLinkTokenRequired on nil options",
+			fn:           func() error { _, err := c.Passwordless().VerifyPasswordlessEmail(ctx, nil); return err },
+			wantSentinel: scalekit.ErrCodeOrLinkTokenRequired,
+		},
+		{
+			name: "ErrCodeOrLinkTokenRequired on non-nil empty options",
+			fn: func() error {
+				_, err := c.Passwordless().VerifyPasswordlessEmail(ctx, &scalekit.VerifyPasswordlessOptions{})
+				return err
+			},
+			wantSentinel: scalekit.ErrCodeOrLinkTokenRequired,
+		},
+		{
+			name:         "ErrOrganizationIdRequired on CreateToken with empty orgId",
+			fn:           func() error { _, err := c.Token().CreateToken(ctx, "", scalekit.CreateTokenOptions{}); return err },
+			wantSentinel: scalekit.ErrOrganizationIdRequired,
+		},
+		{
+			name: "ErrCodeRequired on AuthenticateWithCode with empty code",
+			fn: func() error {
+				_, err := c.AuthenticateWithCode(ctx, "", "http://localhost/cb", scalekit.AuthenticationOptions{})
+				return err
+			},
+			wantSentinel: scalekit.ErrCodeRequired,
+		},
+		{
+			name: "ErrRedirectUriRequired on AuthenticateWithCode with empty redirectUri",
+			fn: func() error {
+				_, err := c.AuthenticateWithCode(ctx, "code", "", scalekit.AuthenticationOptions{})
+				return err
+			},
+			wantSentinel: scalekit.ErrRedirectUriRequired,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.fn()
+			require.Error(t, err)
+			assert.ErrorIs(t, err, tt.wantSentinel)
+		})
+	}
+}
+
+func TestValidateToken_EmptyToken(t *testing.T) {
+	noopJwks := func(_ context.Context) (*jose.JSONWebKeySet, error) {
+		return &jose.JSONWebKeySet{}, nil
+	}
+	_, err := scalekit.ValidateToken[map[string]interface{}](context.Background(), "", noopJwks)
+	require.Error(t, err)
+	assert.ErrorIs(t, err, scalekit.ErrTokenRequired)
+	// Backward compatibility: empty token also matches ErrTokenValidationFailed (joined by SDK).
+	assert.ErrorIs(t, err, scalekit.ErrTokenValidationFailed)
+}
+
+func TestValidateToken_MissingExpClaim(t *testing.T) {
+	privKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	require.NoError(t, err)
+
+	kid := "test-key"
+	signer, err := jose.NewSigner(
+		jose.SigningKey{Algorithm: jose.RS256, Key: privKey},
+		(&jose.SignerOptions{}).WithHeader("kid", kid),
+	)
+	require.NoError(t, err)
+
+	// JWT with no exp field
+	payload, _ := json.Marshal(map[string]interface{}{"sub": "user123", "iss": "test"})
+	jws, err := signer.Sign(payload)
+	require.NoError(t, err)
+	token, err := jws.CompactSerialize()
+	require.NoError(t, err)
+
+	jwksFn := func(_ context.Context) (*jose.JSONWebKeySet, error) {
+		return &jose.JSONWebKeySet{Keys: []jose.JSONWebKey{
+			{Key: &privKey.PublicKey, KeyID: kid, Algorithm: string(jose.RS256)},
+		}}, nil
+	}
+
+	_, err = scalekit.ValidateToken[map[string]interface{}](context.Background(), token, jwksFn)
+	require.Error(t, err)
+	assert.ErrorIs(t, err, scalekit.ErrMissingExpClaim)
+	// Backward compat: ErrInvalidExpClaimFormat is an alias for ErrMissingExpClaim
+	assert.ErrorIs(t, err, scalekit.ErrInvalidExpClaimFormat) //nolint:staticcheck // testing deprecated alias
+}
+
+// TestConnectRetryOn401 verifies that a 401 on a Connect RPC triggers re-auth and one retry.
+// The success response uses manual gRPC wire framing; this is fragile against Connect protocol
+// changes. For stability, consider using connect/connecttest or a real connectrpc handler.
+func TestConnectRetryOn401(t *testing.T) {
+	listOrganizationPath := organizationsconnect.OrganizationServiceListOrganizationProcedure
+	var rpcCallCount atomic.Int32
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/oauth/token" && r.Method == http.MethodPost:
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"access_token":"new_token","expires_in":3600}`))
+		case r.URL.Path == listOrganizationPath:
+			n := rpcCallCount.Add(1)
+			if n == 1 {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			// Second call: success with empty list (manual gRPC wire: 5-byte prefix + marshaled message).
+			// Connect expects Grpc-Status as a trailer (after the body); declare it and set it after writing.
+			msg, err := proto.Marshal(&organizationsv1.ListOrganizationsResponse{})
+			require.NoError(t, err)
+			w.Header().Set("Content-Type", "application/grpc")
+			w.Header().Set("Trailer", "Grpc-Status")
+			w.WriteHeader(http.StatusOK)
+			prefix := make([]byte, 5)
+			prefix[0] = 0 // no compression
+			binary.BigEndian.PutUint32(prefix[1:5], uint32(len(msg)))
+			_, _ = w.Write(prefix)
+			_, _ = w.Write(msg)
+			w.Header().Set("Grpc-Status", "0")
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer server.Close()
+
+	client := scalekit.NewScalekitClient(server.URL, "client_id", "client_secret")
+	ctx := context.Background()
+	resp, err := client.Organization().ListOrganization(ctx, nil)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	assert.Equal(t, int32(2), rpcCallCount.Load(), "ListOrganization should be called twice (401 then retry)")
 }

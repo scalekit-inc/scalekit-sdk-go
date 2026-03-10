@@ -5,10 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"connectrpc.com/connect"
-	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/errdetails"
 )
 
 type fn[TRequest interface{}, TResponse interface{}] func(
@@ -19,8 +17,8 @@ type fn[TRequest interface{}, TResponse interface{}] func(
 type connectExecuter[TRequest interface{}, TResponse interface{}] struct {
 	coreClient *coreClient
 	data       *TRequest
-	retries    int
-	maxRetry   int
+	retries    int // retries for unauthenticated errors; compared against maxRetries.
+	maxRetries int
 	fn         fn[TRequest, TResponse]
 }
 
@@ -46,15 +44,14 @@ func newHeaderInterceptor(c *coreClient) connect.UnaryInterceptorFunc {
 			ctx context.Context,
 			req connect.AnyRequest,
 		) (connect.AnyResponse, error) {
+			ctx, cancel := withDefaultTimeout(ctx)
+			defer cancel()
 			if req.Spec().IsClient {
 				req.Header().Set("user-agent", c.userAgent)
 				req.Header().Set("x-sdk-version", c.sdkVersion)
 				req.Header().Set("x-api-version", c.apiVersion)
-				if c.accessToken != nil {
-					req.Header().Set(
-						"Authorization",
-						fmt.Sprintf("Bearer %s", *c.accessToken),
-					)
+				if token := c.accessToken.Load(); token != nil {
+					req.Header().Set("Authorization", fmt.Sprintf("Bearer %s", *token))
 				}
 			}
 			return next(ctx, req)
@@ -70,11 +67,24 @@ func newConnectExecuter[TRequest interface{}, TResponse interface{}](
 	return &connectExecuter[TRequest, TResponse]{
 		coreClient: coreClient,
 		data:       data,
-		maxRetry:   1,
+		maxRetries:   1,
 		fn:         fn,
 	}
 }
 
+// isUnauthenticated reports whether err indicates an authentication failure
+// (HTTP 401 or Connect CodeUnauthenticated).
+func isUnauthenticated(err error) bool {
+	var httpErr *Error
+	if errors.As(err, &httpErr) && httpErr.StatusCode == http.StatusUnauthorized {
+		return true
+	}
+	var connectErr *connect.Error
+	return errors.As(err, &connectErr) && connectErr.Code() == connect.CodeUnauthenticated
+}
+
+// exec runs the Connect RPC. Errors (including validation/CodeInvalidArgument) are returned
+// as-is; use errors.As(err, &connectErr) with *connect.Error to inspect Code() and Details().
 func (r *connectExecuter[TRequest, TResponse]) exec(ctx context.Context) (*TResponse, error) {
 	if r.coreClient.clientSecret == "" {
 		return nil, ErrClientSecretRequired
@@ -85,51 +95,19 @@ func (r *connectExecuter[TRequest, TResponse]) exec(ctx context.Context) (*TResp
 	}
 	data, err := r.fn(ctx, connect.NewRequest(r.data))
 	if err != nil {
-		if r.maxRetry-r.retries > 0 {
-			var isUnAuthenticatedError bool
-			if httpErr, ok := err.(*httpError); ok {
-				if httpErr.StatusCode != http.StatusUnauthorized {
-					isUnAuthenticatedError = true
-				}
+		if r.maxRetries-r.retries > 0 && isUnauthenticated(err) {
+			if authErr := r.coreClient.authenticateClient(ctx); authErr != nil {
+				return nil, authErr
 			}
-			if connectErr, ok := err.(*connect.Error); ok {
-				if connectErr.Code() == connect.CodeUnauthenticated {
-					isUnAuthenticatedError = true
-				}
-				if connectErr.Code() == connect.CodeInvalidArgument {
-					messages := []string{connectErr.Message()}
-					for _, detail := range connectErr.Details() {
-						msg, err := detail.Value()
-						if err != nil {
-							continue
-						}
-						if info, ok := msg.(*errdetails.ErrorInfo); ok {
-							if info.ValidationErrorInfo != nil {
-								for _, field := range info.ValidationErrorInfo.FieldViolations {
-									messages = append(messages, fmt.Sprintf("%s:  %s", field.Field, field.Description))
-								}
-							}
-						}
-					}
-
-					return nil, errors.New(strings.Join(messages, "\n"))
-				}
-			}
-
-			if isUnAuthenticatedError {
-				_ = r.coreClient.authenticateClient(ctx)
-				r.retries++
-				return r.exec(ctx)
-			}
+			r.retries++
+			return r.exec(ctx)
 		}
-
 		return nil, err
 	}
-
 	return data.Msg, nil
 }
 
 func (r *connectExecuter[TRequest, TResponse]) WithMaxRetry(retry int) *connectExecuter[TRequest, TResponse] {
-	r.maxRetry = retry
+	r.maxRetries = retry
 	return r
 }
