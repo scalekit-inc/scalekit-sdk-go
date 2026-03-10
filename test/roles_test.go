@@ -30,7 +30,8 @@ func deleteEnvRole(t *testing.T, ctx context.Context, name string) {
 	t.Helper()
 	err := client.Role().DeleteRole(ctx, name)
 	if err != nil {
-		t.Fatalf("deleteEnvRole: failed to delete role %q: %v", name, err)
+		t.Errorf("deleteEnvRole: failed to delete role %q: %v", name, err)
+		return
 	}
 }
 
