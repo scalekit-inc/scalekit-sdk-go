@@ -306,7 +306,8 @@ func TestValidateTokenViaInterface(t *testing.T) {
 	defer server.Close()
 
 	// Use the interface type — this is the consumer scenario described in SK-2598
-	var c scalekit.Scalekit = scalekit.NewScalekitClient(server.URL, "client_id", "client_secret")
+	var c scalekit.Scalekit
+	c = scalekit.NewScalekitClient(server.URL, "client_id", "client_secret")
 
 	// Build a signed token using our test key
 	now := time.Now()
