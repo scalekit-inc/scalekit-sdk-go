@@ -39,6 +39,9 @@ const (
 	// UserServiceGetCurrentUserProcedure is the fully-qualified name of the UserService's
 	// GetCurrentUser RPC.
 	UserServiceGetCurrentUserProcedure = "/scalekit.v1.users.UserService/GetCurrentUser"
+	// UserServiceGetSupportHashProcedure is the fully-qualified name of the UserService's
+	// GetSupportHash RPC.
+	UserServiceGetSupportHashProcedure = "/scalekit.v1.users.UserService/GetSupportHash"
 	// UserServiceListUsersProcedure is the fully-qualified name of the UserService's ListUsers RPC.
 	UserServiceListUsersProcedure = "/scalekit.v1.users.UserService/ListUsers"
 	// UserServiceSearchUsersProcedure is the fully-qualified name of the UserService's SearchUsers RPC.
@@ -86,7 +89,8 @@ const (
 type UserServiceClient interface {
 	// Users
 	GetUser(context.Context, *connect.Request[users.GetUserRequest]) (*connect.Response[users.GetUserResponse], error)
-	GetCurrentUser(context.Context, *connect.Request[users.GetCurrentUserRequest]) (*connect.Response[users.GetUserResponse], error)
+	GetCurrentUser(context.Context, *connect.Request[users.GetCurrentUserRequest]) (*connect.Response[users.GetCurrentUserResponse], error)
+	GetSupportHash(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[users.GetSupportHashResponse], error)
 	ListUsers(context.Context, *connect.Request[users.ListUsersRequest]) (*connect.Response[users.ListUsersResponse], error)
 	SearchUsers(context.Context, *connect.Request[users.SearchUsersRequest]) (*connect.Response[users.SearchUsersResponse], error)
 	SearchOrganizationUsers(context.Context, *connect.Request[users.SearchOrganizationUsersRequest]) (*connect.Response[users.SearchOrganizationUsersResponse], error)
@@ -125,10 +129,16 @@ func NewUserServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(userServiceMethods.ByName("GetUser")),
 			connect.WithClientOptions(opts...),
 		),
-		getCurrentUser: connect.NewClient[users.GetCurrentUserRequest, users.GetUserResponse](
+		getCurrentUser: connect.NewClient[users.GetCurrentUserRequest, users.GetCurrentUserResponse](
 			httpClient,
 			baseURL+UserServiceGetCurrentUserProcedure,
 			connect.WithSchema(userServiceMethods.ByName("GetCurrentUser")),
+			connect.WithClientOptions(opts...),
+		),
+		getSupportHash: connect.NewClient[emptypb.Empty, users.GetSupportHashResponse](
+			httpClient,
+			baseURL+UserServiceGetSupportHashProcedure,
+			connect.WithSchema(userServiceMethods.ByName("GetSupportHash")),
 			connect.WithClientOptions(opts...),
 		),
 		listUsers: connect.NewClient[users.ListUsersRequest, users.ListUsersResponse](
@@ -227,7 +237,8 @@ func NewUserServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 // userServiceClient implements UserServiceClient.
 type userServiceClient struct {
 	getUser                 *connect.Client[users.GetUserRequest, users.GetUserResponse]
-	getCurrentUser          *connect.Client[users.GetCurrentUserRequest, users.GetUserResponse]
+	getCurrentUser          *connect.Client[users.GetCurrentUserRequest, users.GetCurrentUserResponse]
+	getSupportHash          *connect.Client[emptypb.Empty, users.GetSupportHashResponse]
 	listUsers               *connect.Client[users.ListUsersRequest, users.ListUsersResponse]
 	searchUsers             *connect.Client[users.SearchUsersRequest, users.SearchUsersResponse]
 	searchOrganizationUsers *connect.Client[users.SearchOrganizationUsersRequest, users.SearchOrganizationUsersResponse]
@@ -251,8 +262,13 @@ func (c *userServiceClient) GetUser(ctx context.Context, req *connect.Request[us
 }
 
 // GetCurrentUser calls scalekit.v1.users.UserService.GetCurrentUser.
-func (c *userServiceClient) GetCurrentUser(ctx context.Context, req *connect.Request[users.GetCurrentUserRequest]) (*connect.Response[users.GetUserResponse], error) {
+func (c *userServiceClient) GetCurrentUser(ctx context.Context, req *connect.Request[users.GetCurrentUserRequest]) (*connect.Response[users.GetCurrentUserResponse], error) {
 	return c.getCurrentUser.CallUnary(ctx, req)
+}
+
+// GetSupportHash calls scalekit.v1.users.UserService.GetSupportHash.
+func (c *userServiceClient) GetSupportHash(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[users.GetSupportHashResponse], error) {
+	return c.getSupportHash.CallUnary(ctx, req)
 }
 
 // ListUsers calls scalekit.v1.users.UserService.ListUsers.
@@ -334,7 +350,8 @@ func (c *userServiceClient) ListUserPermissions(ctx context.Context, req *connec
 type UserServiceHandler interface {
 	// Users
 	GetUser(context.Context, *connect.Request[users.GetUserRequest]) (*connect.Response[users.GetUserResponse], error)
-	GetCurrentUser(context.Context, *connect.Request[users.GetCurrentUserRequest]) (*connect.Response[users.GetUserResponse], error)
+	GetCurrentUser(context.Context, *connect.Request[users.GetCurrentUserRequest]) (*connect.Response[users.GetCurrentUserResponse], error)
+	GetSupportHash(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[users.GetSupportHashResponse], error)
 	ListUsers(context.Context, *connect.Request[users.ListUsersRequest]) (*connect.Response[users.ListUsersResponse], error)
 	SearchUsers(context.Context, *connect.Request[users.SearchUsersRequest]) (*connect.Response[users.SearchUsersResponse], error)
 	SearchOrganizationUsers(context.Context, *connect.Request[users.SearchOrganizationUsersRequest]) (*connect.Response[users.SearchOrganizationUsersResponse], error)
@@ -373,6 +390,12 @@ func NewUserServiceHandler(svc UserServiceHandler, opts ...connect.HandlerOption
 		UserServiceGetCurrentUserProcedure,
 		svc.GetCurrentUser,
 		connect.WithSchema(userServiceMethods.ByName("GetCurrentUser")),
+		connect.WithHandlerOptions(opts...),
+	)
+	userServiceGetSupportHashHandler := connect.NewUnaryHandler(
+		UserServiceGetSupportHashProcedure,
+		svc.GetSupportHash,
+		connect.WithSchema(userServiceMethods.ByName("GetSupportHash")),
 		connect.WithHandlerOptions(opts...),
 	)
 	userServiceListUsersHandler := connect.NewUnaryHandler(
@@ -471,6 +494,8 @@ func NewUserServiceHandler(svc UserServiceHandler, opts ...connect.HandlerOption
 			userServiceGetUserHandler.ServeHTTP(w, r)
 		case UserServiceGetCurrentUserProcedure:
 			userServiceGetCurrentUserHandler.ServeHTTP(w, r)
+		case UserServiceGetSupportHashProcedure:
+			userServiceGetSupportHashHandler.ServeHTTP(w, r)
 		case UserServiceListUsersProcedure:
 			userServiceListUsersHandler.ServeHTTP(w, r)
 		case UserServiceSearchUsersProcedure:
@@ -514,8 +539,12 @@ func (UnimplementedUserServiceHandler) GetUser(context.Context, *connect.Request
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.users.UserService.GetUser is not implemented"))
 }
 
-func (UnimplementedUserServiceHandler) GetCurrentUser(context.Context, *connect.Request[users.GetCurrentUserRequest]) (*connect.Response[users.GetUserResponse], error) {
+func (UnimplementedUserServiceHandler) GetCurrentUser(context.Context, *connect.Request[users.GetCurrentUserRequest]) (*connect.Response[users.GetCurrentUserResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.users.UserService.GetCurrentUser is not implemented"))
+}
+
+func (UnimplementedUserServiceHandler) GetSupportHash(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[users.GetSupportHashResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.users.UserService.GetSupportHash is not implemented"))
 }
 
 func (UnimplementedUserServiceHandler) ListUsers(context.Context, *connect.Request[users.ListUsersRequest]) (*connect.Response[users.ListUsersResponse], error) {

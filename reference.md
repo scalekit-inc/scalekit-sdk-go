@@ -1099,6 +1099,7 @@ Retrieves a paginated list of organizations in your environment.
 <dd>
 
 ```go
+// Paginate through all organizations
 orgs, err := client.Organization().ListOrganization(ctx, &scalekit.ListOrganizationOptions{
   PageSize:  10,
   PageToken: "",
@@ -1106,10 +1107,12 @@ orgs, err := client.Organization().ListOrganization(ctx, &scalekit.ListOrganizat
 if err != nil {
   // handle
 }
-
 for _, org := range orgs.Organizations {
   _ = org.Id
 }
+
+// Use server defaults
+orgs, err = client.Organization().ListOrganization(ctx, nil)
 ```
 </dd>
 </dl>
@@ -1132,9 +1135,9 @@ for _, org := range orgs.Organizations {
 <dl>
 <dd>
 
-**options:** `*ListOrganizationOptions` (alias of `organizationsv1.ListOrganizationsRequest`)
-- `PageSize uint32`
-- `PageToken string`
+**options:** `*ListOrganizationOptions` — all fields optional; pass `nil` to use server defaults.
+- `PageSize uint32` — number of results per page (0 = server default)
+- `PageToken string` — cursor from a previous response's `NextPageToken`
 
 </dd>
 </dl>

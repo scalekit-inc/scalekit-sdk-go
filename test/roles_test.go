@@ -54,4 +54,9 @@ func TestRole_DeleteRoleBase(t *testing.T) {
 	// Delete the base relationship from the child role
 	err = client.Role().DeleteRoleBase(ctx, childName)
 	assert.NoError(t, err)
+
+	// Verify the inheritance relationship is actually removed
+	updated, err := client.Role().GetRole(ctx, childName)
+	require.NoError(t, err)
+	assert.Nil(t, updated.GetRole().Extends, "expected Extends to be nil after DeleteRoleBase")
 }

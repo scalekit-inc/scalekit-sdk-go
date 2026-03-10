@@ -2,6 +2,7 @@ package test
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/scalekit-inc/scalekit-sdk-go/v2"
@@ -80,12 +81,33 @@ func TestOrganization_EndToEndIntegration(t *testing.T) {
 	require.NotNil(t, organizationsList)
 }
 
-func TestOrganization_CreateOrganization_InvalidExternalID(t *testing.T) {
+func TestOrganization_ListOrganization_NilOptions(t *testing.T) {
 	ctx := context.Background()
-	_, err := client.Organization().CreateOrganization(ctx, "Exception Test", scalekit.CreateOrganizationOptions{
-		ExternalId: "123",
+	// nil options must not panic and must return a valid (possibly empty) list.
+	orgs, err := client.Organization().ListOrganization(ctx, nil)
+	require.NoError(t, err)
+	require.NotNil(t, orgs)
+}
+
+func TestOrganization_CreateOrganization_DuplicateExternalID(t *testing.T) {
+	ctx := context.Background()
+	externalId := UniqueSuffix()
+
+	first, err := client.Organization().CreateOrganization(ctx, TestOrgName, scalekit.CreateOrganizationOptions{
+		ExternalId: externalId,
 	})
-	assert.Error(t, err)
+	require.NoError(t, err)
+	require.NotNil(t, first)
+	require.NotNil(t, first.GetOrganization())
+	defer DeleteTestOrganization(t, ctx, first.GetOrganization().GetId())
+
+	_, err = client.Organization().CreateOrganization(ctx, "Duplicate Org", scalekit.CreateOrganizationOptions{
+		ExternalId: externalId,
+	})
+	require.Error(t, err)
+	errMsg := strings.ToLower(err.Error())
+	assert.True(t, strings.Contains(errMsg, "external") || strings.Contains(errMsg, "duplicate") || strings.Contains(errMsg, "already exists"),
+		"error message should mention external/duplicate/already exists, got: %s", err.Error())
 }
 
 func TestOrganization_UpdateOrganizationSettings(t *testing.T) {
