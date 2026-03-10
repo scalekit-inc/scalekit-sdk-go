@@ -12,6 +12,7 @@ type CreateUserAndMembershipResponse = usersv1.CreateUserAndMembershipResponse
 type UpdateUserResponse = usersv1.UpdateUserResponse
 type GetUserResponse = usersv1.GetUserResponse
 type ListOrganizationUsersResponse = usersv1.ListOrganizationUsersResponse
+type ListUsersResponse = usersv1.ListUsersResponse
 type CreateMembershipResponse = usersv1.CreateMembershipResponse
 type UpdateMembershipResponse = usersv1.UpdateMembershipResponse
 
@@ -25,6 +26,7 @@ type UserService interface {
 	CreateUserAndMembership(ctx context.Context, organizationId string, user *usersv1.CreateUser, sendInvitationEmail bool) (*CreateUserAndMembershipResponse, error)
 	UpdateUser(ctx context.Context, userId string, updateUser *usersv1.UpdateUser) (*UpdateUserResponse, error)
 	GetUser(ctx context.Context, userId string) (*GetUserResponse, error)
+	ListUsers(ctx context.Context, options *ListUsersOptions) (*ListUsersResponse, error)
 	ListOrganizationUsers(ctx context.Context, organizationId string, options *ListUsersOptions) (*ListOrganizationUsersResponse, error)
 	DeleteUser(ctx context.Context, userId string) error
 	CreateMembership(ctx context.Context, organizationId string, userId string, membership *usersv1.CreateMembership, sendInvitationEmail bool) (*CreateMembershipResponse, error)
@@ -81,6 +83,22 @@ func (u *userService) GetUser(ctx context.Context, userId string) (*GetUserRespo
 	return newConnectExecuter(
 		u.coreClient,
 		u.client.GetUser,
+		request,
+	).exec(ctx)
+}
+
+// ListUsers retrieves all users across the environment with optional pagination.
+// Pass nil options to use server defaults.
+func (u *userService) ListUsers(ctx context.Context, options *ListUsersOptions) (*ListUsersResponse, error) {
+	request := &usersv1.ListUsersRequest{}
+	if options != nil {
+		request.PageSize = options.PageSize
+		request.PageToken = options.PageToken
+	}
+
+	return newConnectExecuter(
+		u.coreClient,
+		u.client.ListUsers,
 		request,
 	).exec(ctx)
 }
@@ -146,7 +164,9 @@ func (u *userService) UpdateMembership(ctx context.Context, organizationId strin
 	).exec(ctx)
 }
 
-// DeleteMembership deletes a user's membership from an organization
+// DeleteMembership deletes a user's membership from an organization.
+// cascade, when true, also removes the user from any sub-organizations or nested groups
+// within the organization. Pass false to remove only the direct membership.
 func (u *userService) DeleteMembership(ctx context.Context, organizationId string, userId string, cascade bool) error {
 	request := &usersv1.DeleteMembershipRequest{
 		OrganizationId: organizationId,

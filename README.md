@@ -81,9 +81,9 @@ Before integrating the Scalekit Go SDK, ensure your development environment meet
 
 | Component | Version |
 | --------- | ------- |
-| Go        | 1.24+   |
+| Go        | 1.25.8+ |
 
-> **Note:** Go 1.24+ provides the essential features required by this SDK. For optimal performance and security, consider using the latest stable release.
+> **Note:** Go 1.25.8+ is required. This minimum was raised from 1.24 to incorporate security fixes for stdlib vulnerabilities (GO-2026-4601, GO-2026-4602, GO-2026-4603) in `net/url`, `os`, and `html/template`.
 
 
 ## Examples - SSO with Go HTTP Server

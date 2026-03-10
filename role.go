@@ -28,6 +28,7 @@ type RoleService interface {
 	ListRoles(ctx context.Context) (*ListRolesResponse, error)
 	UpdateRole(ctx context.Context, roleName string, role *rolesv1.UpdateRole) (*UpdateRoleResponse, error)
 	DeleteRole(ctx context.Context, roleName string, reassignRoleName ...string) error
+	DeleteRoleBase(ctx context.Context, roleName string) error
 	GetRoleUsersCount(ctx context.Context, roleName string) (*GetRoleUsersCountResponse, error)
 
 	// Organization-level role management
@@ -110,6 +111,18 @@ func (r *roleService) DeleteRole(ctx context.Context, roleName string, reassignR
 		r.coreClient,
 		r.client.DeleteRole,
 		req,
+	).exec(ctx)
+	return err
+}
+
+// DeleteRoleBase deletes the base relationship for an environment-level role
+func (r *roleService) DeleteRoleBase(ctx context.Context, roleName string) error {
+	_, err := newConnectExecuter(
+		r.coreClient,
+		r.client.DeleteRoleBase,
+		&rolesv1.DeleteRoleBaseRequest{
+			RoleName: roleName,
+		},
 	).exec(ctx)
 	return err
 }
