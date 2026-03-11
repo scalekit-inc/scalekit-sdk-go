@@ -55,6 +55,12 @@ type Scalekit interface {
 	VerifyInterceptorPayload(secret string, headers map[string]string, payload []byte) (bool, error)
 	RefreshAccessToken(ctx context.Context, refreshToken string) (*TokenResponse, error)
 	GetLogoutUrl(options LogoutUrlOptions) (*url.URL, error)
+	GenerateClientToken(ctx context.Context, clientId string, clientSecret string) (string, error)
+	GetClientAccessToken(ctx context.Context) (string, error)
+	// ValidateToken validates the token signature and expiry, then returns all
+	// claims as a Claims map (map[string]interface{}). For strongly-typed claim
+	// structs use the package-level generic ValidateToken[T] function directly.
+	ValidateToken(ctx context.Context, token string) (Claims, error)
 	GetAccessTokenClaims(ctx context.Context, accessToken string) (*AccessTokenClaims, error)
 	GeneratePKCEConfiguration(options PKCEOptions) (*PKCEConfiguration, error)
 	WithSecret(clientSecret string) Scalekit
@@ -597,6 +603,35 @@ func (s *scalekitClient) RefreshAccessToken(ctx context.Context, refreshToken st
 		ExpiresIn:    authResp.ExpiresIn,
 		IdToken:      authResp.IdToken,
 	}, nil
+}
+
+func (s *scalekitClient) GenerateClientToken(ctx context.Context, clientId string, clientSecret string) (string, error) {
+	qs := url.Values{}
+	qs.Add("grant_type", GrantTypeClientCredentials)
+	qs.Add("client_id", clientId)
+	qs.Add("client_secret", clientSecret)
+
+	authResp, err := s.coreClient.authenticate(ctx, qs)
+	if err != nil {
+		return "", err
+	}
+	if authResp.AccessToken == "" {
+		return "", fmt.Errorf("empty access_token in authentication response")
+	}
+
+	return authResp.AccessToken, nil
+}
+
+func (s *scalekitClient) GetClientAccessToken(ctx context.Context) (string, error) {
+	return s.GenerateClientToken(ctx, s.coreClient.clientId, s.coreClient.clientSecret)
+}
+
+func (s *scalekitClient) ValidateToken(ctx context.Context, token string) (Claims, error) {
+	claims, err := ValidateToken[Claims](ctx, token, s.coreClient.GetJwks)
+	if err != nil {
+		return nil, err
+	}
+	return *claims, nil
 }
 
 func (s *scalekitClient) GetLogoutUrl(options LogoutUrlOptions) (*url.URL, error) {

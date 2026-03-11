@@ -452,6 +452,138 @@ func TestVerifyWebhookPayload(t *testing.T) {
 	}
 }
 
+// TestValidateTokenViaInterface verifies that ValidateToken is callable directly
+// through the Scalekit interface type, as described in SK-2598.
+func TestValidateTokenViaInterface(t *testing.T) {
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	require.NoError(t, err)
+
+	keyID := "test-kid"
+	signer, err := jose.NewSigner(
+		jose.SigningKey{Algorithm: jose.RS256, Key: privateKey},
+		(&jose.SignerOptions{}).WithHeader("kid", keyID),
+	)
+	require.NoError(t, err)
+
+	jwk := jose.JSONWebKey{
+		Key:       privateKey.Public(),
+		KeyID:     keyID,
+		Algorithm: string(jose.RS256),
+		Use:       "sig",
+	}
+	keySet := &jose.JSONWebKeySet{Keys: []jose.JSONWebKey{jwk}}
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/keys" {
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(keySet)
+		}
+	}))
+	defer server.Close()
+
+	// NewScalekitClient returns the Scalekit interface directly (SK-2598)
+	c := scalekit.NewScalekitClient(server.URL, "client_id", "client_secret")
+
+	// Build a signed token using our test key
+	now := time.Now()
+	rawClaims := map[string]interface{}{
+		"sub": "usr_test123",
+		"iss": server.URL,
+		"exp": now.Add(time.Hour).Unix(),
+		"iat": now.Unix(),
+	}
+	claimsBytes, _ := json.Marshal(rawClaims)
+	signed, err := signer.Sign(claimsBytes)
+	require.NoError(t, err)
+	token, err := signed.CompactSerialize()
+	require.NoError(t, err)
+
+	// Callable directly through the interface — no package-level function required
+	claims, err := c.ValidateToken(context.Background(), token)
+	require.NoError(t, err)
+	require.NotNil(t, claims)
+	assert.Equal(t, "usr_test123", claims["sub"])
+}
+
+func TestGenerateClientToken(t *testing.T) {
+	tests := []struct {
+		name         string
+		clientId     string
+		clientSecret string
+		mockFn       func(w http.ResponseWriter, r *http.Request)
+		assertFn     func(t *testing.T, token string, err error)
+	}{
+		{
+			name:         "successful token generation",
+			clientId:     "test_client_id",
+			clientSecret: "test_client_secret",
+			mockFn: func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == "/oauth/token" {
+					_ = r.ParseForm()
+					assert.Equal(t, "client_credentials", r.FormValue("grant_type"))
+					assert.Equal(t, "test_client_id", r.FormValue("client_id"))
+					assert.Equal(t, "test_client_secret", r.FormValue("client_secret"))
+					w.Header().Set("Content-Type", "application/json")
+					_, _ = w.Write([]byte(`{"access_token":"mock_token_123","expires_in":3600}`))
+				}
+			},
+			assertFn: func(t *testing.T, token string, err error) {
+				require.NoError(t, err)
+				assert.Equal(t, "mock_token_123", token)
+			},
+		},
+		{
+			// authenticate() does not inspect HTTP status codes; it errors only on
+			// network failure or JSON decode failure. Return malformed JSON so the
+			// decode step fails and a real error is propagated to the caller.
+			name:         "server error",
+			clientId:     "bad_id",
+			clientSecret: "bad_secret",
+			mockFn: func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == "/oauth/token" {
+					w.WriteHeader(http.StatusUnauthorized)
+					_, _ = w.Write([]byte(`not valid json`))
+				}
+			},
+			assertFn: func(t *testing.T, token string, err error) {
+				assert.Error(t, err)
+				assert.Empty(t, token)
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(tt.mockFn))
+			defer server.Close()
+
+			c := scalekit.NewScalekitClient(server.URL, "stored_id", "stored_secret")
+			token, err := c.GenerateClientToken(context.Background(), tt.clientId, tt.clientSecret)
+			tt.assertFn(t, token, err)
+		})
+	}
+}
+
+func TestGetClientAccessToken(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/oauth/token" {
+			_ = r.ParseForm()
+			// GetClientAccessToken should use the stored credentials
+			assert.Equal(t, "client_credentials", r.FormValue("grant_type"))
+			assert.Equal(t, "stored_id", r.FormValue("client_id"))
+			assert.Equal(t, "stored_secret", r.FormValue("client_secret"))
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"access_token":"stored_cred_token","expires_in":3600}`))
+		}
+	}))
+	defer server.Close()
+
+	c := scalekit.NewScalekitClient(server.URL, "stored_id", "stored_secret")
+	token, err := c.GetClientAccessToken(context.Background())
+	require.NoError(t, err)
+	assert.Equal(t, "stored_cred_token", token)
+}
+
 func TestGetAuthorizationUrl(t *testing.T) {
 	type testCase struct {
 		name        string

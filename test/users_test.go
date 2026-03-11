@@ -13,6 +13,30 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestUser_ListUsers(t *testing.T) {
+	ctx := context.Background()
+
+	// No options — server defaults
+	resp, err := client.User().ListUsers(ctx, nil)
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+
+	// With page size
+	resp, err = client.User().ListUsers(ctx, &scalekit.ListUsersOptions{PageSize: 10})
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+
+	// Paginate with next page token if available
+	if resp.GetNextPageToken() != "" {
+		next, err := client.User().ListUsers(ctx, &scalekit.ListUsersOptions{
+			PageToken: resp.GetNextPageToken(),
+			PageSize:  10,
+		})
+		assert.NoError(t, err)
+		assert.NotNil(t, next)
+	}
+}
+
 func TestUser_ListOrganizationUsers(t *testing.T) {
 	ctx := context.Background()
 	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())

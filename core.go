@@ -47,7 +47,7 @@ type coreClient struct {
 	accessToken atomic.Pointer[string]
 	authGroup   singleflight.Group
 
-	jwksGroup     singleflight.Group
+	jwksGroup    singleflight.Group
 	jsonWebKeySet atomic.Pointer[jose.JSONWebKeySet]
 
 	httpClient *http.Client
@@ -99,7 +99,7 @@ func (h *headerInterceptor) RoundTrip(r *http.Request) (*http.Response, error) {
 
 func newCoreClient(envUrl, clientId, clientSecret string) *coreClient {
 	sdkVersion := sdkVersion
-	apiVersion := "20260304"
+	apiVersion := "20260310"
 	client := &coreClient{
 		sdkVersion:   sdkVersion,
 		apiVersion:   apiVersion,
