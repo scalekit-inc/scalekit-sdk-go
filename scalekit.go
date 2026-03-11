@@ -55,7 +55,7 @@ type Scalekit interface {
 	VerifyInterceptorPayload(secret string, headers map[string]string, payload []byte) (bool, error)
 	RefreshAccessToken(ctx context.Context, refreshToken string) (*TokenResponse, error)
 	GetLogoutUrl(options LogoutUrlOptions) (*url.URL, error)
-	GenerateClientToken(ctx context.Context, options *GenerateClientTokenOptions) (*ClientTokenResponse, error)
+	GenerateClientToken(ctx context.Context, options GenerateClientTokenOptions) (*ClientTokenResponse, error)
 	GetClientAccessToken(ctx context.Context) (string, error)
 	// ValidateToken validates the token signature and expiry, then returns all
 	// claims as a Claims map (map[string]interface{}). For strongly-typed claim
@@ -103,7 +103,13 @@ type AuthenticationOptions struct {
 
 // ValidateTokenOptions defines optional validations for token verification.
 type ValidateTokenOptions struct {
+	// Audience is the optional set of accepted aud claim values. Validation
+	// succeeds when any configured audience matches.
 	Audience []string
+
+	// Scopes is the optional set of scopes that must be present in the token's
+	// space-delimited scope claim.
+	Scopes []string
 }
 
 type AuthenticationResponse struct {
@@ -432,7 +438,7 @@ func (s *scalekitClient) ValidateAccessToken(ctx context.Context, accessToken st
 }
 
 // ValidateTokenWithOptions validates a signed JWT (access token or ID token)
-// and enforces optional checks such as audience validation.
+// and enforces optional checks such as audience and scope validation.
 func (s *scalekitClient) ValidateTokenWithOptions(ctx context.Context, token string, options *ValidateTokenOptions) (bool, error) {
 	claims, err := ValidateToken[TokenClaims](ctx, token, s.coreClient.GetJwks)
 	if err != nil {
@@ -441,24 +447,47 @@ func (s *scalekitClient) ValidateTokenWithOptions(ctx context.Context, token str
 	if options == nil {
 		return true, nil
 	}
-	if len(options.Audience) == 0 {
+
+	if len(options.Audience) > 0 {
+		audienceSet := map[string]struct{}{}
+		for _, audience := range claims.Audience {
+			audienceSet[audience] = struct{}{}
+		}
+
+		matched := false
+		for _, audience := range options.Audience {
+			if _, ok := audienceSet[audience]; ok {
+				matched = true
+				break
+			}
+		}
+		if !matched {
+			return false, fmt.Errorf("none of the expected audiences found in token aud claim")
+		}
+	}
+
+	if len(options.Scopes) == 0 {
 		return true, nil
 	}
 
-	audienceSet := map[string]struct{}{}
-	for _, audience := range claims.Audience {
-		audienceSet[audience] = struct{}{}
+	scopeClaim, ok := claims.Claims["scope"]
+	if !ok {
+		return false, fmt.Errorf("token missing scope claim")
+	}
+	scopeValue, ok := scopeClaim.(string)
+	if !ok {
+		return false, fmt.Errorf("token scope claim must be a string")
 	}
 
-	matched := false
-	for _, audience := range options.Audience {
-		if _, ok := audienceSet[audience]; ok {
-			matched = true
-			break
-		}
+	scopeSet := map[string]struct{}{}
+	for _, scope := range strings.Fields(scopeValue) {
+		scopeSet[scope] = struct{}{}
 	}
-	if !matched {
-		return false, fmt.Errorf("none of the expected audiences found in token aud claim")
+
+	for _, scope := range options.Scopes {
+		if _, ok := scopeSet[scope]; !ok {
+			return false, fmt.Errorf("missing expected scope %q in token scope claim", scope)
+		}
 	}
 
 	return true, nil
@@ -632,8 +661,8 @@ func (s *scalekitClient) RefreshAccessToken(ctx context.Context, refreshToken st
 //   - ClientID: required OAuth client identifier.
 //   - ClientSecret: required OAuth client secret for ClientID.
 //   - Scopes: optional scopes sent as a space-delimited "scope" parameter.
-func (s *scalekitClient) GenerateClientToken(ctx context.Context, options *GenerateClientTokenOptions) (*ClientTokenResponse, error) {
-	if options == nil || options.ClientID == "" {
+func (s *scalekitClient) GenerateClientToken(ctx context.Context, options GenerateClientTokenOptions) (*ClientTokenResponse, error) {
+	if options.ClientID == "" {
 		return nil, ErrClientIdRequired
 	}
 	if options.ClientSecret == "" {
@@ -663,7 +692,7 @@ func (s *scalekitClient) GenerateClientToken(ctx context.Context, options *Gener
 }
 
 func (s *scalekitClient) GetClientAccessToken(ctx context.Context) (string, error) {
-	resp, err := s.GenerateClientToken(ctx, &GenerateClientTokenOptions{
+	resp, err := s.GenerateClientToken(ctx, GenerateClientTokenOptions{
 		ClientID:     s.coreClient.clientId,
 		ClientSecret: s.coreClient.clientSecret,
 	})

@@ -508,13 +508,13 @@ func TestValidateTokenViaInterface(t *testing.T) {
 func TestGenerateClientToken(t *testing.T) {
 	tests := []struct {
 		name     string
-		options  *scalekit.GenerateClientTokenOptions
+		options  scalekit.GenerateClientTokenOptions
 		mockFn   func(w http.ResponseWriter, r *http.Request)
 		assertFn func(t *testing.T, resp *scalekit.ClientTokenResponse, err error)
 	}{
 		{
 			name: "successful token generation",
-			options: &scalekit.GenerateClientTokenOptions{
+			options: scalekit.GenerateClientTokenOptions{
 				ClientID:     "test_client_id",
 				ClientSecret: "test_client_secret",
 				Scopes:       []string{"usr:read", "usr:write"},
@@ -542,7 +542,7 @@ func TestGenerateClientToken(t *testing.T) {
 			// network failure or JSON decode failure. Return malformed JSON so the
 			// decode step fails and a real error is propagated to the caller.
 			name: "server error",
-			options: &scalekit.GenerateClientTokenOptions{
+			options: scalekit.GenerateClientTokenOptions{
 				ClientID:     "bad_id",
 				ClientSecret: "bad_secret",
 			},
@@ -559,7 +559,7 @@ func TestGenerateClientToken(t *testing.T) {
 		},
 		{
 			name: "missing client secret",
-			options: &scalekit.GenerateClientTokenOptions{
+			options: scalekit.GenerateClientTokenOptions{
 				ClientID: "test_client_id",
 			},
 			mockFn: func(w http.ResponseWriter, r *http.Request) {},
@@ -569,8 +569,9 @@ func TestGenerateClientToken(t *testing.T) {
 			},
 		},
 		{
-			name:   "missing client id",
-			mockFn: func(w http.ResponseWriter, r *http.Request) {},
+			name:    "missing client id",
+			options: scalekit.GenerateClientTokenOptions{},
+			mockFn:  func(w http.ResponseWriter, r *http.Request) {},
 			assertFn: func(t *testing.T, resp *scalekit.ClientTokenResponse, err error) {
 				assert.ErrorIs(t, err, scalekit.ErrClientIdRequired)
 				assert.Nil(t, resp)
@@ -816,32 +817,19 @@ func TestValidateAccessToken(t *testing.T) {
 }
 
 func TestValidateTokenWithOptions(t *testing.T) {
-	validIDToken, validIDTokenJWKS := func() (string, string) {
+	signedToken := func(claims map[string]interface{}, keyID string) (string, string) {
 		privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 		require.NoError(t, err)
 
-		keyID := "mock-id-token-kid"
 		signer, err := jose.NewSigner(
 			jose.SigningKey{Algorithm: jose.RS256, Key: privateKey},
 			(&jose.SignerOptions{}).WithHeader("kid", keyID),
 		)
 		require.NoError(t, err)
 
-		now := time.Now()
-		idClaims := map[string]interface{}{
-			"sub":            "usr_mock123",
-			"name":           "Mock User",
-			"email":          "mock@example.com",
-			"given_name":     "Mock",
-			"family_name":    "User",
-			"email_verified": true,
-			"iat":            now.Unix(),
-			"exp":            now.Add(time.Hour).Unix(),
-		}
-
-		idTokenPayload, err := json.Marshal(idClaims)
+		tokenPayload, err := json.Marshal(claims)
 		require.NoError(t, err)
-		idToken, err := signer.Sign(idTokenPayload)
+		idToken, err := signer.Sign(tokenPayload)
 		require.NoError(t, err)
 		idTokenCompact, err := idToken.CompactSerialize()
 		require.NoError(t, err)
@@ -857,6 +845,55 @@ func TestValidateTokenWithOptions(t *testing.T) {
 		require.NoError(t, err)
 
 		return idTokenCompact, string(keySetBytes)
+	}
+
+	validIDToken, validIDTokenJWKS := func() (string, string) {
+		now := time.Now()
+		return signedToken(map[string]interface{}{
+			"sub":            "usr_mock123",
+			"name":           "Mock User",
+			"email":          "mock@example.com",
+			"given_name":     "Mock",
+			"family_name":    "User",
+			"email_verified": true,
+			"iat":            now.Unix(),
+			"exp":            now.Add(time.Hour).Unix(),
+		}, "mock-id-token-kid")
+	}()
+
+	validScopedToken, validScopedTokenJWKS := func() (string, string) {
+		now := time.Now()
+		return signedToken(map[string]interface{}{
+			"sub":   "usr_mock123",
+			"iss":   "http://test.com",
+			"aud":   []string{"prd_skc_17002334227857508"},
+			"iat":   now.Unix(),
+			"exp":   now.Add(time.Hour).Unix(),
+			"scope": "usr:read usr:write",
+		}, "mock-scoped-token-kid")
+	}()
+
+	tokenWithoutScopeClaim, tokenWithoutScopeClaimJWKS := func() (string, string) {
+		now := time.Now()
+		return signedToken(map[string]interface{}{
+			"sub": "usr_mock123",
+			"iss": "http://test.com",
+			"aud": []string{"prd_skc_17002334227857508"},
+			"iat": now.Unix(),
+			"exp": now.Add(time.Hour).Unix(),
+		}, "mock-no-scope-token-kid")
+	}()
+
+	tokenWithInvalidScopeClaim, tokenWithInvalidScopeClaimJWKS := func() (string, string) {
+		now := time.Now()
+		return signedToken(map[string]interface{}{
+			"sub":   "usr_mock123",
+			"iss":   "http://test.com",
+			"aud":   []string{"prd_skc_17002334227857508"},
+			"iat":   now.Unix(),
+			"exp":   now.Add(time.Hour).Unix(),
+			"scope": []string{"usr:read"},
+		}, "mock-invalid-scope-token-kid")
 	}()
 
 	tests := []struct {
@@ -983,6 +1020,95 @@ func TestValidateTokenWithOptions(t *testing.T) {
 			assertFn: func(t *testing.T, isValid bool, err error) {
 				assert.Error(t, err)
 				assert.False(t, isValid)
+			},
+		},
+		{
+			name:  "valid token with matching scopes",
+			token: validScopedToken,
+			options: &scalekit.ValidateTokenOptions{
+				Scopes: []string{"usr:read", "usr:write"},
+			},
+			mockFn: func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == "/keys" {
+					w.Header().Set("Content-Type", "application/json")
+					_, _ = w.Write([]byte(validScopedTokenJWKS))
+				}
+			},
+			assertFn: func(t *testing.T, isValid bool, err error) {
+				assert.NoError(t, err)
+				assert.True(t, isValid)
+			},
+		},
+		{
+			name:  "valid token with missing expected scope",
+			token: validScopedToken,
+			options: &scalekit.ValidateTokenOptions{
+				Scopes: []string{"usr:read", "usr:delete"},
+			},
+			mockFn: func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == "/keys" {
+					w.Header().Set("Content-Type", "application/json")
+					_, _ = w.Write([]byte(validScopedTokenJWKS))
+				}
+			},
+			assertFn: func(t *testing.T, isValid bool, err error) {
+				assert.Error(t, err)
+				assert.False(t, isValid)
+				assert.EqualError(t, err, `missing expected scope "usr:delete" in token scope claim`)
+			},
+		},
+		{
+			name:  "token missing scope claim",
+			token: tokenWithoutScopeClaim,
+			options: &scalekit.ValidateTokenOptions{
+				Scopes: []string{"usr:read"},
+			},
+			mockFn: func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == "/keys" {
+					w.Header().Set("Content-Type", "application/json")
+					_, _ = w.Write([]byte(tokenWithoutScopeClaimJWKS))
+				}
+			},
+			assertFn: func(t *testing.T, isValid bool, err error) {
+				assert.Error(t, err)
+				assert.False(t, isValid)
+				assert.EqualError(t, err, "token missing scope claim")
+			},
+		},
+		{
+			name:  "token scope claim must be string",
+			token: tokenWithInvalidScopeClaim,
+			options: &scalekit.ValidateTokenOptions{
+				Scopes: []string{"usr:read"},
+			},
+			mockFn: func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == "/keys" {
+					w.Header().Set("Content-Type", "application/json")
+					_, _ = w.Write([]byte(tokenWithInvalidScopeClaimJWKS))
+				}
+			},
+			assertFn: func(t *testing.T, isValid bool, err error) {
+				assert.Error(t, err)
+				assert.False(t, isValid)
+				assert.EqualError(t, err, "token scope claim must be a string")
+			},
+		},
+		{
+			name:  "valid token with matching audience and scopes",
+			token: validScopedToken,
+			options: &scalekit.ValidateTokenOptions{
+				Audience: []string{"prd_skc_17002334227857508"},
+				Scopes:   []string{"usr:read"},
+			},
+			mockFn: func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == "/keys" {
+					w.Header().Set("Content-Type", "application/json")
+					_, _ = w.Write([]byte(validScopedTokenJWKS))
+				}
+			},
+			assertFn: func(t *testing.T, isValid bool, err error) {
+				assert.NoError(t, err)
+				assert.True(t, isValid)
 			},
 		},
 	}
