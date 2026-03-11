@@ -205,6 +205,78 @@ func TestListTokensWithPagination(t *testing.T) {
 	assert.NotEqual(t, page1.Tokens[0].TokenId, page2.Tokens[0].TokenId)
 }
 
+func TestUpdateTokenDescription(t *testing.T) {
+	ctx := context.Background()
+
+	created, err := client.Token().CreateToken(ctx, testOrg, scalekit.CreateTokenOptions{
+		Description: "Token before update",
+	})
+	require.NoError(t, err)
+	require.NotNil(t, created)
+
+	t.Cleanup(func() {
+		_ = client.Token().InvalidateToken(ctx, created.Token)
+	})
+
+	updated, err := client.Token().UpdateToken(ctx, created.TokenId, scalekit.UpdateTokenOptions{
+		Description: "Token after update",
+	})
+	require.NoError(t, err)
+	require.NotNil(t, updated)
+	require.NotNil(t, updated.TokenInfo)
+	assert.Equal(t, "Token after update", updated.TokenInfo.Description)
+}
+
+func TestUpdateTokenMergeCustomClaims(t *testing.T) {
+	ctx := context.Background()
+
+	created, err := client.Token().CreateToken(ctx, testOrg, scalekit.CreateTokenOptions{
+		Description:  "Token for claims update",
+		CustomClaims: map[string]string{"env": "staging", "scope": "read"},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, created)
+
+	t.Cleanup(func() {
+		_ = client.Token().InvalidateToken(ctx, created.Token)
+	})
+
+	updated, err := client.Token().UpdateToken(ctx, created.TokenId, scalekit.UpdateTokenOptions{
+		CustomClaims: map[string]string{"env": "production", "team": "infra"},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, updated)
+	require.NotNil(t, updated.TokenInfo)
+	assert.Equal(t, "production", updated.TokenInfo.CustomClaims["env"])
+	assert.Equal(t, "infra", updated.TokenInfo.CustomClaims["team"])
+	assert.Equal(t, "read", updated.TokenInfo.CustomClaims["scope"])
+}
+
+func TestUpdateTokenRemoveClaim(t *testing.T) {
+	ctx := context.Background()
+
+	created, err := client.Token().CreateToken(ctx, testOrg, scalekit.CreateTokenOptions{
+		Description:  "Token for claim removal",
+		CustomClaims: map[string]string{"env": "staging", "scope": "read"},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, created)
+
+	t.Cleanup(func() {
+		_ = client.Token().InvalidateToken(ctx, created.Token)
+	})
+
+	updated, err := client.Token().UpdateToken(ctx, created.TokenId, scalekit.UpdateTokenOptions{
+		CustomClaims: map[string]string{"scope": ""},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, updated)
+	require.NotNil(t, updated.TokenInfo)
+	_, hasScopeKey := updated.TokenInfo.CustomClaims["scope"]
+	assert.False(t, hasScopeKey)
+	assert.Equal(t, "staging", updated.TokenInfo.CustomClaims["env"])
+}
+
 func TestInvalidateToken(t *testing.T) {
 	ctx := context.Background()
 
