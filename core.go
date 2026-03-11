@@ -20,7 +20,7 @@ import (
 const (
 	tokenEndpoint      = "oauth/token"
 	jwksEndpoint       = "keys"
-	sdkVersion         = "Scalekit-Go/2.3.0"
+	sdkVersion         = "Scalekit-Go/2.4.0"
 	defaultHTTPTimeout = 10 * time.Second
 	maxErrorBodyBytes  = 8 * 1024
 )
@@ -47,7 +47,7 @@ type coreClient struct {
 	accessToken atomic.Pointer[string]
 	authGroup   singleflight.Group
 
-	jwksGroup    singleflight.Group
+	jwksGroup     singleflight.Group
 	jsonWebKeySet atomic.Pointer[jose.JSONWebKeySet]
 
 	httpClient *http.Client
@@ -99,7 +99,7 @@ func (h *headerInterceptor) RoundTrip(r *http.Request) (*http.Response, error) {
 
 func newCoreClient(envUrl, clientId, clientSecret string) *coreClient {
 	sdkVersion := sdkVersion
-	apiVersion := "20260310"
+	apiVersion := "20260311"
 	client := &coreClient{
 		sdkVersion:   sdkVersion,
 		apiVersion:   apiVersion,
