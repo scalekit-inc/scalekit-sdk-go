@@ -55,7 +55,7 @@ type Scalekit interface {
 	VerifyInterceptorPayload(secret string, headers map[string]string, payload []byte) (bool, error)
 	RefreshAccessToken(ctx context.Context, refreshToken string) (*TokenResponse, error)
 	GetLogoutUrl(options LogoutUrlOptions) (*url.URL, error)
-	GenerateClientToken(ctx context.Context, clientId string, clientSecret string) (string, error)
+	GenerateClientToken(ctx context.Context, options *GenerateClientTokenOptions) (*ClientTokenResponse, error)
 	GetClientAccessToken(ctx context.Context) (string, error)
 	// ValidateToken validates the token signature and expiry, then returns all
 	// claims as a Claims map (map[string]interface{}). For strongly-typed claim
@@ -198,6 +198,27 @@ type TokenResponse struct {
 	IdToken      string
 	RefreshToken string
 	ExpiresIn    int
+}
+
+// GenerateClientTokenOptions defines inputs for client-credentials token generation.
+type GenerateClientTokenOptions struct {
+	// ClientID is the OAuth client identifier used for the token request.
+	// Required.
+	ClientID string
+
+	// ClientSecret is the OAuth client secret paired with ClientID.
+	// Required.
+	ClientSecret string
+
+	// Scopes is the optional set of scopes to request. When provided, the SDK
+	// sends them as a single space-delimited "scope" parameter.
+	// Optional.
+	Scopes []string
+}
+
+type ClientTokenResponse struct {
+	AccessToken string
+	ExpiresIn   int
 }
 
 type LogoutUrlOptions struct {
@@ -605,25 +626,51 @@ func (s *scalekitClient) RefreshAccessToken(ctx context.Context, refreshToken st
 	}, nil
 }
 
-func (s *scalekitClient) GenerateClientToken(ctx context.Context, clientId string, clientSecret string) (string, error) {
+// GenerateClientToken creates a client-credentials access token.
+//
+// The options parameter controls the request payload:
+//   - ClientID: required OAuth client identifier.
+//   - ClientSecret: required OAuth client secret for ClientID.
+//   - Scopes: optional scopes sent as a space-delimited "scope" parameter.
+func (s *scalekitClient) GenerateClientToken(ctx context.Context, options *GenerateClientTokenOptions) (*ClientTokenResponse, error) {
+	if options == nil || options.ClientID == "" {
+		return nil, ErrClientIdRequired
+	}
+	if options.ClientSecret == "" {
+		return nil, ErrClientSecretRequired
+	}
+
 	qs := url.Values{}
 	qs.Add("grant_type", GrantTypeClientCredentials)
-	qs.Add("client_id", clientId)
-	qs.Add("client_secret", clientSecret)
+	qs.Add("client_id", options.ClientID)
+	qs.Add("client_secret", options.ClientSecret)
+	if len(options.Scopes) > 0 {
+		qs.Add("scope", strings.Join(options.Scopes, " "))
+	}
 
 	authResp, err := s.coreClient.authenticate(ctx, qs)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if authResp.AccessToken == "" {
-		return "", fmt.Errorf("empty access_token in authentication response")
+		return nil, fmt.Errorf("empty access_token in authentication response")
 	}
 
-	return authResp.AccessToken, nil
+	return &ClientTokenResponse{
+		AccessToken: authResp.AccessToken,
+		ExpiresIn:   authResp.ExpiresIn,
+	}, nil
 }
 
 func (s *scalekitClient) GetClientAccessToken(ctx context.Context) (string, error) {
-	return s.GenerateClientToken(ctx, s.coreClient.clientId, s.coreClient.clientSecret)
+	resp, err := s.GenerateClientToken(ctx, &GenerateClientTokenOptions{
+		ClientID:     s.coreClient.clientId,
+		ClientSecret: s.coreClient.clientSecret,
+	})
+	if err != nil {
+		return "", err
+	}
+	return resp.AccessToken, nil
 }
 
 func (s *scalekitClient) ValidateToken(ctx context.Context, token string) (Claims, error) {

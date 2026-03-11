@@ -507,47 +507,73 @@ func TestValidateTokenViaInterface(t *testing.T) {
 
 func TestGenerateClientToken(t *testing.T) {
 	tests := []struct {
-		name         string
-		clientId     string
-		clientSecret string
-		mockFn       func(w http.ResponseWriter, r *http.Request)
-		assertFn     func(t *testing.T, token string, err error)
+		name     string
+		options  *scalekit.GenerateClientTokenOptions
+		mockFn   func(w http.ResponseWriter, r *http.Request)
+		assertFn func(t *testing.T, resp *scalekit.ClientTokenResponse, err error)
 	}{
 		{
-			name:         "successful token generation",
-			clientId:     "test_client_id",
-			clientSecret: "test_client_secret",
+			name: "successful token generation",
+			options: &scalekit.GenerateClientTokenOptions{
+				ClientID:     "test_client_id",
+				ClientSecret: "test_client_secret",
+				Scopes:       []string{"usr:read", "usr:write"},
+			},
 			mockFn: func(w http.ResponseWriter, r *http.Request) {
 				if r.URL.Path == "/oauth/token" {
 					_ = r.ParseForm()
 					assert.Equal(t, "client_credentials", r.FormValue("grant_type"))
 					assert.Equal(t, "test_client_id", r.FormValue("client_id"))
 					assert.Equal(t, "test_client_secret", r.FormValue("client_secret"))
+					assert.Equal(t, "usr:read usr:write", r.FormValue("scope"))
 					w.Header().Set("Content-Type", "application/json")
 					_, _ = w.Write([]byte(`{"access_token":"mock_token_123","expires_in":3600}`))
 				}
 			},
-			assertFn: func(t *testing.T, token string, err error) {
+			assertFn: func(t *testing.T, resp *scalekit.ClientTokenResponse, err error) {
 				require.NoError(t, err)
-				assert.Equal(t, "mock_token_123", token)
+				require.NotNil(t, resp)
+				assert.Equal(t, "mock_token_123", resp.AccessToken)
+				assert.Equal(t, 3600, resp.ExpiresIn)
 			},
 		},
 		{
 			// authenticate() does not inspect HTTP status codes; it errors only on
 			// network failure or JSON decode failure. Return malformed JSON so the
 			// decode step fails and a real error is propagated to the caller.
-			name:         "server error",
-			clientId:     "bad_id",
-			clientSecret: "bad_secret",
+			name: "server error",
+			options: &scalekit.GenerateClientTokenOptions{
+				ClientID:     "bad_id",
+				ClientSecret: "bad_secret",
+			},
 			mockFn: func(w http.ResponseWriter, r *http.Request) {
 				if r.URL.Path == "/oauth/token" {
 					w.WriteHeader(http.StatusUnauthorized)
 					_, _ = w.Write([]byte(`not valid json`))
 				}
 			},
-			assertFn: func(t *testing.T, token string, err error) {
+			assertFn: func(t *testing.T, resp *scalekit.ClientTokenResponse, err error) {
 				assert.Error(t, err)
-				assert.Empty(t, token)
+				assert.Nil(t, resp)
+			},
+		},
+		{
+			name: "missing client secret",
+			options: &scalekit.GenerateClientTokenOptions{
+				ClientID: "test_client_id",
+			},
+			mockFn: func(w http.ResponseWriter, r *http.Request) {},
+			assertFn: func(t *testing.T, resp *scalekit.ClientTokenResponse, err error) {
+				assert.ErrorIs(t, err, scalekit.ErrClientSecretRequired)
+				assert.Nil(t, resp)
+			},
+		},
+		{
+			name:   "missing client id",
+			mockFn: func(w http.ResponseWriter, r *http.Request) {},
+			assertFn: func(t *testing.T, resp *scalekit.ClientTokenResponse, err error) {
+				assert.ErrorIs(t, err, scalekit.ErrClientIdRequired)
+				assert.Nil(t, resp)
 			},
 		},
 	}
@@ -558,8 +584,8 @@ func TestGenerateClientToken(t *testing.T) {
 			defer server.Close()
 
 			c := scalekit.NewScalekitClient(server.URL, "stored_id", "stored_secret")
-			token, err := c.GenerateClientToken(context.Background(), tt.clientId, tt.clientSecret)
-			tt.assertFn(t, token, err)
+			resp, err := c.GenerateClientToken(context.Background(), tt.options)
+			tt.assertFn(t, resp, err)
 		})
 	}
 }
