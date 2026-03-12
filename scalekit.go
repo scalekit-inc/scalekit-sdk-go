@@ -45,6 +45,7 @@ type Scalekit interface {
 	Permission() PermissionService
 	WebAuthn() WebAuthnService
 	Token() TokenService
+	M2M() M2MService
 	GetAuthorizationUrl(redirectUri string, options AuthorizationUrlOptions) (*url.URL, error)
 	AuthenticateWithCode(
 		ctx context.Context,
@@ -81,6 +82,7 @@ type scalekitClient struct {
 	permission   PermissionService
 	webauthn     WebAuthnService
 	token        TokenService
+	m2m          M2MService
 }
 
 type AuthorizationUrlOptions struct {
@@ -202,6 +204,7 @@ func NewScalekitClient(envUrl, clientId, clientSecret string) Scalekit {
 		permission:   newPermissionService(coreClient),
 		webauthn:     newWebAuthnClient(coreClient),
 		token:        newTokenService(coreClient),
+		m2m:          newM2MService(coreClient),
 	}
 }
 
@@ -251,6 +254,10 @@ func (s *scalekitClient) WebAuthn() WebAuthnService {
 
 func (s *scalekitClient) Token() TokenService {
 	return s.token
+}
+
+func (s *scalekitClient) M2M() M2MService {
+	return s.m2m
 }
 
 func (s *scalekitClient) GetAuthorizationUrl(redirectUri string, options AuthorizationUrlOptions) (*url.URL, error) {
