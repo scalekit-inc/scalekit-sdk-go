@@ -13,6 +13,14 @@ var (
 	// ErrRefreshTokenRequired is returned when RefreshAccessToken is called with an empty refresh token.
 	ErrRefreshTokenRequired = errors.New("refresh token is required")
 
+	// ErrClientSecretRequired is returned when client_credentials auth is attempted
+	// without a configured client secret.
+	ErrClientSecretRequired = errors.New("client secret is required for authentication")
+
+	// ErrClientIdRequired is returned when client_credentials auth is attempted
+	// without a client id.
+	ErrClientIdRequired = errors.New("client id is required for authentication")
+
 	// ErrTokenRequired is returned when a token argument is required but was empty.
 	ErrTokenRequired = errors.New("token is required")
 
