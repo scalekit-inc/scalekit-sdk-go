@@ -15,6 +15,8 @@ type ListOrganizationUsersResponse = usersv1.ListOrganizationUsersResponse
 type ListUsersResponse = usersv1.ListUsersResponse
 type CreateMembershipResponse = usersv1.CreateMembershipResponse
 type UpdateMembershipResponse = usersv1.UpdateMembershipResponse
+type ListUserRolesResponse = usersv1.ListUserRolesResponse
+type ListUserPermissionsResponse = usersv1.ListUserPermissionsResponse
 
 // ListUsersOptions represents optional parameters for listing users
 type ListUsersOptions struct {
@@ -33,6 +35,8 @@ type UserService interface {
 	UpdateMembership(ctx context.Context, organizationId string, userId string, membership *usersv1.UpdateMembership) (*UpdateMembershipResponse, error)
 	DeleteMembership(ctx context.Context, organizationId string, userId string, cascade bool) error
 	ResendInvite(ctx context.Context, organizationId string, userId string) (*usersv1.ResendInviteResponse, error)
+	ListUserRoles(ctx context.Context, organizationId string, userId string) (*ListUserRolesResponse, error)
+	ListUserPermissions(ctx context.Context, organizationId string, userId string) (*ListUserPermissionsResponse, error)
 }
 
 type userService struct {
@@ -193,5 +197,29 @@ func (u *userService) ResendInvite(ctx context.Context, organizationId string, u
 		u.coreClient,
 		u.client.ResendInvite,
 		request,
+	).exec(ctx)
+}
+
+// ListUserRoles returns all roles assigned to the specified user within the given organization
+func (u *userService) ListUserRoles(ctx context.Context, organizationId string, userId string) (*ListUserRolesResponse, error) {
+	return newConnectExecuter(
+		u.coreClient,
+		u.client.ListUserRoles,
+		&usersv1.ListUserRolesRequest{
+			OrganizationId: organizationId,
+			UserId:         userId,
+		},
+	).exec(ctx)
+}
+
+// ListUserPermissions returns all permissions granted to the specified user within the given organization
+func (u *userService) ListUserPermissions(ctx context.Context, organizationId string, userId string) (*ListUserPermissionsResponse, error) {
+	return newConnectExecuter(
+		u.coreClient,
+		u.client.ListUserPermissions,
+		&usersv1.ListUserPermissionsRequest{
+			OrganizationId: organizationId,
+			UserId:         userId,
+		},
 	).exec(ctx)
 }
