@@ -19,6 +19,8 @@ type UpdateOrganizationRoleResponse = rolesv1.UpdateOrganizationRoleResponse
 type GetRoleUsersCountResponse = rolesv1.GetRoleUsersCountResponse
 type GetOrganizationRoleUsersCountResponse = rolesv1.GetOrganizationRoleUsersCountResponse
 type UpdateDefaultOrganizationRolesResponse = rolesv1.UpdateDefaultOrganizationRolesResponse
+type UpdateDefaultRolesResponse = rolesv1.UpdateDefaultRolesResponse
+type ListDependentRolesResponse = rolesv1.ListDependentRolesResponse
 
 // RoleService defines the interface for role management operations
 type RoleService interface {
@@ -40,6 +42,10 @@ type RoleService interface {
 	GetOrganizationRoleUsersCount(ctx context.Context, orgId, roleName string) (*GetOrganizationRoleUsersCountResponse, error)
 	UpdateDefaultOrganizationRoles(ctx context.Context, orgId, defaultMemberRole string) (*UpdateDefaultOrganizationRolesResponse, error)
 	DeleteOrganizationRoleBase(ctx context.Context, orgId, roleName string) error
+
+	// Environment-level default and dependent role management
+	UpdateDefaultRoles(ctx context.Context, defaultCreatorRole, defaultMemberRole string) (*UpdateDefaultRolesResponse, error)
+	ListDependentRoles(ctx context.Context, roleName string) (*ListDependentRolesResponse, error)
 }
 
 type roleService struct {
@@ -240,4 +246,25 @@ func (r *roleService) DeleteOrganizationRoleBase(ctx context.Context, orgId, rol
 		},
 	).exec(ctx)
 	return err
+}
+
+// UpdateDefaultRoles updates the environment-level default creator and member roles
+func (r *roleService) UpdateDefaultRoles(ctx context.Context, defaultCreatorRole, defaultMemberRole string) (*UpdateDefaultRolesResponse, error) {
+	return newConnectExecuter(
+		r.coreClient,
+		r.client.UpdateDefaultRoles,
+		&rolesv1.UpdateDefaultRolesRequest{
+			DefaultCreatorRole: &defaultCreatorRole,
+			DefaultMemberRole:  &defaultMemberRole,
+		},
+	).exec(ctx)
+}
+
+// ListDependentRoles lists all roles that depend on the specified role
+func (r *roleService) ListDependentRoles(ctx context.Context, roleName string) (*ListDependentRolesResponse, error) {
+	return newConnectExecuter(
+		r.coreClient,
+		r.client.ListDependentRoles,
+		&rolesv1.ListDependentRolesRequest{RoleName: roleName},
+	).exec(ctx)
 }
