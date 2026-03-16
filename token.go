@@ -33,8 +33,8 @@ type ListTokensOptions struct {
 type UpdateTokenOptions struct {
 	// CustomClaims to merge into existing claims; set value to "" to remove a claim
 	CustomClaims map[string]string
-	// Description replacement; empty string clears the description
-	Description string
+	// Description replacement; nil leaves it unchanged, pointer to "" clears it
+	Description *string
 }
 
 type TokenService interface {
@@ -135,8 +135,8 @@ func (t *tokenService) UpdateToken(ctx context.Context, token string, options Up
 	if options.CustomClaims != nil {
 		request.CustomClaims = options.CustomClaims
 	}
-	if options.Description != "" {
-		request.Description = &options.Description
+	if options.Description != nil {
+		request.Description = options.Description
 	}
 	return newConnectExecuter(
 		t.coreClient,

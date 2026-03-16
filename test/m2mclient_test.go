@@ -36,6 +36,7 @@ func TestCreateOrganizationClientRequiresOrgId(t *testing.T) {
 		Name: "Test",
 	})
 	require.Error(t, err)
+	require.ErrorIs(t, err, scalekit.ErrOrganizationIdRequired)
 }
 
 func TestGetOrganizationClient(t *testing.T) {
