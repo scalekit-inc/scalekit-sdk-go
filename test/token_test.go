@@ -218,8 +218,9 @@ func TestUpdateTokenDescription(t *testing.T) {
 		_ = client.Token().InvalidateToken(ctx, created.Token)
 	})
 
+	newDesc := "Token after update"
 	updated, err := client.Token().UpdateToken(ctx, created.TokenId, scalekit.UpdateTokenOptions{
-		Description: "Token after update",
+		Description: &newDesc,
 	})
 	require.NoError(t, err)
 	require.NotNil(t, updated)
