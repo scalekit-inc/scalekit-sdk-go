@@ -250,6 +250,12 @@ func (r *roleService) DeleteOrganizationRoleBase(ctx context.Context, orgId, rol
 
 // UpdateDefaultRoles updates the environment-level default creator and member roles
 func (r *roleService) UpdateDefaultRoles(ctx context.Context, defaultCreatorRole, defaultMemberRole string) (*UpdateDefaultRolesResponse, error) {
+	if defaultCreatorRole == "" {
+		return nil, ErrDefaultCreatorRoleRequired
+	}
+	if defaultMemberRole == "" {
+		return nil, ErrDefaultMemberRoleRequired
+	}
 	return newConnectExecuter(
 		r.coreClient,
 		r.client.UpdateDefaultRoles,
@@ -262,6 +268,9 @@ func (r *roleService) UpdateDefaultRoles(ctx context.Context, defaultCreatorRole
 
 // ListDependentRoles lists all roles that depend on the specified role
 func (r *roleService) ListDependentRoles(ctx context.Context, roleName string) (*ListDependentRolesResponse, error) {
+	if roleName == "" {
+		return nil, ErrRoleNameRequired
+	}
 	return newConnectExecuter(
 		r.coreClient,
 		r.client.ListDependentRoles,

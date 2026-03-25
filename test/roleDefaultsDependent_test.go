@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/scalekit-inc/scalekit-sdk-go/v2"
 	rolesv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/roles"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -115,4 +116,28 @@ func TestRole_ListDependentRoles_WithEnvRole(t *testing.T) {
 	for _, r := range resp.GetRoles() {
 		assert.NotEmpty(t, r.GetName(), "role name should not be empty")
 	}
+}
+
+func TestRole_UpdateDefaultRoles_RequiresDefaultCreatorRole(t *testing.T) {
+	ctx := context.Background()
+
+	_, err := client.Role().UpdateDefaultRoles(ctx, "", "some-role")
+	require.Error(t, err)
+	assert.ErrorIs(t, err, scalekit.ErrDefaultCreatorRoleRequired)
+}
+
+func TestRole_UpdateDefaultRoles_RequiresDefaultMemberRole(t *testing.T) {
+	ctx := context.Background()
+
+	_, err := client.Role().UpdateDefaultRoles(ctx, "some-role", "")
+	require.Error(t, err)
+	assert.ErrorIs(t, err, scalekit.ErrDefaultMemberRoleRequired)
+}
+
+func TestRole_ListDependentRoles_RequiresRoleName(t *testing.T) {
+	ctx := context.Background()
+
+	_, err := client.Role().ListDependentRoles(ctx, "")
+	require.Error(t, err)
+	assert.ErrorIs(t, err, scalekit.ErrRoleNameRequired)
 }
