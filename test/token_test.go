@@ -218,13 +218,24 @@ func TestUpdateTokenDescription(t *testing.T) {
 		_ = client.Token().InvalidateToken(ctx, created.Token)
 	})
 
+	desc := "Token after update"
 	updated, err := client.Token().UpdateToken(ctx, created.TokenId, scalekit.UpdateTokenOptions{
-		Description: "Token after update",
+		Description: &desc,
 	})
 	require.NoError(t, err)
 	require.NotNil(t, updated)
 	require.NotNil(t, updated.TokenInfo)
 	assert.Equal(t, "Token after update", updated.TokenInfo.Description)
+}
+
+func TestUpdateTokenEmptyTokenError(t *testing.T) {
+	ctx := context.Background()
+	desc := "irrelevant"
+	_, err := client.Token().UpdateToken(ctx, "", scalekit.UpdateTokenOptions{
+		Description: &desc,
+	})
+	require.Error(t, err)
+	assert.ErrorIs(t, err, scalekit.ErrTokenRequired)
 }
 
 func TestUpdateTokenMergeCustomClaims(t *testing.T) {
