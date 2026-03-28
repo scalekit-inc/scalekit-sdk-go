@@ -977,6 +977,905 @@ Returns the Auth client (`client.Auth()`), used for Auth gRPC helper methods (e.
 
 </dd>
 </dl>
+
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">Client</a>() -> scalekit.ClientService</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the Client service (`client.Client()`), used to manage OIDC application clients and client secrets in the environment.
+</dd>
+</dl>
+</dd>
+</dl>
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">Token</a>() -> scalekit.TokenService</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the API token service (`client.Token()`), used to create, validate, list, and revoke organization API tokens.
+</dd>
+</dl>
+</dd>
+</dl>
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">ValidateTokenWithOptions</a>(ctx, token, options) -> (bool, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Validates a signed JWT (access token or ID token) and enforces optional checks such as audience and scope validation.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+valid, err := client.ValidateTokenWithOptions(ctx, accessToken, &scalekit.ValidateTokenOptions{
+  Audience: []string{"my-api"},
+  Scopes:   []string{"read", "write"},
+})
+if err != nil {
+  // handle
+}
+_ = valid
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context` - Request context for cancellation and timeout propagation
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**token:** `string` - The JWT token to validate
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**options:** `*ValidateTokenOptions`
+- `Audience []string` - Optional set of accepted aud claim values
+- `Scopes []string` - Optional set of scopes that must be present in the token
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">ValidateToken</a>(ctx, token) -> (Claims, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Validates the token signature and expiry, then returns all claims as a Claims map.
+For strongly-typed claim structs use the package-level generic `ValidateToken[T]` function directly.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+claims, err := client.ValidateToken(ctx, idToken)
+if err != nil {
+  // handle
+}
+_ = claims
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context` - Request context for cancellation and timeout propagation
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**token:** `string` - The JWT token to validate
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">GeneratePKCEConfiguration</a>(options) -> (*PKCEConfiguration, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Generates PKCE code verifier and challenge for OAuth authorization code flow.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+pkce, err := client.GeneratePKCEConfiguration(scalekit.PKCEOptions{
+  VerifierLength: 64,
+})
+if err != nil {
+  // handle
+}
+
+// Use pkce.CodeVerifier in token exchange
+// Use pkce.CodeChallenge and pkce.CodeChallengeMethod in authorization URL
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+**options:** `PKCEOptions`
+- `CodeChallengeMethod string` - Optional: defaults to "S256"
+- `VerifierLength int` - Optional: generated code verifier length (43-128, defaults to 64)
+- `CodeVerifier string` - Optional: precomputed code verifier
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">WithSecret</a>(clientSecret) -> Scalekit</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns a new Scalekit client instance with a different client secret.
+Useful when you need to make calls with different credentials in the same application.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+clientWithNewSecret := client.WithSecret("new_client_secret")
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**clientSecret:** `string` - New client secret to use
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">GenerateClientToken</a>(ctx, options) -> (*ClientTokenResponse, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a client-credentials access token using the OAuth client credentials grant type.
+Use this for service-to-service authentication without user context.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+resp, err := client.GenerateClientToken(ctx, scalekit.GenerateClientTokenOptions{
+  ClientID:     "service_client_id",
+  ClientSecret: "service_client_secret",
+  Scopes:       []string{"read", "write"},
+})
+if err != nil {
+  // handle
+}
+_ = resp.AccessToken
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context` - Request context for cancellation and timeout propagation
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**options:** `GenerateClientTokenOptions`
+- `ClientID string` - Required: OAuth client identifier
+- `ClientSecret string` - Required: OAuth client secret
+- `Scopes []string` - Optional: scopes to request
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">GetClientAccessToken</a>(ctx) -> (string, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Generates an access token using the client credentials of the current client.
+Convenience method that calls `GenerateClientToken` with the client's configured credentials.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+accessToken, err := client.GetClientAccessToken(ctx)
+if err != nil {
+  // handle
+}
+_ = accessToken
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context` - Request context for cancellation and timeout propagation
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+## Clients
+
+<details><summary><code>client.Client().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/clients.go">CreateClient</a>(ctx, client) -> (*CreateClientResponse, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a new OIDC client in the environment.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+import (
+  clients "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/clients"
+)
+
+created, err := client.Client().CreateClient(ctx, &clients.CreateClient{
+  Name:                   "My Application",
+  ClientType:             "WEB_APP",
+  PostLoginUris:          []string{"https://myapp.com/callback"},
+  PostLogoutRedirectUris: []string{"https://myapp.com/logout"},
+})
+if err != nil {
+  // handle
+}
+_ = created.Client
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**client:** `*clients.CreateClient` (package `pkg/grpc/scalekit/v1/clients`)
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Client().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/clients.go">GetClient</a>(ctx, clientId) -> (*GetClientResponse, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Fetches an OIDC client by client ID.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+got, err := client.Client().GetClient(ctx, "client_123")
+if err != nil {
+  // handle
+}
+_ = got.Client
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**clientId:** `string`
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Client().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/clients.go">ListClients</a>(ctx, options) -> (*ListClientsResponse, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists OIDC clients in the environment with optional pagination.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+clients, err := client.Client().ListClients(ctx, &scalekit.ListClientsOptions{
+  PageSize:  10,
+  PageToken: "",
+})
+if err != nil {
+  // handle
+}
+for _, c := range clients.Clients {
+  _ = c
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**options:** `*ListClientsOptions` - Pass `nil` to use server defaults
+- `PageSize uint32`
+- `PageToken string`
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Client().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/clients.go">UpdateClient</a>(ctx, clientId, client, mask) -> (*UpdateClientResponse, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Updates an OIDC client by client ID with field mask for partial updates.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+import (
+  clients "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/clients"
+  "google.golang.org/protobuf/types/known/fieldmaskpb"
+)
+
+updated, err := client.Client().UpdateClient(ctx, "client_123", &clients.UpdateClient{
+  Name: "Updated Name",
+}, &fieldmaskpb.FieldMask{
+  Paths: []string{"name"},
+})
+if err != nil {
+  // handle
+}
+_ = updated.Client
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**clientId:** `string`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**client:** `*clients.UpdateClient`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**mask:** `*fieldmaskpb.FieldMask` - Field mask specifying which fields to update
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Client().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/clients.go">DeleteClient</a>(ctx, clientId) -> error</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Deletes an OIDC client by client ID.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+if err := client.Client().DeleteClient(ctx, "client_123"); err != nil {
+  // handle
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**clientId:** `string`
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Client().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/clients.go">CreateClientSecret</a>(ctx, clientId) -> (*CreateClientSecretResponse, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a new client secret for an OIDC client.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+secret, err := client.Client().CreateClientSecret(ctx, "client_123")
+if err != nil {
+  // handle
+}
+// Save the returned secret immediately; it may not be shown again.
+_ = secret.Secret
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**clientId:** `string`
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Client().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/clients.go">DeleteClientSecret</a>(ctx, clientId, secretId) -> error</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Deletes a specific client secret from an OIDC client.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+if err := client.Client().DeleteClientSecret(ctx, "client_123", "secret_456"); err != nil {
+  // handle
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**clientId:** `string`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**secretId:** `string`
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
 </details>
 
 ## Organizations
@@ -1726,6 +2625,152 @@ _ = settings.MaxAllowedUsers
 
 ## Connections
 
+<details><summary><code>client.Connection().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/connection.go">CreateConnection</a>(ctx, organizationId, connection) -> (*CreateConnectionResponse, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a new SSO connection for an organization.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+import (
+  connectionsv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/connections"
+)
+
+created, err := client.Connection().CreateConnection(ctx, "org_123", &connectionsv1.CreateConnection{
+  Provider:    connectionsv1.ConnectionProvider_OKTA,
+  Type:        connectionsv1.ConnectionType_SAML,
+  ProviderKey: "my-okta-connection",
+})
+if err != nil {
+  // handle
+}
+_ = created.Connection
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**organizationId:** `string` - Organization ID
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**connection:** `*connectionsv1.CreateConnection`
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Connection().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/connection.go">DeleteConnection</a>(ctx, organizationId, id) -> error</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Deletes a connection by ID within an organization.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+if err := client.Connection().DeleteConnection(ctx, "org_123", "conn_456"); err != nil {
+  // handle
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**organizationId:** `string` - Organization ID
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**id:** `string` - Connection ID
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.Connection().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/connection.go">GetConnection</a>(ctx, organizationId, id) -> (*GetConnectionResponse, error)</code></summary>
 <dl>
 <dd>
@@ -2076,6 +3121,75 @@ _ = resp.Enabled
 </details>
 
 ## Users
+
+<details><summary><code>client.User().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/users.go">ListUsers</a>(ctx, options) -> (*ListUsersResponse, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists users across the environment with optional pagination. Pass `nil` options to use server defaults.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+users, err := client.User().ListUsers(ctx, &scalekit.ListUsersOptions{
+  PageSize:  50,
+  PageToken: "",
+})
+if err != nil {
+  // handle
+}
+for _, u := range users.Users {
+  _ = u
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**options:** `*ListUsersOptions` - Pass `nil` to use server defaults
+- `PageSize uint32`
+- `PageToken string`
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
 
 <details><summary><code>client.User().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/users.go">ListOrganizationUsers</a>(ctx, organizationId, options) -> (*ListOrganizationUsersResponse, error)</code></summary>
 <dl>
@@ -3115,6 +4229,151 @@ if err := client.Domain().DeleteDomain(ctx, "dom_123", "org_123"); err != nil {
 
 ## Directories
 
+<details><summary><code>client.Directory().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/directory.go">CreateDirectory</a>(ctx, organizationId, directory) -> (*CreateDirectoryResponse, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a directory for an organization.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+import (
+  directoriesv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/directories"
+)
+
+created, err := client.Directory().CreateDirectory(ctx, "org_123", &directoriesv1.CreateDirectory{
+  DirectoryType:     directoriesv1.DirectoryType_SCIM,
+  DirectoryProvider: directoriesv1.DirectoryProvider_OKTA,
+})
+if err != nil {
+  // handle
+}
+_ = created.Directory
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**organizationId:** `string` - Organization ID
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**directory:** `*directoriesv1.CreateDirectory`
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Directory().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/directory.go">DeleteDirectory</a>(ctx, organizationId, directoryId) -> error</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Deletes a directory by ID within an organization.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+if err := client.Directory().DeleteDirectory(ctx, "org_123", "dir_456"); err != nil {
+  // handle
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**organizationId:** `string` - Organization ID
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**directoryId:** `string` - Directory ID
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.Directory().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/directory.go">ListDirectories</a>(ctx, organizationId) -> (*ListDirectoriesResponse, error)</code></summary>
 <dl>
 <dd>
@@ -3932,6 +5191,293 @@ _ = resp
 
 </dd>
 </dl>
+## API Tokens
+
+<details><summary><code>client.Token().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/token.go">CreateToken</a>(ctx, organizationId, options) -> (*CreateTokenResponse, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a new API token for an organization with optional custom claims and expiration.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+expiry := time.Now().Add(24 * time.Hour)
+resp, err := client.Token().CreateToken(ctx, "org_123", scalekit.CreateTokenOptions{
+  UserId:       "usr_123",
+  Description:  "Service account token",
+  CustomClaims: map[string]string{
+    "source": "service",
+  },
+  Expiry:       &expiry,
+})
+if err != nil {
+  // handle
+}
+_ = resp.Token
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**organizationId:** `string` - Organization ID to create token for
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**options:** `CreateTokenOptions`
+- `UserId string` - Optional: user ID to associate with token
+- `CustomClaims map[string]string` - Optional: custom claims to embed in token
+- `Expiry *time.Time` - Optional: token expiration time
+- `Description string` - Optional: token description
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Token().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/token.go">ValidateToken</a>(ctx, token) -> (*ValidateTokenResponse, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Validates an API token and returns token information if valid.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+resp, err := client.Token().ValidateToken(ctx, "api_token_here")
+if err != nil {
+  // token is invalid or expired
+}
+_ = resp.Token
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**token:** `string` - API token to validate
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Token().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/token.go">InvalidateToken</a>(ctx, token) -> error</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Invalidates (revokes) an API token immediately.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+if err := client.Token().InvalidateToken(ctx, "api_token_here"); err != nil {
+  // handle
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**token:** `string` - API token to invalidate
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Token().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/token.go">ListTokens</a>(ctx, organizationId, options) -> (*ListTokensResponse, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists API tokens for an organization with optional filtering and pagination.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+// List all tokens
+tokens, err := client.Token().ListTokens(ctx, "org_123", scalekit.ListTokensOptions{})
+if err != nil {
+  // handle
+}
+for _, token := range tokens.Tokens {
+  _ = token
+}
+
+// Filter by user ID
+userTokens, err := client.Token().ListTokens(ctx, "org_123", scalekit.ListTokensOptions{
+  UserId: "usr_123",
+})
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**organizationId:** `string` - Organization ID to list tokens for
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**options:** `ListTokensOptions`
+- `UserId string` - Optional: filter tokens by user ID
+- `PageSize int32` - Optional: number of results per page
+- `PageToken string` - Optional: pagination token from previous response
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
 </details>
 
 ## Roles
