@@ -48,15 +48,6 @@ var (
 	// ErrSecretIdRequired is returned when a secretId argument is required but was empty.
 	ErrSecretIdRequired = errors.New("secretId is required")
 
-	// ErrRoleNameRequired is returned when a role name argument is required but was empty.
-	ErrRoleNameRequired = errors.New("role name is required")
-
-	// ErrDefaultCreatorRoleRequired is returned when defaultCreatorRole is required but was empty.
-	ErrDefaultCreatorRoleRequired = errors.New("defaultCreatorRole is required")
-
-	// ErrDefaultMemberRoleRequired is returned when defaultMemberRole is required but was empty.
-	ErrDefaultMemberRoleRequired = errors.New("defaultMemberRole is required")
-
 	// ErrDirectoryNotFound is returned when no directory exists for the given organization.
 	ErrDirectoryNotFound = errors.New("directory does not exist for organization")
 

@@ -62,26 +62,32 @@ func newM2MService(coreClient *coreClient) M2MService {
 	}
 }
 
+// buildOrganizationClient constructs an OrganizationClient protobuf from options.
+func buildOrganizationClient(name, description string, customClaims []*clientsv1.CustomClaim, audience, scopes []string) *clientsv1.OrganizationClient {
+	client := &clientsv1.OrganizationClient{}
+	if name != "" {
+		client.Name = name
+	}
+	if description != "" {
+		client.Description = description
+	}
+	if customClaims != nil {
+		client.CustomClaims = customClaims
+	}
+	if audience != nil {
+		client.Audience = audience
+	}
+	if scopes != nil {
+		client.Scopes = scopes
+	}
+	return client
+}
+
 func (m *m2mService) CreateOrganizationClient(ctx context.Context, organizationId string, options CreateOrganizationClientOptions) (*CreateOrganizationClientResponse, error) {
 	if organizationId == "" {
 		return nil, ErrOrganizationIdRequired
 	}
-	client := &clientsv1.OrganizationClient{}
-	if options.Name != "" {
-		client.Name = options.Name
-	}
-	if options.Description != "" {
-		client.Description = options.Description
-	}
-	if options.CustomClaims != nil {
-		client.CustomClaims = options.CustomClaims
-	}
-	if options.Audience != nil {
-		client.Audience = options.Audience
-	}
-	if options.Scopes != nil {
-		client.Scopes = options.Scopes
-	}
+	client := buildOrganizationClient(options.Name, options.Description, options.CustomClaims, options.Audience, options.Scopes)
 	return newConnectExecuter(
 		m.coreClient,
 		m.client.CreateOrganizationClient,
@@ -116,22 +122,7 @@ func (m *m2mService) UpdateOrganizationClient(ctx context.Context, organizationI
 	if clientId == "" {
 		return nil, ErrClientIdRequired
 	}
-	client := &clientsv1.OrganizationClient{}
-	if options.Name != "" {
-		client.Name = options.Name
-	}
-	if options.Description != "" {
-		client.Description = options.Description
-	}
-	if options.CustomClaims != nil {
-		client.CustomClaims = options.CustomClaims
-	}
-	if options.Audience != nil {
-		client.Audience = options.Audience
-	}
-	if options.Scopes != nil {
-		client.Scopes = options.Scopes
-	}
+	client := buildOrganizationClient(options.Name, options.Description, options.CustomClaims, options.Audience, options.Scopes)
 	return newConnectExecuter(
 		m.coreClient,
 		m.client.UpdateOrganizationClient,

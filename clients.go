@@ -20,8 +20,8 @@ type ClientService interface {
 	GetClient(ctx context.Context, clientId string) (*GetClientResponse, error)
 	ListClients(ctx context.Context, options *ListClientsOptions) (*ListClientsResponse, error)
 	UpdateClient(ctx context.Context, clientId string, client *clientsv1.UpdateClient, mask *fieldmaskpb.FieldMask) (*UpdateClientResponse, error)
-	CreateClientSecret(ctx context.Context, clientId string) (*CreateClientSecretResponse, error)
-	DeleteClientSecret(ctx context.Context, clientId string, secretId string) error
+	AddClientSecret(ctx context.Context, clientId string) (*CreateClientSecretResponse, error)
+	RemoveClientSecret(ctx context.Context, clientId string, secretId string) error
 	DeleteClient(ctx context.Context, clientId string) error
 }
 
@@ -93,7 +93,7 @@ func (c *clientService) DeleteClient(ctx context.Context, clientId string) error
 	return err
 }
 
-func (c *clientService) CreateClientSecret(ctx context.Context, clientId string) (*CreateClientSecretResponse, error) {
+func (c *clientService) AddClientSecret(ctx context.Context, clientId string) (*CreateClientSecretResponse, error) {
 	return newConnectExecuter(
 		c.coreClient,
 		c.client.CreateClientSecret,
@@ -103,7 +103,7 @@ func (c *clientService) CreateClientSecret(ctx context.Context, clientId string)
 	).exec(ctx)
 }
 
-func (c *clientService) DeleteClientSecret(ctx context.Context, clientId string, secretId string) error {
+func (c *clientService) RemoveClientSecret(ctx context.Context, clientId string, secretId string) error {
 	_, err := newConnectExecuter(
 		c.coreClient,
 		c.client.DeleteClientSecret,
