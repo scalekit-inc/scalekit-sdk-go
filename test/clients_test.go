@@ -204,14 +204,14 @@ func TestWebClientLifecycleWithPKCEAndSecrets(t *testing.T) {
 			assert.Equal(t, updatedPostLogout, updatedClient.GetPostLogoutRedirectUris())
 			assert.Equal(t, updatedBackchannel, updatedClient.GetBackChannelLogoutUris())
 
-			secret1, err := client.Client().CreateClientSecret(ctx, clientID)
+			secret1, err := client.Client().AddClientSecret(ctx, clientID)
 			require.NoError(t, err)
 			require.NotNil(t, secret1)
 			require.NotEmpty(t, secret1.GetPlainSecret())
 			require.NotNil(t, secret1.GetSecret())
 			require.NotEmpty(t, secret1.GetSecret().GetId())
 
-			secret2, err := client.Client().CreateClientSecret(ctx, clientID)
+			secret2, err := client.Client().AddClientSecret(ctx, clientID)
 			require.NoError(t, err)
 			require.NotNil(t, secret2)
 			require.NotEmpty(t, secret2.GetPlainSecret())
@@ -222,7 +222,7 @@ func TestWebClientLifecycleWithPKCEAndSecrets(t *testing.T) {
 			withTwoSecrets := mustGetClient(t, ctx, clientID)
 			require.GreaterOrEqual(t, len(withTwoSecrets.GetSecrets()), 2)
 
-			err = client.Client().DeleteClientSecret(ctx, clientID, secret1.GetSecret().GetId())
+			err = client.Client().RemoveClientSecret(ctx, clientID, secret1.GetSecret().GetId())
 			require.NoError(t, err)
 
 			withOneSecret := mustGetClient(t, ctx, clientID)
@@ -298,7 +298,7 @@ func TestWebClientDisallowScalekitApiAccess(t *testing.T) {
 			require.NotEmpty(t, clientID)
 			defer deleteClientIfExists(t, ctx, clientID)
 
-			secretResp, err := client.Client().CreateClientSecret(ctx, clientID)
+			secretResp, err := client.Client().AddClientSecret(ctx, clientID)
 			require.NoError(t, err)
 			require.NotNil(t, secretResp)
 			require.NotEmpty(t, secretResp.GetPlainSecret())

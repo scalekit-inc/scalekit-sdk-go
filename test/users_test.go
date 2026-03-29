@@ -18,13 +18,13 @@ func TestUser_ListUsers(t *testing.T) {
 
 	// No options — server defaults
 	resp, err := client.User().ListUsers(ctx, nil)
-	assert.NoError(t, err)
-	assert.NotNil(t, resp)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
 
 	// With page size
 	resp, err = client.User().ListUsers(ctx, &scalekit.ListUsersOptions{PageSize: 10})
-	assert.NoError(t, err)
-	assert.NotNil(t, resp)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
 
 	// Paginate with next page token if available
 	if resp.GetNextPageToken() != "" {
@@ -32,8 +32,8 @@ func TestUser_ListUsers(t *testing.T) {
 			PageToken: resp.GetNextPageToken(),
 			PageSize:  10,
 		})
-		assert.NoError(t, err)
-		assert.NotNil(t, next)
+		require.NoError(t, err)
+		require.NotNil(t, next)
 	}
 }
 
