@@ -31,9 +31,11 @@ type ListTokensOptions struct {
 }
 
 type UpdateTokenOptions struct {
-	// CustomClaims to merge into existing claims; set value to "" to remove a claim
+	// CustomClaims replaces the full set of custom claims on the token.
+	// Omit this field (nil) to leave existing claims unchanged.
+	// Empty-string claim values are not accepted by the server.
 	CustomClaims map[string]string
-	// Description replacement; nil leaves description unchanged, pointer to empty string clears it
+	// Description replacement; nil means do not change, empty string clears the description.
 	Description *string
 }
 
