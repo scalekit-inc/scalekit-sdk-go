@@ -26,7 +26,9 @@ func createPermission(t *testing.T, ctx context.Context, name string) {
 
 func deletePermission(t *testing.T, ctx context.Context, name string) {
 	t.Helper()
-	_ = client.Permission().DeletePermission(ctx, name)
+	if err := client.Permission().DeletePermission(ctx, name); err != nil {
+		t.Errorf("failed to delete permission %s: %v", name, err)
+	}
 }
 
 func TestPermission_ListPermissions_NoParams(t *testing.T) {
