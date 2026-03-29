@@ -66,6 +66,16 @@ func TestGetOrganizationClientRequiresClientId(t *testing.T) {
 	assert.ErrorIs(t, err, scalekit.ErrClientIdRequired)
 }
 
+func TestUpdateOrganizationClientRequiresClientId(t *testing.T) {
+	ctx := context.Background()
+
+	_, err := client.M2M().UpdateOrganizationClient(ctx, testOrg, "", scalekit.UpdateOrganizationClientOptions{
+		Name: "Test",
+	})
+	require.Error(t, err)
+	assert.ErrorIs(t, err, scalekit.ErrClientIdRequired)
+}
+
 func TestUpdateOrganizationClient(t *testing.T) {
 	ctx := context.Background()
 
@@ -86,6 +96,22 @@ func TestUpdateOrganizationClient(t *testing.T) {
 	require.NotNil(t, updated)
 	assert.Equal(t, "Updated Name", updated.Client.Name)
 	assert.Equal(t, "Updated description", updated.Client.Description)
+}
+
+func TestDeleteOrganizationClientRequiresClientId(t *testing.T) {
+	ctx := context.Background()
+
+	err := client.M2M().DeleteOrganizationClient(ctx, testOrg, "")
+	require.Error(t, err)
+	assert.ErrorIs(t, err, scalekit.ErrClientIdRequired)
+}
+
+func TestCreateOrganizationClientSecretRequiresClientId(t *testing.T) {
+	ctx := context.Background()
+
+	_, err := client.M2M().CreateOrganizationClientSecret(ctx, testOrg, "")
+	require.Error(t, err)
+	assert.ErrorIs(t, err, scalekit.ErrClientIdRequired)
 }
 
 func TestCreateOrganizationClientSecret(t *testing.T) {
@@ -130,6 +156,14 @@ func TestDeleteOrganizationClientSecret(t *testing.T) {
 
 	err = client.M2M().DeleteOrganizationClientSecret(ctx, testOrg, clientId, secretResp.Secret.Id)
 	require.NoError(t, err)
+}
+
+func TestDeleteOrganizationClientSecretRequiresClientId(t *testing.T) {
+	ctx := context.Background()
+
+	err := client.M2M().DeleteOrganizationClientSecret(ctx, testOrg, "", "sec_dummy")
+	require.Error(t, err)
+	assert.ErrorIs(t, err, scalekit.ErrClientIdRequired)
 }
 
 func TestDeleteOrganizationClientSecretRequiresSecretId(t *testing.T) {
