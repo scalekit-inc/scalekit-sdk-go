@@ -10,10 +10,6 @@ on:
         description: 'Branch to release from (default: main)'
         required: false
         default: 'main'
-      prerelease:
-        description: 'Mark as pre-release?'
-        type: boolean
-        default: false
       dry_run:
         description: 'Dry run — run all checks but skip tag push and release creation'
         type: boolean
@@ -56,16 +52,26 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          LATEST_TAG=$(gh release view --json tagName --jq '.tagName' | sed 's/^v//')
+          LATEST_RAW=$(gh release view --json tagName --jq '.tagName' 2>/dev/null || echo "")
 
-          IFS='.' read -r maj_new min_new pat_new <<< "${{ inputs.version }}"
-          IFS='.' read -r maj_cur min_cur pat_cur <<< "$LATEST_TAG"
+          if [ -z "$LATEST_RAW" ]; then
+            echo "No prior release found — skipping sequential version check."
+          else
+            # Strip leading 'v' and any prerelease/metadata suffix (e.g. v2.4.0-beta -> 2.4.0)
+            LATEST_TAG=$(echo "$LATEST_RAW" | sed 's/^v//' | sed 's/[-+].*//')
 
-          if ! ( [ "$maj_new" -gt "$maj_cur" ] || \
-                 ( [ "$maj_new" -eq "$maj_cur" ] && [ "$min_new" -gt "$min_cur" ] ) || \
-                 ( [ "$maj_new" -eq "$maj_cur" ] && [ "$min_new" -eq "$min_cur" ] && [ "$pat_new" -gt "$pat_cur" ] ) ); then
-            echo "Input version ${{ inputs.version }} must be greater than latest release $LATEST_TAG"
-            exit 1
+            IFS='.' read -r maj_new min_new pat_new <<< "${{ inputs.version }}"
+            IFS='.' read -r maj_cur min_cur pat_cur <<< "$LATEST_TAG"
+
+            # Default missing components to 0
+            maj_cur=${maj_cur:-0}; min_cur=${min_cur:-0}; pat_cur=${pat_cur:-0}
+
+            if ! ( [ "$maj_new" -gt "$maj_cur" ] || \
+                   ( [ "$maj_new" -eq "$maj_cur" ] && [ "$min_new" -gt "$min_cur" ] ) || \
+                   ( [ "$maj_new" -eq "$maj_cur" ] && [ "$min_new" -eq "$min_cur" ] && [ "$pat_new" -gt "$pat_cur" ] ) ); then
+              echo "Input version ${{ inputs.version }} must be greater than latest release $LATEST_TAG"
+              exit 1
+            fi
           fi
 
       - name: Go modules sync
@@ -141,4 +147,4 @@ jobs:
         with:
           tag_name: v${{ inputs.version }}
           generate_release_notes: true
-          prerelease: ${{ inputs.prerelease }}
+          prerelease: ${{ contains(inputs.version, '-') }}
