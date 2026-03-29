@@ -46,6 +46,8 @@ func TestGetOrganizationClient(t *testing.T) {
 		Name: "Get Test Client",
 	})
 	require.NoError(t, err)
+	require.NotNil(t, created)
+	require.NotNil(t, created.Client)
 	clientId := created.Client.ClientId
 	t.Cleanup(func() {
 		_ = client.M2M().DeleteOrganizationClient(ctx, testOrg, clientId)
@@ -54,6 +56,7 @@ func TestGetOrganizationClient(t *testing.T) {
 	fetched, err := client.M2M().GetOrganizationClient(ctx, testOrg, clientId)
 	require.NoError(t, err)
 	require.NotNil(t, fetched)
+	require.NotNil(t, fetched.Client)
 	assert.Equal(t, clientId, fetched.Client.ClientId)
 	assert.Equal(t, "Get Test Client", fetched.Client.Name)
 }
@@ -99,6 +102,8 @@ func TestUpdateOrganizationClient(t *testing.T) {
 		Name: "Original Name",
 	})
 	require.NoError(t, err)
+	require.NotNil(t, created)
+	require.NotNil(t, created.Client)
 	clientId := created.Client.ClientId
 	t.Cleanup(func() {
 		_ = client.M2M().DeleteOrganizationClient(ctx, testOrg, clientId)
@@ -110,6 +115,7 @@ func TestUpdateOrganizationClient(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NotNil(t, updated)
+	require.NotNil(t, updated.Client)
 	assert.Equal(t, "Updated Name", updated.Client.Name)
 	assert.Equal(t, "Updated description", updated.Client.Description)
 }
@@ -153,6 +159,8 @@ func TestCreateOrganizationClientSecret(t *testing.T) {
 		Name: "Secret Test Client",
 	})
 	require.NoError(t, err)
+	require.NotNil(t, created)
+	require.NotNil(t, created.Client)
 	clientId := created.Client.ClientId
 	t.Cleanup(func() {
 		_ = client.M2M().DeleteOrganizationClient(ctx, testOrg, clientId)
@@ -177,6 +185,8 @@ func TestDeleteOrganizationClientSecret(t *testing.T) {
 		Name: "Delete Secret Client",
 	})
 	require.NoError(t, err)
+	require.NotNil(t, created)
+	require.NotNil(t, created.Client)
 	clientId := created.Client.ClientId
 	t.Cleanup(func() {
 		_ = client.M2M().DeleteOrganizationClient(ctx, testOrg, clientId)
@@ -221,6 +231,8 @@ func TestListOrganizationClients(t *testing.T) {
 		Name: "List Test Client",
 	})
 	require.NoError(t, err)
+	require.NotNil(t, created)
+	require.NotNil(t, created.Client)
 	clientId := created.Client.ClientId
 	t.Cleanup(func() {
 		_ = client.M2M().DeleteOrganizationClient(ctx, testOrg, clientId)
@@ -258,6 +270,8 @@ func TestDeleteOrganizationClient(t *testing.T) {
 		Name: "To Delete Client",
 	})
 	require.NoError(t, err)
+	require.NotNil(t, created)
+	require.NotNil(t, created.Client)
 	clientId := created.Client.ClientId
 
 	err = client.M2M().DeleteOrganizationClient(ctx, testOrg, clientId)
