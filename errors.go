@@ -45,6 +45,9 @@ var (
 	// ErrOrganizationIdRequired is returned when an organizationId argument is required but was empty.
 	ErrOrganizationIdRequired = errors.New("organizationId is required")
 
+	// ErrSecretIdRequired is returned when a secretId argument is required but was empty.
+	ErrSecretIdRequired = errors.New("secretId is required")
+
 	// ErrDirectoryNotFound is returned when no directory exists for the given organization.
 	ErrDirectoryNotFound = errors.New("directory does not exist for organization")
 
