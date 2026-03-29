@@ -225,7 +225,8 @@ func TestUpdateTokenDescription(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, updated)
 	require.NotNil(t, updated.TokenInfo)
-	assert.Equal(t, "Token after update", updated.TokenInfo.Description)
+	require.NotNil(t, updated.TokenInfo.Description)
+	assert.Equal(t, "Token after update", *updated.TokenInfo.Description)
 }
 
 func TestUpdateTokenEmptyTokenError(t *testing.T) {
@@ -238,7 +239,7 @@ func TestUpdateTokenEmptyTokenError(t *testing.T) {
 	assert.ErrorIs(t, err, scalekit.ErrTokenRequired)
 }
 
-func TestUpdateTokenMergeCustomClaims(t *testing.T) {
+func TestUpdateTokenUpdateCustomClaims(t *testing.T) {
 	ctx := context.Background()
 
 	created, err := client.Token().CreateToken(ctx, testOrg, scalekit.CreateTokenOptions{
@@ -252,6 +253,7 @@ func TestUpdateTokenMergeCustomClaims(t *testing.T) {
 		_ = client.Token().InvalidateToken(ctx, created.Token)
 	})
 
+	// The server replaces the full customClaims map; claims not in the update are removed.
 	updated, err := client.Token().UpdateToken(ctx, created.TokenId, scalekit.UpdateTokenOptions{
 		CustomClaims: map[string]string{"env": "production", "team": "infra"},
 	})
@@ -260,15 +262,15 @@ func TestUpdateTokenMergeCustomClaims(t *testing.T) {
 	require.NotNil(t, updated.TokenInfo)
 	assert.Equal(t, "production", updated.TokenInfo.CustomClaims["env"])
 	assert.Equal(t, "infra", updated.TokenInfo.CustomClaims["team"])
-	assert.Equal(t, "read", updated.TokenInfo.CustomClaims["scope"])
+	_, hasScopeKey := updated.TokenInfo.CustomClaims["scope"]
+	assert.False(t, hasScopeKey, "claims not in the update should be removed")
 }
 
-func TestUpdateTokenRemoveClaim(t *testing.T) {
+func TestUpdateTokenEmptyClaimValueRejected(t *testing.T) {
 	ctx := context.Background()
 
 	created, err := client.Token().CreateToken(ctx, testOrg, scalekit.CreateTokenOptions{
-		Description:  "Token for claim removal",
-		CustomClaims: map[string]string{"env": "staging", "scope": "read"},
+		CustomClaims: map[string]string{"env": "staging"},
 	})
 	require.NoError(t, err)
 	require.NotNil(t, created)
@@ -277,15 +279,11 @@ func TestUpdateTokenRemoveClaim(t *testing.T) {
 		_ = client.Token().InvalidateToken(ctx, created.Token)
 	})
 
-	updated, err := client.Token().UpdateToken(ctx, created.TokenId, scalekit.UpdateTokenOptions{
-		CustomClaims: map[string]string{"scope": ""},
+	// The server rejects empty-string claim values with a validation error.
+	_, err = client.Token().UpdateToken(ctx, created.TokenId, scalekit.UpdateTokenOptions{
+		CustomClaims: map[string]string{"env": ""},
 	})
-	require.NoError(t, err)
-	require.NotNil(t, updated)
-	require.NotNil(t, updated.TokenInfo)
-	_, hasScopeKey := updated.TokenInfo.CustomClaims["scope"]
-	assert.False(t, hasScopeKey)
-	assert.Equal(t, "staging", updated.TokenInfo.CustomClaims["env"])
+	require.Error(t, err)
 }
 
 func TestInvalidateToken(t *testing.T) {
