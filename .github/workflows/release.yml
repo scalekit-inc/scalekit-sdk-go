@@ -1,0 +1,144 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release in x.y.z format (e.g. 2.5.0) — no prefix needed'
+        required: true
+      branch:
+        description: 'Branch to release from (default: main)'
+        required: false
+        default: 'main'
+      prerelease:
+        description: 'Mark as pre-release?'
+        type: boolean
+        default: false
+      dry_run:
+        description: 'Dry run — run all checks but skip tag push and release creation'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: "go.mod"
+
+      - name: Enforce dry run for non-main branches
+        if: ${{ inputs.branch != 'main' && !inputs.dry_run }}
+        run: |
+          echo "Real releases can only be made from main. Set dry_run=true to test on a non-main branch."
+          exit 1
+
+      - name: Check version matches core.go
+        run: |
+          CODE_VERSION=$(grep -oP 'sdkVersionNumber\s*=\s*"\K[0-9]+\.[0-9]+\.[0-9]+' core.go)
+          if [ "${{ inputs.version }}" != "$CODE_VERSION" ]; then
+            echo "Input version ${{ inputs.version }} does not match sdkVersionNumber $CODE_VERSION in core.go"
+            exit 1
+          fi
+
+      - name: Check version is greater than latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          LATEST_TAG=$(gh release view --json tagName --jq '.tagName' | sed 's/^v//')
+
+          IFS='.' read -r maj_new min_new pat_new <<< "${{ inputs.version }}"
+          IFS='.' read -r maj_cur min_cur pat_cur <<< "$LATEST_TAG"
+
+          if ! ( [ "$maj_new" -gt "$maj_cur" ] || \
+                 ( [ "$maj_new" -eq "$maj_cur" ] && [ "$min_new" -gt "$min_cur" ] ) || \
+                 ( [ "$maj_new" -eq "$maj_cur" ] && [ "$min_new" -eq "$min_cur" ] && [ "$pat_new" -gt "$pat_cur" ] ) ); then
+            echo "Input version ${{ inputs.version }} must be greater than latest release $LATEST_TAG"
+            exit 1
+          fi
+
+      - name: Go modules sync
+        run: |
+          go mod tidy
+          git diff --exit-code -- go.mod go.sum
+
+      - name: Setup build tools
+        run: make setup
+
+      - name: Verify generated code is up to date
+        env:
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          if [ -z "$PAT_TOKEN" ]; then
+            echo "PAT_TOKEN is required to run make generate against private proto repository."
+            exit 1
+          fi
+
+          auth_header="$(printf "x-access-token:%s" "$PAT_TOKEN" | base64 | tr -d '\n')"
+
+          cleanup() {
+            git config --global --unset-all http.https://github.com/.extraheader || true
+          }
+          trap cleanup EXIT
+
+          git config --global http.https://github.com/.extraheader "AUTHORIZATION: basic ${auth_header}"
+
+          make generate
+          git diff --exit-code
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@9fae48acfc02a90574d7c304a1758ef9895495fa # v7.0.1
+        with:
+          version: v2.11.3
+
+      - name: Run Go vet
+        run: go vet ./...
+
+      - name: Run tests
+        env:
+          SCALEKIT_ENVIRONMENT_URL: ${{ secrets.SCALEKIT_ENVIRONMENT_URL }}
+          SCALEKIT_CLIENT_ID: ${{ secrets.SCALEKIT_CLIENT_ID }}
+          SCALEKIT_CLIENT_SECRET: ${{ secrets.SCALEKIT_CLIENT_SECRET }}
+        run: go test -race -v ./...
+
+      - name: Run Go vulnerability check
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck ./...
+
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    needs: validate
+    if: ${{ !inputs.dry_run }}
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+          fetch-depth: 0
+
+      - name: Create and push tag
+        run: |
+          git tag "v${{ inputs.version }}"
+          git push origin "v${{ inputs.version }}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ inputs.version }}
+          generate_release_notes: true
+          prerelease: ${{ inputs.prerelease }}
