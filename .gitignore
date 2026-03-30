@@ -185,3 +185,4 @@ __debug_bin*
 **/.env
 .env
 **/.tools/
+.claude/settings.local.json
