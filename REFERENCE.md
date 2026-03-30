@@ -977,6 +977,7 @@ Returns the Auth client (`client.Auth()`), used for Auth gRPC helper methods (e.
 
 </dd>
 </dl>
+</details>
 
 <details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">Client</a>() -> scalekit.ClientService</code></summary>
 <dl>
@@ -1218,7 +1219,7 @@ if err != nil {
 </dl>
 </details>
 
-<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">WithSecret</a>(clientSecret) -> Scalekit</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">WithSecret</a>(clientSecret) -> scalekit.Scalekit</code></summary>
 <dl>
 <dd>
 
@@ -1874,8 +1875,6 @@ if err := client.Client().DeleteClientSecret(ctx, "client_123", "secret_456"); e
 </dl>
 </dd>
 </dl>
-</details>
-
 </details>
 
 ## Organizations
@@ -5191,6 +5190,8 @@ _ = resp
 
 </dd>
 </dl>
+</details>
+
 ## API Tokens
 
 <details><summary><code>client.Token().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/token.go">CreateToken</a>(ctx, organizationId, options) -> (*CreateTokenResponse, error)</code></summary>
@@ -5476,8 +5477,6 @@ userTokens, err := client.Token().ListTokens(ctx, "org_123", scalekit.ListTokens
 </dl>
 </dd>
 </dl>
-</details>
-
 </details>
 
 ## Roles
