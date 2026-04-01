@@ -10,7 +10,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/sync v0.19.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20241021214115-324edc3d5d38
-	google.golang.org/protobuf v1.35.2
+	google.golang.org/protobuf v1.36.11
 )
 
 require (
