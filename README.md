@@ -49,7 +49,7 @@ This is the official Go SDK for [Scalekit](https://scalekit.com) — a complete 
 
 #### Prerequisites
 
-- **Go** ≥ 1.25.8 (required for security fixes in stdlib)
+- **Go** ≥ 1.25.9 (required for security fixes in stdlib)
 - [Scalekit account](https://scalekit.com) with `env_url`, `client_id`, and `client_secret`
 
 #### Installation
