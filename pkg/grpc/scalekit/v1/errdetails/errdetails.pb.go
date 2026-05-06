@@ -7,8 +7,11 @@
 package errdetails
 
 import (
+	_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
+	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -362,9 +365,14 @@ func (x *ResourceInfo) GetUser() string {
 	return ""
 }
 
+// HelpInfo provides documentation links attached to an error response.
+// When present in ErrorInfo, clients should surface these links to help
+// developers resolve the error. For example, a missing required field error
+// may include a link to the relevant guide.
 type HelpInfo struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Links         []*HelpInfo_Link       `protobuf:"bytes,1,rep,name=links,proto3" json:"links,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// One or more links relevant to resolving the error.
+	Links         []*HelpInfo_Link `protobuf:"bytes,1,rep,name=links,proto3" json:"links,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -580,10 +588,13 @@ func (x *ValidationErrorInfo_FieldViolation) GetConstraint() string {
 	return ""
 }
 
+// A documentation or reference link.
 type HelpInfo_Link struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Description   string                 `protobuf:"bytes,1,opt,name=description,proto3" json:"description,omitempty"`
-	Url           string                 `protobuf:"bytes,2,opt,name=url,proto3" json:"url,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Human-readable label for the link (e.g. "User verification flow").
+	Description string `protobuf:"bytes,1,opt,name=description,proto3" json:"description,omitempty"`
+	// Absolute URL to the documentation page (e.g. "https://docs.scalekit.com/...").
+	Url           string `protobuf:"bytes,2,opt,name=url,proto3" json:"url,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -636,7 +647,7 @@ var File_scalekit_v1_errdetails_errdetails_proto protoreflect.FileDescriptor
 
 const file_scalekit_v1_errdetails_errdetails_proto_rawDesc = "" +
 	"\n" +
-	"'scalekit/v1/errdetails/errdetails.proto\x12\x16scalekit.v1.errdetails\"\xfe\x05\n" +
+	"'scalekit/v1/errdetails/errdetails.proto\x12\x16scalekit.v1.errdetails\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\"\xfe\x05\n" +
 	"\tErrorInfo\x12\x1d\n" +
 	"\n" +
 	"error_code\x18\x01 \x01(\tR\terrorCode\x12E\n" +
@@ -688,7 +699,11 @@ const file_scalekit_v1_errdetails_errdetails_proto_rawDesc = "" +
 	"\rToolErrorInfo\x12!\n" +
 	"\fexecution_id\x18\x01 \x01(\tR\vexecutionId\x12,\n" +
 	"\x12tool_error_message\x18\x02 \x01(\tR\x10toolErrorMessage\x12&\n" +
-	"\x0ftool_error_code\x18\x03 \x01(\tR\rtoolErrorCodeB\xf3\x01\n" +
+	"\x0ftool_error_code\x18\x03 \x01(\tR\rtoolErrorCode2\x96\x01\n" +
+	"\x05Dummy\x12\x8c\x01\n" +
+	"\fDummyService\x12\x16.google.protobuf.Empty\x1a!.scalekit.v1.errdetails.ErrorInfo\"A\x92A0J.\n" +
+	"\x03200\x12'\x12%\n" +
+	"#\x1a!.scalekit.v1.errdetails.ErrorInfo\x82\xd3\xe4\x93\x02\b\x12\x06/dummyB\xf3\x01\n" +
 	"\x1acom.scalekit.v1.errdetailsB\x0fErrdetailsProtoP\x01ZJgithub.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/errdetails\xa2\x02\x03SVE\xaa\x02\x16Scalekit.V1.Errdetails\xca\x02\x16Scalekit\\V1\\Errdetails\xe2\x02\"Scalekit\\V1\\Errdetails\\GPBMetadata\xea\x02\x18Scalekit::V1::Errdetailsb\x06proto3"
 
 var (
@@ -715,22 +730,25 @@ var file_scalekit_v1_errdetails_errdetails_proto_goTypes = []any{
 	(*ToolErrorInfo)(nil),                      // 7: scalekit.v1.errdetails.ToolErrorInfo
 	(*ValidationErrorInfo_FieldViolation)(nil), // 8: scalekit.v1.errdetails.ValidationErrorInfo.FieldViolation
 	(*HelpInfo_Link)(nil),                      // 9: scalekit.v1.errdetails.HelpInfo.Link
+	(*emptypb.Empty)(nil),                      // 10: google.protobuf.Empty
 }
 var file_scalekit_v1_errdetails_errdetails_proto_depIdxs = []int32{
-	1, // 0: scalekit.v1.errdetails.ErrorInfo.debug_info:type_name -> scalekit.v1.errdetails.DebugInfo
-	5, // 1: scalekit.v1.errdetails.ErrorInfo.help_info:type_name -> scalekit.v1.errdetails.HelpInfo
-	6, // 2: scalekit.v1.errdetails.ErrorInfo.localized_message_info:type_name -> scalekit.v1.errdetails.LocalizedMessageInfo
-	4, // 3: scalekit.v1.errdetails.ErrorInfo.resource_info:type_name -> scalekit.v1.errdetails.ResourceInfo
-	3, // 4: scalekit.v1.errdetails.ErrorInfo.request_info:type_name -> scalekit.v1.errdetails.RequestInfo
-	2, // 5: scalekit.v1.errdetails.ErrorInfo.validation_error_info:type_name -> scalekit.v1.errdetails.ValidationErrorInfo
-	7, // 6: scalekit.v1.errdetails.ErrorInfo.tool_error_info:type_name -> scalekit.v1.errdetails.ToolErrorInfo
-	8, // 7: scalekit.v1.errdetails.ValidationErrorInfo.field_violations:type_name -> scalekit.v1.errdetails.ValidationErrorInfo.FieldViolation
-	9, // 8: scalekit.v1.errdetails.HelpInfo.links:type_name -> scalekit.v1.errdetails.HelpInfo.Link
-	9, // [9:9] is the sub-list for method output_type
-	9, // [9:9] is the sub-list for method input_type
-	9, // [9:9] is the sub-list for extension type_name
-	9, // [9:9] is the sub-list for extension extendee
-	0, // [0:9] is the sub-list for field type_name
+	1,  // 0: scalekit.v1.errdetails.ErrorInfo.debug_info:type_name -> scalekit.v1.errdetails.DebugInfo
+	5,  // 1: scalekit.v1.errdetails.ErrorInfo.help_info:type_name -> scalekit.v1.errdetails.HelpInfo
+	6,  // 2: scalekit.v1.errdetails.ErrorInfo.localized_message_info:type_name -> scalekit.v1.errdetails.LocalizedMessageInfo
+	4,  // 3: scalekit.v1.errdetails.ErrorInfo.resource_info:type_name -> scalekit.v1.errdetails.ResourceInfo
+	3,  // 4: scalekit.v1.errdetails.ErrorInfo.request_info:type_name -> scalekit.v1.errdetails.RequestInfo
+	2,  // 5: scalekit.v1.errdetails.ErrorInfo.validation_error_info:type_name -> scalekit.v1.errdetails.ValidationErrorInfo
+	7,  // 6: scalekit.v1.errdetails.ErrorInfo.tool_error_info:type_name -> scalekit.v1.errdetails.ToolErrorInfo
+	8,  // 7: scalekit.v1.errdetails.ValidationErrorInfo.field_violations:type_name -> scalekit.v1.errdetails.ValidationErrorInfo.FieldViolation
+	9,  // 8: scalekit.v1.errdetails.HelpInfo.links:type_name -> scalekit.v1.errdetails.HelpInfo.Link
+	10, // 9: scalekit.v1.errdetails.Dummy.DummyService:input_type -> google.protobuf.Empty
+	0,  // 10: scalekit.v1.errdetails.Dummy.DummyService:output_type -> scalekit.v1.errdetails.ErrorInfo
+	10, // [10:11] is the sub-list for method output_type
+	9,  // [9:10] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_scalekit_v1_errdetails_errdetails_proto_init() }
@@ -747,7 +765,7 @@ func file_scalekit_v1_errdetails_errdetails_proto_init() {
 			NumEnums:      0,
 			NumMessages:   10,
 			NumExtensions: 0,
-			NumServices:   0,
+			NumServices:   1,
 		},
 		GoTypes:           file_scalekit_v1_errdetails_errdetails_proto_goTypes,
 		DependencyIndexes: file_scalekit_v1_errdetails_errdetails_proto_depIdxs,

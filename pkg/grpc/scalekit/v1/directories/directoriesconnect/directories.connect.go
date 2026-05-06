@@ -82,6 +82,12 @@ const (
 	// DirectoryServiceTriggerDirectorySyncProcedure is the fully-qualified name of the
 	// DirectoryService's TriggerDirectorySync RPC.
 	DirectoryServiceTriggerDirectorySyncProcedure = "/scalekit.v1.directories.DirectoryService/TriggerDirectorySync"
+	// DirectoryServiceGetDirectoryContextProcedure is the fully-qualified name of the
+	// DirectoryService's GetDirectoryContext RPC.
+	DirectoryServiceGetDirectoryContextProcedure = "/scalekit.v1.directories.DirectoryService/GetDirectoryContext"
+	// DirectoryServiceUpdateDirectoryContextProcedure is the fully-qualified name of the
+	// DirectoryService's UpdateDirectoryContext RPC.
+	DirectoryServiceUpdateDirectoryContextProcedure = "/scalekit.v1.directories.DirectoryService/UpdateDirectoryContext"
 )
 
 // DirectoryServiceClient is a client for the scalekit.v1.directories.DirectoryService service.
@@ -102,6 +108,8 @@ type DirectoryServiceClient interface {
 	CreateDirectorySecret(context.Context, *connect.Request[directories.CreateDirectorySecretRequest]) (*connect.Response[directories.CreateDirectorySecretResponse], error)
 	RegenerateDirectorySecret(context.Context, *connect.Request[directories.RegenerateDirectorySecretRequest]) (*connect.Response[directories.RegenerateDirectorySecretResponse], error)
 	TriggerDirectorySync(context.Context, *connect.Request[directories.TriggerDirectorySyncRequest]) (*connect.Response[emptypb.Empty], error)
+	GetDirectoryContext(context.Context, *connect.Request[directories.GetDirectoryContextRequest]) (*connect.Response[directories.GetDirectoryContextResponse], error)
+	UpdateDirectoryContext(context.Context, *connect.Request[directories.UpdateDirectoryContextRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewDirectoryServiceClient constructs a client for the scalekit.v1.directories.DirectoryService
@@ -211,6 +219,18 @@ func NewDirectoryServiceClient(httpClient connect.HTTPClient, baseURL string, op
 			connect.WithSchema(directoryServiceMethods.ByName("TriggerDirectorySync")),
 			connect.WithClientOptions(opts...),
 		),
+		getDirectoryContext: connect.NewClient[directories.GetDirectoryContextRequest, directories.GetDirectoryContextResponse](
+			httpClient,
+			baseURL+DirectoryServiceGetDirectoryContextProcedure,
+			connect.WithSchema(directoryServiceMethods.ByName("GetDirectoryContext")),
+			connect.WithClientOptions(opts...),
+		),
+		updateDirectoryContext: connect.NewClient[directories.UpdateDirectoryContextRequest, emptypb.Empty](
+			httpClient,
+			baseURL+DirectoryServiceUpdateDirectoryContextProcedure,
+			connect.WithSchema(directoryServiceMethods.ByName("UpdateDirectoryContext")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -232,6 +252,8 @@ type directoryServiceClient struct {
 	createDirectorySecret      *connect.Client[directories.CreateDirectorySecretRequest, directories.CreateDirectorySecretResponse]
 	regenerateDirectorySecret  *connect.Client[directories.RegenerateDirectorySecretRequest, directories.RegenerateDirectorySecretResponse]
 	triggerDirectorySync       *connect.Client[directories.TriggerDirectorySyncRequest, emptypb.Empty]
+	getDirectoryContext        *connect.Client[directories.GetDirectoryContextRequest, directories.GetDirectoryContextResponse]
+	updateDirectoryContext     *connect.Client[directories.UpdateDirectoryContextRequest, emptypb.Empty]
 }
 
 // CreateDirectory calls scalekit.v1.directories.DirectoryService.CreateDirectory.
@@ -316,6 +338,16 @@ func (c *directoryServiceClient) TriggerDirectorySync(ctx context.Context, req *
 	return c.triggerDirectorySync.CallUnary(ctx, req)
 }
 
+// GetDirectoryContext calls scalekit.v1.directories.DirectoryService.GetDirectoryContext.
+func (c *directoryServiceClient) GetDirectoryContext(ctx context.Context, req *connect.Request[directories.GetDirectoryContextRequest]) (*connect.Response[directories.GetDirectoryContextResponse], error) {
+	return c.getDirectoryContext.CallUnary(ctx, req)
+}
+
+// UpdateDirectoryContext calls scalekit.v1.directories.DirectoryService.UpdateDirectoryContext.
+func (c *directoryServiceClient) UpdateDirectoryContext(ctx context.Context, req *connect.Request[directories.UpdateDirectoryContextRequest]) (*connect.Response[emptypb.Empty], error) {
+	return c.updateDirectoryContext.CallUnary(ctx, req)
+}
+
 // DirectoryServiceHandler is an implementation of the scalekit.v1.directories.DirectoryService
 // service.
 type DirectoryServiceHandler interface {
@@ -335,6 +367,8 @@ type DirectoryServiceHandler interface {
 	CreateDirectorySecret(context.Context, *connect.Request[directories.CreateDirectorySecretRequest]) (*connect.Response[directories.CreateDirectorySecretResponse], error)
 	RegenerateDirectorySecret(context.Context, *connect.Request[directories.RegenerateDirectorySecretRequest]) (*connect.Response[directories.RegenerateDirectorySecretResponse], error)
 	TriggerDirectorySync(context.Context, *connect.Request[directories.TriggerDirectorySyncRequest]) (*connect.Response[emptypb.Empty], error)
+	GetDirectoryContext(context.Context, *connect.Request[directories.GetDirectoryContextRequest]) (*connect.Response[directories.GetDirectoryContextResponse], error)
+	UpdateDirectoryContext(context.Context, *connect.Request[directories.UpdateDirectoryContextRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewDirectoryServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -440,6 +474,18 @@ func NewDirectoryServiceHandler(svc DirectoryServiceHandler, opts ...connect.Han
 		connect.WithSchema(directoryServiceMethods.ByName("TriggerDirectorySync")),
 		connect.WithHandlerOptions(opts...),
 	)
+	directoryServiceGetDirectoryContextHandler := connect.NewUnaryHandler(
+		DirectoryServiceGetDirectoryContextProcedure,
+		svc.GetDirectoryContext,
+		connect.WithSchema(directoryServiceMethods.ByName("GetDirectoryContext")),
+		connect.WithHandlerOptions(opts...),
+	)
+	directoryServiceUpdateDirectoryContextHandler := connect.NewUnaryHandler(
+		DirectoryServiceUpdateDirectoryContextProcedure,
+		svc.UpdateDirectoryContext,
+		connect.WithSchema(directoryServiceMethods.ByName("UpdateDirectoryContext")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/scalekit.v1.directories.DirectoryService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case DirectoryServiceCreateDirectoryProcedure:
@@ -474,6 +520,10 @@ func NewDirectoryServiceHandler(svc DirectoryServiceHandler, opts ...connect.Han
 			directoryServiceRegenerateDirectorySecretHandler.ServeHTTP(w, r)
 		case DirectoryServiceTriggerDirectorySyncProcedure:
 			directoryServiceTriggerDirectorySyncHandler.ServeHTTP(w, r)
+		case DirectoryServiceGetDirectoryContextProcedure:
+			directoryServiceGetDirectoryContextHandler.ServeHTTP(w, r)
+		case DirectoryServiceUpdateDirectoryContextProcedure:
+			directoryServiceUpdateDirectoryContextHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -545,4 +595,12 @@ func (UnimplementedDirectoryServiceHandler) RegenerateDirectorySecret(context.Co
 
 func (UnimplementedDirectoryServiceHandler) TriggerDirectorySync(context.Context, *connect.Request[directories.TriggerDirectorySyncRequest]) (*connect.Response[emptypb.Empty], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.directories.DirectoryService.TriggerDirectorySync is not implemented"))
+}
+
+func (UnimplementedDirectoryServiceHandler) GetDirectoryContext(context.Context, *connect.Request[directories.GetDirectoryContextRequest]) (*connect.Response[directories.GetDirectoryContextResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.directories.DirectoryService.GetDirectoryContext is not implemented"))
+}
+
+func (UnimplementedDirectoryServiceHandler) UpdateDirectoryContext(context.Context, *connect.Request[directories.UpdateDirectoryContextRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.directories.DirectoryService.UpdateDirectoryContext is not implemented"))
 }

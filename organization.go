@@ -3,6 +3,7 @@ package scalekit
 import (
 	"context"
 
+	commonsv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/commons"
 	organizationsv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/organizations"
 	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/organizations/organizationsconnect"
 	"google.golang.org/protobuf/types/known/wrapperspb"
@@ -26,6 +27,38 @@ type OrganizationUserManagementSettings struct {
 	MaxAllowedUsers *int32
 }
 
+// SessionPolicySource indicates whether an organization uses its own policy or inherits the application default.
+type SessionPolicySource = organizationsv1.SessionPolicySource
+
+const (
+	SessionPolicySourceApplication = organizationsv1.SessionPolicySource_APPLICATION
+	SessionPolicySourceCustom      = organizationsv1.SessionPolicySource_CUSTOM
+)
+
+// TimeUnit for session timeout fields accepted in UpdateOrganizationSessionPolicy.
+type TimeUnit = commonsv1.TimeUnit
+
+const (
+	TimeUnitMinutes = commonsv1.TimeUnit_MINUTES
+	TimeUnitHours   = commonsv1.TimeUnit_HOURS
+	TimeUnitDays    = commonsv1.TimeUnit_DAYS
+)
+
+// OrganizationSessionPolicy is the input type for UpdateOrganizationSessionPolicy.
+// Set PolicySource to SessionPolicySourceApplication to revert the organization to application defaults.
+// Set PolicySource to SessionPolicySourceCustom and supply timeout values to activate a custom policy.
+type OrganizationSessionPolicy struct {
+	PolicySource               SessionPolicySource
+	AbsoluteSessionTimeout     *int32
+	AbsoluteSessionTimeoutUnit TimeUnit
+	IdleSessionTimeoutEnabled  *bool
+	IdleSessionTimeout         *int32
+	IdleSessionTimeoutUnit     TimeUnit
+}
+
+// OrganizationSessionPolicySettings is the response type for session policy operations.
+type OrganizationSessionPolicySettings = organizationsv1.OrganizationSessionPolicySettings
+
 type CreateOrganizationOptions struct {
 	ExternalId string
 	Metadata   map[string]string
@@ -42,6 +75,8 @@ type Organization interface {
 	GeneratePortalLink(ctx context.Context, organizationId string) (*Link, error)
 	UpdateOrganizationSettings(ctx context.Context, id string, settings OrganizationSettings) (*GetOrganizationResponse, error)
 	UpsertUserManagementSettings(ctx context.Context, organizationId string, settings OrganizationUserManagementSettings) (*organizationsv1.OrganizationUserManagementSettings, error)
+	GetOrganizationSessionPolicy(ctx context.Context, organizationId string) (*OrganizationSessionPolicySettings, error)
+	UpdateOrganizationSessionPolicy(ctx context.Context, organizationId string, policy OrganizationSessionPolicy) (*OrganizationSessionPolicySettings, error)
 }
 
 type organization struct {
@@ -201,4 +236,56 @@ func (o *organization) UpsertUserManagementSettings(ctx context.Context, organiz
 	}
 
 	return resp.Settings, nil
+}
+
+func (o *organization) GetOrganizationSessionPolicy(ctx context.Context, organizationId string) (*OrganizationSessionPolicySettings, error) {
+	resp, err := newConnectExecuter(
+		o.coreClient,
+		o.client.GetOrganizationSessionPolicy,
+		&organizationsv1.GetOrganizationSessionPolicyRequest{
+			OrganizationId: organizationId,
+		},
+	).exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Policy, nil
+}
+
+func (o *organization) UpdateOrganizationSessionPolicy(ctx context.Context, organizationId string, policy OrganizationSessionPolicy) (*OrganizationSessionPolicySettings, error) {
+	proto := &organizationsv1.OrganizationSessionPolicySettings{
+		PolicySource: policy.PolicySource,
+	}
+	if policy.AbsoluteSessionTimeout != nil {
+		proto.AbsoluteSessionTimeout = wrapperspb.Int32(*policy.AbsoluteSessionTimeout)
+	}
+	if policy.AbsoluteSessionTimeoutUnit != commonsv1.TimeUnit_SESSION_TIME_UNIT_UNSPECIFIED {
+		u := policy.AbsoluteSessionTimeoutUnit
+		proto.AbsoluteSessionTimeoutUnit = &u
+	}
+	if policy.IdleSessionTimeoutEnabled != nil {
+		proto.IdleSessionTimeoutEnabled = wrapperspb.Bool(*policy.IdleSessionTimeoutEnabled)
+	}
+	if policy.IdleSessionTimeout != nil {
+		proto.IdleSessionTimeout = wrapperspb.Int32(*policy.IdleSessionTimeout)
+	}
+	if policy.IdleSessionTimeoutUnit != commonsv1.TimeUnit_SESSION_TIME_UNIT_UNSPECIFIED {
+		u := policy.IdleSessionTimeoutUnit
+		proto.IdleSessionTimeoutUnit = &u
+	}
+
+	resp, err := newConnectExecuter(
+		o.coreClient,
+		o.client.UpdateOrganizationSessionPolicy,
+		&organizationsv1.UpdateOrganizationSessionPolicyRequest{
+			OrganizationId: organizationId,
+			Policy:         proto,
+		},
+	).exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Policy, nil
 }

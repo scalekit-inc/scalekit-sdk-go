@@ -552,13 +552,19 @@ func (*GetAuthCustomizationsRequest) Descriptor() ([]byte, []int) {
 }
 
 // PortalSettings contains feature flags and settings derived from the workspace's billing subscription
+// and feature rollout configuration.
 type PortalSettings struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// custom_branding indicates whether the workspace has the Customization billing item enabled,
 	// allowing custom portal branding (logos, colors, etc.)
 	CustomBranding bool `protobuf:"varint,1,opt,name=custom_branding,json=customBranding,proto3" json:"custom_branding,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	// new_self_serve_sso_scim indicates whether the new self-serve SSO/SCIM flow
+	// should be shown in the hosted pages. This is rollout-driven (feature flag),
+	// enabled for development environments or new workspaces (workspace_created_at >= cutoff),
+	// not billing-derived.
+	NewSelfServeSsoScim *bool `protobuf:"varint,2,opt,name=new_self_serve_sso_scim,json=newSelfServeSsoScim,proto3,oneof" json:"new_self_serve_sso_scim,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
 func (x *PortalSettings) Reset() {
@@ -594,6 +600,13 @@ func (*PortalSettings) Descriptor() ([]byte, []int) {
 func (x *PortalSettings) GetCustomBranding() bool {
 	if x != nil {
 		return x.CustomBranding
+	}
+	return false
+}
+
+func (x *PortalSettings) GetNewSelfServeSsoScim() bool {
+	if x != nil && x.NewSelfServeSsoScim != nil {
+		return *x.NewSelfServeSsoScim
 	}
 	return false
 }
@@ -1221,24 +1234,26 @@ func (x *UpdateLoginUserDetailsRequest) GetUser() *User {
 }
 
 type User struct {
-	state                  protoimpl.MessageState `protogen:"open.v1"`
-	Sub                    string                 `protobuf:"bytes,1,opt,name=sub,proto3" json:"sub,omitempty"`
-	Email                  string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
-	GivenName              string                 `protobuf:"bytes,3,opt,name=given_name,json=givenName,proto3" json:"given_name,omitempty"`
-	FamilyName             string                 `protobuf:"bytes,4,opt,name=family_name,json=familyName,proto3" json:"family_name,omitempty"`
-	EmailVerified          bool                   `protobuf:"varint,5,opt,name=email_verified,json=emailVerified,proto3" json:"email_verified,omitempty"`
-	PhoneNumber            string                 `protobuf:"bytes,6,opt,name=phone_number,json=phoneNumber,proto3" json:"phone_number,omitempty"`
-	PhoneNumberVerified    bool                   `protobuf:"varint,7,opt,name=phone_number_verified,json=phoneNumberVerified,proto3" json:"phone_number_verified,omitempty"`
-	Name                   string                 `protobuf:"bytes,8,opt,name=name,proto3" json:"name,omitempty"`
-	PreferredUsername      string                 `protobuf:"bytes,9,opt,name=preferred_username,json=preferredUsername,proto3" json:"preferred_username,omitempty"`
-	Picture                string                 `protobuf:"bytes,10,opt,name=picture,proto3" json:"picture,omitempty"`
-	Gender                 string                 `protobuf:"bytes,11,opt,name=gender,proto3" json:"gender,omitempty"`
-	Locale                 string                 `protobuf:"bytes,12,opt,name=locale,proto3" json:"locale,omitempty"`
-	Groups                 []string               `protobuf:"bytes,13,rep,name=groups,proto3" json:"groups,omitempty"`
-	CustomAttributes       *structpb.Struct       `protobuf:"bytes,14,opt,name=custom_attributes,json=customAttributes,proto3" json:"custom_attributes,omitempty"`
-	OrganizationExternalId *string                `protobuf:"bytes,15,opt,name=organization_external_id,json=organizationExternalId,proto3,oneof" json:"organization_external_id,omitempty"`
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
+	state                    protoimpl.MessageState `protogen:"open.v1"`
+	Sub                      string                 `protobuf:"bytes,1,opt,name=sub,proto3" json:"sub,omitempty"`
+	Email                    string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	GivenName                string                 `protobuf:"bytes,3,opt,name=given_name,json=givenName,proto3" json:"given_name,omitempty"`
+	FamilyName               string                 `protobuf:"bytes,4,opt,name=family_name,json=familyName,proto3" json:"family_name,omitempty"`
+	EmailVerified            bool                   `protobuf:"varint,5,opt,name=email_verified,json=emailVerified,proto3" json:"email_verified,omitempty"`
+	PhoneNumber              string                 `protobuf:"bytes,6,opt,name=phone_number,json=phoneNumber,proto3" json:"phone_number,omitempty"`
+	PhoneNumberVerified      bool                   `protobuf:"varint,7,opt,name=phone_number_verified,json=phoneNumberVerified,proto3" json:"phone_number_verified,omitempty"`
+	Name                     string                 `protobuf:"bytes,8,opt,name=name,proto3" json:"name,omitempty"`
+	PreferredUsername        string                 `protobuf:"bytes,9,opt,name=preferred_username,json=preferredUsername,proto3" json:"preferred_username,omitempty"`
+	Picture                  string                 `protobuf:"bytes,10,opt,name=picture,proto3" json:"picture,omitempty"`
+	Gender                   string                 `protobuf:"bytes,11,opt,name=gender,proto3" json:"gender,omitempty"`
+	Locale                   string                 `protobuf:"bytes,12,opt,name=locale,proto3" json:"locale,omitempty"`
+	Groups                   []string               `protobuf:"bytes,13,rep,name=groups,proto3" json:"groups,omitempty"`
+	CustomAttributes         *structpb.Struct       `protobuf:"bytes,14,opt,name=custom_attributes,json=customAttributes,proto3" json:"custom_attributes,omitempty"`
+	OrganizationExternalId   *string                `protobuf:"bytes,15,opt,name=organization_external_id,json=organizationExternalId,proto3,oneof" json:"organization_external_id,omitempty"`
+	Roles                    []string               `protobuf:"bytes,16,rep,name=roles,proto3" json:"roles,omitempty"`
+	OrganizationExternalName *string                `protobuf:"bytes,17,opt,name=organization_external_name,json=organizationExternalName,proto3,oneof" json:"organization_external_name,omitempty"`
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
 }
 
 func (x *User) Reset() {
@@ -1376,10 +1391,26 @@ func (x *User) GetOrganizationExternalId() string {
 	return ""
 }
 
+func (x *User) GetRoles() []string {
+	if x != nil {
+		return x.Roles
+	}
+	return nil
+}
+
+func (x *User) GetOrganizationExternalName() string {
+	if x != nil && x.OrganizationExternalName != nil {
+		return *x.OrganizationExternalName
+	}
+	return ""
+}
+
 type GetAuthStateResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	AuthState     AuthState              `protobuf:"varint,1,opt,name=auth_state,json=authState,proto3,enum=scalekit.v1.auth.AuthState" json:"auth_state,omitempty"`
-	User          *UserDetails           `protobuf:"bytes,2,opt,name=user,proto3" json:"user,omitempty"`
+	state     protoimpl.MessageState `protogen:"open.v1"`
+	AuthState AuthState              `protobuf:"varint,1,opt,name=auth_state,json=authState,proto3,enum=scalekit.v1.auth.AuthState" json:"auth_state,omitempty"`
+	User      *UserDetails           `protobuf:"bytes,2,opt,name=user,proto3" json:"user,omitempty"`
+	// Login hint from the original /authorize request, typically an email address used to pre-fill the login UI.
+	LoginHint     string `protobuf:"bytes,3,opt,name=login_hint,json=loginHint,proto3" json:"login_hint,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1426,6 +1457,13 @@ func (x *GetAuthStateResponse) GetUser() *UserDetails {
 		return x.User
 	}
 	return nil
+}
+
+func (x *GetAuthStateResponse) GetLoginHint() string {
+	if x != nil {
+		return x.LoginHint
+	}
+	return ""
 }
 
 type GetAuthErrorRequest struct {
@@ -1557,9 +1595,11 @@ const file_scalekit_v1_auth_auth_proto_rawDesc = "" +
 	"\x1bDiscoveryAuthMethodResponse\x12=\n" +
 	"\vauth_method\x18\x01 \x01(\v2\x1c.scalekit.v1.auth.AuthMethodR\n" +
 	"authMethod\"\x1e\n" +
-	"\x1cGetAuthCustomizationsRequest\"\xab\x01\n" +
+	"\x1cGetAuthCustomizationsRequest\"\x8f\x03\n" +
 	"\x0ePortalSettings\x12\x98\x01\n" +
-	"\x0fcustom_branding\x18\x01 \x01(\bBo\x92Al2dIndicates whether custom portal branding is enabled for this workspace based on billing subscriptionJ\x04trueR\x0ecustomBranding\"\xb2\x01\n" +
+	"\x0fcustom_branding\x18\x01 \x01(\bBo\x92Al2dIndicates whether custom portal branding is enabled for this workspace based on billing subscriptionJ\x04trueR\x0ecustomBranding\x12\xc5\x01\n" +
+	"\x17new_self_serve_sso_scim\x18\x02 \x01(\bB\x89\x01\x92A\x85\x012|Indicates whether the new self-serve SSO/SCIM flow should be shown in the hosted pages (rollout-driven, not billing-derived)J\x05falseH\x00R\x13newSelfServeSsoScim\x88\x01\x01B\x1a\n" +
+	"\x18_new_self_serve_sso_scim\"\xb2\x01\n" +
 	"\x1dGetAuthCustomizationsResponse\x12N\n" +
 	"\x16customization_settings\x18\x02 \x01(\v2\x17.google.protobuf.StructR\x15customizationSettings\x12A\n" +
 	"\bsettings\x18\x03 \x01(\v2 .scalekit.v1.auth.PortalSettingsB\x03\xe0A\x03R\bsettings\"N\n" +
@@ -1605,7 +1645,7 @@ const file_scalekit_v1_auth_auth_proto_rawDesc = "" +
 	"\x1dUpdateLoginUserDetailsRequest\x12v\n" +
 	"\rconnection_id\x18\x01 \x01(\tBQ\x92AE2+Connection ID. Unique ID for the connectionJ\x16\"conn_121312434123312\"\xbaH\x06r\x04\x10\x01\x18 R\fconnectionId\x12\x90\x01\n" +
 	"\x10login_request_id\x18\x02 \x01(\tBf\x92A]2BLogin Request ID that was shared as part of authorization initiateJ\x17\"lri_73415099636808061\"\xbaH\x03\xc8\x01\x01R\x0eloginRequestId\x12*\n" +
-	"\x04user\x18\x03 \x01(\v2\x16.scalekit.v1.auth.UserR\x04user\"\xe1\r\n" +
+	"\x04user\x18\x03 \x01(\v2\x16.scalekit.v1.auth.UserR\x04user\"\x95\x10\n" +
 	"\x04User\x12\x83\x01\n" +
 	"\x03sub\x18\x01 \x01(\tBq\x92Ag2WSubject identifier for the user (typically a unique user ID from the identity provider)J\f\"1234567890\"\xbaH\x04r\x02\x10\x01R\x03sub\x12R\n" +
 	"\x05email\x18\x02 \x01(\tB<\x92A22\x1cUser's primary email addressJ\x12\"user@example.com\"\xbaH\x04r\x02\x10\x01R\x05email\x12=\n" +
@@ -1625,12 +1665,17 @@ const file_scalekit_v1_auth_auth_proto_rawDesc = "" +
 	"\x06locale\x18\f \x01(\tBM\x92AJ2?User's locale or language preference (IETF BCP 47 language tag)J\a\"en-US\"R\x06locale\x12f\n" +
 	"\x06groups\x18\r \x03(\tBN\x92AK2/List of group names or IDs the user belongs to.J\x18[\"admins\", \"developers\"]R\x06groups\x12\xf2\x01\n" +
 	"\x11custom_attributes\x18\x0e \x01(\v2\x17.google.protobuf.StructB\xab\x01\x92A\xa7\x012mCustom attributes for the user, represented as a key-value map. Used for additional identity provider claims.J6{\"department\": \"Engineering\", \"employee_id\": \"E12345\"}R\x10customAttributes\x12\xb1\x01\n" +
-	"\x18organization_external_id\x18\x0f \x01(\tBr\x92Ao2EIdentifier for the user’s organization within the identity providerJ&\"132d085d-d89d-4a2e-95bb-49bde680d14f\"H\x00R\x16organizationExternalId\x88\x01\x01B\x1b\n" +
-	"\x19_organization_external_id\"\x85\x01\n" +
+	"\x18organization_external_id\x18\x0f \x01(\tBr\x92Ao2EIdentifier for the user’s organization within the identity providerJ&\"132d085d-d89d-4a2e-95bb-49bde680d14f\"H\x00R\x16organizationExternalId\x88\x01\x01\x12S\n" +
+	"\x05roles\x18\x10 \x03(\tB=\x92A:2#List of roles assigned to the user.J\x13[\"admin\", \"editor\"]R\x05roles\x12\xbd\x01\n" +
+	"\x1aorganization_external_name\x18\x11 \x01(\tBz\x92Ao2`Name of the organization the user is authenticating into. Used to display on the consent screen.J\v\"Acme Corp\"\xbaH\x05r\x03\x18\xc8\x01H\x01R\x18organizationExternalName\x88\x01\x01B\x1b\n" +
+	"\x19_organization_external_idB\x1d\n" +
+	"\x1b_organization_external_name\"\xb1\x02\n" +
 	"\x14GetAuthStateResponse\x12:\n" +
 	"\n" +
 	"auth_state\x18\x01 \x01(\x0e2\x1b.scalekit.v1.auth.AuthStateR\tauthState\x121\n" +
-	"\x04user\x18\x02 \x01(\v2\x1d.scalekit.v1.auth.UserDetailsR\x04user\"\x8c\x01\n" +
+	"\x04user\x18\x02 \x01(\v2\x1d.scalekit.v1.auth.UserDetailsR\x04user\x12\xa9\x01\n" +
+	"\n" +
+	"login_hint\x18\x03 \x01(\tB\x89\x01\x92A\x85\x012oLogin hint from the original authorize request. Typically an email address used to pre-fill the login UI input.J\x12\"user@example.com\"R\tloginHint\"\x8c\x01\n" +
 	"\x13GetAuthErrorRequest\x12u\n" +
 	"\berror_id\x18\x01 \x01(\tBZ\x92AH2.Unique identifier for the authentication errorJ\x16\"err_1234567890abcdef\"\xbaH\fr\n" +
 	"\x10\x01\x18@:\x04err_R\aerrorId\"Y\n" +
@@ -1785,6 +1830,7 @@ func file_scalekit_v1_auth_auth_proto_init() {
 		return
 	}
 	file_scalekit_v1_auth_auth_proto_msgTypes[2].OneofWrappers = []any{}
+	file_scalekit_v1_auth_auth_proto_msgTypes[7].OneofWrappers = []any{}
 	file_scalekit_v1_auth_auth_proto_msgTypes[14].OneofWrappers = []any{}
 	file_scalekit_v1_auth_auth_proto_msgTypes[19].OneofWrappers = []any{}
 	type x struct{}

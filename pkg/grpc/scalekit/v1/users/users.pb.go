@@ -2895,10 +2895,10 @@ const file_scalekit_v1_users_users_proto_rawDesc = "" +
 	"\n" +
 	"identities\">\n" +
 	"\x0fGetUserResponse\x12+\n" +
-	"\x04user\x18\x01 \x01(\v2\x17.scalekit.v1.users.UserR\x04user\"\xd9\x01\n" +
+	"\x04user\x18\x01 \x01(\v2\x17.scalekit.v1.users.UserR\x04user\"\xd8\x01\n" +
 	"\x16GetCurrentUserResponse\x12+\n" +
-	"\x04user\x18\x01 \x01(\v2\x17.scalekit.v1.users.UserR\x04user\x12\x91\x01\n" +
-	"\x12current_session_id\x18\x02 \x01(\tBc\x92A`2EThe ID of the current session associated with the authenticated user.J\x17\"sess_1234abcd5678efgh\"R\x10currentSessionId\"\x17\n" +
+	"\x04user\x18\x01 \x01(\v2\x17.scalekit.v1.users.UserR\x04user\x12\x90\x01\n" +
+	"\x12current_session_id\x18\x02 \x01(\tBb\x92A_2EThe ID of the current session associated with the authenticated user.J\x16\"ses_1234567890123456\"R\x10currentSessionId\"\x17\n" +
 	"\x15GetCurrentUserRequest\"\xf4\x04\n" +
 	"\x1cListOrganizationUsersRequest\x12\xc9\x01\n" +
 	"\x0forganization_id\x18\x01 \x01(\tB\x9f\x01\x92A\x8c\x012rUnique identifier of the organization for which to list users. Must start with 'org_' and be 1-32 characters long.J\x16\"org_1234abcd5678efgh\"\xbaH\fr\n" +
@@ -2923,12 +2923,13 @@ const file_scalekit_v1_users_users_proto_rawDesc = "" +
 	"\n" +
 	"identitiesB\n" +
 	"\n" +
-	"\b_cascade\"\xaa\x06\n" +
+	"\b_cascade\"\xbd\x06\n" +
 	"\x17CreateMembershipRequest\x12\xb7\x01\n" +
 	"\x0forganization_id\x18\x01 \x01(\tB\x8d\x01\x92A{2aUnique identifier of the target organization. Must start with 'org_' and be 1-32 characters long.J\x16\"org_1234abcd5678efgh\"\xbaH\fr\n" +
-	"\x10\x01\x18 :\x04org_R\x0eorganizationId\x12\x8f\x01\n" +
+	"\x10\x01\x18 :\x04org_R\x0eorganizationId\x12\xa2\x01\n" +
 	"\n" +
-	"membership\x18\x02 \x01(\v2#.scalekit.v1.users.CreateMembershipBJ\x92AA2?Membership details to create. Required fields must be provided.\xbaH\x03\xc8\x01\x01R\n" +
+	"membership\x18\x02 \x01(\v2#.scalekit.v1.users.CreateMembershipB]\x92AQ2?Membership details to create. Required fields must be provided.\xca>\r\xfa\x02\n" +
+	"membership\xe0A\x02\xbaH\x03\xc8\x01\x01R\n" +
 	"membership\x12\x81\x01\n" +
 	"\x02id\x18\x03 \x01(\tBo\x92A]2CSystem-generated user ID. Must start with 'usr_' (19-25 characters)J\x16\"usr_1234abcd5678efgh\"\xbaH\fr\n" +
 	"\x10\x13\x18\x19:\x04usr_H\x00R\x02id\x12\x8e\x01\n" +
@@ -2949,10 +2950,10 @@ const file_scalekit_v1_users_users_proto_rawDesc = "" +
 	"\x0fnext_page_token\x18\x02 \x01(\tB\x8a\x01\x92A\x86\x012PToken for retrieving the next page of results. Empty if there are no more pages.J2\"eyJwYWdlIjogMiwgImxhc3RfaWQiOiAidXNyXzEyMzQ1In0=\"R\rnextPageToken\x12x\n" +
 	"\n" +
 	"total_size\x18\x03 \x01(\rBY\x92AV2NTotal number of users matching the request criteria, regardless of pagination.J\x041042R\ttotalSize\x12\xb6\x01\n" +
-	"\x0fprev_page_token\x18\x04 \x01(\tB\x8d\x01\x92A\x89\x012SToken for retrieving the previous page of results. Empty if this is the first page.J2\"eyJwYWdlIjogMCwgImZpcnN0X2lkIjogInVzcl85ODc2NSJ9\"R\rprevPageToken\"\xe3\x03\n" +
-	"\x12SearchUsersRequest\x12\xaa\x01\n" +
-	"\x05query\x18\x01 \x01(\tB\x93\x01\x92A\x83\x012oSearch term to match against user email, IDs, or external IDs. Must be at least 3 characters. Case insensitive.J\x10john@example.com\xbaH\t\xc8\x01\x01r\x04\x10\x03\x18dR\x05query\x12x\n" +
-	"\tpage_size\x18\x02 \x01(\rB[\x92AQ2KMaximum number of users to return per page. Value must be between 1 and 30.J\x0230\xbaH\x04*\x02\x18\x1eR\bpageSize\x12\xa5\x01\n" +
+	"\x0fprev_page_token\x18\x04 \x01(\tB\x8d\x01\x92A\x89\x012SToken for retrieving the previous page of results. Empty if this is the first page.J2\"eyJwYWdlIjogMCwgImZpcnN0X2lkIjogInVzcl85ODc2NSJ9\"R\rprevPageToken\"\xfb\x03\n" +
+	"\x12SearchUsersRequest\x12\xaf\x01\n" +
+	"\x05query\x18\x01 \x01(\tB\x98\x01\x92A\x88\x012oSearch term to match against user email, IDs, or external IDs. Must be at least 3 characters. Case insensitive.J\x10john@example.comxd\x80\x01\x03\xbaH\t\xc8\x01\x01r\x04\x10\x03\x18dR\x05query\x12\x8a\x01\n" +
+	"\tpage_size\x18\x02 \x01(\rBm\x92Ac2KMaximum number of users to return per page. Value must be between 1 and 30.J\x0230Y\x00\x00\x00\x00\x00\x00>@i\x00\x00\x00\x00\x00\x00\xf0?\xbaH\x04*\x02\x18\x1eR\bpageSize\x12\xa5\x01\n" +
 	"\n" +
 	"page_token\x18\x03 \x01(\tB\x85\x01\x92A\x81\x012aToken from a previous response for pagination. Provide this to retrieve the next page of results.J\x1ceyJwYWdlIjoyLCJsaW1pdCI6MzB9R\tpageToken\"\xcb\x04\n" +
 	"\x13SearchUsersResponse\x12\xb3\x01\n" +
@@ -2995,12 +2996,12 @@ const file_scalekit_v1_users_users_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\x10\n" +
 	"\x0e_inviter_emailJ\x04\b\x01\x10\x02J\x04\b\x02\x10\x03J\x04\b\x03\x10\x04J\x04\b\x05\x10\x06J\x04\b\x06\x10\a\"G\n" +
 	"\x18UpdateMembershipResponse\x12+\n" +
-	"\x04user\x18\x01 \x01(\v2\x17.scalekit.v1.users.UserR\x04user\"\xb7\x05\n" +
+	"\x04user\x18\x01 \x01(\v2\x17.scalekit.v1.users.UserR\x04user\"\xcf\x05\n" +
 	"\x1eSearchOrganizationUsersRequest\x12\xc5\x01\n" +
 	"\x0forganization_id\x18\x01 \x01(\tB\x9b\x01\x92A\x85\x012kUnique identifier of the organization to search within. Must start with 'org_' and be 1-32 characters long.J\x16\"org_1234abcd5678efgh\"\xbaH\x0f\xc8\x01\x01r\n" +
-	"\x10\x01\x18 :\x04org_R\x0eorganizationId\x12\xaa\x01\n" +
-	"\x05query\x18\x02 \x01(\tB\x93\x01\x92A\x83\x012oSearch term to match against user email, IDs, or external IDs. Must be at least 3 characters. Case insensitive.J\x10john@example.com\xbaH\t\xc8\x01\x01r\x04\x10\x03\x18dR\x05query\x12x\n" +
-	"\tpage_size\x18\x03 \x01(\rB[\x92AQ2KMaximum number of users to return per page. Value must be between 1 and 30.J\x0230\xbaH\x04*\x02\x18\x1eR\bpageSize\x12\xa5\x01\n" +
+	"\x10\x01\x18 :\x04org_R\x0eorganizationId\x12\xaf\x01\n" +
+	"\x05query\x18\x02 \x01(\tB\x98\x01\x92A\x88\x012oSearch term to match against user email, IDs, or external IDs. Must be at least 3 characters. Case insensitive.J\x10john@example.comxd\x80\x01\x03\xbaH\t\xc8\x01\x01r\x04\x10\x03\x18dR\x05query\x12\x8a\x01\n" +
+	"\tpage_size\x18\x03 \x01(\rBm\x92Ac2KMaximum number of users to return per page. Value must be between 1 and 30.J\x0230Y\x00\x00\x00\x00\x00\x00>@i\x00\x00\x00\x00\x00\x00\xf0?\xbaH\x04*\x02\x18\x1eR\bpageSize\x12\xa5\x01\n" +
 	"\n" +
 	"page_token\x18\x04 \x01(\tB\x85\x01\x92A\x81\x012aToken from a previous response for pagination. Provide this to retrieve the next page of results.J\x1ceyJwYWdlIjoyLCJsaW1pdCI6MzB9R\tpageToken\"\xd7\x04\n" +
 	"\x1fSearchOrganizationUsersResponse\x12\xb3\x01\n" +
@@ -3137,103 +3138,117 @@ const file_scalekit_v1_users_users_proto_rawDesc = "" +
 	"\x16GetSupportHashResponse\x12!\n" +
 	"\fsupport_hash\x18\x01 \x01(\tR\vsupportHash\"\x8f\x01\n" +
 	"\x1bListUserPermissionsResponse\x12p\n" +
-	"\vpermissions\x18\x01 \x03(\v2\x1d.scalekit.v1.users.PermissionB/\x92A,2*List of permissions the user has access toR\vpermissions2\xaa[\n" +
+	"\vpermissions\x18\x01 \x03(\v2\x1d.scalekit.v1.users.PermissionB/\x92A,2*List of permissions the user has access toR\vpermissions2\x9eb\n" +
 	"\vUserService\x12\xb8\x03\n" +
 	"\aGetUser\x12!.scalekit.v1.users.GetUserRequest\x1a\".scalekit.v1.users.GetUserResponse\"\xe5\x02\x92A\xc1\x02\n" +
 	"\x05Users\x12\bGet user\x1a\x8e\x01Retrieves all details for a user by system-generated user ID or external ID. The response includes organization memberships and user metadata.J\x9c\x01\n" +
 	"\x03200\x12\x94\x01\n" +
 	"jUser details retrieved successfully. Returns full user object with system-generated fields and timestamps.\x12&\n" +
-	"$\x1a\".scalekit.v1.users.GetUserResponse\x82\xb5\x18\x02\x18D\x82\xd3\xe4\x93\x02\x14\x12\x12/api/v1/users/{id}\x12\xba\x03\n" +
-	"\x0eGetCurrentUser\x12(.scalekit.v1.users.GetCurrentUserRequest\x1a).scalekit.v1.users.GetCurrentUserResponse\"\xd2\x02\x92A\x9f\x02\n" +
-	"\x05Users\x12\x16Get authenticated user\x1a\x9e\x01Retrieves details for the currently authenticated user. Returns the same user object as GetUser but uses the authenticated user's ID from the session context.J]\n" +
-	"\x03200\x12V\n" +
-	",Current user details retrieved successfully.\x12&\n" +
-	"$\x1a\".scalekit.v1.users.GetUserResponse\x82\xb5\x18\x02\x18\x10\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02\x14\x12\x12/api/v1/users:this\x12\xe1\x02\n" +
-	"\x0eGetSupportHash\x12\x16.google.protobuf.Empty\x1a).scalekit.v1.users.GetSupportHashResponse\"\x8b\x02\x92A\xdf\x01\n" +
+	"$\x1a\".scalekit.v1.users.GetUserResponse\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02\x14\x12\x12/api/v1/users/{id}\x12\xd5\x03\n" +
+	"\x0eGetCurrentUser\x12(.scalekit.v1.users.GetCurrentUserRequest\x1a).scalekit.v1.users.GetCurrentUserResponse\"\xed\x02\x92A\xa6\x02\n" +
+	"\x05Users\x12\x16Get authenticated user\x1a\x9e\x01Retrieves details for the currently authenticated user. Returns the same user object as GetUser but uses the authenticated user's ID from the session context.Jd\n" +
+	"\x03200\x12]\n" +
+	",Current user details retrieved successfully.\x12-\n" +
+	"+\x1a).scalekit.v1.users.GetCurrentUserResponse\x82\xb5\x18\x02\x18\x18\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02(Z\x12\x12\x10/api/v1/users/me\x12\x12/api/v1/users:this\x12\xf0\x02\n" +
+	"\x0eGetSupportHash\x12\x16.google.protobuf.Empty\x1a).scalekit.v1.users.GetSupportHashResponse\"\x9a\x02\x92A\xdf\x01\n" +
 	"\x05Users\x12\x10Get support hash\x1afRetrieves the support email hash for the current logged in user, used for the Scalekit support system.J\\\n" +
 	"\x03200\x12U\n" +
 	"$Support hash retrieved successfully.\x12-\n" +
-	"+\x1a).scalekit.v1.users.GetSupportHashResponse\x82\xb5\x18\x02\x18P\x82\xd3\xe4\x93\x02\x1c\x12\x1a/api/v1/users/support-hash\x12\xa0\x04\n" +
+	"+\x1a).scalekit.v1.users.GetSupportHashResponse\x82\xb5\x18\x02\x18P\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02\x1c\x12\x1a/api/v1/users/support-hash\x12\xa0\x04\n" +
 	"\tListUsers\x12#.scalekit.v1.users.ListUsersRequest\x1a$.scalekit.v1.users.ListUsersResponse\"\xc7\x03\x92A\xa8\x03\n" +
 	"\x05Users\x12\x1dList all users in environment\x1a\xbc\x02Retrieves a paginated list of all users across your entire environment. Use this endpoint to view all users regardless of their organization memberships. This is useful for administrative purposes, user audits, or when you need to see all users in your Scalekit environment. Supports pagination for large user bases.JA\n" +
 	"\x03200\x12:\n" +
 	"\x0eList of users.\x12(\n" +
-	"&\x1a$.scalekit.v1.users.ListUsersResponse\x82\xb5\x18\x02\x18D\x82\xd3\xe4\x93\x02\x0f\x12\r/api/v1/users\x12\xcb\x03\n" +
-	"\vSearchUsers\x12%.scalekit.v1.users.SearchUsersRequest\x1a&.scalekit.v1.users.SearchUsersResponse\"\xec\x02\x92A\xb7\x02\n" +
-	"\x05Users\x12\fSearch users\x1a\x85\x01Searches for users in the environment by email, user ID, or external ID. Returns all users that match the query. Supports pagination.J\x97\x01\n" +
-	"\x03200\x12\x8f\x01\n" +
-	"aReturns a list of matching users and a page token for pagination if there are additional results.\x12*\n" +
-	"(\x1a&.scalekit.v1.users.SearchUsersResponse\x82\xb5\x18\x02\x18D\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02\x16\x12\x14/api/v1/users:search\x12\xe0\x04\n" +
-	"\x17SearchOrganizationUsers\x121.scalekit.v1.users.SearchOrganizationUsersRequest\x1a2.scalekit.v1.users.SearchOrganizationUsersResponse\"\xdd\x03\x92A\x88\x03\n" +
-	"\x05Users\x12\x19Search organization users\x1a\xa5\x01Searches for users within a specific organization by email, user ID, or external ID. Returns all users in the organization that match the query. Supports pagination.J\xbb\x01\n" +
-	"\x03200\x12\xb3\x01\n" +
-	"yReturns a list of matching users within the organization and a page token for pagination if there are additional results.\x126\n" +
-	"4\x1a2.scalekit.v1.users.SearchOrganizationUsersResponse\x82\xb5\x18\x02\x18D\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x026\x124/api/v1/organizations/{organization_id}/users:search\x12\x96\x05\n" +
+	"&\x1a$.scalekit.v1.users.ListUsersResponse\x82\xb5\x18\x02\x18D\x82\xd3\xe4\x93\x02\x0f\x12\r/api/v1/users\x12\xb8\x05\n" +
+	"\vSearchUsers\x12%.scalekit.v1.users.SearchUsersRequest\x1a&.scalekit.v1.users.SearchUsersResponse\"\xd9\x04\x92A\xb3\x04\n" +
+	"\x05Users\x12\fSearch users\x1a\xaf\x02Searches for users across the entire environment by email address, user ID, or external ID. The query must be at least 3 characters and is case-insensitive. Returns a paginated list of matching users with up to 30 results per page. Use the next_page_token from the response to retrieve subsequent pages.J\x8c\x01\n" +
+	"\x03200\x12\x84\x01\n" +
+	"VMatching users returned; includes pagination cursors for navigating large result sets.\x12*\n" +
+	"(\x1a&.scalekit.v1.users.SearchUsersResponseJ[\n" +
+	"\x03400\x12T\n" +
+	"RBad Request - query must be at least 3 characters and no more than 100 characters.\x82\xb5\x18\x02\x18D\x82\xd3\xe4\x93\x02\x16\x12\x14/api/v1/users:search\x12\xd0\a\n" +
+	"\x17SearchOrganizationUsers\x121.scalekit.v1.users.SearchOrganizationUsersRequest\x1a2.scalekit.v1.users.SearchOrganizationUsersResponse\"\xcd\x06\x92A\x87\x06\n" +
+	"\x05Users\x12\x19Search organization users\x1a\xe3\x02Searches for users within a specific organization by email address, user ID, or external ID. The query must be at least 3 characters and is case-insensitive. Scopes results strictly to the given organization. Returns a paginated list of matching users with up to 30 results per page. Use the next_page_token from the response to retrieve subsequent pages.J\xb0\x01\n" +
+	"\x03200\x12\xa8\x01\n" +
+	"nMatching users within the organization returned; includes pagination cursors for navigating large result sets.\x126\n" +
+	"4\x1a2.scalekit.v1.users.SearchOrganizationUsersResponseJ\x9b\x01\n" +
+	"\x03400\x12\x93\x01\n" +
+	"\x90\x01Bad Request - query must be at least 3 characters and no more than 100 characters, and organization_id must be a valid org_ prefixed identifier.J,\n" +
+	"\x03404\x12%\n" +
+	"#Not Found - organization not found.\x82\xb5\x18\x02\x18D\x82\xd3\xe4\x93\x026\x124/api/v1/organizations/{organization_id}/users:search\x12\x96\x05\n" +
 	"\n" +
 	"UpdateUser\x12$.scalekit.v1.users.UpdateUserRequest\x1a%.scalekit.v1.users.UpdateUserResponse\"\xba\x04\x92A\x90\x04\n" +
 	"\x05Users\x12\x17Update user information\x1a\xe1\x02Modifies user account information including profile details, metadata, and external ID. Use this endpoint to update a user's personal information, contact details, or custom metadata. You can update the user's profile, phone number, and metadata fields. Note that fields like user ID, email address, environment ID, and creation time cannot be modified.J\x89\x01\n" +
 	"\x03200\x12\x81\x01\n" +
 	"TUser updated successfully. Returns the modified user object with updated timestamps.\x12)\n" +
-	"'\x1a%.scalekit.v1.users.UpdateUserResponse\x82\xb5\x18\x02\x18D\x82\xd3\xe4\x93\x02\x1a:\x04user2\x12/api/v1/users/{id}\x12\xfd\x03\n" +
+	"'\x1a%.scalekit.v1.users.UpdateUserResponse\x82\xb5\x18\x02\x18T\x82\xd3\xe4\x93\x02\x1a:\x04user2\x12/api/v1/users/{id}\x12\xfd\x03\n" +
 	"\n" +
 	"DeleteUser\x12$.scalekit.v1.users.DeleteUserRequest\x1a\x16.google.protobuf.Empty\"\xb0\x03\x92A\x8c\x03\n" +
 	"\x05Users\x12\x17Delete user permanently\x1a\xb0\x02Permanently removes a user from your environment and deletes all associated data. Use this endpoint when you need to completely remove a user account. This action deletes the user's profile, memberships, and all related data across all organizations. This operation cannot be undone, so use with caution.J7\n" +
 	"\x03200\x120\n" +
-	".User successfully deleted. No content returned\x82\xb5\x18\x02\x18D\x82\xd3\xe4\x93\x02\x14*\x12/api/v1/users/{id}\x12\xa8\x05\n" +
-	"\x10CreateMembership\x12*.scalekit.v1.users.CreateMembershipRequest\x1a+.scalekit.v1.users.CreateMembershipResponse\"\xba\x04\x92A\xde\x03\n" +
+	".User successfully deleted. No content returned\x82\xb5\x18\x02\x18D\x82\xd3\xe4\x93\x02\x14*\x12/api/v1/users/{id}\x12\xc4\x05\n" +
+	"\x10CreateMembership\x12*.scalekit.v1.users.CreateMembershipRequest\x1a+.scalekit.v1.users.CreateMembershipResponse\"\xd6\x04\x92A\xde\x03\n" +
 	"\x05Users\x12!Add existing user to organization\x1a\x95\x02Adds an existing user to an organization and assigns them specific roles and permissions. Use this endpoint when you want to grant an existing user access to a particular organization. You can specify roles, metadata, and other membership details during the invitation process.J\x99\x01\n" +
 	"\x03201\x12\x91\x01\n" +
 	"^User successfully added to the organization. Returns details of the updated membership details\x12/\n" +
-	"-\x1a+.scalekit.v1.users.CreateMembershipResponse\x82\xb5\x18\x02\x18D\x82\xd3\xe4\x93\x02L:\n" +
-	"membership\">/api/v1/memberships/organizations/{organization_id}/users/{id}\x12\xfd\x03\n" +
-	"\x10DeleteMembership\x12*.scalekit.v1.users.DeleteMembershipRequest\x1a\x16.google.protobuf.Empty\"\xa4\x03\x92A\xd4\x02\n" +
+	"-\x1a+.scalekit.v1.users.CreateMembershipResponse\x82\xb5\x18\x1e\n" +
+	"\x1aorganizations_users_invite\x18T\x82\xd3\xe4\x93\x02L:\n" +
+	"membership\">/api/v1/memberships/organizations/{organization_id}/users/{id}\x12\x99\x04\n" +
+	"\x10DeleteMembership\x12*.scalekit.v1.users.DeleteMembershipRequest\x1a\x16.google.protobuf.Empty\"\xc0\x03\x92A\xd4\x02\n" +
 	"\x05Users\x12'Delete organization membership for user\x1a\xdc\x01Removes a user from an organization by user ID or external ID. If the user has no memberships left and cascade is true, the user is also deleted. This action is irreversible and may also remove related group memberships.JC\n" +
 	"\x03200\x12<\n" +
-	":User successfully marked for deletion. No content returned\x82\xb5\x18\x02\x18D\x82\xd3\xe4\x93\x02@*>/api/v1/memberships/organizations/{organization_id}/users/{id}\x12\xfd\x03\n" +
-	"\x10UpdateMembership\x12*.scalekit.v1.users.UpdateMembershipRequest\x1a+.scalekit.v1.users.UpdateMembershipResponse\"\x8f\x03\x92A\xb3\x02\n" +
+	":User successfully marked for deletion. No content returned\x82\xb5\x18\x1e\n" +
+	"\x1aorganizations_users_remove\x18T\x82\xd3\xe4\x93\x02@*>/api/v1/memberships/organizations/{organization_id}/users/{id}\x12\x9e\x04\n" +
+	"\x10UpdateMembership\x12*.scalekit.v1.users.UpdateMembershipRequest\x1a+.scalekit.v1.users.UpdateMembershipResponse\"\xb0\x03\x92A\xb3\x02\n" +
 	"\x05Users\x12'Update organization membership for user\x1a\x83\x01Updates a user's membership details within an organization by user ID or external ID. You can update roles and membership metadata.J{\n" +
 	"\x03200\x12t\n" +
 	"AMembership updated successfully. Returns the updated user object.\x12/\n" +
-	"-\x1a+.scalekit.v1.users.UpdateMembershipResponse\x82\xb5\x18\x02\x18D\x82\xd3\xe4\x93\x02L:\n" +
-	"membership2>/api/v1/memberships/organizations/{organization_id}/users/{id}\x12\xac\x06\n" +
-	"\x17CreateUserAndMembership\x121.scalekit.v1.users.CreateUserAndMembershipRequest\x1a2.scalekit.v1.users.CreateUserAndMembershipResponse\"\xa9\x05\x92A\xe4\x04\n" +
+	"-\x1a+.scalekit.v1.users.UpdateMembershipResponse\x82\xb5\x18#\n" +
+	"\x1forganizations_users_role_update\x18T\x82\xd3\xe4\x93\x02L:\n" +
+	"membership2>/api/v1/memberships/organizations/{organization_id}/users/{id}\x12\xc8\x06\n" +
+	"\x17CreateUserAndMembership\x121.scalekit.v1.users.CreateUserAndMembershipRequest\x1a2.scalekit.v1.users.CreateUserAndMembershipResponse\"\xc5\x05\x92A\xe4\x04\n" +
 	"\x05Users\x12\x1fCreate new user in organization\x1a\x83\x03Creates a new user account and immediately adds them to the specified organization. Use this endpoint when you want to create a user and grant them access to an organization in a single operation. You can provide user profile information, assign roles, and configure membership metadata. The user receives an activation email unless this feature is disabled in the organization settings.J\xb3\x01\n" +
 	"\x03201\x12\xab\x01\n" +
 	"qUser created successfully. Returns the created user object, including system-generated identifiers and timestamps\x126\n" +
-	"4\x1a2.scalekit.v1.users.CreateUserAndMembershipResponse\x82\xb5\x18\x02\x18D\x82\xd3\xe4\x93\x025:\x04user\"-/api/v1/organizations/{organization_id}/users\x12\xe3\x04\n" +
-	"\x15ListOrganizationUsers\x12/.scalekit.v1.users.ListOrganizationUsersRequest\x1a0.scalekit.v1.users.ListOrganizationUsersResponse\"\xe6\x03\x92A\xa7\x03\n" +
+	"4\x1a2.scalekit.v1.users.CreateUserAndMembershipResponse\x82\xb5\x18\x1e\n" +
+	"\x1aorganizations_users_invite\x18T\x82\xd3\xe4\x93\x025:\x04user\"-/api/v1/organizations/{organization_id}/users\x12\xfd\x04\n" +
+	"\x15ListOrganizationUsers\x12/.scalekit.v1.users.ListOrganizationUsersRequest\x1a0.scalekit.v1.users.ListOrganizationUsersResponse\"\x80\x04\x92A\xa7\x03\n" +
 	"\x05Users\x12\x17List organization users\x1a\x87\x02Retrieves a paginated list of all users who are members of the specified organization. Use this endpoint to view all users with access to a particular organization, including their roles, metadata, and membership details. Supports pagination for large user lists.J{\n" +
 	"\x03200\x12t\n" +
 	"<Successfully retrieved the list of users in the organization\x124\n" +
-	"2\x1a0.scalekit.v1.users.ListOrganizationUsersResponse\x82\xb5\x18\x02\x18D\x82\xd3\xe4\x93\x02/\x12-/api/v1/organizations/{organization_id}/users\x12\x92\x10\n" +
-	"\fResendInvite\x12&.scalekit.v1.users.ResendInviteRequest\x1a'.scalekit.v1.users.ResendInviteResponse\"\xb0\x0f\x92A\xda\x0e\n" +
+	"2\x1a0.scalekit.v1.users.ListOrganizationUsersResponse\x82\xb5\x18\x1c\n" +
+	"\x18organizations_users_read\x18T\x82\xd3\xe4\x93\x02/\x12-/api/v1/organizations/{organization_id}/users\x12\xae\x10\n" +
+	"\fResendInvite\x12&.scalekit.v1.users.ResendInviteRequest\x1a'.scalekit.v1.users.ResendInviteResponse\"\xcc\x0f\x92A\xda\x0e\n" +
 	"\x05Users\x12\x1cResend user invitation email\x1a\xe1\x04Resends an invitation email to a user who has a pending or expired invitation in the specified organization. If the invitation has expired, a new invitation will be automatically created and sent. If the invitation is still valid, a reminder email will be sent instead. Use this endpoint when a user hasn't responded to their initial invitation and you need to send them a reminder or when the original invitation has expired. The invitation email includes a secure magic link that allows the user to complete their account setup and join the organization. Each resend operation increments the resent counter.J\xa7\x02\n" +
 	"\x03200\x12\x9f\x02\n" +
 	"\xef\x01Successfully resent the invitation email. Returns the updated invitation object with organization ID, user ID, membership status, timestamps, and resent count. If expired, a new invitation is created; otherwise, the existing one is resent.\x12+\n" +
 	")\x1a'.scalekit.v1.users.ResendInviteResponseJ\x8f\x02\n" +
 	"\x03400\x12\x87\x02\n" +
 	"\xdd\x01Invalid request — common causes include user ID or organization ID is invalid, full-stack authentication is disabled, user profile is missing, invite already accepted, or missing expiry time in user management settings.\x12%\n" +
-	"#\x1a!.scalekit.v1.errdetails.ErrorInfoJ\x9d\x02\n" +
+	"#\x1a!#/definitions/errdetailsErrorInfoJ\x9d\x02\n" +
 	"\x03404\x12\x95\x02\n" +
 	"\xeb\x01Resource not found — the specified user, organization, membership, or invitation could not be found in the specified environment. Verify that all IDs are correct and that the resources exist before attempting to resend an invitation.\x12%\n" +
-	"#\x1a!.scalekit.v1.errdetails.ErrorInfoJ\xf2\x02\n" +
+	"#\x1a!#/definitions/errdetailsErrorInfoJ\xf2\x02\n" +
 	"\x03500\x12\xea\x02\n" +
 	"\xc0\x02Internal server error — an unexpected error occurred while processing the invitation resend request. This may be due to database connectivity issues, problems generating the secure magic link, email delivery service failures, or transaction errors during invitation processing. Contact support if the problem persists.\x12%\n" +
-	"#\x1a!.scalekit.v1.errdetails.ErrorInfo\x82\xb5\x18\x02\x18D\x82\xd3\xe4\x93\x02F:\x01*2A/api/v1/invites/organizations/{organization_id}/users/{id}/resend\x12\xdf\x03\n" +
+	"#\x1a!#/definitions/errdetailsErrorInfo\x82\xb5\x18\x1e\n" +
+	"\x1aorganizations_users_invite\x18T\x82\xd3\xe4\x93\x02F:\x01*2A/api/v1/invites/organizations/{organization_id}/users/{id}/resend\x12\xdf\x03\n" +
 	"\rListUserRoles\x12'.scalekit.v1.users.ListUserRolesRequest\x1a(.scalekit.v1.users.ListUserRolesResponse\"\xfa\x02\x92A\xab\x02\n" +
 	"\x05Users\x12\x0fList user roles\x1a\x9a\x01Retrieves all roles assigned to a user within a specific organization. This includes both direct role assignments and inherited roles from role hierarchy.Jt\n" +
 	"\x03200\x12m\n" +
 	"=Successfully retrieved the list of roles assigned to the user\x12,\n" +
-	"*\x1a(.scalekit.v1.users.ListUserRolesResponse\x82\xb5\x18\x02\x18D\x82\xd3\xe4\x93\x02?\x12=/api/v1/organizations/{organization_id}/users/{user_id}/roles\x12\xe2\x03\n" +
-	"\x0fAssignUserRoles\x12).scalekit.v1.users.AssignUserRolesRequest\x1a*.scalekit.v1.users.AssignUserRolesResponse\"\xf7\x02\x92A\x92\x02\n" +
+	"*\x1a(.scalekit.v1.users.ListUserRolesResponse\x82\xb5\x18\x02\x18D\x82\xd3\xe4\x93\x02?\x12=/api/v1/organizations/{organization_id}/users/{user_id}/roles\x12\x83\x04\n" +
+	"\x0fAssignUserRoles\x12).scalekit.v1.users.AssignUserRolesRequest\x1a*.scalekit.v1.users.AssignUserRolesResponse\"\x98\x03\x92A\x92\x02\n" +
 	"\x05Users\x12\x14Assign roles to user\x1a\x90\x01Assigns one or more roles to a user within a specific organization. This operation adds to existing role assignments rather than replacing them.J`\n" +
 	"\x03200\x12Y\n" +
 	"'Successfully assigned roles to the user\x12.\n" +
-	",\x1a*.scalekit.v1.users.AssignUserRolesResponse\x82\xb5\x18\x02\x18D\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02F:\x05roles\"=/api/v1/organizations/{organization_id}/users/{user_id}/roles\x12\xa8\x03\n" +
-	"\x0eRemoveUserRole\x12(.scalekit.v1.users.RemoveUserRoleRequest\x1a\x16.google.protobuf.Empty\"\xd3\x02\x92A\xe9\x01\n" +
+	",\x1a*.scalekit.v1.users.AssignUserRolesResponse\x82\xb5\x18#\n" +
+	"\x1forganizations_users_role_update\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02F:\x05roles\"=/api/v1/organizations/{organization_id}/users/{user_id}/roles\x12\xc9\x03\n" +
+	"\x0eRemoveUserRole\x12(.scalekit.v1.users.RemoveUserRoleRequest\x1a\x16.google.protobuf.Empty\"\xf4\x02\x92A\xe9\x01\n" +
 	"\x05Users\x12\x15Remove role from user\x1a\x9a\x01Removes a specific role assignment from a user within an organization. This only removes direct role assignments, not inherited roles from role hierarchy.J,\n" +
 	"\x03200\x12%\n" +
-	"#Role successfully removed from user\x82\xb5\x18\x02\x18D\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02K*I/api/v1/organizations/{organization_id}/users/{user_id}/roles/{role_name}\x12\x9b\x04\n" +
+	"#Role successfully removed from user\x82\xb5\x18#\n" +
+	"\x1forganizations_users_role_update\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02K*I/api/v1/organizations/{organization_id}/users/{user_id}/roles/{role_name}\x12\x9b\x04\n" +
 	"\x13ListUserPermissions\x12-.scalekit.v1.users.ListUserPermissionsRequest\x1a..scalekit.v1.users.ListUserPermissionsResponse\"\xa4\x03\x92A\xcf\x02\n" +
 	"\x05Users\x12\x15List user permissions\x1a\xb4\x01Retrieves all permissions a user has access to within a specific organization. This includes permissions from direct role assignments and inherited permissions from role hierarchy.Jx\n" +
 	"\x03200\x12q\n" +
