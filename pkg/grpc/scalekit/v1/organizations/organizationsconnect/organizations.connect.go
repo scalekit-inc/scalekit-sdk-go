@@ -82,6 +82,9 @@ const (
 	// OrganizationServiceGetOrganizationUserManagementSettingProcedure is the fully-qualified name of
 	// the OrganizationService's GetOrganizationUserManagementSetting RPC.
 	OrganizationServiceGetOrganizationUserManagementSettingProcedure = "/scalekit.v1.organizations.OrganizationService/GetOrganizationUserManagementSetting"
+	// OrganizationServiceGetApplicationSessionPolicyProcedure is the fully-qualified name of the
+	// OrganizationService's GetApplicationSessionPolicy RPC.
+	OrganizationServiceGetApplicationSessionPolicyProcedure = "/scalekit.v1.organizations.OrganizationService/GetApplicationSessionPolicy"
 )
 
 // OrganizationServiceClient is a client for the scalekit.v1.organizations.OrganizationService
@@ -107,6 +110,7 @@ type OrganizationServiceClient interface {
 	// Update user management setting for an organization
 	UpsertUserManagementSettings(context.Context, *connect.Request[organizations.UpsertUserManagementSettingsRequest]) (*connect.Response[organizations.UpsertUserManagementSettingsResponse], error)
 	GetOrganizationUserManagementSetting(context.Context, *connect.Request[organizations.GetOrganizationUserManagementSettingsRequest]) (*connect.Response[organizations.GetOrganizationUserManagementSettingsResponse], error)
+	GetApplicationSessionPolicy(context.Context, *connect.Request[organizations.GetApplicationSessionPolicyRequest]) (*connect.Response[organizations.GetApplicationSessionPolicyResponse], error)
 }
 
 // NewOrganizationServiceClient constructs a client for the
@@ -217,6 +221,12 @@ func NewOrganizationServiceClient(httpClient connect.HTTPClient, baseURL string,
 			connect.WithSchema(organizationServiceMethods.ByName("GetOrganizationUserManagementSetting")),
 			connect.WithClientOptions(opts...),
 		),
+		getApplicationSessionPolicy: connect.NewClient[organizations.GetApplicationSessionPolicyRequest, organizations.GetApplicationSessionPolicyResponse](
+			httpClient,
+			baseURL+OrganizationServiceGetApplicationSessionPolicyProcedure,
+			connect.WithSchema(organizationServiceMethods.ByName("GetApplicationSessionPolicy")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -238,6 +248,7 @@ type organizationServiceClient struct {
 	getOrganizationSessionPolicy         *connect.Client[organizations.GetOrganizationSessionPolicyRequest, organizations.GetOrganizationSessionPolicyResponse]
 	upsertUserManagementSettings         *connect.Client[organizations.UpsertUserManagementSettingsRequest, organizations.UpsertUserManagementSettingsResponse]
 	getOrganizationUserManagementSetting *connect.Client[organizations.GetOrganizationUserManagementSettingsRequest, organizations.GetOrganizationUserManagementSettingsResponse]
+	getApplicationSessionPolicy          *connect.Client[organizations.GetApplicationSessionPolicyRequest, organizations.GetApplicationSessionPolicyResponse]
 }
 
 // CreateOrganization calls scalekit.v1.organizations.OrganizationService.CreateOrganization.
@@ -326,6 +337,12 @@ func (c *organizationServiceClient) GetOrganizationUserManagementSetting(ctx con
 	return c.getOrganizationUserManagementSetting.CallUnary(ctx, req)
 }
 
+// GetApplicationSessionPolicy calls
+// scalekit.v1.organizations.OrganizationService.GetApplicationSessionPolicy.
+func (c *organizationServiceClient) GetApplicationSessionPolicy(ctx context.Context, req *connect.Request[organizations.GetApplicationSessionPolicyRequest]) (*connect.Response[organizations.GetApplicationSessionPolicyResponse], error) {
+	return c.getApplicationSessionPolicy.CallUnary(ctx, req)
+}
+
 // OrganizationServiceHandler is an implementation of the
 // scalekit.v1.organizations.OrganizationService service.
 type OrganizationServiceHandler interface {
@@ -349,6 +366,7 @@ type OrganizationServiceHandler interface {
 	// Update user management setting for an organization
 	UpsertUserManagementSettings(context.Context, *connect.Request[organizations.UpsertUserManagementSettingsRequest]) (*connect.Response[organizations.UpsertUserManagementSettingsResponse], error)
 	GetOrganizationUserManagementSetting(context.Context, *connect.Request[organizations.GetOrganizationUserManagementSettingsRequest]) (*connect.Response[organizations.GetOrganizationUserManagementSettingsResponse], error)
+	GetApplicationSessionPolicy(context.Context, *connect.Request[organizations.GetApplicationSessionPolicyRequest]) (*connect.Response[organizations.GetApplicationSessionPolicyResponse], error)
 }
 
 // NewOrganizationServiceHandler builds an HTTP handler from the service implementation. It returns
@@ -454,6 +472,12 @@ func NewOrganizationServiceHandler(svc OrganizationServiceHandler, opts ...conne
 		connect.WithSchema(organizationServiceMethods.ByName("GetOrganizationUserManagementSetting")),
 		connect.WithHandlerOptions(opts...),
 	)
+	organizationServiceGetApplicationSessionPolicyHandler := connect.NewUnaryHandler(
+		OrganizationServiceGetApplicationSessionPolicyProcedure,
+		svc.GetApplicationSessionPolicy,
+		connect.WithSchema(organizationServiceMethods.ByName("GetApplicationSessionPolicy")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/scalekit.v1.organizations.OrganizationService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case OrganizationServiceCreateOrganizationProcedure:
@@ -488,6 +512,8 @@ func NewOrganizationServiceHandler(svc OrganizationServiceHandler, opts ...conne
 			organizationServiceUpsertUserManagementSettingsHandler.ServeHTTP(w, r)
 		case OrganizationServiceGetOrganizationUserManagementSettingProcedure:
 			organizationServiceGetOrganizationUserManagementSettingHandler.ServeHTTP(w, r)
+		case OrganizationServiceGetApplicationSessionPolicyProcedure:
+			organizationServiceGetApplicationSessionPolicyHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -559,4 +585,8 @@ func (UnimplementedOrganizationServiceHandler) UpsertUserManagementSettings(cont
 
 func (UnimplementedOrganizationServiceHandler) GetOrganizationUserManagementSetting(context.Context, *connect.Request[organizations.GetOrganizationUserManagementSettingsRequest]) (*connect.Response[organizations.GetOrganizationUserManagementSettingsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.organizations.OrganizationService.GetOrganizationUserManagementSetting is not implemented"))
+}
+
+func (UnimplementedOrganizationServiceHandler) GetApplicationSessionPolicy(context.Context, *connect.Request[organizations.GetApplicationSessionPolicyRequest]) (*connect.Response[organizations.GetApplicationSessionPolicyResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.organizations.OrganizationService.GetApplicationSessionPolicy is not implemented"))
 }

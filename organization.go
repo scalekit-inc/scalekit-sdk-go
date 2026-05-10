@@ -28,11 +28,11 @@ type OrganizationUserManagementSettings struct {
 }
 
 // SessionPolicySource indicates whether an organization uses its own policy or inherits the application default.
-type SessionPolicySource = organizationsv1.SessionPolicySource
+type SessionPolicySource = organizationsv1.SessionPolicyType
 
 const (
-	SessionPolicySourceApplication = organizationsv1.SessionPolicySource_APPLICATION
-	SessionPolicySourceCustom      = organizationsv1.SessionPolicySource_CUSTOM
+	SessionPolicySourceApplication = organizationsv1.SessionPolicyType_APPLICATION
+	SessionPolicySourceCustom      = organizationsv1.SessionPolicyType_CUSTOM
 )
 
 // TimeUnit for session timeout fields accepted in UpdateOrganizationSessionPolicy.
@@ -254,34 +254,32 @@ func (o *organization) GetOrganizationSessionPolicy(ctx context.Context, organiz
 }
 
 func (o *organization) UpdateOrganizationSessionPolicy(ctx context.Context, organizationId string, policy OrganizationSessionPolicy) (*OrganizationSessionPolicySettings, error) {
-	proto := &organizationsv1.OrganizationSessionPolicySettings{
-		PolicySource: policy.PolicySource,
+	req := &organizationsv1.UpdateOrganizationSessionPolicyRequest{
+		OrganizationId: organizationId,
+		PolicySource:   policy.PolicySource,
 	}
 	if policy.AbsoluteSessionTimeout != nil {
-		proto.AbsoluteSessionTimeout = wrapperspb.Int32(*policy.AbsoluteSessionTimeout)
+		req.AbsoluteSessionTimeout = wrapperspb.Int32(*policy.AbsoluteSessionTimeout)
 	}
 	if policy.AbsoluteSessionTimeoutUnit != commonsv1.TimeUnit_SESSION_TIME_UNIT_UNSPECIFIED {
 		u := policy.AbsoluteSessionTimeoutUnit
-		proto.AbsoluteSessionTimeoutUnit = &u
+		req.AbsoluteSessionTimeoutUnit = &u
 	}
 	if policy.IdleSessionTimeoutEnabled != nil {
-		proto.IdleSessionTimeoutEnabled = wrapperspb.Bool(*policy.IdleSessionTimeoutEnabled)
+		req.IdleSessionTimeoutEnabled = wrapperspb.Bool(*policy.IdleSessionTimeoutEnabled)
 	}
 	if policy.IdleSessionTimeout != nil {
-		proto.IdleSessionTimeout = wrapperspb.Int32(*policy.IdleSessionTimeout)
+		req.IdleSessionTimeout = wrapperspb.Int32(*policy.IdleSessionTimeout)
 	}
 	if policy.IdleSessionTimeoutUnit != commonsv1.TimeUnit_SESSION_TIME_UNIT_UNSPECIFIED {
 		u := policy.IdleSessionTimeoutUnit
-		proto.IdleSessionTimeoutUnit = &u
+		req.IdleSessionTimeoutUnit = &u
 	}
 
 	resp, err := newConnectExecuter(
 		o.coreClient,
 		o.client.UpdateOrganizationSessionPolicy,
-		&organizationsv1.UpdateOrganizationSessionPolicyRequest{
-			OrganizationId: organizationId,
-			Policy:         proto,
-		},
+		req,
 	).exec(ctx)
 	if err != nil {
 		return nil, err

@@ -88,52 +88,52 @@ func (Feature) EnumDescriptor() ([]byte, []int) {
 	return file_scalekit_v1_organizations_organizations_proto_rawDescGZIP(), []int{0}
 }
 
-type SessionPolicySource int32
+type SessionPolicyType int32
 
 const (
-	SessionPolicySource_SESSION_POLICY_UNSPECIFIED SessionPolicySource = 0
-	SessionPolicySource_APPLICATION                SessionPolicySource = 1
-	SessionPolicySource_CUSTOM                     SessionPolicySource = 2
+	SessionPolicyType_SESSION_POLICY_TYPE_UNSPECIFIED SessionPolicyType = 0
+	SessionPolicyType_APPLICATION                     SessionPolicyType = 1
+	SessionPolicyType_CUSTOM                          SessionPolicyType = 2
 )
 
-// Enum value maps for SessionPolicySource.
+// Enum value maps for SessionPolicyType.
 var (
-	SessionPolicySource_name = map[int32]string{
-		0: "SESSION_POLICY_UNSPECIFIED",
+	SessionPolicyType_name = map[int32]string{
+		0: "SESSION_POLICY_TYPE_UNSPECIFIED",
 		1: "APPLICATION",
 		2: "CUSTOM",
 	}
-	SessionPolicySource_value = map[string]int32{
-		"SESSION_POLICY_UNSPECIFIED": 0,
-		"APPLICATION":                1,
-		"CUSTOM":                     2,
+	SessionPolicyType_value = map[string]int32{
+		"SESSION_POLICY_TYPE_UNSPECIFIED": 0,
+		"APPLICATION":                     1,
+		"CUSTOM":                          2,
 	}
 )
 
-func (x SessionPolicySource) Enum() *SessionPolicySource {
-	p := new(SessionPolicySource)
+func (x SessionPolicyType) Enum() *SessionPolicyType {
+	p := new(SessionPolicyType)
 	*p = x
 	return p
 }
 
-func (x SessionPolicySource) String() string {
+func (x SessionPolicyType) String() string {
 	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
 }
 
-func (SessionPolicySource) Descriptor() protoreflect.EnumDescriptor {
+func (SessionPolicyType) Descriptor() protoreflect.EnumDescriptor {
 	return file_scalekit_v1_organizations_organizations_proto_enumTypes[1].Descriptor()
 }
 
-func (SessionPolicySource) Type() protoreflect.EnumType {
+func (SessionPolicyType) Type() protoreflect.EnumType {
 	return &file_scalekit_v1_organizations_organizations_proto_enumTypes[1]
 }
 
-func (x SessionPolicySource) Number() protoreflect.EnumNumber {
+func (x SessionPolicyType) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
-// Deprecated: Use SessionPolicySource.Descriptor instead.
-func (SessionPolicySource) EnumDescriptor() ([]byte, []int) {
+// Deprecated: Use SessionPolicyType.Descriptor instead.
+func (SessionPolicyType) EnumDescriptor() ([]byte, []int) {
 	return file_scalekit_v1_organizations_organizations_proto_rawDescGZIP(), []int{1}
 }
 
@@ -1510,9 +1510,8 @@ func (x *UpdateOrganizationSettingsRequest) GetSettings() *OrganizationSettings 
 }
 
 type OrganizationSessionPolicySettings struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// "environment" (default) = inherit application-level policy; "custom" = org-specific values active.
-	PolicySource SessionPolicySource `protobuf:"varint,1,opt,name=policy_source,json=policySource,proto3,enum=scalekit.v1.organizations.SessionPolicySource" json:"policy_source,omitempty"`
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	PolicySource SessionPolicyType      `protobuf:"varint,1,opt,name=policy_source,json=policySource,proto3,enum=scalekit.v1.organizations.SessionPolicyType" json:"policy_source,omitempty"`
 	// Timeout value interpreted with absolute_session_timeout_unit on write; always returned in minutes on read.
 	AbsoluteSessionTimeout *wrapperspb.Int32Value `protobuf:"bytes,2,opt,name=absolute_session_timeout,json=absoluteSessionTimeout,proto3" json:"absolute_session_timeout,omitempty"`
 	// Unit for absolute_session_timeout: "minutes", "hours", or "days". Responses always use "minutes".
@@ -1556,11 +1555,11 @@ func (*OrganizationSessionPolicySettings) Descriptor() ([]byte, []int) {
 	return file_scalekit_v1_organizations_organizations_proto_rawDescGZIP(), []int{22}
 }
 
-func (x *OrganizationSessionPolicySettings) GetPolicySource() SessionPolicySource {
+func (x *OrganizationSessionPolicySettings) GetPolicySource() SessionPolicyType {
 	if x != nil {
 		return x.PolicySource
 	}
-	return SessionPolicySource_SESSION_POLICY_UNSPECIFIED
+	return SessionPolicyType_SESSION_POLICY_TYPE_UNSPECIFIED
 }
 
 func (x *OrganizationSessionPolicySettings) GetAbsoluteSessionTimeout() *wrapperspb.Int32Value {
@@ -1687,11 +1686,16 @@ func (x *GetOrganizationSessionPolicyResponse) GetPolicy() *OrganizationSessionP
 }
 
 type UpdateOrganizationSessionPolicyRequest struct {
-	state          protoimpl.MessageState             `protogen:"open.v1"`
-	OrganizationId string                             `protobuf:"bytes,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
-	Policy         *OrganizationSessionPolicySettings `protobuf:"bytes,2,opt,name=policy,proto3" json:"policy,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state                      protoimpl.MessageState `protogen:"open.v1"`
+	OrganizationId             string                 `protobuf:"bytes,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
+	PolicySource               SessionPolicyType      `protobuf:"varint,2,opt,name=policy_source,json=policySource,proto3,enum=scalekit.v1.organizations.SessionPolicyType" json:"policy_source,omitempty"`
+	AbsoluteSessionTimeout     *wrapperspb.Int32Value `protobuf:"bytes,3,opt,name=absolute_session_timeout,json=absoluteSessionTimeout,proto3" json:"absolute_session_timeout,omitempty"`
+	AbsoluteSessionTimeoutUnit *commons.TimeUnit      `protobuf:"varint,4,opt,name=absolute_session_timeout_unit,json=absoluteSessionTimeoutUnit,proto3,enum=scalekit.v1.commons.TimeUnit,oneof" json:"absolute_session_timeout_unit,omitempty"`
+	IdleSessionTimeoutEnabled  *wrapperspb.BoolValue  `protobuf:"bytes,5,opt,name=idle_session_timeout_enabled,json=idleSessionTimeoutEnabled,proto3" json:"idle_session_timeout_enabled,omitempty"`
+	IdleSessionTimeout         *wrapperspb.Int32Value `protobuf:"bytes,6,opt,name=idle_session_timeout,json=idleSessionTimeout,proto3" json:"idle_session_timeout,omitempty"`
+	IdleSessionTimeoutUnit     *commons.TimeUnit      `protobuf:"varint,7,opt,name=idle_session_timeout_unit,json=idleSessionTimeoutUnit,proto3,enum=scalekit.v1.commons.TimeUnit,oneof" json:"idle_session_timeout_unit,omitempty"`
+	unknownFields              protoimpl.UnknownFields
+	sizeCache                  protoimpl.SizeCache
 }
 
 func (x *UpdateOrganizationSessionPolicyRequest) Reset() {
@@ -1731,11 +1735,46 @@ func (x *UpdateOrganizationSessionPolicyRequest) GetOrganizationId() string {
 	return ""
 }
 
-func (x *UpdateOrganizationSessionPolicyRequest) GetPolicy() *OrganizationSessionPolicySettings {
+func (x *UpdateOrganizationSessionPolicyRequest) GetPolicySource() SessionPolicyType {
 	if x != nil {
-		return x.Policy
+		return x.PolicySource
+	}
+	return SessionPolicyType_SESSION_POLICY_TYPE_UNSPECIFIED
+}
+
+func (x *UpdateOrganizationSessionPolicyRequest) GetAbsoluteSessionTimeout() *wrapperspb.Int32Value {
+	if x != nil {
+		return x.AbsoluteSessionTimeout
 	}
 	return nil
+}
+
+func (x *UpdateOrganizationSessionPolicyRequest) GetAbsoluteSessionTimeoutUnit() commons.TimeUnit {
+	if x != nil && x.AbsoluteSessionTimeoutUnit != nil {
+		return *x.AbsoluteSessionTimeoutUnit
+	}
+	return commons.TimeUnit(0)
+}
+
+func (x *UpdateOrganizationSessionPolicyRequest) GetIdleSessionTimeoutEnabled() *wrapperspb.BoolValue {
+	if x != nil {
+		return x.IdleSessionTimeoutEnabled
+	}
+	return nil
+}
+
+func (x *UpdateOrganizationSessionPolicyRequest) GetIdleSessionTimeout() *wrapperspb.Int32Value {
+	if x != nil {
+		return x.IdleSessionTimeout
+	}
+	return nil
+}
+
+func (x *UpdateOrganizationSessionPolicyRequest) GetIdleSessionTimeoutUnit() commons.TimeUnit {
+	if x != nil && x.IdleSessionTimeoutUnit != nil {
+		return *x.IdleSessionTimeoutUnit
+	}
+	return commons.TimeUnit(0)
 }
 
 type UpdateOrganizationSessionPolicyResponse struct {
@@ -1782,6 +1821,162 @@ func (x *UpdateOrganizationSessionPolicyResponse) GetPolicy() *OrganizationSessi
 	return nil
 }
 
+type GetApplicationSessionPolicyRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	OrganizationId string                 `protobuf:"bytes,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *GetApplicationSessionPolicyRequest) Reset() {
+	*x = GetApplicationSessionPolicyRequest{}
+	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetApplicationSessionPolicyRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetApplicationSessionPolicyRequest) ProtoMessage() {}
+
+func (x *GetApplicationSessionPolicyRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetApplicationSessionPolicyRequest.ProtoReflect.Descriptor instead.
+func (*GetApplicationSessionPolicyRequest) Descriptor() ([]byte, []int) {
+	return file_scalekit_v1_organizations_organizations_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *GetApplicationSessionPolicyRequest) GetOrganizationId() string {
+	if x != nil {
+		return x.OrganizationId
+	}
+	return ""
+}
+
+type ApplicationSessionPolicySettings struct {
+	state                     protoimpl.MessageState `protogen:"open.v1"`
+	AbsoluteSessionTimeout    int32                  `protobuf:"varint,1,opt,name=absolute_session_timeout,json=absoluteSessionTimeout,proto3" json:"absolute_session_timeout,omitempty"`
+	IdleSessionTimeoutEnabled bool                   `protobuf:"varint,2,opt,name=idle_session_timeout_enabled,json=idleSessionTimeoutEnabled,proto3" json:"idle_session_timeout_enabled,omitempty"`
+	IdleSessionTimeout        int32                  `protobuf:"varint,3,opt,name=idle_session_timeout,json=idleSessionTimeout,proto3" json:"idle_session_timeout,omitempty"`
+	AccessTokenExpiry         int32                  `protobuf:"varint,4,opt,name=access_token_expiry,json=accessTokenExpiry,proto3" json:"access_token_expiry,omitempty"`
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
+}
+
+func (x *ApplicationSessionPolicySettings) Reset() {
+	*x = ApplicationSessionPolicySettings{}
+	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ApplicationSessionPolicySettings) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApplicationSessionPolicySettings) ProtoMessage() {}
+
+func (x *ApplicationSessionPolicySettings) ProtoReflect() protoreflect.Message {
+	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApplicationSessionPolicySettings.ProtoReflect.Descriptor instead.
+func (*ApplicationSessionPolicySettings) Descriptor() ([]byte, []int) {
+	return file_scalekit_v1_organizations_organizations_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *ApplicationSessionPolicySettings) GetAbsoluteSessionTimeout() int32 {
+	if x != nil {
+		return x.AbsoluteSessionTimeout
+	}
+	return 0
+}
+
+func (x *ApplicationSessionPolicySettings) GetIdleSessionTimeoutEnabled() bool {
+	if x != nil {
+		return x.IdleSessionTimeoutEnabled
+	}
+	return false
+}
+
+func (x *ApplicationSessionPolicySettings) GetIdleSessionTimeout() int32 {
+	if x != nil {
+		return x.IdleSessionTimeout
+	}
+	return 0
+}
+
+func (x *ApplicationSessionPolicySettings) GetAccessTokenExpiry() int32 {
+	if x != nil {
+		return x.AccessTokenExpiry
+	}
+	return 0
+}
+
+type GetApplicationSessionPolicyResponse struct {
+	state             protoimpl.MessageState            `protogen:"open.v1"`
+	ApplicationPolicy *ApplicationSessionPolicySettings `protobuf:"bytes,1,opt,name=application_policy,json=applicationPolicy,proto3" json:"application_policy,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *GetApplicationSessionPolicyResponse) Reset() {
+	*x = GetApplicationSessionPolicyResponse{}
+	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetApplicationSessionPolicyResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetApplicationSessionPolicyResponse) ProtoMessage() {}
+
+func (x *GetApplicationSessionPolicyResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetApplicationSessionPolicyResponse.ProtoReflect.Descriptor instead.
+func (*GetApplicationSessionPolicyResponse) Descriptor() ([]byte, []int) {
+	return file_scalekit_v1_organizations_organizations_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *GetApplicationSessionPolicyResponse) GetApplicationPolicy() *ApplicationSessionPolicySettings {
+	if x != nil {
+		return x.ApplicationPolicy
+	}
+	return nil
+}
+
 type OrganizationUserManagementSettings struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	MaxAllowedUsers *wrapperspb.Int32Value `protobuf:"bytes,1,opt,name=max_allowed_users,json=maxAllowedUsers,proto3" json:"max_allowed_users,omitempty"`
@@ -1791,7 +1986,7 @@ type OrganizationUserManagementSettings struct {
 
 func (x *OrganizationUserManagementSettings) Reset() {
 	*x = OrganizationUserManagementSettings{}
-	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[27]
+	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1803,7 +1998,7 @@ func (x *OrganizationUserManagementSettings) String() string {
 func (*OrganizationUserManagementSettings) ProtoMessage() {}
 
 func (x *OrganizationUserManagementSettings) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[27]
+	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1816,7 +2011,7 @@ func (x *OrganizationUserManagementSettings) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use OrganizationUserManagementSettings.ProtoReflect.Descriptor instead.
 func (*OrganizationUserManagementSettings) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_organizations_organizations_proto_rawDescGZIP(), []int{27}
+	return file_scalekit_v1_organizations_organizations_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *OrganizationUserManagementSettings) GetMaxAllowedUsers() *wrapperspb.Int32Value {
@@ -1831,9 +2026,9 @@ type OrganizationSessionSettings struct {
 	AbsoluteSessionTimeout *wrapperspb.Int32Value `protobuf:"bytes,1,opt,name=absolute_session_timeout,json=absoluteSessionTimeout,proto3" json:"absolute_session_timeout,omitempty"`
 	IdleSessionTimeout     *wrapperspb.Int32Value `protobuf:"bytes,3,opt,name=idle_session_timeout,json=idleSessionTimeout,proto3" json:"idle_session_timeout,omitempty"`
 	// Whether idle session timeout is enabled for this organization.
-	// Effective idle timeout is enabled if either the environment or the organization (when policy_source='custom') has it enabled.
+	// Effective idle timeout is enabled if either the environment or any organization with SESSION_POLICY_CUSTOM has it enabled.
 	IdleSessionTimeoutEnabled *wrapperspb.BoolValue `protobuf:"bytes,5,opt,name=idle_session_timeout_enabled,json=idleSessionTimeoutEnabled,proto3" json:"idle_session_timeout_enabled,omitempty"`
-	// "environment" (default) = inherit application-level policy; "custom" = org-specific values are active.
+	// APPLICATION (default) = inherit application-level policy; CUSTOM = org-specific values are active.
 	PolicySource  string `protobuf:"bytes,6,opt,name=policy_source,json=policySource,proto3" json:"policy_source,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1841,7 +2036,7 @@ type OrganizationSessionSettings struct {
 
 func (x *OrganizationSessionSettings) Reset() {
 	*x = OrganizationSessionSettings{}
-	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[28]
+	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1853,7 +2048,7 @@ func (x *OrganizationSessionSettings) String() string {
 func (*OrganizationSessionSettings) ProtoMessage() {}
 
 func (x *OrganizationSessionSettings) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[28]
+	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1866,7 +2061,7 @@ func (x *OrganizationSessionSettings) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OrganizationSessionSettings.ProtoReflect.Descriptor instead.
 func (*OrganizationSessionSettings) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_organizations_organizations_proto_rawDescGZIP(), []int{28}
+	return file_scalekit_v1_organizations_organizations_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *OrganizationSessionSettings) GetAbsoluteSessionTimeout() *wrapperspb.Int32Value {
@@ -1906,7 +2101,7 @@ type OrganizationSettings struct {
 
 func (x *OrganizationSettings) Reset() {
 	*x = OrganizationSettings{}
-	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[29]
+	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1918,7 +2113,7 @@ func (x *OrganizationSettings) String() string {
 func (*OrganizationSettings) ProtoMessage() {}
 
 func (x *OrganizationSettings) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[29]
+	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1931,7 +2126,7 @@ func (x *OrganizationSettings) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OrganizationSettings.ProtoReflect.Descriptor instead.
 func (*OrganizationSettings) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_organizations_organizations_proto_rawDescGZIP(), []int{29}
+	return file_scalekit_v1_organizations_organizations_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *OrganizationSettings) GetFeatures() []*OrganizationSettingsFeature {
@@ -1951,7 +2146,7 @@ type OrganizationSettingsFeature struct {
 
 func (x *OrganizationSettingsFeature) Reset() {
 	*x = OrganizationSettingsFeature{}
-	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[30]
+	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1963,7 +2158,7 @@ func (x *OrganizationSettingsFeature) String() string {
 func (*OrganizationSettingsFeature) ProtoMessage() {}
 
 func (x *OrganizationSettingsFeature) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[30]
+	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1976,7 +2171,7 @@ func (x *OrganizationSettingsFeature) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OrganizationSettingsFeature.ProtoReflect.Descriptor instead.
 func (*OrganizationSettingsFeature) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_organizations_organizations_proto_rawDescGZIP(), []int{30}
+	return file_scalekit_v1_organizations_organizations_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *OrganizationSettingsFeature) GetName() string {
@@ -2003,7 +2198,7 @@ type UpsertUserManagementSettingsRequest struct {
 
 func (x *UpsertUserManagementSettingsRequest) Reset() {
 	*x = UpsertUserManagementSettingsRequest{}
-	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[31]
+	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2015,7 +2210,7 @@ func (x *UpsertUserManagementSettingsRequest) String() string {
 func (*UpsertUserManagementSettingsRequest) ProtoMessage() {}
 
 func (x *UpsertUserManagementSettingsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[31]
+	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2028,7 +2223,7 @@ func (x *UpsertUserManagementSettingsRequest) ProtoReflect() protoreflect.Messag
 
 // Deprecated: Use UpsertUserManagementSettingsRequest.ProtoReflect.Descriptor instead.
 func (*UpsertUserManagementSettingsRequest) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_organizations_organizations_proto_rawDescGZIP(), []int{31}
+	return file_scalekit_v1_organizations_organizations_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *UpsertUserManagementSettingsRequest) GetOrganizationId() string {
@@ -2054,7 +2249,7 @@ type UpsertUserManagementSettingsResponse struct {
 
 func (x *UpsertUserManagementSettingsResponse) Reset() {
 	*x = UpsertUserManagementSettingsResponse{}
-	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[32]
+	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2066,7 +2261,7 @@ func (x *UpsertUserManagementSettingsResponse) String() string {
 func (*UpsertUserManagementSettingsResponse) ProtoMessage() {}
 
 func (x *UpsertUserManagementSettingsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[32]
+	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2079,7 +2274,7 @@ func (x *UpsertUserManagementSettingsResponse) ProtoReflect() protoreflect.Messa
 
 // Deprecated: Use UpsertUserManagementSettingsResponse.ProtoReflect.Descriptor instead.
 func (*UpsertUserManagementSettingsResponse) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_organizations_organizations_proto_rawDescGZIP(), []int{32}
+	return file_scalekit_v1_organizations_organizations_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *UpsertUserManagementSettingsResponse) GetSettings() *OrganizationUserManagementSettings {
@@ -2098,7 +2293,7 @@ type GetOrganizationUserManagementSettingsRequest struct {
 
 func (x *GetOrganizationUserManagementSettingsRequest) Reset() {
 	*x = GetOrganizationUserManagementSettingsRequest{}
-	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[33]
+	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2110,7 +2305,7 @@ func (x *GetOrganizationUserManagementSettingsRequest) String() string {
 func (*GetOrganizationUserManagementSettingsRequest) ProtoMessage() {}
 
 func (x *GetOrganizationUserManagementSettingsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[33]
+	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2123,7 +2318,7 @@ func (x *GetOrganizationUserManagementSettingsRequest) ProtoReflect() protorefle
 
 // Deprecated: Use GetOrganizationUserManagementSettingsRequest.ProtoReflect.Descriptor instead.
 func (*GetOrganizationUserManagementSettingsRequest) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_organizations_organizations_proto_rawDescGZIP(), []int{33}
+	return file_scalekit_v1_organizations_organizations_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *GetOrganizationUserManagementSettingsRequest) GetOrganizationId() string {
@@ -2142,7 +2337,7 @@ type GetOrganizationUserManagementSettingsResponse struct {
 
 func (x *GetOrganizationUserManagementSettingsResponse) Reset() {
 	*x = GetOrganizationUserManagementSettingsResponse{}
-	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[34]
+	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2154,7 +2349,7 @@ func (x *GetOrganizationUserManagementSettingsResponse) String() string {
 func (*GetOrganizationUserManagementSettingsResponse) ProtoMessage() {}
 
 func (x *GetOrganizationUserManagementSettingsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[34]
+	mi := &file_scalekit_v1_organizations_organizations_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2167,7 +2362,7 @@ func (x *GetOrganizationUserManagementSettingsResponse) ProtoReflect() protorefl
 
 // Deprecated: Use GetOrganizationUserManagementSettingsResponse.ProtoReflect.Descriptor instead.
 func (*GetOrganizationUserManagementSettingsResponse) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_organizations_organizations_proto_rawDescGZIP(), []int{34}
+	return file_scalekit_v1_organizations_organizations_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *GetOrganizationUserManagementSettingsResponse) GetSettings() *OrganizationUserManagementSettings {
@@ -2324,9 +2519,9 @@ const file_scalekit_v1_organizations_organizations_proto_rawDesc = "" +
 	"!UpdateOrganizationSettingsRequest\x12\x97\x01\n" +
 	"\x02id\x18\x01 \x01(\tB\x86\x01\x92Aq2WUnique identifier of the organization to update settings. Must begin with 'org_' prefixJ\x16\"org_1231234233424344\"\xbaH\x0f\xc8\x01\x01r\n" +
 	"\x10\x01\x18 :\x04org_R\x02id\x12\xd0\x02\n" +
-	"\bsettings\x18\x02 \x01(\v2/.scalekit.v1.organizations.OrganizationSettingsB\x82\x02\x92A\xf8\x012\x95\x01Settings configuration to apply to the organization. Contains feature toggles for SSO, directory synchronization, and other organization capabilitiesJ^{\"features\": [{\"name\": \"sso\", \"enabled\": true}, {\"name\": \"directory_sync\", \"enabled\": false}]}\xbaH\x03\xc8\x01\x01R\bsettings\"\x93\f\n" +
-	"!OrganizationSessionPolicySettings\x12\x94\x02\n" +
-	"\rpolicy_source\x18\x01 \x01(\x0e2..scalekit.v1.organizations.SessionPolicySourceB\xbe\x01\x92A\xaf\x012\xa2\x01Policy source. 'environment' means the organization inherits the application-level session policy. 'custom' means organization-specific timeout values are active.J\b\"custom\"\xbaH\b\x82\x01\x05\x10\x01\"\x01\x00R\fpolicySource\x12\xec\x01\n" +
+	"\bsettings\x18\x02 \x01(\v2/.scalekit.v1.organizations.OrganizationSettingsB\x82\x02\x92A\xf8\x012\x95\x01Settings configuration to apply to the organization. Contains feature toggles for SSO, directory synchronization, and other organization capabilitiesJ^{\"features\": [{\"name\": \"sso\", \"enabled\": true}, {\"name\": \"directory_sync\", \"enabled\": false}]}\xbaH\x03\xc8\x01\x01R\bsettings\"\x91\f\n" +
+	"!OrganizationSessionPolicySettings\x12\x92\x02\n" +
+	"\rpolicy_source\x18\x01 \x01(\x0e2,.scalekit.v1.organizations.SessionPolicyTypeB\xbe\x01\x92A\xaf\x012\xa2\x01Policy source. 'APPLICATION' means the organization inherits the application-level session policy. 'CUSTOM' means organization-specific timeout values are active.J\b\"CUSTOM\"\xbaH\b\x82\x01\x05\x10\x01\"\x01\x00R\fpolicySource\x12\xec\x01\n" +
 	"\x18absolute_session_timeout\x18\x02 \x01(\v2\x1b.google.protobuf.Int32ValueB\x94\x01\x92A\x90\x012\x88\x01The absolute session timeout value. The unit is specified by absolute_session_timeout_unit. Omitted when policy_source is 'environment'.J\x03360R\x16absoluteSessionTimeout\x12\xea\x01\n" +
 	"\x1dabsolute_session_timeout_unit\x18\x03 \x01(\x0e2\x1d.scalekit.v1.commons.TimeUnitB\x82\x01\x92A\x7f2rUnit for absolute_session_timeout. Accepted values: 'minutes', 'hours', 'days'. Responses always return 'minutes'.J\t\"minutes\"H\x00R\x1aabsoluteSessionTimeoutUnit\x88\x01\x01\x12\xd3\x01\n" +
 	"\x1cidle_session_timeout_enabled\x18\x04 \x01(\v2\x1a.google.protobuf.BoolValueBv\x92As2kWhether idle session timeout is enabled for this organization. Omitted when policy_source is 'environment'.J\x04trueR\x19idleSessionTimeoutEnabled\x12\x84\x02\n" +
@@ -2338,20 +2533,37 @@ const file_scalekit_v1_organizations_organizations_proto_rawDesc = "" +
 	"\x0forganization_id\x18\x01 \x01(\tB\x82\x01\x92Am2RThe unique identifier of the organization whose session policy is being requested.J\x17\"org_59615193906282635\"\xe0A\x02\xbaH\fr\n" +
 	"\x10\x01\x18 :\x04org_R\x0eorganizationId\"\xac\x01\n" +
 	"$GetOrganizationSessionPolicyResponse\x12\x83\x01\n" +
-	"\x06policy\x18\x01 \x01(\v2<.scalekit.v1.organizations.OrganizationSessionPolicySettingsB-\x92A*2(The session policy for the organization.R\x06policy\"\x95\x03\n" +
+	"\x06policy\x18\x01 \x01(\v2<.scalekit.v1.organizations.OrganizationSessionPolicySettingsB-\x92A*2(The session policy for the organization.R\x06policy\"\xb7\f\n" +
 	"&UpdateOrganizationSessionPolicyRequest\x12\xaa\x01\n" +
 	"\x0forganization_id\x18\x01 \x01(\tB\x80\x01\x92Ak2PThe unique identifier of the organization whose session policy is being updated.J\x17\"org_59615193906282635\"\xe0A\x02\xbaH\fr\n" +
-	"\x10\x01\x18 :\x04org_R\x0eorganizationId\x12\xbd\x01\n" +
-	"\x06policy\x18\x02 \x01(\v2<.scalekit.v1.organizations.OrganizationSessionPolicySettingsBg\x92Aa2_The session policy to apply. Set policy_source='APPLICATION' to revert to application defaults.\xe0A\x02R\x06policy\"\xb7\x01\n" +
+	"\x10\x01\x18 :\x04org_R\x0eorganizationId\x12\xe8\x01\n" +
+	"\rpolicy_source\x18\x02 \x01(\x0e2,.scalekit.v1.organizations.SessionPolicyTypeB\x94\x01\x92A\x90\x012\x83\x01Policy source. Send 'APPLICATION' to revert to application defaults. Send 'CUSTOM' with timeout values to activate a custom policy.J\b\"CUSTOM\"R\fpolicySource\x12\xe7\x01\n" +
+	"\x18absolute_session_timeout\x18\x03 \x01(\v2\x1b.google.protobuf.Int32ValueB\x8f\x01\x92A\x8b\x012\x83\x01The absolute session timeout value. The unit is specified by absolute_session_timeout_unit. Omit when policy_source is APPLICATION.J\x03360R\x16absoluteSessionTimeout\x12\xdb\x01\n" +
+	"\x1dabsolute_session_timeout_unit\x18\x04 \x01(\x0e2\x1d.scalekit.v1.commons.TimeUnitBt\x92Aq2dUnit for absolute_session_timeout. Accepted values: 'MINUTES', 'HOURS', 'DAYS'. Defaults to MINUTES.J\t\"MINUTES\"H\x00R\x1aabsoluteSessionTimeoutUnit\x88\x01\x01\x12\xb8\x01\n" +
+	"\x1cidle_session_timeout_enabled\x18\x05 \x01(\v2\x1a.google.protobuf.BoolValueB[\x92AX2PWhether idle session timeout is enabled. Omit when policy_source is APPLICATION.J\x04trueR\x19idleSessionTimeoutEnabled\x12\xdf\x01\n" +
+	"\x14idle_session_timeout\x18\x06 \x01(\v2\x1b.google.protobuf.Int32ValueB\x8f\x01\x92A\x8b\x012\x84\x01The idle session timeout value. The unit is specified by idle_session_timeout_unit. Omit when idle_session_timeout_enabled is false.J\x0284R\x12idleSessionTimeout\x12\xcf\x01\n" +
+	"\x19idle_session_timeout_unit\x18\a \x01(\x0e2\x1d.scalekit.v1.commons.TimeUnitBp\x92Am2`Unit for idle_session_timeout. Accepted values: 'MINUTES', 'HOURS', 'DAYS'. Defaults to MINUTES.J\t\"MINUTES\"H\x01R\x16idleSessionTimeoutUnit\x88\x01\x01B \n" +
+	"\x1e_absolute_session_timeout_unitB\x1c\n" +
+	"\x1a_idle_session_timeout_unit\"\xb7\x01\n" +
 	"'UpdateOrganizationSessionPolicyResponse\x12\x8b\x01\n" +
-	"\x06policy\x18\x01 \x01(\v2<.scalekit.v1.organizations.OrganizationSessionPolicySettingsB5\x92A220The updated session policy for the organization.R\x06policy\"\xdc\x02\n" +
+	"\x06policy\x18\x01 \x01(\v2<.scalekit.v1.organizations.OrganizationSessionPolicySettingsB5\x92A220The updated session policy for the organization.R\x06policy\"\xaa\x01\n" +
+	"\"GetApplicationSessionPolicyRequest\x12\x83\x01\n" +
+	"\x0forganization_id\x18\x01 \x01(\tBZ\x92AE2*The unique identifier of the organization.J\x17\"org_59615193906282635\"\xe0A\x02\xbaH\fr\n" +
+	"\x10\x01\x18 :\x04org_R\x0eorganizationId\"\x9e\x04\n" +
+	" ApplicationSessionPolicySettings\x12h\n" +
+	"\x18absolute_session_timeout\x18\x01 \x01(\x05B.\x92A+2$Absolute session timeout in minutes.J\x03480R\x16absoluteSessionTimeout\x12\x8e\x01\n" +
+	"\x1cidle_session_timeout_enabled\x18\x02 \x01(\bBM\x92AJ2AWhether idle session timeout is enabled at the application level.J\x05falseR\x19idleSessionTimeoutEnabled\x12\x7f\n" +
+	"\x14idle_session_timeout\x18\x03 \x01(\x05BM\x92AJ2DIdle session timeout in minutes. Zero when idle timeout is disabled.J\x0260R\x12idleSessionTimeout\x12~\n" +
+	"\x13access_token_expiry\x18\x04 \x01(\x05BN\x92AK2FAccess token expiry in minutes. Custom policy values must exceed this.J\x015R\x11accessTokenExpiry\"\xd1\x01\n" +
+	"#GetApplicationSessionPolicyResponse\x12\xa9\x01\n" +
+	"\x12application_policy\x18\x01 \x01(\v2;.scalekit.v1.organizations.ApplicationSessionPolicySettingsB=\x92A:28The effective application-level session policy settings.R\x11applicationPolicy\"\xdc\x02\n" +
 	"\"OrganizationUserManagementSettings\x12\xb5\x02\n" +
-	"\x11max_allowed_users\x18\x01 \x01(\v2\x1b.google.protobuf.Int32ValueB\xeb\x01\x92A\xe7\x012\xdf\x01Maximum number of users allowed in the organization. When nil (not set), there feature is not enabled. When explicitly set to zero, it also means no limit. When set to a positive integer, it enforces the maximum user limit.J\x03100R\x0fmaxAllowedUsers\"\xb2\b\n" +
+	"\x11max_allowed_users\x18\x01 \x01(\v2\x1b.google.protobuf.Int32ValueB\xeb\x01\x92A\xe7\x012\xdf\x01Maximum number of users allowed in the organization. When nil (not set), there feature is not enabled. When explicitly set to zero, it also means no limit. When set to a positive integer, it enforces the maximum user limit.J\x03100R\x0fmaxAllowedUsers\"\xae\b\n" +
 	"\x1bOrganizationSessionSettings\x12\xfe\x01\n" +
 	"\x18absolute_session_timeout\x18\x01 \x01(\v2\x1b.google.protobuf.Int32ValueB\xa6\x01\x92A\xa2\x012\x98\x01The maximum duration in seconds that a session can remain active, regardless of activity. After this time, the user will be required to re-authenticate.J\x0586400R\x16absoluteSessionTimeout\x12\xd4\x01\n" +
 	"\x14idle_session_timeout\x18\x03 \x01(\v2\x1b.google.protobuf.Int32ValueB\x84\x01\x92A\x80\x012xThe duration in seconds that a session can remain idle before it is automatically terminated. Activity resets the timer.J\x041800R\x12idleSessionTimeout\x12\x8e\x02\n" +
-	"\x1cidle_session_timeout_enabled\x18\x05 \x01(\v2\x1a.google.protobuf.BoolValueB\xb0\x01\x92A\xac\x012\xa3\x01Whether idle session timeout is enabled for this organization. When enabled, sessions expire after the idle timeout duration regardless of the environment setting.J\x04trueR\x19idleSessionTimeoutEnabled\x12\xeb\x01\n" +
-	"\rpolicy_source\x18\x06 \x01(\tB\xc5\x01\x92A\xc1\x012\xb4\x01Policy source for this organization. 'environment' means the organization inherits application-level session policy. 'custom' means organization-specific timeout values are active.J\b\"custom\"R\fpolicySourceJ\x04\b\x02\x10\x03J\x04\b\x04\x10\x05R\x1asession_management_enabledR\x14idle_session_enabled\"\x8e\x04\n" +
+	"\x1cidle_session_timeout_enabled\x18\x05 \x01(\v2\x1a.google.protobuf.BoolValueB\xb0\x01\x92A\xac\x012\xa3\x01Whether idle session timeout is enabled for this organization. When enabled, sessions expire after the idle timeout duration regardless of the environment setting.J\x04trueR\x19idleSessionTimeoutEnabled\x12\xe7\x01\n" +
+	"\rpolicy_source\x18\x06 \x01(\tB\xc1\x01\x92A\xbd\x012\xb0\x01Policy source for this organization. APPLICATION means the organization inherits application-level session policy. CUSTOM means organization-specific timeout values are active.J\b\"CUSTOM\"R\fpolicySourceJ\x04\b\x02\x10\x03J\x04\b\x04\x10\x05R\x1asession_management_enabledR\x14idle_session_enabled\"\x8e\x04\n" +
 	"\x14OrganizationSettings\x12\xa4\x02\n" +
 	"\bfeatures\x18\x01 \x03(\v26.scalekit.v1.organizations.OrganizationSettingsFeatureB\xcf\x01\x92A\xcb\x012wList of feature toggles that control organization capabilities such as SSO authentication and directory synchronizationJP[{\"name\": \"sso\", \"enabled\": true}, {\"name\": \"directory_sync\", \"enabled\": false}]R\bfeatures:\xce\x01\x92A\xca\x01\n" +
 	"h*\x15Organization Settings2OConfiguration options that control organization-level features and capabilities2^{\"features\": [{\"name\": \"sso\", \"enabled\": true}, {\"name\": \"directory_sync\", \"enabled\": false}]}\"\xe1\x03\n" +
@@ -2374,12 +2586,12 @@ const file_scalekit_v1_organizations_organizations_proto_rawDesc = "" +
 	"\x13FEATURE_UNSPECIFIED\x10\x00\x12\x13\n" +
 	"\vUNSPECIFIED\x10\x00\x1a\x02\b\x01\x12\f\n" +
 	"\bdir_sync\x10\x01\x12\a\n" +
-	"\x03sso\x10\x02\x1a\x02\x10\x01*R\n" +
-	"\x13SessionPolicySource\x12\x1e\n" +
-	"\x1aSESSION_POLICY_UNSPECIFIED\x10\x00\x12\x0f\n" +
+	"\x03sso\x10\x02\x1a\x02\x10\x01*U\n" +
+	"\x11SessionPolicyType\x12#\n" +
+	"\x1fSESSION_POLICY_TYPE_UNSPECIFIED\x10\x00\x12\x0f\n" +
 	"\vAPPLICATION\x10\x01\x12\n" +
 	"\n" +
-	"\x06CUSTOM\x10\x022\xa3J\n" +
+	"\x06CUSTOM\x10\x022\xaaP\n" +
 	"\x13OrganizationService\x12\x88\x04\n" +
 	"\x12CreateOrganization\x124.scalekit.v1.organizations.CreateOrganizationRequest\x1a5.scalekit.v1.organizations.CreateOrganizationResponse\"\x84\x03\x92A\xcf\x02\n" +
 	"\rOrganizations\x12\x16Create an organization\x1a\x8f\x01Creates a new organization in your environment. Use this endpoint to add a new tenant that can be configured with various settings and metadataJ\x93\x01\n" +
@@ -2494,21 +2706,23 @@ const file_scalekit_v1_organizations_organizations_proto_rawDesc = "" +
 	"\x03400\x12i\n" +
 	"gInvalid request - occurs when the settings payload contains invalid values or unsupported configurationJM\n" +
 	"\x03404\x12F\n" +
-	"DOrganization not found - the specified organization ID doesn't exist\x82\xb5\x18\x02\x18D\x82\xd3\xe4\x93\x02/:\bsettings2#/api/v1/organizations/{id}/settings\x12\x82\x06\n" +
-	"\x1fUpdateOrganizationSessionPolicy\x12A.scalekit.v1.organizations.UpdateOrganizationSessionPolicyRequest\x1aB.scalekit.v1.organizations.UpdateOrganizationSessionPolicyResponse\"\xd7\x04\x92A\xe9\x03\n" +
-	"\rOrganizations\x12\"Update organization session policy\x1a\xe2\x02Sets a custom session policy for an organization or reverts to application-level settings. Send policy_source='APPLICATION' to revert to application defaults. Send policy_source='CUSTOM' with timeout values to activate a custom policy. Values are accepted as-is; the system applies the stricter of application and organization values at session creation.J-\n" +
-	"\x03200\x12&\n" +
-	"$Session policy updated successfully.J \n" +
+	"DOrganization not found - the specified organization ID doesn't exist\x82\xb5\x18\x02\x18D\x82\xd3\xe4\x93\x02/:\bsettings2#/api/v1/organizations/{id}/settings\x12\xd0\x05\n" +
+	"\x1fUpdateOrganizationSessionPolicy\x12A.scalekit.v1.organizations.UpdateOrganizationSessionPolicyRequest\x1aB.scalekit.v1.organizations.UpdateOrganizationSessionPolicyResponse\"\xa5\x04\x92A\xbc\x03\n" +
+	"\rOrganizations\x12\"Update organization session policy\x1a\xed\x01Sets a custom session policy for an organization or reverts to application-level settings. Send session_policy='APPLICATION' to revert to application defaults. Send session_policy='CUSTOM' with timeout values to activate a custom policy.Ju\n" +
+	"\x03200\x12n\n" +
+	"$Session policy updated successfully.\x12F\n" +
+	"D\x1aB.scalekit.v1.organizations.UpdateOrganizationSessionPolicyResponseJ \n" +
 	"\x03404\x12\x19\n" +
 	"\x17Organization not found.\x82\xb5\x18 \n" +
-	"\x1csk_org_session_policy_manage\x18t\x82\xd3\xe4\x93\x02@:\x06policy26/api/v1/organizations/{organization_id}/session-policy\x12\xf1\x04\n" +
-	"\x1cGetOrganizationSessionPolicy\x12>.scalekit.v1.organizations.GetOrganizationSessionPolicyRequest\x1a?.scalekit.v1.organizations.GetOrganizationSessionPolicyResponse\"\xcf\x03\x92A\xeb\x02\n" +
-	"\rOrganizations\x12\x1fGet organization session policy\x1a\xe5\x01Retrieves the session policy for an organization. Returns policy_source='APPLICATION' if the organization inherits the application-level defaults, or policy_source='CUSTOM' with the configured values if a custom policy is active.J/\n" +
-	"\x03200\x12(\n" +
-	"&Session policy retrieved successfully.J \n" +
+	"\x1corganizations_sessions_write\x18T\x82\xd3\xe4\x93\x02;:\x01*26/api/v1/organizations/{organization_id}/session-policy\x12\xb9\x05\n" +
+	"\x1cGetOrganizationSessionPolicy\x12>.scalekit.v1.organizations.GetOrganizationSessionPolicyRequest\x1a?.scalekit.v1.organizations.GetOrganizationSessionPolicyResponse\"\x97\x04\x92A\xb2\x03\n" +
+	"\rOrganizations\x12\x1fGet organization session policy\x1a\xe7\x01Retrieves the session policy for an organization. Returns session_policy='APPLICATION' if the organization inherits the application-level defaults, or session_policy='CUSTOM' with the configured values if a custom policy is active.Jt\n" +
+	"\x03200\x12m\n" +
+	"&Session policy retrieved successfully.\x12C\n" +
+	"A\x1a?.scalekit.v1.organizations.GetOrganizationSessionPolicyResponseJ \n" +
 	"\x03404\x12\x19\n" +
-	"\x17Organization not found.\x82\xb5\x18\x1e\n" +
-	"\x1ask_org_session_policy_read\x18t\x82\xd3\xe4\x93\x028\x126/api/v1/organizations/{organization_id}/session-policy\x12\xd5\x03\n" +
+	"\x17Organization not found.\x82\xb5\x18\x1f\n" +
+	"\x1borganizations_sessions_read\x18T\x82\xd3\xe4\x93\x028\x126/api/v1/organizations/{organization_id}/session-policy\x12\xd5\x03\n" +
 	"\x1cUpsertUserManagementSettings\x12>.scalekit.v1.organizations.UpsertUserManagementSettingsRequest\x1a?.scalekit.v1.organizations.UpsertUserManagementSettingsResponse\"\xb3\x02\x92A\xdf\x01\n" +
 	"\rOrganizations\x12 Upsert organization user setting\x1a3Upsert user management settings for an organizationJw\n" +
 	"\x03200\x12p\n" +
@@ -2518,7 +2732,17 @@ const file_scalekit_v1_organizations_organizations_proto_rawDesc = "" +
 	"\rOrganizations\x12(Get organization user management setting\x1aCRetrieves the user management settings for a specific organization.J\x82\x01\n" +
 	"\x03200\x12{\n" +
 	"+Returns the requested organization setting.\x12L\n" +
-	"J\x1aH.scalekit.v1.organizations.GetOrganizationUserManagementSettingsResponse\x82\xb5\x18\x02\x18d\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02A\x12?/api/v1/organizations/{organization_id}/settings/usermanagement\x1aX\x92AU\n" +
+	"J\x1aH.scalekit.v1.organizations.GetOrganizationUserManagementSettingsResponse\x82\xb5\x18\x02\x18d\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02A\x12?/api/v1/organizations/{organization_id}/settings/usermanagement\x12\xee\x05\n" +
+	"\x1bGetApplicationSessionPolicy\x12=.scalekit.v1.organizations.GetApplicationSessionPolicyRequest\x1a>.scalekit.v1.organizations.GetApplicationSessionPolicyResponse\"\xcf\x04\x92A\xcf\x03\n" +
+	"\rOrganizations\x12/Get application session policy for organization\x1a\xa6\x01Returns the application-level session settings for display in hosted pages. Includes absolute timeout, idle timeout configuration, and access token expiry in minutes.J\x7f\n" +
+	"\x03200\x12x\n" +
+	"2Application session policy retrieved successfully.\x12B\n" +
+	"@\x1a>.scalekit.v1.organizations.GetApplicationSessionPolicyResponseJA\n" +
+	"\x03403\x12:\n" +
+	"8Session policy feature not enabled for this environment.J \n" +
+	"\x03404\x12\x19\n" +
+	"\x17Organization not found.\x82\xb5\x18\x1f\n" +
+	"\x1borganizations_sessions_read\x18T\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02D\x12B/api/v1/organizations/{organization_id}/application-session-policy\x1aX\x92AU\n" +
 	"\rOrganizations\x12D{{import \"proto/scalekit/v1/organizations/organization_details.md\"}}B\xf8(\x92A\xec&\x12\x92\"\n" +
 	"\rScalekit APIs\x12\x83!# Introduction\n" +
 	"\n" +
@@ -2716,10 +2940,10 @@ func file_scalekit_v1_organizations_organizations_proto_rawDescGZIP() []byte {
 }
 
 var file_scalekit_v1_organizations_organizations_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_scalekit_v1_organizations_organizations_proto_msgTypes = make([]protoimpl.MessageInfo, 38)
+var file_scalekit_v1_organizations_organizations_proto_msgTypes = make([]protoimpl.MessageInfo, 41)
 var file_scalekit_v1_organizations_organizations_proto_goTypes = []any{
 	(Feature)(0),                                          // 0: scalekit.v1.organizations.Feature
-	(SessionPolicySource)(0),                              // 1: scalekit.v1.organizations.SessionPolicySource
+	(SessionPolicyType)(0),                                // 1: scalekit.v1.organizations.SessionPolicyType
 	(*CreateOrganizationRequest)(nil),                     // 2: scalekit.v1.organizations.CreateOrganizationRequest
 	(*CreateOrganizationResponse)(nil),                    // 3: scalekit.v1.organizations.CreateOrganizationResponse
 	(*CreateOrganization)(nil),                            // 4: scalekit.v1.organizations.CreateOrganization
@@ -2747,101 +2971,112 @@ var file_scalekit_v1_organizations_organizations_proto_goTypes = []any{
 	(*GetOrganizationSessionPolicyResponse)(nil),          // 26: scalekit.v1.organizations.GetOrganizationSessionPolicyResponse
 	(*UpdateOrganizationSessionPolicyRequest)(nil),        // 27: scalekit.v1.organizations.UpdateOrganizationSessionPolicyRequest
 	(*UpdateOrganizationSessionPolicyResponse)(nil),       // 28: scalekit.v1.organizations.UpdateOrganizationSessionPolicyResponse
-	(*OrganizationUserManagementSettings)(nil),            // 29: scalekit.v1.organizations.OrganizationUserManagementSettings
-	(*OrganizationSessionSettings)(nil),                   // 30: scalekit.v1.organizations.OrganizationSessionSettings
-	(*OrganizationSettings)(nil),                          // 31: scalekit.v1.organizations.OrganizationSettings
-	(*OrganizationSettingsFeature)(nil),                   // 32: scalekit.v1.organizations.OrganizationSettingsFeature
-	(*UpsertUserManagementSettingsRequest)(nil),           // 33: scalekit.v1.organizations.UpsertUserManagementSettingsRequest
-	(*UpsertUserManagementSettingsResponse)(nil),          // 34: scalekit.v1.organizations.UpsertUserManagementSettingsResponse
-	(*GetOrganizationUserManagementSettingsRequest)(nil),  // 35: scalekit.v1.organizations.GetOrganizationUserManagementSettingsRequest
-	(*GetOrganizationUserManagementSettingsResponse)(nil), // 36: scalekit.v1.organizations.GetOrganizationUserManagementSettingsResponse
-	nil,                           // 37: scalekit.v1.organizations.CreateOrganization.MetadataEntry
-	nil,                           // 38: scalekit.v1.organizations.Organization.MetadataEntry
-	nil,                           // 39: scalekit.v1.organizations.UpdateOrganization.MetadataEntry
-	(commons.RegionCode)(0),       // 40: scalekit.v1.commons.RegionCode
-	(*timestamppb.Timestamp)(nil), // 41: google.protobuf.Timestamp
-	(*fieldmaskpb.FieldMask)(nil), // 42: google.protobuf.FieldMask
-	(*wrapperspb.Int32Value)(nil), // 43: google.protobuf.Int32Value
-	(commons.TimeUnit)(0),         // 44: scalekit.v1.commons.TimeUnit
-	(*wrapperspb.BoolValue)(nil),  // 45: google.protobuf.BoolValue
-	(*emptypb.Empty)(nil),         // 46: google.protobuf.Empty
+	(*GetApplicationSessionPolicyRequest)(nil),            // 29: scalekit.v1.organizations.GetApplicationSessionPolicyRequest
+	(*ApplicationSessionPolicySettings)(nil),              // 30: scalekit.v1.organizations.ApplicationSessionPolicySettings
+	(*GetApplicationSessionPolicyResponse)(nil),           // 31: scalekit.v1.organizations.GetApplicationSessionPolicyResponse
+	(*OrganizationUserManagementSettings)(nil),            // 32: scalekit.v1.organizations.OrganizationUserManagementSettings
+	(*OrganizationSessionSettings)(nil),                   // 33: scalekit.v1.organizations.OrganizationSessionSettings
+	(*OrganizationSettings)(nil),                          // 34: scalekit.v1.organizations.OrganizationSettings
+	(*OrganizationSettingsFeature)(nil),                   // 35: scalekit.v1.organizations.OrganizationSettingsFeature
+	(*UpsertUserManagementSettingsRequest)(nil),           // 36: scalekit.v1.organizations.UpsertUserManagementSettingsRequest
+	(*UpsertUserManagementSettingsResponse)(nil),          // 37: scalekit.v1.organizations.UpsertUserManagementSettingsResponse
+	(*GetOrganizationUserManagementSettingsRequest)(nil),  // 38: scalekit.v1.organizations.GetOrganizationUserManagementSettingsRequest
+	(*GetOrganizationUserManagementSettingsResponse)(nil), // 39: scalekit.v1.organizations.GetOrganizationUserManagementSettingsResponse
+	nil,                           // 40: scalekit.v1.organizations.CreateOrganization.MetadataEntry
+	nil,                           // 41: scalekit.v1.organizations.Organization.MetadataEntry
+	nil,                           // 42: scalekit.v1.organizations.UpdateOrganization.MetadataEntry
+	(commons.RegionCode)(0),       // 43: scalekit.v1.commons.RegionCode
+	(*timestamppb.Timestamp)(nil), // 44: google.protobuf.Timestamp
+	(*fieldmaskpb.FieldMask)(nil), // 45: google.protobuf.FieldMask
+	(*wrapperspb.Int32Value)(nil), // 46: google.protobuf.Int32Value
+	(commons.TimeUnit)(0),         // 47: scalekit.v1.commons.TimeUnit
+	(*wrapperspb.BoolValue)(nil),  // 48: google.protobuf.BoolValue
+	(*emptypb.Empty)(nil),         // 49: google.protobuf.Empty
 }
 var file_scalekit_v1_organizations_organizations_proto_depIdxs = []int32{
 	4,  // 0: scalekit.v1.organizations.CreateOrganizationRequest.organization:type_name -> scalekit.v1.organizations.CreateOrganization
 	5,  // 1: scalekit.v1.organizations.CreateOrganizationResponse.organization:type_name -> scalekit.v1.organizations.Organization
-	40, // 2: scalekit.v1.organizations.CreateOrganization.region_code:type_name -> scalekit.v1.commons.RegionCode
-	37, // 3: scalekit.v1.organizations.CreateOrganization.metadata:type_name -> scalekit.v1.organizations.CreateOrganization.MetadataEntry
-	41, // 4: scalekit.v1.organizations.Organization.create_time:type_name -> google.protobuf.Timestamp
-	41, // 5: scalekit.v1.organizations.Organization.update_time:type_name -> google.protobuf.Timestamp
-	40, // 6: scalekit.v1.organizations.Organization.region_code:type_name -> scalekit.v1.commons.RegionCode
-	38, // 7: scalekit.v1.organizations.Organization.metadata:type_name -> scalekit.v1.organizations.Organization.MetadataEntry
-	31, // 8: scalekit.v1.organizations.Organization.settings:type_name -> scalekit.v1.organizations.OrganizationSettings
+	43, // 2: scalekit.v1.organizations.CreateOrganization.region_code:type_name -> scalekit.v1.commons.RegionCode
+	40, // 3: scalekit.v1.organizations.CreateOrganization.metadata:type_name -> scalekit.v1.organizations.CreateOrganization.MetadataEntry
+	44, // 4: scalekit.v1.organizations.Organization.create_time:type_name -> google.protobuf.Timestamp
+	44, // 5: scalekit.v1.organizations.Organization.update_time:type_name -> google.protobuf.Timestamp
+	43, // 6: scalekit.v1.organizations.Organization.region_code:type_name -> scalekit.v1.commons.RegionCode
+	41, // 7: scalekit.v1.organizations.Organization.metadata:type_name -> scalekit.v1.organizations.Organization.MetadataEntry
+	34, // 8: scalekit.v1.organizations.Organization.settings:type_name -> scalekit.v1.organizations.OrganizationSettings
 	7,  // 9: scalekit.v1.organizations.UpdateOrganizationRequest.organization:type_name -> scalekit.v1.organizations.UpdateOrganization
-	42, // 10: scalekit.v1.organizations.UpdateOrganizationRequest.update_mask:type_name -> google.protobuf.FieldMask
-	39, // 11: scalekit.v1.organizations.UpdateOrganization.metadata:type_name -> scalekit.v1.organizations.UpdateOrganization.MetadataEntry
+	45, // 10: scalekit.v1.organizations.UpdateOrganizationRequest.update_mask:type_name -> google.protobuf.FieldMask
+	42, // 11: scalekit.v1.organizations.UpdateOrganization.metadata:type_name -> scalekit.v1.organizations.UpdateOrganization.MetadataEntry
 	5,  // 12: scalekit.v1.organizations.UpdateOrganizationResponse.organization:type_name -> scalekit.v1.organizations.Organization
 	5,  // 13: scalekit.v1.organizations.GetOrganizationResponse.organization:type_name -> scalekit.v1.organizations.Organization
 	5,  // 14: scalekit.v1.organizations.ListOrganizationsResponse.organizations:type_name -> scalekit.v1.organizations.Organization
 	5,  // 15: scalekit.v1.organizations.SearchOrganizationsResponse.organizations:type_name -> scalekit.v1.organizations.Organization
 	0,  // 16: scalekit.v1.organizations.GeneratePortalLinkRequest.features:type_name -> scalekit.v1.organizations.Feature
-	41, // 17: scalekit.v1.organizations.Link.expire_time:type_name -> google.protobuf.Timestamp
+	44, // 17: scalekit.v1.organizations.Link.expire_time:type_name -> google.protobuf.Timestamp
 	20, // 18: scalekit.v1.organizations.GeneratePortalLinkResponse.link:type_name -> scalekit.v1.organizations.Link
 	20, // 19: scalekit.v1.organizations.GetPortalLinksResponse.links:type_name -> scalekit.v1.organizations.Link
-	31, // 20: scalekit.v1.organizations.UpdateOrganizationSettingsRequest.settings:type_name -> scalekit.v1.organizations.OrganizationSettings
-	1,  // 21: scalekit.v1.organizations.OrganizationSessionPolicySettings.policy_source:type_name -> scalekit.v1.organizations.SessionPolicySource
-	43, // 22: scalekit.v1.organizations.OrganizationSessionPolicySettings.absolute_session_timeout:type_name -> google.protobuf.Int32Value
-	44, // 23: scalekit.v1.organizations.OrganizationSessionPolicySettings.absolute_session_timeout_unit:type_name -> scalekit.v1.commons.TimeUnit
-	45, // 24: scalekit.v1.organizations.OrganizationSessionPolicySettings.idle_session_timeout_enabled:type_name -> google.protobuf.BoolValue
-	43, // 25: scalekit.v1.organizations.OrganizationSessionPolicySettings.idle_session_timeout:type_name -> google.protobuf.Int32Value
-	44, // 26: scalekit.v1.organizations.OrganizationSessionPolicySettings.idle_session_timeout_unit:type_name -> scalekit.v1.commons.TimeUnit
+	34, // 20: scalekit.v1.organizations.UpdateOrganizationSettingsRequest.settings:type_name -> scalekit.v1.organizations.OrganizationSettings
+	1,  // 21: scalekit.v1.organizations.OrganizationSessionPolicySettings.policy_source:type_name -> scalekit.v1.organizations.SessionPolicyType
+	46, // 22: scalekit.v1.organizations.OrganizationSessionPolicySettings.absolute_session_timeout:type_name -> google.protobuf.Int32Value
+	47, // 23: scalekit.v1.organizations.OrganizationSessionPolicySettings.absolute_session_timeout_unit:type_name -> scalekit.v1.commons.TimeUnit
+	48, // 24: scalekit.v1.organizations.OrganizationSessionPolicySettings.idle_session_timeout_enabled:type_name -> google.protobuf.BoolValue
+	46, // 25: scalekit.v1.organizations.OrganizationSessionPolicySettings.idle_session_timeout:type_name -> google.protobuf.Int32Value
+	47, // 26: scalekit.v1.organizations.OrganizationSessionPolicySettings.idle_session_timeout_unit:type_name -> scalekit.v1.commons.TimeUnit
 	24, // 27: scalekit.v1.organizations.GetOrganizationSessionPolicyResponse.policy:type_name -> scalekit.v1.organizations.OrganizationSessionPolicySettings
-	24, // 28: scalekit.v1.organizations.UpdateOrganizationSessionPolicyRequest.policy:type_name -> scalekit.v1.organizations.OrganizationSessionPolicySettings
-	24, // 29: scalekit.v1.organizations.UpdateOrganizationSessionPolicyResponse.policy:type_name -> scalekit.v1.organizations.OrganizationSessionPolicySettings
-	43, // 30: scalekit.v1.organizations.OrganizationUserManagementSettings.max_allowed_users:type_name -> google.protobuf.Int32Value
-	43, // 31: scalekit.v1.organizations.OrganizationSessionSettings.absolute_session_timeout:type_name -> google.protobuf.Int32Value
-	43, // 32: scalekit.v1.organizations.OrganizationSessionSettings.idle_session_timeout:type_name -> google.protobuf.Int32Value
-	45, // 33: scalekit.v1.organizations.OrganizationSessionSettings.idle_session_timeout_enabled:type_name -> google.protobuf.BoolValue
-	32, // 34: scalekit.v1.organizations.OrganizationSettings.features:type_name -> scalekit.v1.organizations.OrganizationSettingsFeature
-	29, // 35: scalekit.v1.organizations.UpsertUserManagementSettingsRequest.settings:type_name -> scalekit.v1.organizations.OrganizationUserManagementSettings
-	29, // 36: scalekit.v1.organizations.UpsertUserManagementSettingsResponse.settings:type_name -> scalekit.v1.organizations.OrganizationUserManagementSettings
-	29, // 37: scalekit.v1.organizations.GetOrganizationUserManagementSettingsResponse.settings:type_name -> scalekit.v1.organizations.OrganizationUserManagementSettings
-	2,  // 38: scalekit.v1.organizations.OrganizationService.CreateOrganization:input_type -> scalekit.v1.organizations.CreateOrganizationRequest
-	6,  // 39: scalekit.v1.organizations.OrganizationService.UpdateOrganization:input_type -> scalekit.v1.organizations.UpdateOrganizationRequest
-	9,  // 40: scalekit.v1.organizations.OrganizationService.GetOrganization:input_type -> scalekit.v1.organizations.GetOrganizationRequest
-	9,  // 41: scalekit.v1.organizations.OrganizationService.GetOrganizationByExternalId:input_type -> scalekit.v1.organizations.GetOrganizationRequest
-	11, // 42: scalekit.v1.organizations.OrganizationService.ListOrganization:input_type -> scalekit.v1.organizations.ListOrganizationsRequest
-	13, // 43: scalekit.v1.organizations.OrganizationService.SearchOrganization:input_type -> scalekit.v1.organizations.SearchOrganizationsRequest
-	15, // 44: scalekit.v1.organizations.OrganizationService.DeleteOrganization:input_type -> scalekit.v1.organizations.DeleteOrganizationRequest
-	16, // 45: scalekit.v1.organizations.OrganizationService.GeneratePortalLink:input_type -> scalekit.v1.organizations.GeneratePortalLinkRequest
-	18, // 46: scalekit.v1.organizations.OrganizationService.DeletePortalLink:input_type -> scalekit.v1.organizations.DeletePortalLinkRequest
-	19, // 47: scalekit.v1.organizations.OrganizationService.DeletePortalLinkByID:input_type -> scalekit.v1.organizations.DeletePortalLinkByIdRequest
-	17, // 48: scalekit.v1.organizations.OrganizationService.GetPortalLinks:input_type -> scalekit.v1.organizations.GetPortalLinkRequest
-	23, // 49: scalekit.v1.organizations.OrganizationService.UpdateOrganizationSettings:input_type -> scalekit.v1.organizations.UpdateOrganizationSettingsRequest
-	27, // 50: scalekit.v1.organizations.OrganizationService.UpdateOrganizationSessionPolicy:input_type -> scalekit.v1.organizations.UpdateOrganizationSessionPolicyRequest
-	25, // 51: scalekit.v1.organizations.OrganizationService.GetOrganizationSessionPolicy:input_type -> scalekit.v1.organizations.GetOrganizationSessionPolicyRequest
-	33, // 52: scalekit.v1.organizations.OrganizationService.UpsertUserManagementSettings:input_type -> scalekit.v1.organizations.UpsertUserManagementSettingsRequest
-	35, // 53: scalekit.v1.organizations.OrganizationService.GetOrganizationUserManagementSetting:input_type -> scalekit.v1.organizations.GetOrganizationUserManagementSettingsRequest
-	3,  // 54: scalekit.v1.organizations.OrganizationService.CreateOrganization:output_type -> scalekit.v1.organizations.CreateOrganizationResponse
-	8,  // 55: scalekit.v1.organizations.OrganizationService.UpdateOrganization:output_type -> scalekit.v1.organizations.UpdateOrganizationResponse
-	10, // 56: scalekit.v1.organizations.OrganizationService.GetOrganization:output_type -> scalekit.v1.organizations.GetOrganizationResponse
-	10, // 57: scalekit.v1.organizations.OrganizationService.GetOrganizationByExternalId:output_type -> scalekit.v1.organizations.GetOrganizationResponse
-	12, // 58: scalekit.v1.organizations.OrganizationService.ListOrganization:output_type -> scalekit.v1.organizations.ListOrganizationsResponse
-	14, // 59: scalekit.v1.organizations.OrganizationService.SearchOrganization:output_type -> scalekit.v1.organizations.SearchOrganizationsResponse
-	46, // 60: scalekit.v1.organizations.OrganizationService.DeleteOrganization:output_type -> google.protobuf.Empty
-	21, // 61: scalekit.v1.organizations.OrganizationService.GeneratePortalLink:output_type -> scalekit.v1.organizations.GeneratePortalLinkResponse
-	46, // 62: scalekit.v1.organizations.OrganizationService.DeletePortalLink:output_type -> google.protobuf.Empty
-	46, // 63: scalekit.v1.organizations.OrganizationService.DeletePortalLinkByID:output_type -> google.protobuf.Empty
-	22, // 64: scalekit.v1.organizations.OrganizationService.GetPortalLinks:output_type -> scalekit.v1.organizations.GetPortalLinksResponse
-	10, // 65: scalekit.v1.organizations.OrganizationService.UpdateOrganizationSettings:output_type -> scalekit.v1.organizations.GetOrganizationResponse
-	28, // 66: scalekit.v1.organizations.OrganizationService.UpdateOrganizationSessionPolicy:output_type -> scalekit.v1.organizations.UpdateOrganizationSessionPolicyResponse
-	26, // 67: scalekit.v1.organizations.OrganizationService.GetOrganizationSessionPolicy:output_type -> scalekit.v1.organizations.GetOrganizationSessionPolicyResponse
-	34, // 68: scalekit.v1.organizations.OrganizationService.UpsertUserManagementSettings:output_type -> scalekit.v1.organizations.UpsertUserManagementSettingsResponse
-	36, // 69: scalekit.v1.organizations.OrganizationService.GetOrganizationUserManagementSetting:output_type -> scalekit.v1.organizations.GetOrganizationUserManagementSettingsResponse
-	54, // [54:70] is the sub-list for method output_type
-	38, // [38:54] is the sub-list for method input_type
-	38, // [38:38] is the sub-list for extension type_name
-	38, // [38:38] is the sub-list for extension extendee
-	0,  // [0:38] is the sub-list for field type_name
+	1,  // 28: scalekit.v1.organizations.UpdateOrganizationSessionPolicyRequest.policy_source:type_name -> scalekit.v1.organizations.SessionPolicyType
+	46, // 29: scalekit.v1.organizations.UpdateOrganizationSessionPolicyRequest.absolute_session_timeout:type_name -> google.protobuf.Int32Value
+	47, // 30: scalekit.v1.organizations.UpdateOrganizationSessionPolicyRequest.absolute_session_timeout_unit:type_name -> scalekit.v1.commons.TimeUnit
+	48, // 31: scalekit.v1.organizations.UpdateOrganizationSessionPolicyRequest.idle_session_timeout_enabled:type_name -> google.protobuf.BoolValue
+	46, // 32: scalekit.v1.organizations.UpdateOrganizationSessionPolicyRequest.idle_session_timeout:type_name -> google.protobuf.Int32Value
+	47, // 33: scalekit.v1.organizations.UpdateOrganizationSessionPolicyRequest.idle_session_timeout_unit:type_name -> scalekit.v1.commons.TimeUnit
+	24, // 34: scalekit.v1.organizations.UpdateOrganizationSessionPolicyResponse.policy:type_name -> scalekit.v1.organizations.OrganizationSessionPolicySettings
+	30, // 35: scalekit.v1.organizations.GetApplicationSessionPolicyResponse.application_policy:type_name -> scalekit.v1.organizations.ApplicationSessionPolicySettings
+	46, // 36: scalekit.v1.organizations.OrganizationUserManagementSettings.max_allowed_users:type_name -> google.protobuf.Int32Value
+	46, // 37: scalekit.v1.organizations.OrganizationSessionSettings.absolute_session_timeout:type_name -> google.protobuf.Int32Value
+	46, // 38: scalekit.v1.organizations.OrganizationSessionSettings.idle_session_timeout:type_name -> google.protobuf.Int32Value
+	48, // 39: scalekit.v1.organizations.OrganizationSessionSettings.idle_session_timeout_enabled:type_name -> google.protobuf.BoolValue
+	35, // 40: scalekit.v1.organizations.OrganizationSettings.features:type_name -> scalekit.v1.organizations.OrganizationSettingsFeature
+	32, // 41: scalekit.v1.organizations.UpsertUserManagementSettingsRequest.settings:type_name -> scalekit.v1.organizations.OrganizationUserManagementSettings
+	32, // 42: scalekit.v1.organizations.UpsertUserManagementSettingsResponse.settings:type_name -> scalekit.v1.organizations.OrganizationUserManagementSettings
+	32, // 43: scalekit.v1.organizations.GetOrganizationUserManagementSettingsResponse.settings:type_name -> scalekit.v1.organizations.OrganizationUserManagementSettings
+	2,  // 44: scalekit.v1.organizations.OrganizationService.CreateOrganization:input_type -> scalekit.v1.organizations.CreateOrganizationRequest
+	6,  // 45: scalekit.v1.organizations.OrganizationService.UpdateOrganization:input_type -> scalekit.v1.organizations.UpdateOrganizationRequest
+	9,  // 46: scalekit.v1.organizations.OrganizationService.GetOrganization:input_type -> scalekit.v1.organizations.GetOrganizationRequest
+	9,  // 47: scalekit.v1.organizations.OrganizationService.GetOrganizationByExternalId:input_type -> scalekit.v1.organizations.GetOrganizationRequest
+	11, // 48: scalekit.v1.organizations.OrganizationService.ListOrganization:input_type -> scalekit.v1.organizations.ListOrganizationsRequest
+	13, // 49: scalekit.v1.organizations.OrganizationService.SearchOrganization:input_type -> scalekit.v1.organizations.SearchOrganizationsRequest
+	15, // 50: scalekit.v1.organizations.OrganizationService.DeleteOrganization:input_type -> scalekit.v1.organizations.DeleteOrganizationRequest
+	16, // 51: scalekit.v1.organizations.OrganizationService.GeneratePortalLink:input_type -> scalekit.v1.organizations.GeneratePortalLinkRequest
+	18, // 52: scalekit.v1.organizations.OrganizationService.DeletePortalLink:input_type -> scalekit.v1.organizations.DeletePortalLinkRequest
+	19, // 53: scalekit.v1.organizations.OrganizationService.DeletePortalLinkByID:input_type -> scalekit.v1.organizations.DeletePortalLinkByIdRequest
+	17, // 54: scalekit.v1.organizations.OrganizationService.GetPortalLinks:input_type -> scalekit.v1.organizations.GetPortalLinkRequest
+	23, // 55: scalekit.v1.organizations.OrganizationService.UpdateOrganizationSettings:input_type -> scalekit.v1.organizations.UpdateOrganizationSettingsRequest
+	27, // 56: scalekit.v1.organizations.OrganizationService.UpdateOrganizationSessionPolicy:input_type -> scalekit.v1.organizations.UpdateOrganizationSessionPolicyRequest
+	25, // 57: scalekit.v1.organizations.OrganizationService.GetOrganizationSessionPolicy:input_type -> scalekit.v1.organizations.GetOrganizationSessionPolicyRequest
+	36, // 58: scalekit.v1.organizations.OrganizationService.UpsertUserManagementSettings:input_type -> scalekit.v1.organizations.UpsertUserManagementSettingsRequest
+	38, // 59: scalekit.v1.organizations.OrganizationService.GetOrganizationUserManagementSetting:input_type -> scalekit.v1.organizations.GetOrganizationUserManagementSettingsRequest
+	29, // 60: scalekit.v1.organizations.OrganizationService.GetApplicationSessionPolicy:input_type -> scalekit.v1.organizations.GetApplicationSessionPolicyRequest
+	3,  // 61: scalekit.v1.organizations.OrganizationService.CreateOrganization:output_type -> scalekit.v1.organizations.CreateOrganizationResponse
+	8,  // 62: scalekit.v1.organizations.OrganizationService.UpdateOrganization:output_type -> scalekit.v1.organizations.UpdateOrganizationResponse
+	10, // 63: scalekit.v1.organizations.OrganizationService.GetOrganization:output_type -> scalekit.v1.organizations.GetOrganizationResponse
+	10, // 64: scalekit.v1.organizations.OrganizationService.GetOrganizationByExternalId:output_type -> scalekit.v1.organizations.GetOrganizationResponse
+	12, // 65: scalekit.v1.organizations.OrganizationService.ListOrganization:output_type -> scalekit.v1.organizations.ListOrganizationsResponse
+	14, // 66: scalekit.v1.organizations.OrganizationService.SearchOrganization:output_type -> scalekit.v1.organizations.SearchOrganizationsResponse
+	49, // 67: scalekit.v1.organizations.OrganizationService.DeleteOrganization:output_type -> google.protobuf.Empty
+	21, // 68: scalekit.v1.organizations.OrganizationService.GeneratePortalLink:output_type -> scalekit.v1.organizations.GeneratePortalLinkResponse
+	49, // 69: scalekit.v1.organizations.OrganizationService.DeletePortalLink:output_type -> google.protobuf.Empty
+	49, // 70: scalekit.v1.organizations.OrganizationService.DeletePortalLinkByID:output_type -> google.protobuf.Empty
+	22, // 71: scalekit.v1.organizations.OrganizationService.GetPortalLinks:output_type -> scalekit.v1.organizations.GetPortalLinksResponse
+	10, // 72: scalekit.v1.organizations.OrganizationService.UpdateOrganizationSettings:output_type -> scalekit.v1.organizations.GetOrganizationResponse
+	28, // 73: scalekit.v1.organizations.OrganizationService.UpdateOrganizationSessionPolicy:output_type -> scalekit.v1.organizations.UpdateOrganizationSessionPolicyResponse
+	26, // 74: scalekit.v1.organizations.OrganizationService.GetOrganizationSessionPolicy:output_type -> scalekit.v1.organizations.GetOrganizationSessionPolicyResponse
+	37, // 75: scalekit.v1.organizations.OrganizationService.UpsertUserManagementSettings:output_type -> scalekit.v1.organizations.UpsertUserManagementSettingsResponse
+	39, // 76: scalekit.v1.organizations.OrganizationService.GetOrganizationUserManagementSetting:output_type -> scalekit.v1.organizations.GetOrganizationUserManagementSettingsResponse
+	31, // 77: scalekit.v1.organizations.OrganizationService.GetApplicationSessionPolicy:output_type -> scalekit.v1.organizations.GetApplicationSessionPolicyResponse
+	61, // [61:78] is the sub-list for method output_type
+	44, // [44:61] is the sub-list for method input_type
+	44, // [44:44] is the sub-list for extension type_name
+	44, // [44:44] is the sub-list for extension extendee
+	0,  // [0:44] is the sub-list for field type_name
 }
 
 func init() { file_scalekit_v1_organizations_organizations_proto_init() }
@@ -2867,13 +3102,14 @@ func file_scalekit_v1_organizations_organizations_proto_init() {
 	}
 	file_scalekit_v1_organizations_organizations_proto_msgTypes[14].OneofWrappers = []any{}
 	file_scalekit_v1_organizations_organizations_proto_msgTypes[22].OneofWrappers = []any{}
+	file_scalekit_v1_organizations_organizations_proto_msgTypes[25].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_scalekit_v1_organizations_organizations_proto_rawDesc), len(file_scalekit_v1_organizations_organizations_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   38,
+			NumMessages:   41,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -1346,7 +1346,7 @@ const file_scalekit_v1_domains_domains_proto_rawDesc = "" +
 	"DomainType\x12\x1b\n" +
 	"\x17DOMAIN_TYPE_UNSPECIFIED\x10\x00\x12\x18\n" +
 	"\x14ALLOWED_EMAIL_DOMAIN\x10\x01\x12\x17\n" +
-	"\x13ORGANIZATION_DOMAIN\x10\x022\xb1*\n" +
+	"\x13ORGANIZATION_DOMAIN\x10\x022\xc6*\n" +
 	"\rDomainService\x12\x91\b\n" +
 	"\fCreateDomain\x12(.scalekit.v1.domains.CreateDomainRequest\x1a).scalekit.v1.domains.CreateDomainResponse\"\xab\a\x92A\xcd\x06\n" +
 	"\aDomains\x12\rCreate Domain\x1a\xb5\x04Creates and associates a domain with an organization.\n" +
@@ -1374,8 +1374,8 @@ const file_scalekit_v1_domains_domains_proto_rawDesc = "" +
 	"\x03200\x12Q\n" +
 	" Successfully updated the domain.\x12-\n" +
 	"+\x1a).scalekit.v1.domains.UpdateDomainResponse\x82\xb5\x18\x17\n" +
-	"\x13organizations_write\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02>:\x06domain24/api/v1/organizations/{organization_id}/domains/{id}\x12\xea\x06\n" +
-	"\fVerifyDomain\x12(.scalekit.v1.domains.VerifyDomainRequest\x1a\x1a.google.protobuf.BoolValue\"\x93\x06\x92A\xb7\x05\n" +
+	"\x13organizations_write\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02>:\x06domain24/api/v1/organizations/{organization_id}/domains/{id}\x12\xff\x06\n" +
+	"\fVerifyDomain\x12(.scalekit.v1.domains.VerifyDomainRequest\x1a\x1a.google.protobuf.BoolValue\"\xa8\x06\x92A\xb7\x05\n" +
 	"\aDomains\x12\rVerify Domain\x1a\x9e\x04Initiates domain ownership verification by checking the DNS TXT record that should be added to the domain's DNS configuration.\n" +
 	"\n" +
 	"Use this endpoint to manually trigger verification for domains that are in PENDING status. The system will check for the required TXT record and update the verification status accordingly.\n" +
@@ -1383,7 +1383,8 @@ const file_scalekit_v1_domains_domains_proto_rawDesc = "" +
 	"For automatically verified domains, this endpoint will return true immediately. For domains requiring manual verification, ensure the TXT record has been properly configured in your DNS settings before calling this endpoint.J|\n" +
 	"\x03200\x12u\n" +
 	"SDomain verification result. Returns true if verification succeeds, false otherwise.\x12\x1e\n" +
-	"\x1c\x1a\x1a.google.protobuf.BoolValue\x82\xb5\x18\x02\x18d\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02=2;/api/v1/organizations/{organization_id}/domains/{id}:verify\x12\x9a\x03\n" +
+	"\x1c\x1a\x1a.google.protobuf.BoolValue\x82\xb5\x18\x17\n" +
+	"\x13organizations_write\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02=2;/api/v1/organizations/{organization_id}/domains/{id}:verify\x12\x9a\x03\n" +
 	"\tGetDomain\x12%.scalekit.v1.domains.GetDomainRequest\x1a&.scalekit.v1.domains.GetDomainResponse\"\xbd\x02\x92A\xe3\x01\n" +
 	"\aDomains\x12\n" +
 	"Get Domain\x1akRetrieves complete details for a domain including domain type, timestamps, and configuration information.\n" +
