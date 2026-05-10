@@ -1,6 +1,7 @@
 # Makefile for scalekit-sdk-go: build, lint, test, and vulnerability check.
 # Requires: go, golangci-lint (https://golangci-lint.run/).
 
+PROTO_REF := v0.1.120.2
 LOCAL_PROTO_DIR ?= ../scalekit/proto
 
 .PHONY: build lint test vuln all generate generate-local
@@ -10,7 +11,7 @@ all: build lint test vuln
 
 # generate regenerates gRPC stubs from the published BSR module.
 generate:
-	buf generate buf.build/scalekit/scalekit --include-imports
+	buf generate buf.build/scalekit/scalekit:$(PROTO_REF) --include-imports
 
 # generate-local regenerates gRPC stubs from a local proto checkout.
 generate-local:
