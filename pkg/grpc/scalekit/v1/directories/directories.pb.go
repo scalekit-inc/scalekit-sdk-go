@@ -2663,162 +2663,6 @@ func (x *TriggerDirectorySyncRequest) GetOrganizationId() string {
 	return ""
 }
 
-type GetDirectoryContextRequest struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	DirectoryId    string                 `protobuf:"bytes,1,opt,name=directory_id,json=directoryId,proto3" json:"directory_id,omitempty"`
-	OrganizationId string                 `protobuf:"bytes,2,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
-}
-
-func (x *GetDirectoryContextRequest) Reset() {
-	*x = GetDirectoryContextRequest{}
-	mi := &file_scalekit_v1_directories_directories_proto_msgTypes[39]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetDirectoryContextRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetDirectoryContextRequest) ProtoMessage() {}
-
-func (x *GetDirectoryContextRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_directories_directories_proto_msgTypes[39]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetDirectoryContextRequest.ProtoReflect.Descriptor instead.
-func (*GetDirectoryContextRequest) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_directories_directories_proto_rawDescGZIP(), []int{39}
-}
-
-func (x *GetDirectoryContextRequest) GetDirectoryId() string {
-	if x != nil {
-		return x.DirectoryId
-	}
-	return ""
-}
-
-func (x *GetDirectoryContextRequest) GetOrganizationId() string {
-	if x != nil {
-		return x.OrganizationId
-	}
-	return ""
-}
-
-type GetDirectoryContextResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Context       *structpb.Struct       `protobuf:"bytes,1,opt,name=context,proto3" json:"context,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetDirectoryContextResponse) Reset() {
-	*x = GetDirectoryContextResponse{}
-	mi := &file_scalekit_v1_directories_directories_proto_msgTypes[40]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetDirectoryContextResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetDirectoryContextResponse) ProtoMessage() {}
-
-func (x *GetDirectoryContextResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_directories_directories_proto_msgTypes[40]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetDirectoryContextResponse.ProtoReflect.Descriptor instead.
-func (*GetDirectoryContextResponse) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_directories_directories_proto_rawDescGZIP(), []int{40}
-}
-
-func (x *GetDirectoryContextResponse) GetContext() *structpb.Struct {
-	if x != nil {
-		return x.Context
-	}
-	return nil
-}
-
-type UpdateDirectoryContextRequest struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	DirectoryId    string                 `protobuf:"bytes,1,opt,name=directory_id,json=directoryId,proto3" json:"directory_id,omitempty"`
-	OrganizationId string                 `protobuf:"bytes,2,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
-	Context        *structpb.Struct       `protobuf:"bytes,3,opt,name=context,proto3" json:"context,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
-}
-
-func (x *UpdateDirectoryContextRequest) Reset() {
-	*x = UpdateDirectoryContextRequest{}
-	mi := &file_scalekit_v1_directories_directories_proto_msgTypes[41]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateDirectoryContextRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateDirectoryContextRequest) ProtoMessage() {}
-
-func (x *UpdateDirectoryContextRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_directories_directories_proto_msgTypes[41]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateDirectoryContextRequest.ProtoReflect.Descriptor instead.
-func (*UpdateDirectoryContextRequest) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_directories_directories_proto_rawDescGZIP(), []int{41}
-}
-
-func (x *UpdateDirectoryContextRequest) GetDirectoryId() string {
-	if x != nil {
-		return x.DirectoryId
-	}
-	return ""
-}
-
-func (x *UpdateDirectoryContextRequest) GetOrganizationId() string {
-	if x != nil {
-		return x.OrganizationId
-	}
-	return ""
-}
-
-func (x *UpdateDirectoryContextRequest) GetContext() *structpb.Struct {
-	if x != nil {
-		return x.Context
-	}
-	return nil
-}
-
 var File_scalekit_v1_directories_directories_proto protoreflect.FileDescriptor
 
 const file_scalekit_v1_directories_directories_proto_rawDesc = "" +
@@ -3046,20 +2890,7 @@ const file_scalekit_v1_directories_directories_proto_rawDesc = "" +
 	"\x10\x01\x18 :\x04dir_R\x02idJ\x04\b\x02\x10\x03\"\xfb\x01\n" +
 	"\x1bTriggerDirectorySyncRequest\x12h\n" +
 	"\fdirectory_id\x18\x01 \x01(\tBE\x92A92 Unique identifier of a DirectoryJ\x15\"dir_121312434123312\"\xbaH\x06r\x04\x10\x01\x18 R\vdirectoryId\x12r\n" +
-	"\x0forganization_id\x18\x02 \x01(\tBI\x92A=2$Unique identifier to an OrganizationJ\x15\"org_121312434123312\"\xbaH\x06r\x04\x10\x01\x18 R\x0eorganizationId\"\x90\x01\n" +
-	"\x1aGetDirectoryContextRequest\x125\n" +
-	"\fdirectory_id\x18\x01 \x01(\tB\x12\xbaH\x0f\xc8\x01\x01r\n" +
-	"\x10\x01\x18 :\x04dir_R\vdirectoryId\x12;\n" +
-	"\x0forganization_id\x18\x02 \x01(\tB\x12\xbaH\x0f\xc8\x01\x01r\n" +
-	"\x10\x01\x18 :\x04org_R\x0eorganizationId\"P\n" +
-	"\x1bGetDirectoryContextResponse\x121\n" +
-	"\acontext\x18\x01 \x01(\v2\x17.google.protobuf.StructR\acontext\"\xc6\x01\n" +
-	"\x1dUpdateDirectoryContextRequest\x125\n" +
-	"\fdirectory_id\x18\x01 \x01(\tB\x12\xbaH\x0f\xc8\x01\x01r\n" +
-	"\x10\x01\x18 :\x04dir_R\vdirectoryId\x12;\n" +
-	"\x0forganization_id\x18\x02 \x01(\tB\x12\xbaH\x0f\xc8\x01\x01r\n" +
-	"\x10\x01\x18 :\x04org_R\x0eorganizationId\x121\n" +
-	"\acontext\x18\x03 \x01(\v2\x17.google.protobuf.StructR\acontext*M\n" +
+	"\x0forganization_id\x18\x02 \x01(\tBI\x92A=2$Unique identifier to an OrganizationJ\x15\"org_121312434123312\"\xbaH\x06r\x04\x10\x01\x18 R\x0eorganizationId*M\n" +
 	"\rDirectoryType\x12\x1e\n" +
 	"\x1aDIRECTORY_TYPE_UNSPECIFIED\x10\x00\x12\b\n" +
 	"\x04SCIM\x10\x01\x12\b\n" +
@@ -3083,92 +2914,63 @@ const file_scalekit_v1_directories_directories_proto_rawDesc = "" +
 	"\fSecretStatus\x12\n" +
 	"\n" +
 	"\x06ACTIVE\x10\x00\x12\f\n" +
-	"\bINACTIVE\x10\x012\xa98\n" +
-	"\x10DirectoryService\x12\xe4\x01\n" +
-	"\x0fCreateDirectory\x12/.scalekit.v1.directories.CreateDirectoryRequest\x1a0.scalekit.v1.directories.CreateDirectoryResponse\"n\x82\xb5\x18\x15\n" +
-	"\x11directories_write\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02@:\tdirectory\"3/api/v1/organizations/{organization_id}/directories\x12\x9e\x02\n" +
+	"\bINACTIVE\x10\x012\xd1/\n" +
+	"\x10DirectoryService\x12\xd1\x01\n" +
+	"\x0fCreateDirectory\x12/.scalekit.v1.directories.CreateDirectoryRequest\x1a0.scalekit.v1.directories.CreateDirectoryResponse\"[\x82\xb5\x18\x02\x18d\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02@:\tdirectory\"3/api/v1/organizations/{organization_id}/directories\x12\x9e\x02\n" +
 	"\x0fDeleteDirectory\x12/.scalekit.v1.directories.DeleteDirectoryRequest\x1a\x16.google.protobuf.Empty\"\xc1\x01\x92Ai\n" +
 	"\tDirectory\x12\x12Delete a directory\x1a)Delete a Directory within an organizationJ\x1d\n" +
 	"\x03200\x12\x16\n" +
-	"\x14Deleted Successfully\x82\xb5\x18\x02\x18d\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02:*8/api/v1/organizations/{organization_id}/directories/{id}\x12\xe9\x01\n" +
-	"\x0fUpdateDirectory\x12/.scalekit.v1.directories.UpdateDirectoryRequest\x1a0.scalekit.v1.directories.UpdateDirectoryResponse\"s\x82\xb5\x18\x15\n" +
-	"\x11directories_write\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02E:\tdirectory28/api/v1/organizations/{organization_id}/directories/{id}\x12\xe7\x01\n" +
-	"\x18AssignGroupsForDirectory\x128.scalekit.v1.directories.AssignGroupsForDirectoryRequest\x1a\x16.google.protobuf.Empty\"y\x82\xb5\x18\x15\n" +
-	"\x11directories_write\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02K:\x01*\x1aF/api/v1/organizations/{organization_id}/directories/{id}/groups:assign\x12\xfb\x01\n" +
-	"\vAssignRoles\x12+.scalekit.v1.directories.AssignRolesRequest\x1a,.scalekit.v1.directories.AssignRolesResponse\"\x90\x01\x82\xb5\x18\x15\n" +
-	"\x11directories_write\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02b:\x10role_assignments\x1aN/api/v1/organizations/{organization_id}/directories/{id}/groups/-/roles:assign\x12\x80\x02\n" +
-	"\x10UpdateAttributes\x120.scalekit.v1.directories.UpdateAttributesRequest\x1a1.scalekit.v1.directories.UpdateAttributesResponse\"\x86\x01\x82\xb5\x18\x15\n" +
-	"\x11directories_write\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02X:\x11attribute_mapping\x1aC/api/v1/organizations/{organization_id}/directories/{id}/attributes\x12\xa4\x03\n" +
-	"\fGetDirectory\x12,.scalekit.v1.directories.GetDirectoryRequest\x1a-.scalekit.v1.directories.GetDirectoryResponse\"\xb6\x02\x92A\xda\x01\n" +
+	"\x14Deleted Successfully\x82\xb5\x18\x02\x18d\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02:*8/api/v1/organizations/{organization_id}/directories/{id}\x12\xd6\x01\n" +
+	"\x0fUpdateDirectory\x12/.scalekit.v1.directories.UpdateDirectoryRequest\x1a0.scalekit.v1.directories.UpdateDirectoryResponse\"`\x82\xb5\x18\x02\x18d\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02E:\tdirectory28/api/v1/organizations/{organization_id}/directories/{id}\x12\xd4\x01\n" +
+	"\x18AssignGroupsForDirectory\x128.scalekit.v1.directories.AssignGroupsForDirectoryRequest\x1a\x16.google.protobuf.Empty\"f\x82\xb5\x18\x02\x18d\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02K:\x01*\x1aF/api/v1/organizations/{organization_id}/directories/{id}/groups:assign\x12\xe7\x01\n" +
+	"\vAssignRoles\x12+.scalekit.v1.directories.AssignRolesRequest\x1a,.scalekit.v1.directories.AssignRolesResponse\"}\x82\xb5\x18\x02\x18d\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02b:\x10role_assignments\x1aN/api/v1/organizations/{organization_id}/directories/{id}/groups/-/roles:assign\x12\xec\x01\n" +
+	"\x10UpdateAttributes\x120.scalekit.v1.directories.UpdateAttributesRequest\x1a1.scalekit.v1.directories.UpdateAttributesResponse\"s\x82\xb5\x18\x02\x18d\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02X:\x11attribute_mapping\x1aC/api/v1/organizations/{organization_id}/directories/{id}/attributes\x12\x92\x03\n" +
+	"\fGetDirectory\x12,.scalekit.v1.directories.GetDirectoryRequest\x1a-.scalekit.v1.directories.GetDirectoryResponse\"\xa4\x02\x92A\xda\x01\n" +
 	"\tDirectory\x12\x15Get directory details\x1aPRetrieves detailed information about a specific directory within an organizationJd\n" +
 	"\x03200\x12]\n" +
 	"(Successfully retrieved directory details\x121\n" +
-	"/\x1a-.scalekit.v1.directories.GetDirectoryResponse\x82\xb5\x18\x14\n" +
-	"\x10directories_read\x18t\x82\xd3\xe4\x93\x02:\x128/api/v1/organizations/{organization_id}/directories/{id}\x12\xfd\x02\n" +
-	"\x0fListDirectories\x12/.scalekit.v1.directories.ListDirectoriesRequest\x1a0.scalekit.v1.directories.ListDirectoriesResponse\"\x86\x02\x92A\xaf\x01\n" +
+	"/\x1a-.scalekit.v1.directories.GetDirectoryResponse\x82\xb5\x18\x02\x18d\x82\xd3\xe4\x93\x02:\x128/api/v1/organizations/{organization_id}/directories/{id}\x12\xeb\x02\n" +
+	"\x0fListDirectories\x12/.scalekit.v1.directories.ListDirectoriesRequest\x1a0.scalekit.v1.directories.ListDirectoriesResponse\"\xf4\x01\x92A\xaf\x01\n" +
 	"\tDirectory\x12\x1dList organization directoriesJ\x82\x01\n" +
 	"\x03200\x12{\n" +
 	"CSuccessfully retrieved the list of directories for the organization\x124\n" +
-	"2\x1a0.scalekit.v1.directories.ListDirectoriesResponse\x82\xb5\x18\x14\n" +
-	"\x10directories_read\x18t\x82\xd3\xe4\x93\x025\x123/api/v1/organizations/{organization_id}/directories\x12\xc3\x03\n" +
-	"\x0fEnableDirectory\x12/.scalekit.v1.directories.ToggleDirectoryRequest\x1a0.scalekit.v1.directories.ToggleDirectoryResponse\"\xcc\x02\x92A\xe8\x01\n" +
+	"2\x1a0.scalekit.v1.directories.ListDirectoriesResponse\x82\xb5\x18\x02\x18d\x82\xd3\xe4\x93\x025\x123/api/v1/organizations/{organization_id}/directories\x12\xb0\x03\n" +
+	"\x0fEnableDirectory\x12/.scalekit.v1.directories.ToggleDirectoryRequest\x1a0.scalekit.v1.directories.ToggleDirectoryResponse\"\xb9\x02\x92A\xe8\x01\n" +
 	"\tDirectory\x12\x12Enable a directory\x1a\x7fActivates a directory within an organization, allowing it to synchronize users and groups with the connected Directory providerJF\n" +
 	"\x03200\x12?\n" +
 	"\aSuccess\x124\n" +
-	"2\x1a0.scalekit.v1.directories.ToggleDirectoryResponse\x82\xb5\x18\x15\n" +
-	"\x11directories_write\x18t\x82\xd3\xe4\x93\x02A2?/api/v1/organizations/{organization_id}/directories/{id}:enable\x12\x8e\x04\n" +
-	"\x10DisableDirectory\x12/.scalekit.v1.directories.ToggleDirectoryRequest\x1a0.scalekit.v1.directories.ToggleDirectoryResponse\"\x96\x03\x92A\xb1\x02\n" +
+	"2\x1a0.scalekit.v1.directories.ToggleDirectoryResponse\x82\xb5\x18\x02\x18d\x82\xd3\xe4\x93\x02A2?/api/v1/organizations/{organization_id}/directories/{id}:enable\x12\xfb\x03\n" +
+	"\x10DisableDirectory\x12/.scalekit.v1.directories.ToggleDirectoryRequest\x1a0.scalekit.v1.directories.ToggleDirectoryResponse\"\x83\x03\x92A\xb1\x02\n" +
 	"\tDirectory\x12\x13Disable a directory\x1a\xaa\x01Stops synchronization of users and groups from a specified directory within an organization. This operation prevents further updates from the connected Directory providerJb\n" +
 	"\x03200\x12[\n" +
 	"#Successfully disabled the directory\x124\n" +
-	"2\x1a0.scalekit.v1.directories.ToggleDirectoryResponse\x82\xb5\x18\x15\n" +
-	"\x11directories_write\x18t\x82\xd3\xe4\x93\x02B2@/api/v1/organizations/{organization_id}/directories/{id}:disable\x12\xcd\x04\n" +
-	"\x12ListDirectoryUsers\x122.scalekit.v1.directories.ListDirectoryUsersRequest\x1a3.scalekit.v1.directories.ListDirectoryUsersResponse\"\xcd\x03\x92A\xe1\x02\n" +
+	"2\x1a0.scalekit.v1.directories.ToggleDirectoryResponse\x82\xb5\x18\x02\x18d\x82\xd3\xe4\x93\x02B2@/api/v1/organizations/{organization_id}/directories/{id}:disable\x12\xbb\x04\n" +
+	"\x12ListDirectoryUsers\x122.scalekit.v1.directories.ListDirectoryUsersRequest\x1a3.scalekit.v1.directories.ListDirectoryUsersResponse\"\xbb\x03\x92A\xe1\x02\n" +
 	"\tDirectory\x12\x14List directory users\x1a\xb2\x01Retrieves a list of all users within a specified directory for an organization. This endpoint allows you to view user accounts associated with your connected Directory Providers.J\x88\x01\n" +
 	"\x03200\x12\x80\x01\n" +
 	"ESuccessfully retrieved the list of users from the specified directory\x127\n" +
-	"5\x1a3.scalekit.v1.directories.ListDirectoryUsersResponse\x82\xb5\x18\x14\n" +
-	"\x10directories_read\x18t\x82\xd3\xe4\x93\x02J\x12H/api/v1/organizations/{organization_id}/directories/{directory_id}/users\x12\xa4\x04\n" +
-	"\x13ListDirectoryGroups\x123.scalekit.v1.directories.ListDirectoryGroupsRequest\x1a4.scalekit.v1.directories.ListDirectoryGroupsResponse\"\xa1\x03\x92A\xb4\x02\n" +
+	"5\x1a3.scalekit.v1.directories.ListDirectoryUsersResponse\x82\xb5\x18\x02\x18d\x82\xd3\xe4\x93\x02J\x12H/api/v1/organizations/{organization_id}/directories/{directory_id}/users\x12\x92\x04\n" +
+	"\x13ListDirectoryGroups\x123.scalekit.v1.directories.ListDirectoryGroupsRequest\x1a4.scalekit.v1.directories.ListDirectoryGroupsResponse\"\x8f\x03\x92A\xb4\x02\n" +
 	"\tDirectory\x12\x15List directory groups\x1a\x82\x01Retrieves all groups from a specified directory. Use this endpoint to view group structures from your connected identity provider.J\x8a\x01\n" +
 	"\x03200\x12\x82\x01\n" +
 	"FSuccessfully retrieved the list of groups from the specified directory\x128\n" +
-	"6\x1a4.scalekit.v1.directories.ListDirectoryGroupsResponse\x82\xb5\x18\x14\n" +
-	"\x10directories_read\x18t\x82\xd3\xe4\x93\x02K\x12I/api/v1/organizations/{organization_id}/directories/{directory_id}/groups\x12\xd3\x04\n" +
-	"\x1aListDirectoryGroupsSummary\x12:.scalekit.v1.directories.ListDirectoryGroupsSummaryRequest\x1a4.scalekit.v1.directories.ListDirectoryGroupsResponse\"\xc2\x03\x92A\xbe\x02\n" +
+	"6\x1a4.scalekit.v1.directories.ListDirectoryGroupsResponse\x82\xb5\x18\x02\x18d\x82\xd3\xe4\x93\x02K\x12I/api/v1/organizations/{organization_id}/directories/{directory_id}/groups\x12\xc1\x04\n" +
+	"\x1aListDirectoryGroupsSummary\x12:.scalekit.v1.directories.ListDirectoryGroupsSummaryRequest\x1a4.scalekit.v1.directories.ListDirectoryGroupsResponse\"\xb0\x03\x92A\xbe\x02\n" +
 	"\tDirectory\x12\x1dList directory groups summary\x1a\x84\x01Retrieves all groups from a specified directory. This is not a paginated api. It gives a summary view with id and name of the group.J\x8a\x01\n" +
 	"\x03200\x12\x82\x01\n" +
 	"FSuccessfully retrieved the list of groups from the specified directory\x128\n" +
-	"6\x1a4.scalekit.v1.directories.ListDirectoryGroupsResponse\x82\xb5\x18\x14\n" +
-	"\x10directories_read\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02S\x12Q/api/v1/organizations/{organization_id}/directories/{directory_id}/groups/summary\x12\xfe\x02\n" +
-	"\x15CreateDirectorySecret\x125.scalekit.v1.directories.CreateDirectorySecretRequest\x1a6.scalekit.v1.directories.CreateDirectorySecretResponse\"\xf5\x01\x92Ax\n" +
+	"6\x1a4.scalekit.v1.directories.ListDirectoryGroupsResponse\x82\xb5\x18\x02\x18d\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02S\x12Q/api/v1/organizations/{organization_id}/directories/{directory_id}/groups/summary\x12\xeb\x02\n" +
+	"\x15CreateDirectorySecret\x125.scalekit.v1.directories.CreateDirectorySecretRequest\x1a6.scalekit.v1.directories.CreateDirectorySecretResponse\"\xe2\x01\x92Ax\n" +
 	"\tDirectory\x12\x1dCreate secret for a directoryJL\n" +
 	"\x03200\x12E\n" +
 	"\aSuccess\x12:\n" +
-	"8\x1a6.scalekit.v1.directories.CreateDirectorySecretResponse\x82\xb5\x18\x15\n" +
-	"\x11directories_write\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02L\"J/api/v1/organizations/{organization_id}/directories/{directory_id}/secrets\x12\x9e\x03\n" +
-	"\x19RegenerateDirectorySecret\x129.scalekit.v1.directories.RegenerateDirectorySecretRequest\x1a:.scalekit.v1.directories.RegenerateDirectorySecretResponse\"\x89\x02\x92A\x80\x01\n" +
+	"8\x1a6.scalekit.v1.directories.CreateDirectorySecretResponse\x82\xb5\x18\x02\x18d\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02L\"J/api/v1/organizations/{organization_id}/directories/{directory_id}/secrets\x12\x8b\x03\n" +
+	"\x19RegenerateDirectorySecret\x129.scalekit.v1.directories.RegenerateDirectorySecretRequest\x1a:.scalekit.v1.directories.RegenerateDirectorySecretResponse\"\xf6\x01\x92A\x80\x01\n" +
 	"\tDirectory\x12!Regenerate secret for a directoryJP\n" +
 	"\x03200\x12I\n" +
 	"\aSuccess\x12>\n" +
-	"<\x1a:.scalekit.v1.directories.RegenerateDirectorySecretResponse\x82\xb5\x18\x15\n" +
-	"\x11directories_write\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02W\"U/api/v1/organizations/{organization_id}/directories/{directory_id}/secrets:regenerate\x12\xdd\x01\n" +
-	"\x14TriggerDirectorySync\x124.scalekit.v1.directories.TriggerDirectorySyncRequest\x1a\x16.google.protobuf.Empty\"w\x82\xb5\x18\x15\n" +
-	"\x11directories_write\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02I\x12G/api/v1/organizations/{organization_id}/directories/{directory_id}:sync\x12\x96\x03\n" +
-	"\x13GetDirectoryContext\x123.scalekit.v1.directories.GetDirectoryContextRequest\x1a4.scalekit.v1.directories.GetDirectoryContextResponse\"\x93\x02\x92A\xa7\x01\n" +
-	"\tDirectory\x12\x15Get directory context\x1a;Retrieves the custom context data for a specific directory.J'\n" +
-	"\x03200\x12 \n" +
-	"\x1eReturns the directory context.J\x1d\n" +
-	"\x03404\x12\x16\n" +
-	"\x14Directory not found.\x82\xb5\x18\x02\x18p\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02M\x12K/api/v1/organizations/{organization_id}/directories/{directory_id}/contexts\x12\xa2\x03\n" +
-	"\x16UpdateDirectoryContext\x126.scalekit.v1.directories.UpdateDirectoryContextRequest\x1a\x16.google.protobuf.Empty\"\xb7\x02\x92A\xc2\x01\n" +
-	"\tDirectory\x12\x18Update directory context\x1a9Updates the custom context data for a specific directory.J&\n" +
-	"\x03200\x12\x1f\n" +
-	"\x1dContext updated successfully.J\x19\n" +
-	"\x03400\x12\x12\n" +
-	"\x10Invalid request.J\x1d\n" +
-	"\x03404\x12\x16\n" +
-	"\x14Directory not found.\x82\xb5\x18\x02\x18p\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02V:\acontext\x1aK/api/v1/organizations/{organization_id}/directories/{directory_id}/contexts\x1a\xaa\x02\x92A\xa6\x02\n" +
+	"<\x1a:.scalekit.v1.directories.RegenerateDirectorySecretResponse\x82\xb5\x18\x02\x18d\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02W\"U/api/v1/organizations/{organization_id}/directories/{directory_id}/secrets:regenerate\x12\xca\x01\n" +
+	"\x14TriggerDirectorySync\x124.scalekit.v1.directories.TriggerDirectorySyncRequest\x1a\x16.google.protobuf.Empty\"d\x82\xb5\x18\x02\x18d\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02I\x12G/api/v1/organizations/{organization_id}/directories/{directory_id}:sync\x1a\xaa\x02\x92A\xa6\x02\n" +
 	"\tDirectory\x12\x98\x02Directory management for viewing and controlling external identity provider connections in your Scalekit environment. This service provides endpoints for retrieving directory information, listing directories and their contents, and enabling or disabling directory synchronization.B\xfa\x01\n" +
 	"\x1bcom.scalekit.v1.directoriesB\x10DirectoriesProtoP\x01ZKgithub.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/directories\xa2\x02\x03SVD\xaa\x02\x17Scalekit.V1.Directories\xca\x02\x17Scalekit\\V1\\Directories\xe2\x02#Scalekit\\V1\\Directories\\GPBMetadata\xea\x02\x19Scalekit::V1::Directoriesb\x06proto3"
 
@@ -3185,7 +2987,7 @@ func file_scalekit_v1_directories_directories_proto_rawDescGZIP() []byte {
 }
 
 var file_scalekit_v1_directories_directories_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_scalekit_v1_directories_directories_proto_msgTypes = make([]protoimpl.MessageInfo, 42)
+var file_scalekit_v1_directories_directories_proto_msgTypes = make([]protoimpl.MessageInfo, 39)
 var file_scalekit_v1_directories_directories_proto_goTypes = []any{
 	(DirectoryType)(0),                        // 0: scalekit.v1.directories.DirectoryType
 	(DirectoryProvider)(0),                    // 1: scalekit.v1.directories.DirectoryProvider
@@ -3230,12 +3032,9 @@ var file_scalekit_v1_directories_directories_proto_goTypes = []any{
 	(*UpdateAttributesResponse)(nil),          // 40: scalekit.v1.directories.UpdateAttributesResponse
 	(*DeleteDirectoryRequest)(nil),            // 41: scalekit.v1.directories.DeleteDirectoryRequest
 	(*TriggerDirectorySyncRequest)(nil),       // 42: scalekit.v1.directories.TriggerDirectorySyncRequest
-	(*GetDirectoryContextRequest)(nil),        // 43: scalekit.v1.directories.GetDirectoryContextRequest
-	(*GetDirectoryContextResponse)(nil),       // 44: scalekit.v1.directories.GetDirectoryContextResponse
-	(*UpdateDirectoryContextRequest)(nil),     // 45: scalekit.v1.directories.UpdateDirectoryContextRequest
-	(*timestamppb.Timestamp)(nil),             // 46: google.protobuf.Timestamp
-	(*structpb.Struct)(nil),                   // 47: google.protobuf.Struct
-	(*emptypb.Empty)(nil),                     // 48: google.protobuf.Empty
+	(*timestamppb.Timestamp)(nil),             // 43: google.protobuf.Timestamp
+	(*structpb.Struct)(nil),                   // 44: google.protobuf.Struct
+	(*emptypb.Empty)(nil),                     // 45: google.protobuf.Empty
 }
 var file_scalekit_v1_directories_directories_proto_depIdxs = []int32{
 	20, // 0: scalekit.v1.directories.GetDirectoryResponse.directory:type_name -> scalekit.v1.directories.Directory
@@ -3251,79 +3050,73 @@ var file_scalekit_v1_directories_directories_proto_depIdxs = []int32{
 	25, // 10: scalekit.v1.directories.UpdateDirectory.groups:type_name -> scalekit.v1.directories.ExternalGroup
 	20, // 11: scalekit.v1.directories.UpdateDirectoryResponse.directory:type_name -> scalekit.v1.directories.Directory
 	20, // 12: scalekit.v1.directories.ListDirectoriesResponse.directories:type_name -> scalekit.v1.directories.Directory
-	46, // 13: scalekit.v1.directories.ListDirectoryUsersRequest.updated_after:type_name -> google.protobuf.Timestamp
+	43, // 13: scalekit.v1.directories.ListDirectoryUsersRequest.updated_after:type_name -> google.protobuf.Timestamp
 	24, // 14: scalekit.v1.directories.ListDirectoryUsersResponse.users:type_name -> scalekit.v1.directories.DirectoryUser
-	46, // 15: scalekit.v1.directories.ListDirectoryGroupsRequest.updated_after:type_name -> google.protobuf.Timestamp
+	43, // 15: scalekit.v1.directories.ListDirectoryGroupsRequest.updated_after:type_name -> google.protobuf.Timestamp
 	26, // 16: scalekit.v1.directories.ListDirectoryGroupsResponse.groups:type_name -> scalekit.v1.directories.DirectoryGroup
 	0,  // 17: scalekit.v1.directories.Directory.directory_type:type_name -> scalekit.v1.directories.DirectoryType
 	1,  // 18: scalekit.v1.directories.Directory.directory_provider:type_name -> scalekit.v1.directories.DirectoryProvider
-	46, // 19: scalekit.v1.directories.Directory.last_synced_at:type_name -> google.protobuf.Timestamp
+	43, // 19: scalekit.v1.directories.Directory.last_synced_at:type_name -> google.protobuf.Timestamp
 	31, // 20: scalekit.v1.directories.Directory.secrets:type_name -> scalekit.v1.directories.Secret
 	32, // 21: scalekit.v1.directories.Directory.stats:type_name -> scalekit.v1.directories.Stats
 	34, // 22: scalekit.v1.directories.Directory.role_assignments:type_name -> scalekit.v1.directories.RoleAssignments
 	38, // 23: scalekit.v1.directories.Directory.attribute_mappings:type_name -> scalekit.v1.directories.AttributeMappings
-	46, // 24: scalekit.v1.directories.DirectoryUser.updated_at:type_name -> google.protobuf.Timestamp
+	43, // 24: scalekit.v1.directories.DirectoryUser.updated_at:type_name -> google.protobuf.Timestamp
 	26, // 25: scalekit.v1.directories.DirectoryUser.groups:type_name -> scalekit.v1.directories.DirectoryGroup
-	47, // 26: scalekit.v1.directories.DirectoryUser.user_detail:type_name -> google.protobuf.Struct
-	46, // 27: scalekit.v1.directories.DirectoryGroup.updated_at:type_name -> google.protobuf.Timestamp
-	47, // 28: scalekit.v1.directories.DirectoryGroup.group_detail:type_name -> google.protobuf.Struct
+	44, // 26: scalekit.v1.directories.DirectoryUser.user_detail:type_name -> google.protobuf.Struct
+	43, // 27: scalekit.v1.directories.DirectoryGroup.updated_at:type_name -> google.protobuf.Timestamp
+	44, // 28: scalekit.v1.directories.DirectoryGroup.group_detail:type_name -> google.protobuf.Struct
 	31, // 29: scalekit.v1.directories.CreateDirectorySecretResponse.secret:type_name -> scalekit.v1.directories.Secret
 	31, // 30: scalekit.v1.directories.RegenerateDirectorySecretResponse.secret:type_name -> scalekit.v1.directories.Secret
-	46, // 31: scalekit.v1.directories.Secret.create_time:type_name -> google.protobuf.Timestamp
+	43, // 31: scalekit.v1.directories.Secret.create_time:type_name -> google.protobuf.Timestamp
 	3,  // 32: scalekit.v1.directories.Secret.status:type_name -> scalekit.v1.directories.SecretStatus
-	46, // 33: scalekit.v1.directories.Secret.expire_time:type_name -> google.protobuf.Timestamp
-	46, // 34: scalekit.v1.directories.Secret.last_used_time:type_name -> google.protobuf.Timestamp
-	46, // 35: scalekit.v1.directories.Stats.group_updated_at:type_name -> google.protobuf.Timestamp
-	46, // 36: scalekit.v1.directories.Stats.user_updated_at:type_name -> google.protobuf.Timestamp
+	43, // 33: scalekit.v1.directories.Secret.expire_time:type_name -> google.protobuf.Timestamp
+	43, // 34: scalekit.v1.directories.Secret.last_used_time:type_name -> google.protobuf.Timestamp
+	43, // 35: scalekit.v1.directories.Stats.group_updated_at:type_name -> google.protobuf.Timestamp
+	43, // 36: scalekit.v1.directories.Stats.user_updated_at:type_name -> google.protobuf.Timestamp
 	34, // 37: scalekit.v1.directories.AssignRolesRequest.role_assignments:type_name -> scalekit.v1.directories.RoleAssignments
 	36, // 38: scalekit.v1.directories.RoleAssignments.assignments:type_name -> scalekit.v1.directories.RoleAssignment
 	34, // 39: scalekit.v1.directories.AssignRolesResponse.role_assignments:type_name -> scalekit.v1.directories.RoleAssignments
 	38, // 40: scalekit.v1.directories.UpdateAttributesRequest.attribute_mapping:type_name -> scalekit.v1.directories.AttributeMappings
 	39, // 41: scalekit.v1.directories.AttributeMappings.attributes:type_name -> scalekit.v1.directories.AttributeMapping
 	38, // 42: scalekit.v1.directories.UpdateAttributesResponse.attribute_mappings:type_name -> scalekit.v1.directories.AttributeMappings
-	47, // 43: scalekit.v1.directories.GetDirectoryContextResponse.context:type_name -> google.protobuf.Struct
-	47, // 44: scalekit.v1.directories.UpdateDirectoryContextRequest.context:type_name -> google.protobuf.Struct
-	6,  // 45: scalekit.v1.directories.DirectoryService.CreateDirectory:input_type -> scalekit.v1.directories.CreateDirectoryRequest
-	41, // 46: scalekit.v1.directories.DirectoryService.DeleteDirectory:input_type -> scalekit.v1.directories.DeleteDirectoryRequest
-	9,  // 47: scalekit.v1.directories.DirectoryService.UpdateDirectory:input_type -> scalekit.v1.directories.UpdateDirectoryRequest
-	12, // 48: scalekit.v1.directories.DirectoryService.AssignGroupsForDirectory:input_type -> scalekit.v1.directories.AssignGroupsForDirectoryRequest
-	33, // 49: scalekit.v1.directories.DirectoryService.AssignRoles:input_type -> scalekit.v1.directories.AssignRolesRequest
-	37, // 50: scalekit.v1.directories.DirectoryService.UpdateAttributes:input_type -> scalekit.v1.directories.UpdateAttributesRequest
-	4,  // 51: scalekit.v1.directories.DirectoryService.GetDirectory:input_type -> scalekit.v1.directories.GetDirectoryRequest
-	13, // 52: scalekit.v1.directories.DirectoryService.ListDirectories:input_type -> scalekit.v1.directories.ListDirectoriesRequest
-	21, // 53: scalekit.v1.directories.DirectoryService.EnableDirectory:input_type -> scalekit.v1.directories.ToggleDirectoryRequest
-	21, // 54: scalekit.v1.directories.DirectoryService.DisableDirectory:input_type -> scalekit.v1.directories.ToggleDirectoryRequest
-	15, // 55: scalekit.v1.directories.DirectoryService.ListDirectoryUsers:input_type -> scalekit.v1.directories.ListDirectoryUsersRequest
-	17, // 56: scalekit.v1.directories.DirectoryService.ListDirectoryGroups:input_type -> scalekit.v1.directories.ListDirectoryGroupsRequest
-	19, // 57: scalekit.v1.directories.DirectoryService.ListDirectoryGroupsSummary:input_type -> scalekit.v1.directories.ListDirectoryGroupsSummaryRequest
-	27, // 58: scalekit.v1.directories.DirectoryService.CreateDirectorySecret:input_type -> scalekit.v1.directories.CreateDirectorySecretRequest
-	29, // 59: scalekit.v1.directories.DirectoryService.RegenerateDirectorySecret:input_type -> scalekit.v1.directories.RegenerateDirectorySecretRequest
-	42, // 60: scalekit.v1.directories.DirectoryService.TriggerDirectorySync:input_type -> scalekit.v1.directories.TriggerDirectorySyncRequest
-	43, // 61: scalekit.v1.directories.DirectoryService.GetDirectoryContext:input_type -> scalekit.v1.directories.GetDirectoryContextRequest
-	45, // 62: scalekit.v1.directories.DirectoryService.UpdateDirectoryContext:input_type -> scalekit.v1.directories.UpdateDirectoryContextRequest
-	8,  // 63: scalekit.v1.directories.DirectoryService.CreateDirectory:output_type -> scalekit.v1.directories.CreateDirectoryResponse
-	48, // 64: scalekit.v1.directories.DirectoryService.DeleteDirectory:output_type -> google.protobuf.Empty
-	11, // 65: scalekit.v1.directories.DirectoryService.UpdateDirectory:output_type -> scalekit.v1.directories.UpdateDirectoryResponse
-	48, // 66: scalekit.v1.directories.DirectoryService.AssignGroupsForDirectory:output_type -> google.protobuf.Empty
-	35, // 67: scalekit.v1.directories.DirectoryService.AssignRoles:output_type -> scalekit.v1.directories.AssignRolesResponse
-	40, // 68: scalekit.v1.directories.DirectoryService.UpdateAttributes:output_type -> scalekit.v1.directories.UpdateAttributesResponse
-	5,  // 69: scalekit.v1.directories.DirectoryService.GetDirectory:output_type -> scalekit.v1.directories.GetDirectoryResponse
-	14, // 70: scalekit.v1.directories.DirectoryService.ListDirectories:output_type -> scalekit.v1.directories.ListDirectoriesResponse
-	22, // 71: scalekit.v1.directories.DirectoryService.EnableDirectory:output_type -> scalekit.v1.directories.ToggleDirectoryResponse
-	22, // 72: scalekit.v1.directories.DirectoryService.DisableDirectory:output_type -> scalekit.v1.directories.ToggleDirectoryResponse
-	16, // 73: scalekit.v1.directories.DirectoryService.ListDirectoryUsers:output_type -> scalekit.v1.directories.ListDirectoryUsersResponse
-	18, // 74: scalekit.v1.directories.DirectoryService.ListDirectoryGroups:output_type -> scalekit.v1.directories.ListDirectoryGroupsResponse
-	18, // 75: scalekit.v1.directories.DirectoryService.ListDirectoryGroupsSummary:output_type -> scalekit.v1.directories.ListDirectoryGroupsResponse
-	28, // 76: scalekit.v1.directories.DirectoryService.CreateDirectorySecret:output_type -> scalekit.v1.directories.CreateDirectorySecretResponse
-	30, // 77: scalekit.v1.directories.DirectoryService.RegenerateDirectorySecret:output_type -> scalekit.v1.directories.RegenerateDirectorySecretResponse
-	48, // 78: scalekit.v1.directories.DirectoryService.TriggerDirectorySync:output_type -> google.protobuf.Empty
-	44, // 79: scalekit.v1.directories.DirectoryService.GetDirectoryContext:output_type -> scalekit.v1.directories.GetDirectoryContextResponse
-	48, // 80: scalekit.v1.directories.DirectoryService.UpdateDirectoryContext:output_type -> google.protobuf.Empty
-	63, // [63:81] is the sub-list for method output_type
-	45, // [45:63] is the sub-list for method input_type
-	45, // [45:45] is the sub-list for extension type_name
-	45, // [45:45] is the sub-list for extension extendee
-	0,  // [0:45] is the sub-list for field type_name
+	6,  // 43: scalekit.v1.directories.DirectoryService.CreateDirectory:input_type -> scalekit.v1.directories.CreateDirectoryRequest
+	41, // 44: scalekit.v1.directories.DirectoryService.DeleteDirectory:input_type -> scalekit.v1.directories.DeleteDirectoryRequest
+	9,  // 45: scalekit.v1.directories.DirectoryService.UpdateDirectory:input_type -> scalekit.v1.directories.UpdateDirectoryRequest
+	12, // 46: scalekit.v1.directories.DirectoryService.AssignGroupsForDirectory:input_type -> scalekit.v1.directories.AssignGroupsForDirectoryRequest
+	33, // 47: scalekit.v1.directories.DirectoryService.AssignRoles:input_type -> scalekit.v1.directories.AssignRolesRequest
+	37, // 48: scalekit.v1.directories.DirectoryService.UpdateAttributes:input_type -> scalekit.v1.directories.UpdateAttributesRequest
+	4,  // 49: scalekit.v1.directories.DirectoryService.GetDirectory:input_type -> scalekit.v1.directories.GetDirectoryRequest
+	13, // 50: scalekit.v1.directories.DirectoryService.ListDirectories:input_type -> scalekit.v1.directories.ListDirectoriesRequest
+	21, // 51: scalekit.v1.directories.DirectoryService.EnableDirectory:input_type -> scalekit.v1.directories.ToggleDirectoryRequest
+	21, // 52: scalekit.v1.directories.DirectoryService.DisableDirectory:input_type -> scalekit.v1.directories.ToggleDirectoryRequest
+	15, // 53: scalekit.v1.directories.DirectoryService.ListDirectoryUsers:input_type -> scalekit.v1.directories.ListDirectoryUsersRequest
+	17, // 54: scalekit.v1.directories.DirectoryService.ListDirectoryGroups:input_type -> scalekit.v1.directories.ListDirectoryGroupsRequest
+	19, // 55: scalekit.v1.directories.DirectoryService.ListDirectoryGroupsSummary:input_type -> scalekit.v1.directories.ListDirectoryGroupsSummaryRequest
+	27, // 56: scalekit.v1.directories.DirectoryService.CreateDirectorySecret:input_type -> scalekit.v1.directories.CreateDirectorySecretRequest
+	29, // 57: scalekit.v1.directories.DirectoryService.RegenerateDirectorySecret:input_type -> scalekit.v1.directories.RegenerateDirectorySecretRequest
+	42, // 58: scalekit.v1.directories.DirectoryService.TriggerDirectorySync:input_type -> scalekit.v1.directories.TriggerDirectorySyncRequest
+	8,  // 59: scalekit.v1.directories.DirectoryService.CreateDirectory:output_type -> scalekit.v1.directories.CreateDirectoryResponse
+	45, // 60: scalekit.v1.directories.DirectoryService.DeleteDirectory:output_type -> google.protobuf.Empty
+	11, // 61: scalekit.v1.directories.DirectoryService.UpdateDirectory:output_type -> scalekit.v1.directories.UpdateDirectoryResponse
+	45, // 62: scalekit.v1.directories.DirectoryService.AssignGroupsForDirectory:output_type -> google.protobuf.Empty
+	35, // 63: scalekit.v1.directories.DirectoryService.AssignRoles:output_type -> scalekit.v1.directories.AssignRolesResponse
+	40, // 64: scalekit.v1.directories.DirectoryService.UpdateAttributes:output_type -> scalekit.v1.directories.UpdateAttributesResponse
+	5,  // 65: scalekit.v1.directories.DirectoryService.GetDirectory:output_type -> scalekit.v1.directories.GetDirectoryResponse
+	14, // 66: scalekit.v1.directories.DirectoryService.ListDirectories:output_type -> scalekit.v1.directories.ListDirectoriesResponse
+	22, // 67: scalekit.v1.directories.DirectoryService.EnableDirectory:output_type -> scalekit.v1.directories.ToggleDirectoryResponse
+	22, // 68: scalekit.v1.directories.DirectoryService.DisableDirectory:output_type -> scalekit.v1.directories.ToggleDirectoryResponse
+	16, // 69: scalekit.v1.directories.DirectoryService.ListDirectoryUsers:output_type -> scalekit.v1.directories.ListDirectoryUsersResponse
+	18, // 70: scalekit.v1.directories.DirectoryService.ListDirectoryGroups:output_type -> scalekit.v1.directories.ListDirectoryGroupsResponse
+	18, // 71: scalekit.v1.directories.DirectoryService.ListDirectoryGroupsSummary:output_type -> scalekit.v1.directories.ListDirectoryGroupsResponse
+	28, // 72: scalekit.v1.directories.DirectoryService.CreateDirectorySecret:output_type -> scalekit.v1.directories.CreateDirectorySecretResponse
+	30, // 73: scalekit.v1.directories.DirectoryService.RegenerateDirectorySecret:output_type -> scalekit.v1.directories.RegenerateDirectorySecretResponse
+	45, // 74: scalekit.v1.directories.DirectoryService.TriggerDirectorySync:output_type -> google.protobuf.Empty
+	59, // [59:75] is the sub-list for method output_type
+	43, // [43:59] is the sub-list for method input_type
+	43, // [43:43] is the sub-list for extension type_name
+	43, // [43:43] is the sub-list for extension extendee
+	0,  // [0:43] is the sub-list for field type_name
 }
 
 func init() { file_scalekit_v1_directories_directories_proto_init() }
@@ -3340,7 +3133,7 @@ func file_scalekit_v1_directories_directories_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_scalekit_v1_directories_directories_proto_rawDesc), len(file_scalekit_v1_directories_directories_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   42,
+			NumMessages:   39,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

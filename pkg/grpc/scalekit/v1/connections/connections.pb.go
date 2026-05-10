@@ -504,49 +504,43 @@ func (OIDCScope) EnumDescriptor() ([]byte, []int) {
 type ConnectionType int32
 
 const (
-	ConnectionType_INVALID       ConnectionType = 0
-	ConnectionType_OIDC          ConnectionType = 1
-	ConnectionType_SAML          ConnectionType = 2
-	ConnectionType_PASSWORD      ConnectionType = 3
-	ConnectionType_OAUTH         ConnectionType = 4
-	ConnectionType_PASSWORDLESS  ConnectionType = 5
-	ConnectionType_BASIC         ConnectionType = 6
-	ConnectionType_BEARER        ConnectionType = 7
-	ConnectionType_API_KEY       ConnectionType = 8
-	ConnectionType_WEBAUTHN      ConnectionType = 9
-	ConnectionType_OAUTH_M2M     ConnectionType = 10
-	ConnectionType_TRELLO_OAUTH1 ConnectionType = 11
+	ConnectionType_INVALID      ConnectionType = 0
+	ConnectionType_OIDC         ConnectionType = 1
+	ConnectionType_SAML         ConnectionType = 2
+	ConnectionType_PASSWORD     ConnectionType = 3
+	ConnectionType_OAUTH        ConnectionType = 4
+	ConnectionType_PASSWORDLESS ConnectionType = 5
+	ConnectionType_BASIC        ConnectionType = 6
+	ConnectionType_BEARER       ConnectionType = 7
+	ConnectionType_API_KEY      ConnectionType = 8
+	ConnectionType_WEBAUTHN     ConnectionType = 9
 )
 
 // Enum value maps for ConnectionType.
 var (
 	ConnectionType_name = map[int32]string{
-		0:  "INVALID",
-		1:  "OIDC",
-		2:  "SAML",
-		3:  "PASSWORD",
-		4:  "OAUTH",
-		5:  "PASSWORDLESS",
-		6:  "BASIC",
-		7:  "BEARER",
-		8:  "API_KEY",
-		9:  "WEBAUTHN",
-		10: "OAUTH_M2M",
-		11: "TRELLO_OAUTH1",
+		0: "INVALID",
+		1: "OIDC",
+		2: "SAML",
+		3: "PASSWORD",
+		4: "OAUTH",
+		5: "PASSWORDLESS",
+		6: "BASIC",
+		7: "BEARER",
+		8: "API_KEY",
+		9: "WEBAUTHN",
 	}
 	ConnectionType_value = map[string]int32{
-		"INVALID":       0,
-		"OIDC":          1,
-		"SAML":          2,
-		"PASSWORD":      3,
-		"OAUTH":         4,
-		"PASSWORDLESS":  5,
-		"BASIC":         6,
-		"BEARER":        7,
-		"API_KEY":       8,
-		"WEBAUTHN":      9,
-		"OAUTH_M2M":     10,
-		"TRELLO_OAUTH1": 11,
+		"INVALID":      0,
+		"OIDC":         1,
+		"SAML":         2,
+		"PASSWORD":     3,
+		"OAUTH":        4,
+		"PASSWORDLESS": 5,
+		"BASIC":        6,
+		"BEARER":       7,
+		"API_KEY":      8,
+		"WEBAUTHN":     9,
 	}
 )
 
@@ -2907,11 +2901,6 @@ type OAuthConnectionConfig struct {
 	AccessType             *wrapperspb.StringValue `protobuf:"bytes,16,opt,name=access_type,json=accessType,proto3" json:"access_type,omitempty"`
 	CustomScopeName        *wrapperspb.StringValue `protobuf:"bytes,17,opt,name=custom_scope_name,json=customScopeName,proto3" json:"custom_scope_name,omitempty"`
 	SyncUserProfileOnLogin *wrapperspb.BoolValue   `protobuf:"bytes,18,opt,name=sync_user_profile_on_login,json=syncUserProfileOnLogin,proto3" json:"sync_user_profile_on_login,omitempty"`
-	TokenAccessType        *wrapperspb.StringValue `protobuf:"bytes,19,opt,name=token_access_type,json=tokenAccessType,proto3" json:"token_access_type,omitempty"`
-	TenantId               *wrapperspb.StringValue `protobuf:"bytes,20,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
-	IsCimd                 *wrapperspb.BoolValue   `protobuf:"bytes,21,opt,name=is_cimd,json=isCimd,proto3" json:"is_cimd,omitempty"`
-	AppName                *wrapperspb.StringValue `protobuf:"bytes,22,opt,name=app_name,json=appName,proto3" json:"app_name,omitempty"`
-	OptionalScopes         *OptionalScopes         `protobuf:"bytes,23,opt,name=optional_scopes,json=optionalScopes,proto3,oneof" json:"optional_scopes,omitempty"`
 	unknownFields          protoimpl.UnknownFields
 	sizeCache              protoimpl.SizeCache
 }
@@ -3037,93 +3026,6 @@ func (x *OAuthConnectionConfig) GetSyncUserProfileOnLogin() *wrapperspb.BoolValu
 	return nil
 }
 
-func (x *OAuthConnectionConfig) GetTokenAccessType() *wrapperspb.StringValue {
-	if x != nil {
-		return x.TokenAccessType
-	}
-	return nil
-}
-
-func (x *OAuthConnectionConfig) GetTenantId() *wrapperspb.StringValue {
-	if x != nil {
-		return x.TenantId
-	}
-	return nil
-}
-
-func (x *OAuthConnectionConfig) GetIsCimd() *wrapperspb.BoolValue {
-	if x != nil {
-		return x.IsCimd
-	}
-	return nil
-}
-
-func (x *OAuthConnectionConfig) GetAppName() *wrapperspb.StringValue {
-	if x != nil {
-		return x.AppName
-	}
-	return nil
-}
-
-func (x *OAuthConnectionConfig) GetOptionalScopes() *OptionalScopes {
-	if x != nil {
-		return x.OptionalScopes
-	}
-	return nil
-}
-
-type OptionalScopes struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Scopes        []string               `protobuf:"bytes,1,rep,name=scopes,proto3" json:"scopes,omitempty"`
-	FieldName     string                 `protobuf:"bytes,2,opt,name=field_name,json=fieldName,proto3" json:"field_name,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *OptionalScopes) Reset() {
-	*x = OptionalScopes{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[31]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *OptionalScopes) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*OptionalScopes) ProtoMessage() {}
-
-func (x *OptionalScopes) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[31]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use OptionalScopes.ProtoReflect.Descriptor instead.
-func (*OptionalScopes) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{31}
-}
-
-func (x *OptionalScopes) GetScopes() []string {
-	if x != nil {
-		return x.Scopes
-	}
-	return nil
-}
-
-func (x *OptionalScopes) GetFieldName() string {
-	if x != nil {
-		return x.FieldName
-	}
-	return ""
-}
-
 type PasswordLessConfig struct {
 	state                                     protoimpl.MessageState  `protogen:"open.v1"`
 	Type                                      PasswordlessType        `protobuf:"varint,1,opt,name=type,proto3,enum=scalekit.v1.connections.PasswordlessType" json:"type,omitempty"`
@@ -3139,7 +3041,7 @@ type PasswordLessConfig struct {
 
 func (x *PasswordLessConfig) Reset() {
 	*x = PasswordLessConfig{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[32]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3151,7 +3053,7 @@ func (x *PasswordLessConfig) String() string {
 func (*PasswordLessConfig) ProtoMessage() {}
 
 func (x *PasswordLessConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[32]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3164,7 +3066,7 @@ func (x *PasswordLessConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PasswordLessConfig.ProtoReflect.Descriptor instead.
 func (*PasswordLessConfig) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{32}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *PasswordLessConfig) GetType() PasswordlessType {
@@ -3225,7 +3127,7 @@ type StaticAuthConfig struct {
 
 func (x *StaticAuthConfig) Reset() {
 	*x = StaticAuthConfig{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[33]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3237,7 +3139,7 @@ func (x *StaticAuthConfig) String() string {
 func (*StaticAuthConfig) ProtoMessage() {}
 
 func (x *StaticAuthConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[33]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3250,7 +3152,7 @@ func (x *StaticAuthConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StaticAuthConfig.ProtoReflect.Descriptor instead.
 func (*StaticAuthConfig) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{33}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *StaticAuthConfig) GetStaticConfig() *structpb.Struct {
@@ -3277,7 +3179,7 @@ type WebAuthConfiguration struct {
 
 func (x *WebAuthConfiguration) Reset() {
 	*x = WebAuthConfiguration{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[34]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3289,7 +3191,7 @@ func (x *WebAuthConfiguration) String() string {
 func (*WebAuthConfiguration) ProtoMessage() {}
 
 func (x *WebAuthConfiguration) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[34]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3302,7 +3204,7 @@ func (x *WebAuthConfiguration) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WebAuthConfiguration.ProtoReflect.Descriptor instead.
 func (*WebAuthConfiguration) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{34}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *WebAuthConfiguration) GetRp() *WebAuthConfiguration_Rp {
@@ -3390,7 +3292,7 @@ type SAMLConnectionConfigRequest struct {
 
 func (x *SAMLConnectionConfigRequest) Reset() {
 	*x = SAMLConnectionConfigRequest{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[35]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3402,7 +3304,7 @@ func (x *SAMLConnectionConfigRequest) String() string {
 func (*SAMLConnectionConfigRequest) ProtoMessage() {}
 
 func (x *SAMLConnectionConfigRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[35]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3415,7 +3317,7 @@ func (x *SAMLConnectionConfigRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SAMLConnectionConfigRequest.ProtoReflect.Descriptor instead.
 func (*SAMLConnectionConfigRequest) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{35}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *SAMLConnectionConfigRequest) GetIdpMetadataUrl() *wrapperspb.StringValue {
@@ -3596,7 +3498,7 @@ type SAMLConnectionConfigResponse struct {
 
 func (x *SAMLConnectionConfigResponse) Reset() {
 	*x = SAMLConnectionConfigResponse{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[36]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3608,7 +3510,7 @@ func (x *SAMLConnectionConfigResponse) String() string {
 func (*SAMLConnectionConfigResponse) ProtoMessage() {}
 
 func (x *SAMLConnectionConfigResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[36]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3621,7 +3523,7 @@ func (x *SAMLConnectionConfigResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SAMLConnectionConfigResponse.ProtoReflect.Descriptor instead.
 func (*SAMLConnectionConfigResponse) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{36}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *SAMLConnectionConfigResponse) GetSpEntityId() string {
@@ -3798,7 +3700,7 @@ type IDPCertificate struct {
 
 func (x *IDPCertificate) Reset() {
 	*x = IDPCertificate{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[37]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3810,7 +3712,7 @@ func (x *IDPCertificate) String() string {
 func (*IDPCertificate) ProtoMessage() {}
 
 func (x *IDPCertificate) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[37]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3823,7 +3725,7 @@ func (x *IDPCertificate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IDPCertificate.ProtoReflect.Descriptor instead.
 func (*IDPCertificate) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{37}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *IDPCertificate) GetCertificate() string {
@@ -3870,7 +3772,7 @@ type GetOIDCMetadataRequest struct {
 
 func (x *GetOIDCMetadataRequest) Reset() {
 	*x = GetOIDCMetadataRequest{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[38]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3882,7 +3784,7 @@ func (x *GetOIDCMetadataRequest) String() string {
 func (*GetOIDCMetadataRequest) ProtoMessage() {}
 
 func (x *GetOIDCMetadataRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[38]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3895,7 +3797,7 @@ func (x *GetOIDCMetadataRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetOIDCMetadataRequest.ProtoReflect.Descriptor instead.
 func (*GetOIDCMetadataRequest) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{38}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *GetOIDCMetadataRequest) GetMetadata() *OIDCMetadataRequest {
@@ -3914,7 +3816,7 @@ type OIDCMetadataRequest struct {
 
 func (x *OIDCMetadataRequest) Reset() {
 	*x = OIDCMetadataRequest{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[39]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3926,7 +3828,7 @@ func (x *OIDCMetadataRequest) String() string {
 func (*OIDCMetadataRequest) ProtoMessage() {}
 
 func (x *OIDCMetadataRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[39]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3939,7 +3841,7 @@ func (x *OIDCMetadataRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OIDCMetadataRequest.ProtoReflect.Descriptor instead.
 func (*OIDCMetadataRequest) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{39}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *OIDCMetadataRequest) GetIssuer() string {
@@ -3962,7 +3864,7 @@ type GetOIDCMetadataResponse struct {
 
 func (x *GetOIDCMetadataResponse) Reset() {
 	*x = GetOIDCMetadataResponse{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[40]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3974,7 +3876,7 @@ func (x *GetOIDCMetadataResponse) String() string {
 func (*GetOIDCMetadataResponse) ProtoMessage() {}
 
 func (x *GetOIDCMetadataResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[40]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3987,7 +3889,7 @@ func (x *GetOIDCMetadataResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetOIDCMetadataResponse.ProtoReflect.Descriptor instead.
 func (*GetOIDCMetadataResponse) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{40}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *GetOIDCMetadataResponse) GetIssuer() string {
@@ -4034,7 +3936,7 @@ type GetSAMLMetadataRequest struct {
 
 func (x *GetSAMLMetadataRequest) Reset() {
 	*x = GetSAMLMetadataRequest{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[41]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4046,7 +3948,7 @@ func (x *GetSAMLMetadataRequest) String() string {
 func (*GetSAMLMetadataRequest) ProtoMessage() {}
 
 func (x *GetSAMLMetadataRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[41]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4059,7 +3961,7 @@ func (x *GetSAMLMetadataRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSAMLMetadataRequest.ProtoReflect.Descriptor instead.
 func (*GetSAMLMetadataRequest) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{41}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *GetSAMLMetadataRequest) GetMetadata() *SAMLMetadataRequest {
@@ -4078,7 +3980,7 @@ type SAMLMetadataRequest struct {
 
 func (x *SAMLMetadataRequest) Reset() {
 	*x = SAMLMetadataRequest{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[42]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4090,7 +3992,7 @@ func (x *SAMLMetadataRequest) String() string {
 func (*SAMLMetadataRequest) ProtoMessage() {}
 
 func (x *SAMLMetadataRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[42]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4103,7 +4005,7 @@ func (x *SAMLMetadataRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SAMLMetadataRequest.ProtoReflect.Descriptor instead.
 func (*SAMLMetadataRequest) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{42}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *SAMLMetadataRequest) GetMetadataUrl() string {
@@ -4128,7 +4030,7 @@ type GetSAMLMetadataResponse struct {
 
 func (x *GetSAMLMetadataResponse) Reset() {
 	*x = GetSAMLMetadataResponse{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[43]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4140,7 +4042,7 @@ func (x *GetSAMLMetadataResponse) String() string {
 func (*GetSAMLMetadataResponse) ProtoMessage() {}
 
 func (x *GetSAMLMetadataResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[43]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4153,7 +4055,7 @@ func (x *GetSAMLMetadataResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSAMLMetadataResponse.ProtoReflect.Descriptor instead.
 func (*GetSAMLMetadataResponse) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{43}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *GetSAMLMetadataResponse) GetIdpEntityId() string {
@@ -4214,7 +4116,7 @@ type GetSAMLCertificateDetailsRequest struct {
 
 func (x *GetSAMLCertificateDetailsRequest) Reset() {
 	*x = GetSAMLCertificateDetailsRequest{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[44]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4226,7 +4128,7 @@ func (x *GetSAMLCertificateDetailsRequest) String() string {
 func (*GetSAMLCertificateDetailsRequest) ProtoMessage() {}
 
 func (x *GetSAMLCertificateDetailsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[44]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4239,7 +4141,7 @@ func (x *GetSAMLCertificateDetailsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSAMLCertificateDetailsRequest.ProtoReflect.Descriptor instead.
 func (*GetSAMLCertificateDetailsRequest) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{44}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *GetSAMLCertificateDetailsRequest) GetCertificate() *SAMLCertificateRequest {
@@ -4258,7 +4160,7 @@ type SAMLCertificateRequest struct {
 
 func (x *SAMLCertificateRequest) Reset() {
 	*x = SAMLCertificateRequest{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[45]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4270,7 +4172,7 @@ func (x *SAMLCertificateRequest) String() string {
 func (*SAMLCertificateRequest) ProtoMessage() {}
 
 func (x *SAMLCertificateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[45]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4283,7 +4185,7 @@ func (x *SAMLCertificateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SAMLCertificateRequest.ProtoReflect.Descriptor instead.
 func (*SAMLCertificateRequest) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{45}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *SAMLCertificateRequest) GetText() string {
@@ -4306,7 +4208,7 @@ type GetSAMLCertificateDetailsResponse struct {
 
 func (x *GetSAMLCertificateDetailsResponse) Reset() {
 	*x = GetSAMLCertificateDetailsResponse{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[46]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4318,7 +4220,7 @@ func (x *GetSAMLCertificateDetailsResponse) String() string {
 func (*GetSAMLCertificateDetailsResponse) ProtoMessage() {}
 
 func (x *GetSAMLCertificateDetailsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[46]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4331,7 +4233,7 @@ func (x *GetSAMLCertificateDetailsResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use GetSAMLCertificateDetailsResponse.ProtoReflect.Descriptor instead.
 func (*GetSAMLCertificateDetailsResponse) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{46}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *GetSAMLCertificateDetailsResponse) GetText() string {
@@ -4379,7 +4281,7 @@ type GetConnectionTestResultRequest struct {
 
 func (x *GetConnectionTestResultRequest) Reset() {
 	*x = GetConnectionTestResultRequest{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[47]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4391,7 +4293,7 @@ func (x *GetConnectionTestResultRequest) String() string {
 func (*GetConnectionTestResultRequest) ProtoMessage() {}
 
 func (x *GetConnectionTestResultRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[47]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4404,7 +4306,7 @@ func (x *GetConnectionTestResultRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetConnectionTestResultRequest.ProtoReflect.Descriptor instead.
 func (*GetConnectionTestResultRequest) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{47}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *GetConnectionTestResultRequest) GetConnectionId() string {
@@ -4434,7 +4336,7 @@ type GetConnectionTestResultResponse struct {
 
 func (x *GetConnectionTestResultResponse) Reset() {
 	*x = GetConnectionTestResultResponse{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[48]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4446,7 +4348,7 @@ func (x *GetConnectionTestResultResponse) String() string {
 func (*GetConnectionTestResultResponse) ProtoMessage() {}
 
 func (x *GetConnectionTestResultResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[48]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4459,7 +4361,7 @@ func (x *GetConnectionTestResultResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetConnectionTestResultResponse.ProtoReflect.Descriptor instead.
 func (*GetConnectionTestResultResponse) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{48}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{47}
 }
 
 func (x *GetConnectionTestResultResponse) GetStatus() TestResultStatus {
@@ -4505,7 +4407,7 @@ type PasswordConnectionConfig struct {
 
 func (x *PasswordConnectionConfig) Reset() {
 	*x = PasswordConnectionConfig{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[49]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4517,7 +4419,7 @@ func (x *PasswordConnectionConfig) String() string {
 func (*PasswordConnectionConfig) ProtoMessage() {}
 
 func (x *PasswordConnectionConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[49]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4530,7 +4432,7 @@ func (x *PasswordConnectionConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PasswordConnectionConfig.ProtoReflect.Descriptor instead.
 func (*PasswordConnectionConfig) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{49}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{48}
 }
 
 type Flags struct {
@@ -4543,7 +4445,7 @@ type Flags struct {
 
 func (x *Flags) Reset() {
 	*x = Flags{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[50]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4555,7 +4457,7 @@ func (x *Flags) String() string {
 func (*Flags) ProtoMessage() {}
 
 func (x *Flags) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[50]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4568,7 +4470,7 @@ func (x *Flags) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Flags.ProtoReflect.Descriptor instead.
 func (*Flags) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{50}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{49}
 }
 
 func (x *Flags) GetIsLogin() bool {
@@ -4596,7 +4498,7 @@ type ListAppConnectionsRequest struct {
 
 func (x *ListAppConnectionsRequest) Reset() {
 	*x = ListAppConnectionsRequest{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[51]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[50]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4608,7 +4510,7 @@ func (x *ListAppConnectionsRequest) String() string {
 func (*ListAppConnectionsRequest) ProtoMessage() {}
 
 func (x *ListAppConnectionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[51]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[50]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4621,7 +4523,7 @@ func (x *ListAppConnectionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAppConnectionsRequest.ProtoReflect.Descriptor instead.
 func (*ListAppConnectionsRequest) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{51}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{50}
 }
 
 func (x *ListAppConnectionsRequest) GetPageSize() uint32 {
@@ -4657,7 +4559,7 @@ type ListAppConnectionsResponse struct {
 
 func (x *ListAppConnectionsResponse) Reset() {
 	*x = ListAppConnectionsResponse{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[52]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4669,7 +4571,7 @@ func (x *ListAppConnectionsResponse) String() string {
 func (*ListAppConnectionsResponse) ProtoMessage() {}
 
 func (x *ListAppConnectionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[52]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4682,7 +4584,7 @@ func (x *ListAppConnectionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAppConnectionsResponse.ProtoReflect.Descriptor instead.
 func (*ListAppConnectionsResponse) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{52}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{51}
 }
 
 func (x *ListAppConnectionsResponse) GetConnections() []*ListConnection {
@@ -4713,162 +4615,6 @@ func (x *ListAppConnectionsResponse) GetTotalSize() uint32 {
 	return 0
 }
 
-type GetConnectionContextRequest struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	ConnectionId   string                 `protobuf:"bytes,1,opt,name=connection_id,json=connectionId,proto3" json:"connection_id,omitempty"`
-	OrganizationId string                 `protobuf:"bytes,2,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
-}
-
-func (x *GetConnectionContextRequest) Reset() {
-	*x = GetConnectionContextRequest{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[53]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetConnectionContextRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetConnectionContextRequest) ProtoMessage() {}
-
-func (x *GetConnectionContextRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[53]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetConnectionContextRequest.ProtoReflect.Descriptor instead.
-func (*GetConnectionContextRequest) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{53}
-}
-
-func (x *GetConnectionContextRequest) GetConnectionId() string {
-	if x != nil {
-		return x.ConnectionId
-	}
-	return ""
-}
-
-func (x *GetConnectionContextRequest) GetOrganizationId() string {
-	if x != nil {
-		return x.OrganizationId
-	}
-	return ""
-}
-
-type GetConnectionContextResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Context       *structpb.Struct       `protobuf:"bytes,1,opt,name=context,proto3" json:"context,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetConnectionContextResponse) Reset() {
-	*x = GetConnectionContextResponse{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[54]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetConnectionContextResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetConnectionContextResponse) ProtoMessage() {}
-
-func (x *GetConnectionContextResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[54]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetConnectionContextResponse.ProtoReflect.Descriptor instead.
-func (*GetConnectionContextResponse) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{54}
-}
-
-func (x *GetConnectionContextResponse) GetContext() *structpb.Struct {
-	if x != nil {
-		return x.Context
-	}
-	return nil
-}
-
-type UpdateConnectionContextRequest struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	ConnectionId   string                 `protobuf:"bytes,1,opt,name=connection_id,json=connectionId,proto3" json:"connection_id,omitempty"`
-	OrganizationId string                 `protobuf:"bytes,2,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
-	Context        *structpb.Struct       `protobuf:"bytes,3,opt,name=context,proto3" json:"context,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
-}
-
-func (x *UpdateConnectionContextRequest) Reset() {
-	*x = UpdateConnectionContextRequest{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[55]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateConnectionContextRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateConnectionContextRequest) ProtoMessage() {}
-
-func (x *UpdateConnectionContextRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[55]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateConnectionContextRequest.ProtoReflect.Descriptor instead.
-func (*UpdateConnectionContextRequest) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{55}
-}
-
-func (x *UpdateConnectionContextRequest) GetConnectionId() string {
-	if x != nil {
-		return x.ConnectionId
-	}
-	return ""
-}
-
-func (x *UpdateConnectionContextRequest) GetOrganizationId() string {
-	if x != nil {
-		return x.OrganizationId
-	}
-	return ""
-}
-
-func (x *UpdateConnectionContextRequest) GetContext() *structpb.Struct {
-	if x != nil {
-		return x.Context
-	}
-	return nil
-}
-
 // Rp contains relying party identifiers and origins
 type WebAuthConfiguration_Rp struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -4884,7 +4630,7 @@ type WebAuthConfiguration_Rp struct {
 
 func (x *WebAuthConfiguration_Rp) Reset() {
 	*x = WebAuthConfiguration_Rp{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[58]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[54]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4896,7 +4642,7 @@ func (x *WebAuthConfiguration_Rp) String() string {
 func (*WebAuthConfiguration_Rp) ProtoMessage() {}
 
 func (x *WebAuthConfiguration_Rp) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[58]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[54]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4909,7 +4655,7 @@ func (x *WebAuthConfiguration_Rp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WebAuthConfiguration_Rp.ProtoReflect.Descriptor instead.
 func (*WebAuthConfiguration_Rp) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{34, 0}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{33, 0}
 }
 
 func (x *WebAuthConfiguration_Rp) GetIds() []string {
@@ -4939,7 +4685,7 @@ type WebAuthConfiguration_Attestation struct {
 
 func (x *WebAuthConfiguration_Attestation) Reset() {
 	*x = WebAuthConfiguration_Attestation{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[59]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[55]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4951,7 +4697,7 @@ func (x *WebAuthConfiguration_Attestation) String() string {
 func (*WebAuthConfiguration_Attestation) ProtoMessage() {}
 
 func (x *WebAuthConfiguration_Attestation) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[59]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[55]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4964,7 +4710,7 @@ func (x *WebAuthConfiguration_Attestation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WebAuthConfiguration_Attestation.ProtoReflect.Descriptor instead.
 func (*WebAuthConfiguration_Attestation) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{34, 1}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{33, 1}
 }
 
 func (x *WebAuthConfiguration_Attestation) GetConveyancePreference() *wrapperspb.StringValue {
@@ -4996,7 +4742,7 @@ type WebAuthConfiguration_Authenticators struct {
 
 func (x *WebAuthConfiguration_Authenticators) Reset() {
 	*x = WebAuthConfiguration_Authenticators{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[60]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[56]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5008,7 +4754,7 @@ func (x *WebAuthConfiguration_Authenticators) String() string {
 func (*WebAuthConfiguration_Authenticators) ProtoMessage() {}
 
 func (x *WebAuthConfiguration_Authenticators) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[60]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[56]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5021,7 +4767,7 @@ func (x *WebAuthConfiguration_Authenticators) ProtoReflect() protoreflect.Messag
 
 // Deprecated: Use WebAuthConfiguration_Authenticators.ProtoReflect.Descriptor instead.
 func (*WebAuthConfiguration_Authenticators) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{34, 2}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{33, 2}
 }
 
 func (x *WebAuthConfiguration_Authenticators) GetValidateEntry() *wrapperspb.BoolValue {
@@ -5084,7 +4830,7 @@ type WebAuthConfiguration_AuthenticatorSelection struct {
 
 func (x *WebAuthConfiguration_AuthenticatorSelection) Reset() {
 	*x = WebAuthConfiguration_AuthenticatorSelection{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[61]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[57]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5096,7 +4842,7 @@ func (x *WebAuthConfiguration_AuthenticatorSelection) String() string {
 func (*WebAuthConfiguration_AuthenticatorSelection) ProtoMessage() {}
 
 func (x *WebAuthConfiguration_AuthenticatorSelection) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[61]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[57]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5109,7 +4855,7 @@ func (x *WebAuthConfiguration_AuthenticatorSelection) ProtoReflect() protoreflec
 
 // Deprecated: Use WebAuthConfiguration_AuthenticatorSelection.ProtoReflect.Descriptor instead.
 func (*WebAuthConfiguration_AuthenticatorSelection) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{34, 3}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{33, 3}
 }
 
 func (x *WebAuthConfiguration_AuthenticatorSelection) GetUserVerification() *wrapperspb.StringValue {
@@ -5138,7 +4884,7 @@ type WebAuthConfiguration_Timeout struct {
 
 func (x *WebAuthConfiguration_Timeout) Reset() {
 	*x = WebAuthConfiguration_Timeout{}
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[62]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[58]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5150,7 +4896,7 @@ func (x *WebAuthConfiguration_Timeout) String() string {
 func (*WebAuthConfiguration_Timeout) ProtoMessage() {}
 
 func (x *WebAuthConfiguration_Timeout) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[62]
+	mi := &file_scalekit_v1_connections_connections_proto_msgTypes[58]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5163,7 +4909,7 @@ func (x *WebAuthConfiguration_Timeout) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WebAuthConfiguration_Timeout.ProtoReflect.Descriptor instead.
 func (*WebAuthConfiguration_Timeout) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{34, 4}
+	return file_scalekit_v1_connections_connections_proto_rawDescGZIP(), []int{33, 4}
 }
 
 func (x *WebAuthConfiguration_Timeout) GetRegistration() *durationpb.Duration {
@@ -5295,7 +5041,7 @@ const file_scalekit_v1_connections_connections_proto_rawDesc = "" +
 	"\x02id\x18\x03 \x01(\tBQ\x92AE2+Connection ID. Unique ID for the connectionJ\x16\"conn_121312434123312\"\xbaH\x06r\x04\x10\x01\x18 R\x02id\x12\xd6\x01\n" +
 	"\n" +
 	"connection\x18\x04 \x01(\v2).scalekit.v1.connections.UpdateConnectionB\x8a\x01\x92A-2#Connection properties to be updated\xca>\x05\xfa\x02\x02id\xbaHW\xba\x01Q\x126OAUTH, PASSWORDLESS and WEBAUTHN are not supported yet\x1a\x17!(this.type in [4,5,9])\xc8\x01\x01R\n" +
-	"connectionJ\x04\b\x02\x10\x03\"\xcb\x11\n" +
+	"connectionJ\x04\b\x02\x10\x03\"\xca\x11\n" +
 	"\x10UpdateConnection\x12w\n" +
 	"\bprovider\x18\x02 \x01(\x0e2+.scalekit.v1.connections.ConnectionProviderB.\x92A#2\x17SSO Connection ProviderJ\b\"CUSTOM\"\xbaH\x05\x82\x01\x02\x10\x01R\bprovider\x12r\n" +
 	"\x04type\x18\x03 \x01(\x0e2'.scalekit.v1.connections.ConnectionTypeB5\x92A*2 Connection Protocol OIDC / SAML J\x06\"OIDC\"\xbaH\x05\x82\x01\x02\x10\x01R\x04type\x12\xae\x01\n" +
@@ -5310,9 +5056,8 @@ const file_scalekit_v1_connections_connections_proto_rawDesc = "" +
 	"\foauth_config\x18\x12 \x01(\v2..scalekit.v1.connections.OAuthConnectionConfigB3\x92A02.OAuth Configuration if ConnectionType == OAUTHH\x00R\voauthConfig\x12\x9d\x01\n" +
 	"\x13passwordless_config\x18\x14 \x01(\v2+.scalekit.v1.connections.PasswordLessConfigB=\x92A:28Magic Link Configuration if ConnectionType == MAGIC_LINKH\x00R\x12passwordlessConfig\x12P\n" +
 	"\rstatic_config\x18\x17 \x01(\v2).scalekit.v1.connections.StaticAuthConfigH\x00R\fstaticConfig\x12\xb1\x01\n" +
-	"\x0fwebauthn_config\x18\x18 \x01(\v2-.scalekit.v1.connections.WebAuthConfigurationBW\x92AT2RConfiguration details for WebAuthn (passkeys). Present only when type is WEBAUTHN.H\x00R\x0ewebauthnConfig\x12&\n" +
-	"\x06key_id\x18\x16 \x01(\tB\n" +
-	"\xbaH\ar\x05\x10\x01\x18\xac\x02H\x01R\x05keyId\x88\x01\x01\x12u\n" +
+	"\x0fwebauthn_config\x18\x18 \x01(\v2-.scalekit.v1.connections.WebAuthConfigurationBW\x92AT2RConfiguration details for WebAuthn (passkeys). Present only when type is WEBAUTHN.H\x00R\x0ewebauthnConfig\x12%\n" +
+	"\x06key_id\x18\x16 \x01(\tB\t\xbaH\x06r\x04\x10\x01\x18 H\x01R\x05keyId\x88\x01\x01\x12u\n" +
 	"\fprovider_key\x18\x15 \x01(\tBR\x92AO2CKey ID of the identity provider service that handles authenticationJ\b\"google\"R\vproviderKey\x1aC\n" +
 	"\x15AttributeMappingEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
@@ -5422,7 +5167,7 @@ const file_scalekit_v1_connections_connections_proto_rawDesc = "" +
 	"\x18post_logout_redirect_uri\x18\x0f \x01(\v2\x1c.google.protobuf.StringValueB]\x92AW2\x18post logout redirect uriJ;\"https://yourapp.com/sso/v1/oidc/conn_1234/logout/callback\"\xe0A\x03R\x15postLogoutRedirectUri\x12\xea\x01\n" +
 	"\x1fbackchannel_logout_redirect_uri\x18\x10 \x01(\v2\x1c.google.protobuf.StringValueB\x84\x01\x92A~2<backchannel logout redirect uri where idp sends logout_tokenJ>\"https://yourapp.com/sso/v1/oidc/conn_1234/backchannel-logout\"\xe0A\x03R\x1cbackchannelLogoutRedirectUri\x12\xc6\x01\n" +
 	"\x1async_user_profile_on_login\x18\x11 \x01(\v2\x1a.google.protobuf.BoolValueBn\x92Ak2cIndicates whether user profiles should be synchronized with the identity provider upon each log-in.J\x04trueR\x16syncUserProfileOnLogin\x12\xba\x01\n" +
-	"!jit_provisioning_with_sso_enabled\x18\x12 \x01(\v2\x1a.google.protobuf.BoolValueBT\x92AQ2IIndicates if Just In Time user provisioning is enabled for the connectionJ\x04trueR\x1djitProvisioningWithSsoEnabled\"\xce\x13\n" +
+	"!jit_provisioning_with_sso_enabled\x18\x12 \x01(\v2\x1a.google.protobuf.BoolValueBT\x92AQ2IIndicates if Just In Time user provisioning is enabled for the connectionJ\x04trueR\x1djitProvisioningWithSsoEnabled\"\xbe\v\n" +
 	"\x15OAuthConnectionConfig\x12\x84\x01\n" +
 	"\rauthorize_uri\x18\x03 \x01(\v2\x1c.google.protobuf.StringValueBA\x92A>2\rAuthorize URIJ-\"https://youridp.com/service/oauth/authorize\"R\fauthorizeUri\x12t\n" +
 	"\ttoken_uri\x18\x04 \x01(\v2\x1c.google.protobuf.StringValueB9\x92A62\tToken URIJ)\"https://youridp.com/service/oauth/token\"R\btokenUri\x12\x82\x01\n" +
@@ -5438,17 +5183,7 @@ const file_scalekit_v1_connections_connections_proto_rawDesc = "" +
 	"\vaccess_type\x18\x10 \x01(\v2\x1c.google.protobuf.StringValueB\x1b\x92A\x182\vAccess TypeJ\t\"offline\"R\n" +
 	"accessType\x12n\n" +
 	"\x11custom_scope_name\x18\x11 \x01(\v2\x1c.google.protobuf.StringValueB$\x92A!2\x11Custom Scope NameJ\f\"user_scope\"R\x0fcustomScopeName\x12\xc6\x01\n" +
-	"\x1async_user_profile_on_login\x18\x12 \x01(\v2\x1a.google.protobuf.BoolValueBn\x92Ak2cIndicates whether user profiles should be synchronized with the identity provider upon each log-in.J\x04trueR\x16syncUserProfileOnLogin\x12k\n" +
-	"\x11token_access_type\x18\x13 \x01(\v2\x1c.google.protobuf.StringValueB!\x92A\x1e2\x11Token Access TypeJ\t\"offline\"R\x0ftokenAccessType\x12\x84\x02\n" +
-	"\ttenant_id\x18\x14 \x01(\v2\x1c.google.protobuf.StringValueB\xc8\x01\x92A\xc4\x012\x99\x01Microsoft Entra tenant ID. Required when using a single-tenant or multi-tenant app registered in Microsoft Entra. Leave empty to use the common endpoint.J&\"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\"R\btenantId\x12\xc7\x01\n" +
-	"\ais_cimd\x18\x15 \x01(\v2\x1a.google.protobuf.BoolValueB\x91\x01\x92A\x8a\x012\x81\x01Indicates whether this connection was registered using Client ID Metadata Document (CIMD) instead of Dynamic Client Registration.J\x04true\xe0A\x03R\x06isCimd\x12\xbe\x01\n" +
-	"\bapp_name\x18\x16 \x01(\v2\x1c.google.protobuf.StringValueB\x84\x01\x92A\x80\x012mApplication name used by providers that require it as an authorize query parameter (e.g., Trello's app_name).J\x0f\"My Trello App\"R\aappName\x12\xfa\x01\n" +
-	"\x0foptional_scopes\x18\x17 \x01(\v2'.scalekit.v1.connections.OptionalScopesB\xa2\x01\x92A\x9e\x012\x9b\x01Optional scopes configuration for identity providers that support or require additional scopes to be sent in a custom field during authentication requests.H\x00R\x0eoptionalScopes\x88\x01\x01B\x12\n" +
-	"\x10_optional_scopes\"\xa6\x03\n" +
-	"\x0eOptionalScopes\x12v\n" +
-	"\x06scopes\x18\x01 \x03(\tB^\x92A[2CList of optional scopes that can be requested during authenticationJ\x14[\"scope1\", \"scope2\"]R\x06scopes\x12\x9b\x02\n" +
-	"\n" +
-	"field_name\x18\x02 \x01(\tB\xfb\x01\x92A\xf7\x012\xd5\x01Name of the field in which scope should be sent in the authentication request. This is required by some identity providers that expect scopes to be sent in a custom field instead of the standard 'scope' parameter.J\x1d\"optional_scope or bot_scope\"R\tfieldName\"\xf4\a\n" +
+	"\x1async_user_profile_on_login\x18\x12 \x01(\v2\x1a.google.protobuf.BoolValueBn\x92Ak2cIndicates whether user profiles should be synchronized with the identity provider upon each log-in.J\x04trueR\x16syncUserProfileOnLogin\"\xf4\a\n" +
 	"\x12PasswordLessConfig\x12]\n" +
 	"\x04type\x18\x01 \x01(\x0e2).scalekit.v1.connections.PasswordlessTypeB\x1e\x92A\x1b2\x11Passwordless TypeJ\x06\"LINK\"R\x04type\x12W\n" +
 	"\tfrequency\x18\x02 \x01(\v2\x1c.google.protobuf.UInt32ValueB\x16\x92A\x132\x0eLink FrequencyJ\x011H\x00R\tfrequency\x88\x01\x01\x12a\n" +
@@ -5629,16 +5364,7 @@ const file_scalekit_v1_connections_connections_proto_rawDesc = "" +
 	"\x0fnext_page_token\x18\x02 \x01(\tBG\x92AD2\"Token for the next page of resultsJ\x1e\"eyJwYWdlIjoyLCJsaW1pdCI6MzB9\"R\rnextPageToken\x12s\n" +
 	"\x0fprev_page_token\x18\x03 \x01(\tBK\x92AH2&Token for the previous page of resultsJ\x1e\"eyJwYWdlIjoyLCJsaW1pdCI6MzB9\"R\rprevPageToken\x12b\n" +
 	"\n" +
-	"total_size\x18\x04 \x01(\rBC\x92A@29Total number of connections matching the request criteriaJ\x03100R\ttotalSize\"\x8b\x01\n" +
-	"\x1bGetConnectionContextRequest\x128\n" +
-	"\rconnection_id\x18\x01 \x01(\tB\x13\xbaH\x10\xc8\x01\x01r\v\x10\x01\x18 :\x05conn_R\fconnectionId\x122\n" +
-	"\x0forganization_id\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x00\x18 R\x0eorganizationId\"Q\n" +
-	"\x1cGetConnectionContextResponse\x121\n" +
-	"\acontext\x18\x01 \x01(\v2\x17.google.protobuf.StructR\acontext\"\xc1\x01\n" +
-	"\x1eUpdateConnectionContextRequest\x128\n" +
-	"\rconnection_id\x18\x01 \x01(\tB\x13\xbaH\x10\xc8\x01\x01r\v\x10\x01\x18 :\x05conn_R\fconnectionId\x122\n" +
-	"\x0forganization_id\x18\x02 \x01(\tB\t\xbaH\x06r\x04\x10\x00\x18 R\x0eorganizationId\x121\n" +
-	"\acontext\x18\x03 \x01(\v2\x17.google.protobuf.StructR\acontext*W\n" +
+	"total_size\x18\x04 \x01(\rBC\x92A@29Total number of connections matching the request criteriaJ\x03100R\ttotalSize*W\n" +
 	"\x11CodeChallengeType\x12#\n" +
 	"\x1fCODE_CHALLENGE_TYPE_UNSPECIFIED\x10\x00\x12\v\n" +
 	"\aNUMERIC\x10\x01\x12\x10\n" +
@@ -5689,7 +5415,7 @@ const file_scalekit_v1_connections_connections_proto_rawDesc = "" +
 	"\aprofile\x10\x02\x12\t\n" +
 	"\x05email\x10\x03\x12\v\n" +
 	"\aaddress\x10\x04\x12\t\n" +
-	"\x05phone\x10\x05*\xb0\x01\n" +
+	"\x05phone\x10\x05*\x8e\x01\n" +
 	"\x0eConnectionType\x12\v\n" +
 	"\aINVALID\x10\x00\x12\b\n" +
 	"\x04OIDC\x10\x01\x12\b\n" +
@@ -5701,10 +5427,7 @@ const file_scalekit_v1_connections_connections_proto_rawDesc = "" +
 	"\n" +
 	"\x06BEARER\x10\a\x12\v\n" +
 	"\aAPI_KEY\x10\b\x12\f\n" +
-	"\bWEBAUTHN\x10\t\x12\r\n" +
-	"\tOAUTH_M2M\x10\n" +
-	"\x12\x11\n" +
-	"\rTRELLO_OAUTH1\x10\v*`\n" +
+	"\bWEBAUTHN\x10\t*`\n" +
 	"\x10ConnectionStatus\x12!\n" +
 	"\x1dCONNECTION_STATUS_UNSPECIFIED\x10\x00\x12\t\n" +
 	"\x05DRAFT\x10\x01\x12\x0f\n" +
@@ -5733,44 +5456,40 @@ const file_scalekit_v1_connections_connections_proto_rawDesc = "" +
 	"\tMICROSOFT\x10\r\x12\x11\n" +
 	"\rIDP_SIMULATOR\x10\x0e\x12\f\n" +
 	"\bSCALEKIT\x10\x0f\x12\b\n" +
-	"\x04ADFS\x10\x102\x92G\n" +
+	"\x04ADFS\x10\x102\x8f=\n" +
 	"\x11ConnectionService\x12\x91\x03\n" +
 	"\x1bCreateEnvironmentConnection\x12;.scalekit.v1.connections.CreateEnvironmentConnectionRequest\x1a1.scalekit.v1.connections.CreateConnectionResponse\"\x81\x02\x92A\xc1\x01\n" +
 	"\vConnections\x12\x17Create a new connection\x1a8Establish a new connection for the specified environmentJ_\n" +
 	"\x03201\x12X\n" +
 	"\x1fConnection created successfully\x125\n" +
 	"3\x1a1.scalekit.v1.connections.CreateConnectionResponse\x82\xb5\x18\x02\x18D\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02!:\n" +
-	"connection\"\x13/api/v1/connections\x12\xb3\x03\n" +
-	"\x10CreateConnection\x120.scalekit.v1.connections.CreateConnectionRequest\x1a1.scalekit.v1.connections.CreateConnectionResponse\"\xb9\x02\x92A\xc6\x01\n" +
+	"connection\"\x13/api/v1/connections\x12\xa0\x03\n" +
+	"\x10CreateConnection\x120.scalekit.v1.connections.CreateConnectionRequest\x1a1.scalekit.v1.connections.CreateConnectionResponse\"\xa6\x02\x92A\xc6\x01\n" +
 	"\vConnections\x12\x17Create a new connection\x1a=Establish a new SSO connection for the specified organizationJ_\n" +
 	"\x03201\x12X\n" +
 	"\x1fConnection created successfully\x125\n" +
-	"3\x1a1.scalekit.v1.connections.CreateConnectionResponse\x82\xb5\x18\x15\n" +
-	"\x11connections_write\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02A:\n" +
-	"connection\"3/api/v1/organizations/{organization_id}/connections\x12\xcd\x04\n" +
-	"\x19AssignDomainsToConnection\x129.scalekit.v1.connections.AssignDomainsToConnectionRequest\x1a:.scalekit.v1.connections.AssignDomainsToConnectionResponse\"\xb8\x03\x92A\xb6\x02\n" +
+	"3\x1a1.scalekit.v1.connections.CreateConnectionResponse\x82\xb5\x18\x02\x18d\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02A:\n" +
+	"connection\"3/api/v1/organizations/{organization_id}/connections\x12\xba\x04\n" +
+	"\x19AssignDomainsToConnection\x129.scalekit.v1.connections.AssignDomainsToConnectionRequest\x1a:.scalekit.v1.connections.AssignDomainsToConnectionResponse\"\xa5\x03\x92A\xb6\x02\n" +
 	"\vConnections\x12\x1eAssign domains to a connection\x1a\x9e\x01Assigns one or more domains to a specific connection within an organization. This allows the connection to be used for authentication on the specified domainsJf\n" +
 	"\x03200\x12_\n" +
 	"\x1dDomains assigned successfully\x12>\n" +
-	"<\x1a:.scalekit.v1.connections.AssignDomainsToConnectionResponse\x82\xb5\x18\x15\n" +
-	"\x11connections_write\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02P:\x01*\x1aK/api/v1/organizations/{organization_id}/connections/{connection_id}/domains\x12\xb3\x03\n" +
-	"\x18GetEnvironmentConnection\x128.scalekit.v1.connections.GetEnvironmentConnectionRequest\x1a..scalekit.v1.connections.GetConnectionResponse\"\xac\x02\x92A\xe7\x01\n" +
+	"<\x1a:.scalekit.v1.connections.AssignDomainsToConnectionResponse\x82\xb5\x18\x02\x18d\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02P:\x01*\x1aK/api/v1/organizations/{organization_id}/connections/{connection_id}/domains\x12\xb2\x03\n" +
+	"\x18GetEnvironmentConnection\x128.scalekit.v1.connections.GetEnvironmentConnectionRequest\x1a..scalekit.v1.connections.GetConnectionResponse\"\xab\x02\x92A\xe7\x01\n" +
 	"\vConnections\x12\x1bRetrieve connection details\x1aSObtain detailed information about a specific connection using its unique identifierJf\n" +
 	"\x03200\x12_\n" +
 	")Successfully retrieved connection details\x122\n" +
-	"0\x1a..scalekit.v1.connections.GetConnectionResponse\x82\xb5\x18\x03\x18\xc4\x01\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02%\x12#/api/v1/connections/{connection_id}\x12\xcf\x04\n" +
-	"\rGetConnection\x12-.scalekit.v1.connections.GetConnectionRequest\x1a..scalekit.v1.connections.GetConnectionResponse\"\xde\x03\x92A\x81\x03\n" +
+	"0\x1a..scalekit.v1.connections.GetConnectionResponse\x82\xb5\x18\x02\x18D\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02%\x12#/api/v1/connections/{connection_id}\x12\xbc\x04\n" +
+	"\rGetConnection\x12-.scalekit.v1.connections.GetConnectionRequest\x1a..scalekit.v1.connections.GetConnectionResponse\"\xcb\x03\x92A\x81\x03\n" +
 	"\vConnections\x12\x16Get connection details\x1a\xd1\x01Retrieves the complete configuration and status details for a specific connection by its ID within an organization. Returns all connection properties including provider settings, protocols, and current status.J\x85\x01\n" +
 	"\x03200\x12~\n" +
 	"HSuccessfully retrieved connection details for the specified organization\x122\n" +
-	"0\x1a..scalekit.v1.connections.GetConnectionResponse\x82\xb5\x18\x15\n" +
-	"\x10connections_read\x18\xf4\x01\x82\xd3\xe4\x93\x02:\x128/api/v1/organizations/{organization_id}/connections/{id}\x12\xe4\x02\n" +
-	"\x0fListConnections\x12/.scalekit.v1.connections.ListConnectionsRequest\x1a0.scalekit.v1.connections.ListConnectionsResponse\"\xed\x01\x92A\xb6\x01\n" +
+	"0\x1a..scalekit.v1.connections.GetConnectionResponse\x82\xb5\x18\x02\x18d\x82\xd3\xe4\x93\x02:\x128/api/v1/organizations/{organization_id}/connections/{id}\x12\xd2\x02\n" +
+	"\x0fListConnections\x12/.scalekit.v1.connections.ListConnectionsRequest\x1a0.scalekit.v1.connections.ListConnectionsResponse\"\xdb\x01\x92A\xb6\x01\n" +
 	"\vConnections\x12\x10List connections\x1a2Retrieves a list of connections in the environmentJa\n" +
 	"\x03200\x12Z\n" +
 	"\"Successfully retrieved connections\x124\n" +
-	"2\x1a0.scalekit.v1.connections.ListConnectionsResponse\x82\xb5\x18\x14\n" +
-	"\x10connections_read\x18t\x82\xd3\xe4\x93\x02\x15\x12\x13/api/v1/connections\x12\xb5\x03\n" +
+	"2\x1a0.scalekit.v1.connections.ListConnectionsResponse\x82\xb5\x18\x02\x18d\x82\xd3\xe4\x93\x02\x15\x12\x13/api/v1/connections\x12\xb5\x03\n" +
 	"\x1bListOrganizationConnections\x12;.scalekit.v1.connections.ListOrganizationConnectionsRequest\x1a<.scalekit.v1.connections.ListOrganizationConnectionsResponse\"\x9a\x02\x92A\xd6\x01\n" +
 	"\vConnections\x12\x1dList organization connections\x1a9Retrieves a list of connections for all the organizationsJm\n" +
 	"\x03200\x12f\n" +
@@ -5786,68 +5505,51 @@ const file_scalekit_v1_connections_connections_proto_rawDesc = "" +
 	"\x03200\x12M\n" +
 	"\x14Updated Successfully\x125\n" +
 	"3\x1a1.scalekit.v1.connections.UpdateConnectionResponse\x82\xb5\x18\x02\x18D\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x021:\n" +
-	"connection2#/api/v1/connections/{connection_id}\x12\x94\x03\n" +
-	"\x10UpdateConnection\x120.scalekit.v1.connections.UpdateConnectionRequest\x1a1.scalekit.v1.connections.UpdateConnectionResponse\"\x9a\x02\x92A\xa2\x01\n" +
+	"connection2#/api/v1/connections/{connection_id}\x12\x81\x03\n" +
+	"\x10UpdateConnection\x120.scalekit.v1.connections.UpdateConnectionRequest\x1a1.scalekit.v1.connections.UpdateConnectionResponse\"\x87\x02\x92A\xa2\x01\n" +
 	"\vConnections\x12$Update a connection for organization\x1a\x17Update a SSO ConnectionJT\n" +
 	"\x03200\x12M\n" +
 	"\x14Updated Successfully\x125\n" +
-	"3\x1a1.scalekit.v1.connections.UpdateConnectionResponse\x82\xb5\x18\x15\n" +
-	"\x11connections_write\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02F:\n" +
+	"3\x1a1.scalekit.v1.connections.UpdateConnectionResponse\x82\xb5\x18\x02\x18d\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02F:\n" +
 	"connection28/api/v1/organizations/{organization_id}/connections/{id}\x12\x92\x02\n" +
 	"\x1bDeleteEnvironmentConnection\x12;.scalekit.v1.connections.DeleteEnvironmentConnectionRequest\x1a\x16.google.protobuf.Empty\"\x9d\x01\x92AZ\n" +
 	"\vConnections\x12\x13Delete a connection\x1a\x17Delete a SSO ConnectionJ\x1d\n" +
 	"\x03200\x12\x16\n" +
-	"\x14Deleted Successfully\x82\xb5\x18\x02\x18D\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02%*#/api/v1/connections/{connection_id}\x12\xf7\x03\n" +
-	"\x10DeleteConnection\x120.scalekit.v1.connections.DeleteConnectionRequest\x1a\x16.google.protobuf.Empty\"\x98\x03\x92A\xce\x02\n" +
-	"\vConnections\x12\x15Delete SSO connection\x1a\xf9\x01Deletes an SSO connection from the specified organization by connection ID. Use this endpoint when an identity provider integration is no longer needed for the organization. Returns an empty response after the SSO connection is deleted successfully.J,\n" +
-	"\x03200\x12%\n" +
-	"#SSO connection deleted successfully\x82\xb5\x18\x02\x18d\x82\xd3\xe4\x93\x02:*8/api/v1/organizations/{organization_id}/connections/{id}\x12\xdf\x02\n" +
+	"\x14Deleted Successfully\x82\xb5\x18\x02\x18D\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02%*#/api/v1/connections/{connection_id}\x12\xa2\x02\n" +
+	"\x10DeleteConnection\x120.scalekit.v1.connections.DeleteConnectionRequest\x1a\x16.google.protobuf.Empty\"\xc3\x01\x92Ak\n" +
+	"\vConnections\x12$Delete a connection for organization\x1a\x17Delete a SSO ConnectionJ\x1d\n" +
+	"\x03200\x12\x16\n" +
+	"\x14Deleted Successfully\x82\xb5\x18\x02\x18d\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02:*8/api/v1/organizations/{organization_id}/connections/{id}\x12\xdf\x02\n" +
 	"\x1bEnableEnvironmentConnection\x12;.scalekit.v1.connections.ToggleEnvironmentConnectionRequest\x1a1.scalekit.v1.connections.ToggleConnectionResponse\"\xcf\x01\x92A\x84\x01\n" +
 	"\vConnections\x12\x13Enable a connection\x1a\x17Enable a SSO ConnectionJG\n" +
 	"\x03200\x12@\n" +
 	"\aSuccess\x125\n" +
-	"3\x1a1.scalekit.v1.connections.ToggleConnectionResponse\x82\xb5\x18\x02\x18D\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02,2*/api/v1/connections/{connection_id}:enable\x12\xd4\x04\n" +
-	"\x10EnableConnection\x120.scalekit.v1.connections.ToggleConnectionRequest\x1a1.scalekit.v1.connections.ToggleConnectionResponse\"\xda\x03\x92A\xf6\x02\n" +
-	"\vConnections\x12\x15Enable SSO connection\x1a\xee\x01Activate an existing connection for the specified organization. When enabled, users can authenticate using this connection. This endpoint changes the connection state from disabled to enabled without modifying other configuration settingsJ_\n" +
+	"3\x1a1.scalekit.v1.connections.ToggleConnectionResponse\x82\xb5\x18\x02\x18D\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02,2*/api/v1/connections/{connection_id}:enable\x12\xca\x04\n" +
+	"\x10EnableConnection\x120.scalekit.v1.connections.ToggleConnectionRequest\x1a1.scalekit.v1.connections.ToggleConnectionResponse\"\xd0\x03\x92A\xff\x02\n" +
+	"\vConnections\x12\x1eEnable organization connection\x1a\xee\x01Activate an existing connection for the specified organization. When enabled, users can authenticate using this connection. This endpoint changes the connection state from disabled to enabled without modifying other configuration settingsJ_\n" +
 	"\x03200\x12X\n" +
 	"\x1fConnection enabled successfully\x125\n" +
-	"3\x1a1.scalekit.v1.connections.ToggleConnectionResponse\x82\xb5\x18\x15\n" +
-	"\x11connections_write\x18t\x82\xd3\xe4\x93\x02A2?/api/v1/organizations/{organization_id}/connections/{id}:enable\x12\xe3\x02\n" +
+	"3\x1a1.scalekit.v1.connections.ToggleConnectionResponse\x82\xb5\x18\x02\x18d\x82\xd3\xe4\x93\x02A2?/api/v1/organizations/{organization_id}/connections/{id}:enable\x12\xe3\x02\n" +
 	"\x1cDisableEnvironmentConnection\x12;.scalekit.v1.connections.ToggleEnvironmentConnectionRequest\x1a1.scalekit.v1.connections.ToggleConnectionResponse\"\xd2\x01\x92A\x86\x01\n" +
 	"\vConnections\x12\x14Disable a connection\x1a\x18Disable a SSO ConnectionJG\n" +
 	"\x03200\x12@\n" +
 	"\aSuccess\x125\n" +
-	"3\x1a1.scalekit.v1.connections.ToggleConnectionResponse\x82\xb5\x18\x02\x18D\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02-2+/api/v1/connections/{connection_id}:disable\x12\xde\x04\n" +
-	"\x11DisableConnection\x120.scalekit.v1.connections.ToggleConnectionRequest\x1a1.scalekit.v1.connections.ToggleConnectionResponse\"\xe3\x03\x92A\xfe\x02\n" +
-	"\vConnections\x12\x16Disable SSO connection\x1a\xf4\x01Deactivate an existing connection for the specified organization. When disabled, users cannot authenticate using this connection. This endpoint changes the connection state from enabled to disabled without modifying other configuration settingsJ`\n" +
+	"3\x1a1.scalekit.v1.connections.ToggleConnectionResponse\x82\xb5\x18\x02\x18D\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02-2+/api/v1/connections/{connection_id}:disable\x12\xd4\x04\n" +
+	"\x11DisableConnection\x120.scalekit.v1.connections.ToggleConnectionRequest\x1a1.scalekit.v1.connections.ToggleConnectionResponse\"\xd9\x03\x92A\x87\x03\n" +
+	"\vConnections\x12\x1fDisable organization connection\x1a\xf4\x01Deactivate an existing connection for the specified organization. When disabled, users cannot authenticate using this connection. This endpoint changes the connection state from enabled to disabled without modifying other configuration settingsJ`\n" +
 	"\x03200\x12Y\n" +
 	" Connection disabled successfully\x125\n" +
-	"3\x1a1.scalekit.v1.connections.ToggleConnectionResponse\x82\xb5\x18\x15\n" +
-	"\x11connections_write\x18t\x82\xd3\xe4\x93\x02B2@/api/v1/organizations/{organization_id}/connections/{id}:disable\x12\x80\x03\n" +
+	"3\x1a1.scalekit.v1.connections.ToggleConnectionResponse\x82\xb5\x18\x02\x18d\x82\xd3\xe4\x93\x02B2@/api/v1/organizations/{organization_id}/connections/{id}:disable\x12\x80\x03\n" +
 	"\x17GetConnectionTestResult\x127.scalekit.v1.connections.GetConnectionTestResultRequest\x1a8.scalekit.v1.connections.GetConnectionTestResultResponse\"\xf1\x01\x92A\x8d\x01\n" +
 	"\vConnections\x12\x16Test connection result\x1a\x16Connection test resultJN\n" +
 	"\x03200\x12G\n" +
 	"\aSuccess\x12<\n" +
-	":\x1a8.scalekit.v1.connections.GetConnectionTestResultResponse\x82\xb5\x18\x02\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02E\x12C/api/v1/connections/{connection_id}/test-requests/{test_request_id}\x12\xf6\x02\n" +
+	":\x1a8.scalekit.v1.connections.GetConnectionTestResultResponse\x82\xb5\x18\x02\x18d\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02E\x12C/api/v1/connections/{connection_id}/test-requests/{test_request_id}\x12\xf6\x02\n" +
 	"\x12ListAppConnections\x122.scalekit.v1.connections.ListAppConnectionsRequest\x1a3.scalekit.v1.connections.ListAppConnectionsResponse\"\xf6\x01\x92A\xbe\x01\n" +
 	"\vConnections\x12\x14List App connections\x1a6Retrieves a list of app connections in the environmentJa\n" +
 	"\x03200\x12Z\n" +
 	"\"Successfully retrieved connections\x124\n" +
-	"2\x1a0.scalekit.v1.connections.ListConnectionsResponse\x82\xb5\x18\x02\x18d\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02\x19\x12\x17/api/v1/connections/app\x12\xd1\x03\n" +
-	"\x14GetConnectionContext\x124.scalekit.v1.connections.GetConnectionContextRequest\x1a5.scalekit.v1.connections.GetConnectionContextResponse\"\xcb\x02\x92A\xad\x01\n" +
-	"\vConnections\x12\x16Get connection context\x1a<Retrieves the custom context data for a specific connection.J(\n" +
-	"\x03200\x12!\n" +
-	"\x1fReturns the connection context.J\x1e\n" +
-	"\x03404\x12\x17\n" +
-	"\x15Connection not found.\x82\xb5\x18\x03\x18\xf0\x01\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02~Z.\x12,/api/v1/connections/{connection_id}/contexts\x12L/api/v1/organizations/{organization_id}/connections/{connection_id}/contexts\x12\xe4\x03\n" +
-	"\x17UpdateConnectionContext\x127.scalekit.v1.connections.UpdateConnectionContextRequest\x1a\x16.google.protobuf.Empty\"\xf7\x02\x92A\xc7\x01\n" +
-	"\vConnections\x12\x19Update connection context\x1a:Updates the custom context data for a specific connection.J&\n" +
-	"\x03200\x12\x1f\n" +
-	"\x1dContext updated successfully.J\x19\n" +
-	"\x03400\x12\x12\n" +
-	"\x10Invalid request.J\x1e\n" +
-	"\x03404\x12\x17\n" +
-	"\x15Connection not found.\x82\xb5\x18\x02\x18p\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02\x90\x01:\acontextZ7:\acontext\x1a,/api/v1/connections/{connection_id}/contexts\x1aL/api/v1/organizations/{organization_id}/connections/{connection_id}/contexts\x1a\x9a\x01\x92A\x96\x01\n" +
+	"2\x1a0.scalekit.v1.connections.ListConnectionsResponse\x82\xb5\x18\x02\x18d\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02\x19\x12\x17/api/v1/connections/app\x1a\x9a\x01\x92A\x96\x01\n" +
 	"\vConnections\x12\x86\x01Manage enterprise connections for your Scalekit environment. This service provides endpoints for retrieving, and updating connections.B\xfa\x01\n" +
 	"\x1bcom.scalekit.v1.connectionsB\x10ConnectionsProtoP\x01ZKgithub.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/connections\xa2\x02\x03SVC\xaa\x02\x17Scalekit.V1.Connections\xca\x02\x17Scalekit\\V1\\Connections\xe2\x02#Scalekit\\V1\\Connections\\GPBMetadata\xea\x02\x19Scalekit::V1::Connectionsb\x06proto3"
 
@@ -5864,7 +5566,7 @@ func file_scalekit_v1_connections_connections_proto_rawDescGZIP() []byte {
 }
 
 var file_scalekit_v1_connections_connections_proto_enumTypes = make([]protoimpl.EnumInfo, 12)
-var file_scalekit_v1_connections_connections_proto_msgTypes = make([]protoimpl.MessageInfo, 63)
+var file_scalekit_v1_connections_connections_proto_msgTypes = make([]protoimpl.MessageInfo, 59)
 var file_scalekit_v1_connections_connections_proto_goTypes = []any{
 	(CodeChallengeType)(0),                              // 0: scalekit.v1.connections.CodeChallengeType
 	(ConfigurationType)(0),                              // 1: scalekit.v1.connections.ConfigurationType
@@ -5909,52 +5611,48 @@ var file_scalekit_v1_connections_connections_proto_goTypes = []any{
 	(*ToggleConnectionResponse)(nil),                    // 40: scalekit.v1.connections.ToggleConnectionResponse
 	(*OIDCConnectionConfig)(nil),                        // 41: scalekit.v1.connections.OIDCConnectionConfig
 	(*OAuthConnectionConfig)(nil),                       // 42: scalekit.v1.connections.OAuthConnectionConfig
-	(*OptionalScopes)(nil),                              // 43: scalekit.v1.connections.OptionalScopes
-	(*PasswordLessConfig)(nil),                          // 44: scalekit.v1.connections.PasswordLessConfig
-	(*StaticAuthConfig)(nil),                            // 45: scalekit.v1.connections.StaticAuthConfig
-	(*WebAuthConfiguration)(nil),                        // 46: scalekit.v1.connections.WebAuthConfiguration
-	(*SAMLConnectionConfigRequest)(nil),                 // 47: scalekit.v1.connections.SAMLConnectionConfigRequest
-	(*SAMLConnectionConfigResponse)(nil),                // 48: scalekit.v1.connections.SAMLConnectionConfigResponse
-	(*IDPCertificate)(nil),                              // 49: scalekit.v1.connections.IDPCertificate
-	(*GetOIDCMetadataRequest)(nil),                      // 50: scalekit.v1.connections.GetOIDCMetadataRequest
-	(*OIDCMetadataRequest)(nil),                         // 51: scalekit.v1.connections.OIDCMetadataRequest
-	(*GetOIDCMetadataResponse)(nil),                     // 52: scalekit.v1.connections.GetOIDCMetadataResponse
-	(*GetSAMLMetadataRequest)(nil),                      // 53: scalekit.v1.connections.GetSAMLMetadataRequest
-	(*SAMLMetadataRequest)(nil),                         // 54: scalekit.v1.connections.SAMLMetadataRequest
-	(*GetSAMLMetadataResponse)(nil),                     // 55: scalekit.v1.connections.GetSAMLMetadataResponse
-	(*GetSAMLCertificateDetailsRequest)(nil),            // 56: scalekit.v1.connections.GetSAMLCertificateDetailsRequest
-	(*SAMLCertificateRequest)(nil),                      // 57: scalekit.v1.connections.SAMLCertificateRequest
-	(*GetSAMLCertificateDetailsResponse)(nil),           // 58: scalekit.v1.connections.GetSAMLCertificateDetailsResponse
-	(*GetConnectionTestResultRequest)(nil),              // 59: scalekit.v1.connections.GetConnectionTestResultRequest
-	(*GetConnectionTestResultResponse)(nil),             // 60: scalekit.v1.connections.GetConnectionTestResultResponse
-	(*PasswordConnectionConfig)(nil),                    // 61: scalekit.v1.connections.PasswordConnectionConfig
-	(*Flags)(nil),                                       // 62: scalekit.v1.connections.Flags
-	(*ListAppConnectionsRequest)(nil),                   // 63: scalekit.v1.connections.ListAppConnectionsRequest
-	(*ListAppConnectionsResponse)(nil),                  // 64: scalekit.v1.connections.ListAppConnectionsResponse
-	(*GetConnectionContextRequest)(nil),                 // 65: scalekit.v1.connections.GetConnectionContextRequest
-	(*GetConnectionContextResponse)(nil),                // 66: scalekit.v1.connections.GetConnectionContextResponse
-	(*UpdateConnectionContextRequest)(nil),              // 67: scalekit.v1.connections.UpdateConnectionContextRequest
-	nil,                                                 // 68: scalekit.v1.connections.Connection.AttributeMappingEntry
-	nil,                                                 // 69: scalekit.v1.connections.UpdateConnection.AttributeMappingEntry
-	(*WebAuthConfiguration_Rp)(nil),                     // 70: scalekit.v1.connections.WebAuthConfiguration.Rp
-	(*WebAuthConfiguration_Attestation)(nil),            // 71: scalekit.v1.connections.WebAuthConfiguration.Attestation
-	(*WebAuthConfiguration_Authenticators)(nil),         // 72: scalekit.v1.connections.WebAuthConfiguration.Authenticators
-	(*WebAuthConfiguration_AuthenticatorSelection)(nil), // 73: scalekit.v1.connections.WebAuthConfiguration.AuthenticatorSelection
-	(*WebAuthConfiguration_Timeout)(nil),                // 74: scalekit.v1.connections.WebAuthConfiguration.Timeout
-	(*timestamppb.Timestamp)(nil),                       // 75: google.protobuf.Timestamp
-	(*domains.Domain)(nil),                              // 76: scalekit.v1.domains.Domain
-	(*wrapperspb.BoolValue)(nil),                        // 77: google.protobuf.BoolValue
-	(*wrapperspb.StringValue)(nil),                      // 78: google.protobuf.StringValue
-	(*wrapperspb.UInt32Value)(nil),                      // 79: google.protobuf.UInt32Value
-	(*structpb.Struct)(nil),                             // 80: google.protobuf.Struct
-	(*durationpb.Duration)(nil),                         // 81: google.protobuf.Duration
-	(*emptypb.Empty)(nil),                               // 82: google.protobuf.Empty
+	(*PasswordLessConfig)(nil),                          // 43: scalekit.v1.connections.PasswordLessConfig
+	(*StaticAuthConfig)(nil),                            // 44: scalekit.v1.connections.StaticAuthConfig
+	(*WebAuthConfiguration)(nil),                        // 45: scalekit.v1.connections.WebAuthConfiguration
+	(*SAMLConnectionConfigRequest)(nil),                 // 46: scalekit.v1.connections.SAMLConnectionConfigRequest
+	(*SAMLConnectionConfigResponse)(nil),                // 47: scalekit.v1.connections.SAMLConnectionConfigResponse
+	(*IDPCertificate)(nil),                              // 48: scalekit.v1.connections.IDPCertificate
+	(*GetOIDCMetadataRequest)(nil),                      // 49: scalekit.v1.connections.GetOIDCMetadataRequest
+	(*OIDCMetadataRequest)(nil),                         // 50: scalekit.v1.connections.OIDCMetadataRequest
+	(*GetOIDCMetadataResponse)(nil),                     // 51: scalekit.v1.connections.GetOIDCMetadataResponse
+	(*GetSAMLMetadataRequest)(nil),                      // 52: scalekit.v1.connections.GetSAMLMetadataRequest
+	(*SAMLMetadataRequest)(nil),                         // 53: scalekit.v1.connections.SAMLMetadataRequest
+	(*GetSAMLMetadataResponse)(nil),                     // 54: scalekit.v1.connections.GetSAMLMetadataResponse
+	(*GetSAMLCertificateDetailsRequest)(nil),            // 55: scalekit.v1.connections.GetSAMLCertificateDetailsRequest
+	(*SAMLCertificateRequest)(nil),                      // 56: scalekit.v1.connections.SAMLCertificateRequest
+	(*GetSAMLCertificateDetailsResponse)(nil),           // 57: scalekit.v1.connections.GetSAMLCertificateDetailsResponse
+	(*GetConnectionTestResultRequest)(nil),              // 58: scalekit.v1.connections.GetConnectionTestResultRequest
+	(*GetConnectionTestResultResponse)(nil),             // 59: scalekit.v1.connections.GetConnectionTestResultResponse
+	(*PasswordConnectionConfig)(nil),                    // 60: scalekit.v1.connections.PasswordConnectionConfig
+	(*Flags)(nil),                                       // 61: scalekit.v1.connections.Flags
+	(*ListAppConnectionsRequest)(nil),                   // 62: scalekit.v1.connections.ListAppConnectionsRequest
+	(*ListAppConnectionsResponse)(nil),                  // 63: scalekit.v1.connections.ListAppConnectionsResponse
+	nil,                                                 // 64: scalekit.v1.connections.Connection.AttributeMappingEntry
+	nil,                                                 // 65: scalekit.v1.connections.UpdateConnection.AttributeMappingEntry
+	(*WebAuthConfiguration_Rp)(nil),                     // 66: scalekit.v1.connections.WebAuthConfiguration.Rp
+	(*WebAuthConfiguration_Attestation)(nil),            // 67: scalekit.v1.connections.WebAuthConfiguration.Attestation
+	(*WebAuthConfiguration_Authenticators)(nil),         // 68: scalekit.v1.connections.WebAuthConfiguration.Authenticators
+	(*WebAuthConfiguration_AuthenticatorSelection)(nil), // 69: scalekit.v1.connections.WebAuthConfiguration.AuthenticatorSelection
+	(*WebAuthConfiguration_Timeout)(nil),                // 70: scalekit.v1.connections.WebAuthConfiguration.Timeout
+	(*timestamppb.Timestamp)(nil),                       // 71: google.protobuf.Timestamp
+	(*domains.Domain)(nil),                              // 72: scalekit.v1.domains.Domain
+	(*wrapperspb.BoolValue)(nil),                        // 73: google.protobuf.BoolValue
+	(*wrapperspb.StringValue)(nil),                      // 74: google.protobuf.StringValue
+	(*wrapperspb.UInt32Value)(nil),                      // 75: google.protobuf.UInt32Value
+	(*structpb.Struct)(nil),                             // 76: google.protobuf.Struct
+	(*durationpb.Duration)(nil),                         // 77: google.protobuf.Duration
+	(*emptypb.Empty)(nil),                               // 78: google.protobuf.Empty
 }
 var file_scalekit_v1_connections_connections_proto_depIdxs = []int32{
 	20,  // 0: scalekit.v1.connections.AssignDomainsToConnectionResponse.connection:type_name -> scalekit.v1.connections.Connection
 	16,  // 1: scalekit.v1.connections.GetProvidersResponse.providers:type_name -> scalekit.v1.connections.Provider
 	19,  // 2: scalekit.v1.connections.CreateEnvironmentConnectionRequest.connection:type_name -> scalekit.v1.connections.CreateConnection
-	62,  // 3: scalekit.v1.connections.CreateEnvironmentConnectionRequest.flags:type_name -> scalekit.v1.connections.Flags
+	61,  // 3: scalekit.v1.connections.CreateEnvironmentConnectionRequest.flags:type_name -> scalekit.v1.connections.Flags
 	19,  // 4: scalekit.v1.connections.CreateConnectionRequest.connection:type_name -> scalekit.v1.connections.CreateConnection
 	11,  // 5: scalekit.v1.connections.CreateConnection.provider:type_name -> scalekit.v1.connections.ConnectionProvider
 	9,   // 6: scalekit.v1.connections.CreateConnection.type:type_name -> scalekit.v1.connections.ConnectionType
@@ -5962,194 +5660,183 @@ var file_scalekit_v1_connections_connections_proto_depIdxs = []int32{
 	9,   // 8: scalekit.v1.connections.Connection.type:type_name -> scalekit.v1.connections.ConnectionType
 	10,  // 9: scalekit.v1.connections.Connection.status:type_name -> scalekit.v1.connections.ConnectionStatus
 	1,   // 10: scalekit.v1.connections.Connection.configuration_type:type_name -> scalekit.v1.connections.ConfigurationType
-	68,  // 11: scalekit.v1.connections.Connection.attribute_mapping:type_name -> scalekit.v1.connections.Connection.AttributeMappingEntry
-	75,  // 12: scalekit.v1.connections.Connection.create_time:type_name -> google.protobuf.Timestamp
-	75,  // 13: scalekit.v1.connections.Connection.update_time:type_name -> google.protobuf.Timestamp
+	64,  // 11: scalekit.v1.connections.Connection.attribute_mapping:type_name -> scalekit.v1.connections.Connection.AttributeMappingEntry
+	71,  // 12: scalekit.v1.connections.Connection.create_time:type_name -> google.protobuf.Timestamp
+	71,  // 13: scalekit.v1.connections.Connection.update_time:type_name -> google.protobuf.Timestamp
 	41,  // 14: scalekit.v1.connections.Connection.oidc_config:type_name -> scalekit.v1.connections.OIDCConnectionConfig
-	48,  // 15: scalekit.v1.connections.Connection.saml_config:type_name -> scalekit.v1.connections.SAMLConnectionConfigResponse
+	47,  // 15: scalekit.v1.connections.Connection.saml_config:type_name -> scalekit.v1.connections.SAMLConnectionConfigResponse
 	42,  // 16: scalekit.v1.connections.Connection.oauth_config:type_name -> scalekit.v1.connections.OAuthConnectionConfig
-	44,  // 17: scalekit.v1.connections.Connection.passwordless_config:type_name -> scalekit.v1.connections.PasswordLessConfig
-	45,  // 18: scalekit.v1.connections.Connection.static_config:type_name -> scalekit.v1.connections.StaticAuthConfig
-	46,  // 19: scalekit.v1.connections.Connection.webauthn_config:type_name -> scalekit.v1.connections.WebAuthConfiguration
-	76,  // 20: scalekit.v1.connections.Connection.domains:type_name -> scalekit.v1.domains.Domain
+	43,  // 17: scalekit.v1.connections.Connection.passwordless_config:type_name -> scalekit.v1.connections.PasswordLessConfig
+	44,  // 18: scalekit.v1.connections.Connection.static_config:type_name -> scalekit.v1.connections.StaticAuthConfig
+	45,  // 19: scalekit.v1.connections.Connection.webauthn_config:type_name -> scalekit.v1.connections.WebAuthConfiguration
+	72,  // 20: scalekit.v1.connections.Connection.domains:type_name -> scalekit.v1.domains.Domain
 	20,  // 21: scalekit.v1.connections.CreateConnectionResponse.connection:type_name -> scalekit.v1.connections.Connection
 	24,  // 22: scalekit.v1.connections.UpdateEnvironmentConnectionRequest.connection:type_name -> scalekit.v1.connections.UpdateConnection
 	24,  // 23: scalekit.v1.connections.UpdateConnectionRequest.connection:type_name -> scalekit.v1.connections.UpdateConnection
 	11,  // 24: scalekit.v1.connections.UpdateConnection.provider:type_name -> scalekit.v1.connections.ConnectionProvider
 	9,   // 25: scalekit.v1.connections.UpdateConnection.type:type_name -> scalekit.v1.connections.ConnectionType
-	77,  // 26: scalekit.v1.connections.UpdateConnection.debug_enabled:type_name -> google.protobuf.BoolValue
-	78,  // 27: scalekit.v1.connections.UpdateConnection.ui_button_title:type_name -> google.protobuf.StringValue
+	73,  // 26: scalekit.v1.connections.UpdateConnection.debug_enabled:type_name -> google.protobuf.BoolValue
+	74,  // 27: scalekit.v1.connections.UpdateConnection.ui_button_title:type_name -> google.protobuf.StringValue
 	1,   // 28: scalekit.v1.connections.UpdateConnection.configuration_type:type_name -> scalekit.v1.connections.ConfigurationType
-	69,  // 29: scalekit.v1.connections.UpdateConnection.attribute_mapping:type_name -> scalekit.v1.connections.UpdateConnection.AttributeMappingEntry
+	65,  // 29: scalekit.v1.connections.UpdateConnection.attribute_mapping:type_name -> scalekit.v1.connections.UpdateConnection.AttributeMappingEntry
 	41,  // 30: scalekit.v1.connections.UpdateConnection.oidc_config:type_name -> scalekit.v1.connections.OIDCConnectionConfig
-	47,  // 31: scalekit.v1.connections.UpdateConnection.saml_config:type_name -> scalekit.v1.connections.SAMLConnectionConfigRequest
+	46,  // 31: scalekit.v1.connections.UpdateConnection.saml_config:type_name -> scalekit.v1.connections.SAMLConnectionConfigRequest
 	42,  // 32: scalekit.v1.connections.UpdateConnection.oauth_config:type_name -> scalekit.v1.connections.OAuthConnectionConfig
-	44,  // 33: scalekit.v1.connections.UpdateConnection.passwordless_config:type_name -> scalekit.v1.connections.PasswordLessConfig
-	45,  // 34: scalekit.v1.connections.UpdateConnection.static_config:type_name -> scalekit.v1.connections.StaticAuthConfig
-	46,  // 35: scalekit.v1.connections.UpdateConnection.webauthn_config:type_name -> scalekit.v1.connections.WebAuthConfiguration
+	43,  // 33: scalekit.v1.connections.UpdateConnection.passwordless_config:type_name -> scalekit.v1.connections.PasswordLessConfig
+	44,  // 34: scalekit.v1.connections.UpdateConnection.static_config:type_name -> scalekit.v1.connections.StaticAuthConfig
+	45,  // 35: scalekit.v1.connections.UpdateConnection.webauthn_config:type_name -> scalekit.v1.connections.WebAuthConfiguration
 	20,  // 36: scalekit.v1.connections.UpdateConnectionResponse.connection:type_name -> scalekit.v1.connections.Connection
 	20,  // 37: scalekit.v1.connections.GetConnectionResponse.connection:type_name -> scalekit.v1.connections.Connection
 	33,  // 38: scalekit.v1.connections.ListConnectionsResponse.connections:type_name -> scalekit.v1.connections.ListConnection
 	11,  // 39: scalekit.v1.connections.ListConnection.provider:type_name -> scalekit.v1.connections.ConnectionProvider
 	9,   // 40: scalekit.v1.connections.ListConnection.type:type_name -> scalekit.v1.connections.ConnectionType
 	10,  // 41: scalekit.v1.connections.ListConnection.status:type_name -> scalekit.v1.connections.ConnectionStatus
-	75,  // 42: scalekit.v1.connections.ListConnection.created_at:type_name -> google.protobuf.Timestamp
+	71,  // 42: scalekit.v1.connections.ListConnection.created_at:type_name -> google.protobuf.Timestamp
 	33,  // 43: scalekit.v1.connections.ListOrganizationConnectionsResponse.connections:type_name -> scalekit.v1.connections.ListConnection
 	10,  // 44: scalekit.v1.connections.SearchOrganizationConnectionsRequest.status:type_name -> scalekit.v1.connections.ConnectionStatus
 	9,   // 45: scalekit.v1.connections.SearchOrganizationConnectionsRequest.connection_type:type_name -> scalekit.v1.connections.ConnectionType
 	33,  // 46: scalekit.v1.connections.SearchOrganizationConnectionsResponse.connections:type_name -> scalekit.v1.connections.ListConnection
-	78,  // 47: scalekit.v1.connections.OIDCConnectionConfig.issuer:type_name -> google.protobuf.StringValue
-	78,  // 48: scalekit.v1.connections.OIDCConnectionConfig.discovery_endpoint:type_name -> google.protobuf.StringValue
-	78,  // 49: scalekit.v1.connections.OIDCConnectionConfig.authorize_uri:type_name -> google.protobuf.StringValue
-	78,  // 50: scalekit.v1.connections.OIDCConnectionConfig.token_uri:type_name -> google.protobuf.StringValue
-	78,  // 51: scalekit.v1.connections.OIDCConnectionConfig.user_info_uri:type_name -> google.protobuf.StringValue
-	78,  // 52: scalekit.v1.connections.OIDCConnectionConfig.jwks_uri:type_name -> google.protobuf.StringValue
-	78,  // 53: scalekit.v1.connections.OIDCConnectionConfig.client_id:type_name -> google.protobuf.StringValue
-	78,  // 54: scalekit.v1.connections.OIDCConnectionConfig.client_secret:type_name -> google.protobuf.StringValue
+	74,  // 47: scalekit.v1.connections.OIDCConnectionConfig.issuer:type_name -> google.protobuf.StringValue
+	74,  // 48: scalekit.v1.connections.OIDCConnectionConfig.discovery_endpoint:type_name -> google.protobuf.StringValue
+	74,  // 49: scalekit.v1.connections.OIDCConnectionConfig.authorize_uri:type_name -> google.protobuf.StringValue
+	74,  // 50: scalekit.v1.connections.OIDCConnectionConfig.token_uri:type_name -> google.protobuf.StringValue
+	74,  // 51: scalekit.v1.connections.OIDCConnectionConfig.user_info_uri:type_name -> google.protobuf.StringValue
+	74,  // 52: scalekit.v1.connections.OIDCConnectionConfig.jwks_uri:type_name -> google.protobuf.StringValue
+	74,  // 53: scalekit.v1.connections.OIDCConnectionConfig.client_id:type_name -> google.protobuf.StringValue
+	74,  // 54: scalekit.v1.connections.OIDCConnectionConfig.client_secret:type_name -> google.protobuf.StringValue
 	8,   // 55: scalekit.v1.connections.OIDCConnectionConfig.scopes:type_name -> scalekit.v1.connections.OIDCScope
 	7,   // 56: scalekit.v1.connections.OIDCConnectionConfig.token_auth_type:type_name -> scalekit.v1.connections.TokenAuthType
-	77,  // 57: scalekit.v1.connections.OIDCConnectionConfig.pkce_enabled:type_name -> google.protobuf.BoolValue
-	77,  // 58: scalekit.v1.connections.OIDCConnectionConfig.idp_logout_required:type_name -> google.protobuf.BoolValue
-	78,  // 59: scalekit.v1.connections.OIDCConnectionConfig.post_logout_redirect_uri:type_name -> google.protobuf.StringValue
-	78,  // 60: scalekit.v1.connections.OIDCConnectionConfig.backchannel_logout_redirect_uri:type_name -> google.protobuf.StringValue
-	77,  // 61: scalekit.v1.connections.OIDCConnectionConfig.sync_user_profile_on_login:type_name -> google.protobuf.BoolValue
-	77,  // 62: scalekit.v1.connections.OIDCConnectionConfig.jit_provisioning_with_sso_enabled:type_name -> google.protobuf.BoolValue
-	78,  // 63: scalekit.v1.connections.OAuthConnectionConfig.authorize_uri:type_name -> google.protobuf.StringValue
-	78,  // 64: scalekit.v1.connections.OAuthConnectionConfig.token_uri:type_name -> google.protobuf.StringValue
-	78,  // 65: scalekit.v1.connections.OAuthConnectionConfig.user_info_uri:type_name -> google.protobuf.StringValue
-	78,  // 66: scalekit.v1.connections.OAuthConnectionConfig.client_id:type_name -> google.protobuf.StringValue
-	78,  // 67: scalekit.v1.connections.OAuthConnectionConfig.client_secret:type_name -> google.protobuf.StringValue
-	77,  // 68: scalekit.v1.connections.OAuthConnectionConfig.pkce_enabled:type_name -> google.protobuf.BoolValue
-	78,  // 69: scalekit.v1.connections.OAuthConnectionConfig.prompt:type_name -> google.protobuf.StringValue
-	77,  // 70: scalekit.v1.connections.OAuthConnectionConfig.use_platform_creds:type_name -> google.protobuf.BoolValue
-	78,  // 71: scalekit.v1.connections.OAuthConnectionConfig.access_type:type_name -> google.protobuf.StringValue
-	78,  // 72: scalekit.v1.connections.OAuthConnectionConfig.custom_scope_name:type_name -> google.protobuf.StringValue
-	77,  // 73: scalekit.v1.connections.OAuthConnectionConfig.sync_user_profile_on_login:type_name -> google.protobuf.BoolValue
-	78,  // 74: scalekit.v1.connections.OAuthConnectionConfig.token_access_type:type_name -> google.protobuf.StringValue
-	78,  // 75: scalekit.v1.connections.OAuthConnectionConfig.tenant_id:type_name -> google.protobuf.StringValue
-	77,  // 76: scalekit.v1.connections.OAuthConnectionConfig.is_cimd:type_name -> google.protobuf.BoolValue
-	78,  // 77: scalekit.v1.connections.OAuthConnectionConfig.app_name:type_name -> google.protobuf.StringValue
-	43,  // 78: scalekit.v1.connections.OAuthConnectionConfig.optional_scopes:type_name -> scalekit.v1.connections.OptionalScopes
-	3,   // 79: scalekit.v1.connections.PasswordLessConfig.type:type_name -> scalekit.v1.connections.PasswordlessType
-	79,  // 80: scalekit.v1.connections.PasswordLessConfig.frequency:type_name -> google.protobuf.UInt32Value
-	79,  // 81: scalekit.v1.connections.PasswordLessConfig.validity:type_name -> google.protobuf.UInt32Value
-	77,  // 82: scalekit.v1.connections.PasswordLessConfig.enforce_same_browser_origin:type_name -> google.protobuf.BoolValue
-	79,  // 83: scalekit.v1.connections.PasswordLessConfig.code_challenge_length:type_name -> google.protobuf.UInt32Value
-	0,   // 84: scalekit.v1.connections.PasswordLessConfig.code_challenge_type:type_name -> scalekit.v1.connections.CodeChallengeType
-	77,  // 85: scalekit.v1.connections.PasswordLessConfig.regenerate_passwordless_credentials_on_resend:type_name -> google.protobuf.BoolValue
-	80,  // 86: scalekit.v1.connections.StaticAuthConfig.static_config:type_name -> google.protobuf.Struct
-	70,  // 87: scalekit.v1.connections.WebAuthConfiguration.rp:type_name -> scalekit.v1.connections.WebAuthConfiguration.Rp
-	71,  // 88: scalekit.v1.connections.WebAuthConfiguration.attestation:type_name -> scalekit.v1.connections.WebAuthConfiguration.Attestation
-	72,  // 89: scalekit.v1.connections.WebAuthConfiguration.authenticators:type_name -> scalekit.v1.connections.WebAuthConfiguration.Authenticators
-	73,  // 90: scalekit.v1.connections.WebAuthConfiguration.authenticator_selection:type_name -> scalekit.v1.connections.WebAuthConfiguration.AuthenticatorSelection
-	74,  // 91: scalekit.v1.connections.WebAuthConfiguration.timeout:type_name -> scalekit.v1.connections.WebAuthConfiguration.Timeout
-	78,  // 92: scalekit.v1.connections.SAMLConnectionConfigRequest.idp_metadata_url:type_name -> google.protobuf.StringValue
-	78,  // 93: scalekit.v1.connections.SAMLConnectionConfigRequest.idp_entity_id:type_name -> google.protobuf.StringValue
-	78,  // 94: scalekit.v1.connections.SAMLConnectionConfigRequest.idp_sso_url:type_name -> google.protobuf.StringValue
-	78,  // 95: scalekit.v1.connections.SAMLConnectionConfigRequest.idp_certificate:type_name -> google.protobuf.StringValue
-	78,  // 96: scalekit.v1.connections.SAMLConnectionConfigRequest.idp_slo_url:type_name -> google.protobuf.StringValue
-	78,  // 97: scalekit.v1.connections.SAMLConnectionConfigRequest.ui_button_title:type_name -> google.protobuf.StringValue
-	2,   // 98: scalekit.v1.connections.SAMLConnectionConfigRequest.idp_name_id_format:type_name -> scalekit.v1.connections.NameIdFormat
-	6,   // 99: scalekit.v1.connections.SAMLConnectionConfigRequest.idp_sso_request_binding:type_name -> scalekit.v1.connections.RequestBinding
-	6,   // 100: scalekit.v1.connections.SAMLConnectionConfigRequest.idp_slo_request_binding:type_name -> scalekit.v1.connections.RequestBinding
-	5,   // 101: scalekit.v1.connections.SAMLConnectionConfigRequest.saml_signing_option:type_name -> scalekit.v1.connections.SAMLSigningOptions
-	77,  // 102: scalekit.v1.connections.SAMLConnectionConfigRequest.force_authn:type_name -> google.protobuf.BoolValue
-	78,  // 103: scalekit.v1.connections.SAMLConnectionConfigRequest.default_redirect_uri:type_name -> google.protobuf.StringValue
-	77,  // 104: scalekit.v1.connections.SAMLConnectionConfigRequest.assertion_encrypted:type_name -> google.protobuf.BoolValue
-	77,  // 105: scalekit.v1.connections.SAMLConnectionConfigRequest.want_request_signed:type_name -> google.protobuf.BoolValue
-	78,  // 106: scalekit.v1.connections.SAMLConnectionConfigRequest.certificate_id:type_name -> google.protobuf.StringValue
-	77,  // 107: scalekit.v1.connections.SAMLConnectionConfigRequest.idp_slo_required:type_name -> google.protobuf.BoolValue
-	78,  // 108: scalekit.v1.connections.SAMLConnectionConfigRequest.sp_entity_id:type_name -> google.protobuf.StringValue
-	78,  // 109: scalekit.v1.connections.SAMLConnectionConfigRequest.sp_assertion_url:type_name -> google.protobuf.StringValue
-	78,  // 110: scalekit.v1.connections.SAMLConnectionConfigRequest.sp_slo_url:type_name -> google.protobuf.StringValue
-	77,  // 111: scalekit.v1.connections.SAMLConnectionConfigRequest.sync_user_profile_on_login:type_name -> google.protobuf.BoolValue
-	77,  // 112: scalekit.v1.connections.SAMLConnectionConfigRequest.jit_provisioning_with_sso_enabled:type_name -> google.protobuf.BoolValue
-	78,  // 113: scalekit.v1.connections.SAMLConnectionConfigResponse.idp_metadata_url:type_name -> google.protobuf.StringValue
-	78,  // 114: scalekit.v1.connections.SAMLConnectionConfigResponse.idp_entity_id:type_name -> google.protobuf.StringValue
-	78,  // 115: scalekit.v1.connections.SAMLConnectionConfigResponse.idp_sso_url:type_name -> google.protobuf.StringValue
-	49,  // 116: scalekit.v1.connections.SAMLConnectionConfigResponse.idp_certificates:type_name -> scalekit.v1.connections.IDPCertificate
-	78,  // 117: scalekit.v1.connections.SAMLConnectionConfigResponse.idp_slo_url:type_name -> google.protobuf.StringValue
-	78,  // 118: scalekit.v1.connections.SAMLConnectionConfigResponse.ui_button_title:type_name -> google.protobuf.StringValue
-	2,   // 119: scalekit.v1.connections.SAMLConnectionConfigResponse.idp_name_id_format:type_name -> scalekit.v1.connections.NameIdFormat
-	6,   // 120: scalekit.v1.connections.SAMLConnectionConfigResponse.idp_sso_request_binding:type_name -> scalekit.v1.connections.RequestBinding
-	6,   // 121: scalekit.v1.connections.SAMLConnectionConfigResponse.idp_slo_request_binding:type_name -> scalekit.v1.connections.RequestBinding
-	5,   // 122: scalekit.v1.connections.SAMLConnectionConfigResponse.saml_signing_option:type_name -> scalekit.v1.connections.SAMLSigningOptions
-	77,  // 123: scalekit.v1.connections.SAMLConnectionConfigResponse.allow_idp_initiated_login:type_name -> google.protobuf.BoolValue
-	77,  // 124: scalekit.v1.connections.SAMLConnectionConfigResponse.force_authn:type_name -> google.protobuf.BoolValue
-	78,  // 125: scalekit.v1.connections.SAMLConnectionConfigResponse.default_redirect_uri:type_name -> google.protobuf.StringValue
-	77,  // 126: scalekit.v1.connections.SAMLConnectionConfigResponse.assertion_encrypted:type_name -> google.protobuf.BoolValue
-	77,  // 127: scalekit.v1.connections.SAMLConnectionConfigResponse.want_request_signed:type_name -> google.protobuf.BoolValue
-	78,  // 128: scalekit.v1.connections.SAMLConnectionConfigResponse.certificate_id:type_name -> google.protobuf.StringValue
-	77,  // 129: scalekit.v1.connections.SAMLConnectionConfigResponse.idp_slo_required:type_name -> google.protobuf.BoolValue
-	78,  // 130: scalekit.v1.connections.SAMLConnectionConfigResponse.sp_slo_url:type_name -> google.protobuf.StringValue
-	77,  // 131: scalekit.v1.connections.SAMLConnectionConfigResponse.sync_user_profile_on_login:type_name -> google.protobuf.BoolValue
-	77,  // 132: scalekit.v1.connections.SAMLConnectionConfigResponse.jit_provisioning_with_sso_enabled:type_name -> google.protobuf.BoolValue
-	75,  // 133: scalekit.v1.connections.IDPCertificate.create_time:type_name -> google.protobuf.Timestamp
-	75,  // 134: scalekit.v1.connections.IDPCertificate.expiry_time:type_name -> google.protobuf.Timestamp
-	51,  // 135: scalekit.v1.connections.GetOIDCMetadataRequest.metadata:type_name -> scalekit.v1.connections.OIDCMetadataRequest
-	54,  // 136: scalekit.v1.connections.GetSAMLMetadataRequest.metadata:type_name -> scalekit.v1.connections.SAMLMetadataRequest
-	57,  // 137: scalekit.v1.connections.GetSAMLCertificateDetailsRequest.certificate:type_name -> scalekit.v1.connections.SAMLCertificateRequest
-	4,   // 138: scalekit.v1.connections.GetConnectionTestResultResponse.status:type_name -> scalekit.v1.connections.TestResultStatus
-	33,  // 139: scalekit.v1.connections.ListAppConnectionsResponse.connections:type_name -> scalekit.v1.connections.ListConnection
-	80,  // 140: scalekit.v1.connections.GetConnectionContextResponse.context:type_name -> google.protobuf.Struct
-	80,  // 141: scalekit.v1.connections.UpdateConnectionContextRequest.context:type_name -> google.protobuf.Struct
-	78,  // 142: scalekit.v1.connections.WebAuthConfiguration.Attestation.conveyance_preference:type_name -> google.protobuf.StringValue
-	77,  // 143: scalekit.v1.connections.WebAuthConfiguration.Authenticators.validate_entry:type_name -> google.protobuf.BoolValue
-	77,  // 144: scalekit.v1.connections.WebAuthConfiguration.Authenticators.validate_entry_permit_zero_aaguid:type_name -> google.protobuf.BoolValue
-	77,  // 145: scalekit.v1.connections.WebAuthConfiguration.Authenticators.validate_anchors:type_name -> google.protobuf.BoolValue
-	77,  // 146: scalekit.v1.connections.WebAuthConfiguration.Authenticators.validate_status:type_name -> google.protobuf.BoolValue
-	77,  // 147: scalekit.v1.connections.WebAuthConfiguration.Authenticators.validate_attestation_type:type_name -> google.protobuf.BoolValue
-	78,  // 148: scalekit.v1.connections.WebAuthConfiguration.AuthenticatorSelection.user_verification:type_name -> google.protobuf.StringValue
-	78,  // 149: scalekit.v1.connections.WebAuthConfiguration.AuthenticatorSelection.authenticator_attachment:type_name -> google.protobuf.StringValue
-	81,  // 150: scalekit.v1.connections.WebAuthConfiguration.Timeout.registration:type_name -> google.protobuf.Duration
-	81,  // 151: scalekit.v1.connections.WebAuthConfiguration.Timeout.registration_uvd:type_name -> google.protobuf.Duration
-	81,  // 152: scalekit.v1.connections.WebAuthConfiguration.Timeout.login:type_name -> google.protobuf.Duration
-	81,  // 153: scalekit.v1.connections.WebAuthConfiguration.Timeout.login_uvd:type_name -> google.protobuf.Duration
-	17,  // 154: scalekit.v1.connections.ConnectionService.CreateEnvironmentConnection:input_type -> scalekit.v1.connections.CreateEnvironmentConnectionRequest
-	18,  // 155: scalekit.v1.connections.ConnectionService.CreateConnection:input_type -> scalekit.v1.connections.CreateConnectionRequest
-	12,  // 156: scalekit.v1.connections.ConnectionService.AssignDomainsToConnection:input_type -> scalekit.v1.connections.AssignDomainsToConnectionRequest
-	28,  // 157: scalekit.v1.connections.ConnectionService.GetEnvironmentConnection:input_type -> scalekit.v1.connections.GetEnvironmentConnectionRequest
-	29,  // 158: scalekit.v1.connections.ConnectionService.GetConnection:input_type -> scalekit.v1.connections.GetConnectionRequest
-	31,  // 159: scalekit.v1.connections.ConnectionService.ListConnections:input_type -> scalekit.v1.connections.ListConnectionsRequest
-	34,  // 160: scalekit.v1.connections.ConnectionService.ListOrganizationConnections:input_type -> scalekit.v1.connections.ListOrganizationConnectionsRequest
-	36,  // 161: scalekit.v1.connections.ConnectionService.SearchOrganizationConnections:input_type -> scalekit.v1.connections.SearchOrganizationConnectionsRequest
-	22,  // 162: scalekit.v1.connections.ConnectionService.UpdateEnvironmentConnection:input_type -> scalekit.v1.connections.UpdateEnvironmentConnectionRequest
-	23,  // 163: scalekit.v1.connections.ConnectionService.UpdateConnection:input_type -> scalekit.v1.connections.UpdateConnectionRequest
-	26,  // 164: scalekit.v1.connections.ConnectionService.DeleteEnvironmentConnection:input_type -> scalekit.v1.connections.DeleteEnvironmentConnectionRequest
-	27,  // 165: scalekit.v1.connections.ConnectionService.DeleteConnection:input_type -> scalekit.v1.connections.DeleteConnectionRequest
-	38,  // 166: scalekit.v1.connections.ConnectionService.EnableEnvironmentConnection:input_type -> scalekit.v1.connections.ToggleEnvironmentConnectionRequest
-	39,  // 167: scalekit.v1.connections.ConnectionService.EnableConnection:input_type -> scalekit.v1.connections.ToggleConnectionRequest
-	38,  // 168: scalekit.v1.connections.ConnectionService.DisableEnvironmentConnection:input_type -> scalekit.v1.connections.ToggleEnvironmentConnectionRequest
-	39,  // 169: scalekit.v1.connections.ConnectionService.DisableConnection:input_type -> scalekit.v1.connections.ToggleConnectionRequest
-	59,  // 170: scalekit.v1.connections.ConnectionService.GetConnectionTestResult:input_type -> scalekit.v1.connections.GetConnectionTestResultRequest
-	63,  // 171: scalekit.v1.connections.ConnectionService.ListAppConnections:input_type -> scalekit.v1.connections.ListAppConnectionsRequest
-	65,  // 172: scalekit.v1.connections.ConnectionService.GetConnectionContext:input_type -> scalekit.v1.connections.GetConnectionContextRequest
-	67,  // 173: scalekit.v1.connections.ConnectionService.UpdateConnectionContext:input_type -> scalekit.v1.connections.UpdateConnectionContextRequest
-	21,  // 174: scalekit.v1.connections.ConnectionService.CreateEnvironmentConnection:output_type -> scalekit.v1.connections.CreateConnectionResponse
-	21,  // 175: scalekit.v1.connections.ConnectionService.CreateConnection:output_type -> scalekit.v1.connections.CreateConnectionResponse
-	13,  // 176: scalekit.v1.connections.ConnectionService.AssignDomainsToConnection:output_type -> scalekit.v1.connections.AssignDomainsToConnectionResponse
-	30,  // 177: scalekit.v1.connections.ConnectionService.GetEnvironmentConnection:output_type -> scalekit.v1.connections.GetConnectionResponse
-	30,  // 178: scalekit.v1.connections.ConnectionService.GetConnection:output_type -> scalekit.v1.connections.GetConnectionResponse
-	32,  // 179: scalekit.v1.connections.ConnectionService.ListConnections:output_type -> scalekit.v1.connections.ListConnectionsResponse
-	35,  // 180: scalekit.v1.connections.ConnectionService.ListOrganizationConnections:output_type -> scalekit.v1.connections.ListOrganizationConnectionsResponse
-	37,  // 181: scalekit.v1.connections.ConnectionService.SearchOrganizationConnections:output_type -> scalekit.v1.connections.SearchOrganizationConnectionsResponse
-	25,  // 182: scalekit.v1.connections.ConnectionService.UpdateEnvironmentConnection:output_type -> scalekit.v1.connections.UpdateConnectionResponse
-	25,  // 183: scalekit.v1.connections.ConnectionService.UpdateConnection:output_type -> scalekit.v1.connections.UpdateConnectionResponse
-	82,  // 184: scalekit.v1.connections.ConnectionService.DeleteEnvironmentConnection:output_type -> google.protobuf.Empty
-	82,  // 185: scalekit.v1.connections.ConnectionService.DeleteConnection:output_type -> google.protobuf.Empty
-	40,  // 186: scalekit.v1.connections.ConnectionService.EnableEnvironmentConnection:output_type -> scalekit.v1.connections.ToggleConnectionResponse
-	40,  // 187: scalekit.v1.connections.ConnectionService.EnableConnection:output_type -> scalekit.v1.connections.ToggleConnectionResponse
-	40,  // 188: scalekit.v1.connections.ConnectionService.DisableEnvironmentConnection:output_type -> scalekit.v1.connections.ToggleConnectionResponse
-	40,  // 189: scalekit.v1.connections.ConnectionService.DisableConnection:output_type -> scalekit.v1.connections.ToggleConnectionResponse
-	60,  // 190: scalekit.v1.connections.ConnectionService.GetConnectionTestResult:output_type -> scalekit.v1.connections.GetConnectionTestResultResponse
-	64,  // 191: scalekit.v1.connections.ConnectionService.ListAppConnections:output_type -> scalekit.v1.connections.ListAppConnectionsResponse
-	66,  // 192: scalekit.v1.connections.ConnectionService.GetConnectionContext:output_type -> scalekit.v1.connections.GetConnectionContextResponse
-	82,  // 193: scalekit.v1.connections.ConnectionService.UpdateConnectionContext:output_type -> google.protobuf.Empty
-	174, // [174:194] is the sub-list for method output_type
-	154, // [154:174] is the sub-list for method input_type
-	154, // [154:154] is the sub-list for extension type_name
-	154, // [154:154] is the sub-list for extension extendee
-	0,   // [0:154] is the sub-list for field type_name
+	73,  // 57: scalekit.v1.connections.OIDCConnectionConfig.pkce_enabled:type_name -> google.protobuf.BoolValue
+	73,  // 58: scalekit.v1.connections.OIDCConnectionConfig.idp_logout_required:type_name -> google.protobuf.BoolValue
+	74,  // 59: scalekit.v1.connections.OIDCConnectionConfig.post_logout_redirect_uri:type_name -> google.protobuf.StringValue
+	74,  // 60: scalekit.v1.connections.OIDCConnectionConfig.backchannel_logout_redirect_uri:type_name -> google.protobuf.StringValue
+	73,  // 61: scalekit.v1.connections.OIDCConnectionConfig.sync_user_profile_on_login:type_name -> google.protobuf.BoolValue
+	73,  // 62: scalekit.v1.connections.OIDCConnectionConfig.jit_provisioning_with_sso_enabled:type_name -> google.protobuf.BoolValue
+	74,  // 63: scalekit.v1.connections.OAuthConnectionConfig.authorize_uri:type_name -> google.protobuf.StringValue
+	74,  // 64: scalekit.v1.connections.OAuthConnectionConfig.token_uri:type_name -> google.protobuf.StringValue
+	74,  // 65: scalekit.v1.connections.OAuthConnectionConfig.user_info_uri:type_name -> google.protobuf.StringValue
+	74,  // 66: scalekit.v1.connections.OAuthConnectionConfig.client_id:type_name -> google.protobuf.StringValue
+	74,  // 67: scalekit.v1.connections.OAuthConnectionConfig.client_secret:type_name -> google.protobuf.StringValue
+	73,  // 68: scalekit.v1.connections.OAuthConnectionConfig.pkce_enabled:type_name -> google.protobuf.BoolValue
+	74,  // 69: scalekit.v1.connections.OAuthConnectionConfig.prompt:type_name -> google.protobuf.StringValue
+	73,  // 70: scalekit.v1.connections.OAuthConnectionConfig.use_platform_creds:type_name -> google.protobuf.BoolValue
+	74,  // 71: scalekit.v1.connections.OAuthConnectionConfig.access_type:type_name -> google.protobuf.StringValue
+	74,  // 72: scalekit.v1.connections.OAuthConnectionConfig.custom_scope_name:type_name -> google.protobuf.StringValue
+	73,  // 73: scalekit.v1.connections.OAuthConnectionConfig.sync_user_profile_on_login:type_name -> google.protobuf.BoolValue
+	3,   // 74: scalekit.v1.connections.PasswordLessConfig.type:type_name -> scalekit.v1.connections.PasswordlessType
+	75,  // 75: scalekit.v1.connections.PasswordLessConfig.frequency:type_name -> google.protobuf.UInt32Value
+	75,  // 76: scalekit.v1.connections.PasswordLessConfig.validity:type_name -> google.protobuf.UInt32Value
+	73,  // 77: scalekit.v1.connections.PasswordLessConfig.enforce_same_browser_origin:type_name -> google.protobuf.BoolValue
+	75,  // 78: scalekit.v1.connections.PasswordLessConfig.code_challenge_length:type_name -> google.protobuf.UInt32Value
+	0,   // 79: scalekit.v1.connections.PasswordLessConfig.code_challenge_type:type_name -> scalekit.v1.connections.CodeChallengeType
+	73,  // 80: scalekit.v1.connections.PasswordLessConfig.regenerate_passwordless_credentials_on_resend:type_name -> google.protobuf.BoolValue
+	76,  // 81: scalekit.v1.connections.StaticAuthConfig.static_config:type_name -> google.protobuf.Struct
+	66,  // 82: scalekit.v1.connections.WebAuthConfiguration.rp:type_name -> scalekit.v1.connections.WebAuthConfiguration.Rp
+	67,  // 83: scalekit.v1.connections.WebAuthConfiguration.attestation:type_name -> scalekit.v1.connections.WebAuthConfiguration.Attestation
+	68,  // 84: scalekit.v1.connections.WebAuthConfiguration.authenticators:type_name -> scalekit.v1.connections.WebAuthConfiguration.Authenticators
+	69,  // 85: scalekit.v1.connections.WebAuthConfiguration.authenticator_selection:type_name -> scalekit.v1.connections.WebAuthConfiguration.AuthenticatorSelection
+	70,  // 86: scalekit.v1.connections.WebAuthConfiguration.timeout:type_name -> scalekit.v1.connections.WebAuthConfiguration.Timeout
+	74,  // 87: scalekit.v1.connections.SAMLConnectionConfigRequest.idp_metadata_url:type_name -> google.protobuf.StringValue
+	74,  // 88: scalekit.v1.connections.SAMLConnectionConfigRequest.idp_entity_id:type_name -> google.protobuf.StringValue
+	74,  // 89: scalekit.v1.connections.SAMLConnectionConfigRequest.idp_sso_url:type_name -> google.protobuf.StringValue
+	74,  // 90: scalekit.v1.connections.SAMLConnectionConfigRequest.idp_certificate:type_name -> google.protobuf.StringValue
+	74,  // 91: scalekit.v1.connections.SAMLConnectionConfigRequest.idp_slo_url:type_name -> google.protobuf.StringValue
+	74,  // 92: scalekit.v1.connections.SAMLConnectionConfigRequest.ui_button_title:type_name -> google.protobuf.StringValue
+	2,   // 93: scalekit.v1.connections.SAMLConnectionConfigRequest.idp_name_id_format:type_name -> scalekit.v1.connections.NameIdFormat
+	6,   // 94: scalekit.v1.connections.SAMLConnectionConfigRequest.idp_sso_request_binding:type_name -> scalekit.v1.connections.RequestBinding
+	6,   // 95: scalekit.v1.connections.SAMLConnectionConfigRequest.idp_slo_request_binding:type_name -> scalekit.v1.connections.RequestBinding
+	5,   // 96: scalekit.v1.connections.SAMLConnectionConfigRequest.saml_signing_option:type_name -> scalekit.v1.connections.SAMLSigningOptions
+	73,  // 97: scalekit.v1.connections.SAMLConnectionConfigRequest.force_authn:type_name -> google.protobuf.BoolValue
+	74,  // 98: scalekit.v1.connections.SAMLConnectionConfigRequest.default_redirect_uri:type_name -> google.protobuf.StringValue
+	73,  // 99: scalekit.v1.connections.SAMLConnectionConfigRequest.assertion_encrypted:type_name -> google.protobuf.BoolValue
+	73,  // 100: scalekit.v1.connections.SAMLConnectionConfigRequest.want_request_signed:type_name -> google.protobuf.BoolValue
+	74,  // 101: scalekit.v1.connections.SAMLConnectionConfigRequest.certificate_id:type_name -> google.protobuf.StringValue
+	73,  // 102: scalekit.v1.connections.SAMLConnectionConfigRequest.idp_slo_required:type_name -> google.protobuf.BoolValue
+	74,  // 103: scalekit.v1.connections.SAMLConnectionConfigRequest.sp_entity_id:type_name -> google.protobuf.StringValue
+	74,  // 104: scalekit.v1.connections.SAMLConnectionConfigRequest.sp_assertion_url:type_name -> google.protobuf.StringValue
+	74,  // 105: scalekit.v1.connections.SAMLConnectionConfigRequest.sp_slo_url:type_name -> google.protobuf.StringValue
+	73,  // 106: scalekit.v1.connections.SAMLConnectionConfigRequest.sync_user_profile_on_login:type_name -> google.protobuf.BoolValue
+	73,  // 107: scalekit.v1.connections.SAMLConnectionConfigRequest.jit_provisioning_with_sso_enabled:type_name -> google.protobuf.BoolValue
+	74,  // 108: scalekit.v1.connections.SAMLConnectionConfigResponse.idp_metadata_url:type_name -> google.protobuf.StringValue
+	74,  // 109: scalekit.v1.connections.SAMLConnectionConfigResponse.idp_entity_id:type_name -> google.protobuf.StringValue
+	74,  // 110: scalekit.v1.connections.SAMLConnectionConfigResponse.idp_sso_url:type_name -> google.protobuf.StringValue
+	48,  // 111: scalekit.v1.connections.SAMLConnectionConfigResponse.idp_certificates:type_name -> scalekit.v1.connections.IDPCertificate
+	74,  // 112: scalekit.v1.connections.SAMLConnectionConfigResponse.idp_slo_url:type_name -> google.protobuf.StringValue
+	74,  // 113: scalekit.v1.connections.SAMLConnectionConfigResponse.ui_button_title:type_name -> google.protobuf.StringValue
+	2,   // 114: scalekit.v1.connections.SAMLConnectionConfigResponse.idp_name_id_format:type_name -> scalekit.v1.connections.NameIdFormat
+	6,   // 115: scalekit.v1.connections.SAMLConnectionConfigResponse.idp_sso_request_binding:type_name -> scalekit.v1.connections.RequestBinding
+	6,   // 116: scalekit.v1.connections.SAMLConnectionConfigResponse.idp_slo_request_binding:type_name -> scalekit.v1.connections.RequestBinding
+	5,   // 117: scalekit.v1.connections.SAMLConnectionConfigResponse.saml_signing_option:type_name -> scalekit.v1.connections.SAMLSigningOptions
+	73,  // 118: scalekit.v1.connections.SAMLConnectionConfigResponse.allow_idp_initiated_login:type_name -> google.protobuf.BoolValue
+	73,  // 119: scalekit.v1.connections.SAMLConnectionConfigResponse.force_authn:type_name -> google.protobuf.BoolValue
+	74,  // 120: scalekit.v1.connections.SAMLConnectionConfigResponse.default_redirect_uri:type_name -> google.protobuf.StringValue
+	73,  // 121: scalekit.v1.connections.SAMLConnectionConfigResponse.assertion_encrypted:type_name -> google.protobuf.BoolValue
+	73,  // 122: scalekit.v1.connections.SAMLConnectionConfigResponse.want_request_signed:type_name -> google.protobuf.BoolValue
+	74,  // 123: scalekit.v1.connections.SAMLConnectionConfigResponse.certificate_id:type_name -> google.protobuf.StringValue
+	73,  // 124: scalekit.v1.connections.SAMLConnectionConfigResponse.idp_slo_required:type_name -> google.protobuf.BoolValue
+	74,  // 125: scalekit.v1.connections.SAMLConnectionConfigResponse.sp_slo_url:type_name -> google.protobuf.StringValue
+	73,  // 126: scalekit.v1.connections.SAMLConnectionConfigResponse.sync_user_profile_on_login:type_name -> google.protobuf.BoolValue
+	73,  // 127: scalekit.v1.connections.SAMLConnectionConfigResponse.jit_provisioning_with_sso_enabled:type_name -> google.protobuf.BoolValue
+	71,  // 128: scalekit.v1.connections.IDPCertificate.create_time:type_name -> google.protobuf.Timestamp
+	71,  // 129: scalekit.v1.connections.IDPCertificate.expiry_time:type_name -> google.protobuf.Timestamp
+	50,  // 130: scalekit.v1.connections.GetOIDCMetadataRequest.metadata:type_name -> scalekit.v1.connections.OIDCMetadataRequest
+	53,  // 131: scalekit.v1.connections.GetSAMLMetadataRequest.metadata:type_name -> scalekit.v1.connections.SAMLMetadataRequest
+	56,  // 132: scalekit.v1.connections.GetSAMLCertificateDetailsRequest.certificate:type_name -> scalekit.v1.connections.SAMLCertificateRequest
+	4,   // 133: scalekit.v1.connections.GetConnectionTestResultResponse.status:type_name -> scalekit.v1.connections.TestResultStatus
+	33,  // 134: scalekit.v1.connections.ListAppConnectionsResponse.connections:type_name -> scalekit.v1.connections.ListConnection
+	74,  // 135: scalekit.v1.connections.WebAuthConfiguration.Attestation.conveyance_preference:type_name -> google.protobuf.StringValue
+	73,  // 136: scalekit.v1.connections.WebAuthConfiguration.Authenticators.validate_entry:type_name -> google.protobuf.BoolValue
+	73,  // 137: scalekit.v1.connections.WebAuthConfiguration.Authenticators.validate_entry_permit_zero_aaguid:type_name -> google.protobuf.BoolValue
+	73,  // 138: scalekit.v1.connections.WebAuthConfiguration.Authenticators.validate_anchors:type_name -> google.protobuf.BoolValue
+	73,  // 139: scalekit.v1.connections.WebAuthConfiguration.Authenticators.validate_status:type_name -> google.protobuf.BoolValue
+	73,  // 140: scalekit.v1.connections.WebAuthConfiguration.Authenticators.validate_attestation_type:type_name -> google.protobuf.BoolValue
+	74,  // 141: scalekit.v1.connections.WebAuthConfiguration.AuthenticatorSelection.user_verification:type_name -> google.protobuf.StringValue
+	74,  // 142: scalekit.v1.connections.WebAuthConfiguration.AuthenticatorSelection.authenticator_attachment:type_name -> google.protobuf.StringValue
+	77,  // 143: scalekit.v1.connections.WebAuthConfiguration.Timeout.registration:type_name -> google.protobuf.Duration
+	77,  // 144: scalekit.v1.connections.WebAuthConfiguration.Timeout.registration_uvd:type_name -> google.protobuf.Duration
+	77,  // 145: scalekit.v1.connections.WebAuthConfiguration.Timeout.login:type_name -> google.protobuf.Duration
+	77,  // 146: scalekit.v1.connections.WebAuthConfiguration.Timeout.login_uvd:type_name -> google.protobuf.Duration
+	17,  // 147: scalekit.v1.connections.ConnectionService.CreateEnvironmentConnection:input_type -> scalekit.v1.connections.CreateEnvironmentConnectionRequest
+	18,  // 148: scalekit.v1.connections.ConnectionService.CreateConnection:input_type -> scalekit.v1.connections.CreateConnectionRequest
+	12,  // 149: scalekit.v1.connections.ConnectionService.AssignDomainsToConnection:input_type -> scalekit.v1.connections.AssignDomainsToConnectionRequest
+	28,  // 150: scalekit.v1.connections.ConnectionService.GetEnvironmentConnection:input_type -> scalekit.v1.connections.GetEnvironmentConnectionRequest
+	29,  // 151: scalekit.v1.connections.ConnectionService.GetConnection:input_type -> scalekit.v1.connections.GetConnectionRequest
+	31,  // 152: scalekit.v1.connections.ConnectionService.ListConnections:input_type -> scalekit.v1.connections.ListConnectionsRequest
+	34,  // 153: scalekit.v1.connections.ConnectionService.ListOrganizationConnections:input_type -> scalekit.v1.connections.ListOrganizationConnectionsRequest
+	36,  // 154: scalekit.v1.connections.ConnectionService.SearchOrganizationConnections:input_type -> scalekit.v1.connections.SearchOrganizationConnectionsRequest
+	22,  // 155: scalekit.v1.connections.ConnectionService.UpdateEnvironmentConnection:input_type -> scalekit.v1.connections.UpdateEnvironmentConnectionRequest
+	23,  // 156: scalekit.v1.connections.ConnectionService.UpdateConnection:input_type -> scalekit.v1.connections.UpdateConnectionRequest
+	26,  // 157: scalekit.v1.connections.ConnectionService.DeleteEnvironmentConnection:input_type -> scalekit.v1.connections.DeleteEnvironmentConnectionRequest
+	27,  // 158: scalekit.v1.connections.ConnectionService.DeleteConnection:input_type -> scalekit.v1.connections.DeleteConnectionRequest
+	38,  // 159: scalekit.v1.connections.ConnectionService.EnableEnvironmentConnection:input_type -> scalekit.v1.connections.ToggleEnvironmentConnectionRequest
+	39,  // 160: scalekit.v1.connections.ConnectionService.EnableConnection:input_type -> scalekit.v1.connections.ToggleConnectionRequest
+	38,  // 161: scalekit.v1.connections.ConnectionService.DisableEnvironmentConnection:input_type -> scalekit.v1.connections.ToggleEnvironmentConnectionRequest
+	39,  // 162: scalekit.v1.connections.ConnectionService.DisableConnection:input_type -> scalekit.v1.connections.ToggleConnectionRequest
+	58,  // 163: scalekit.v1.connections.ConnectionService.GetConnectionTestResult:input_type -> scalekit.v1.connections.GetConnectionTestResultRequest
+	62,  // 164: scalekit.v1.connections.ConnectionService.ListAppConnections:input_type -> scalekit.v1.connections.ListAppConnectionsRequest
+	21,  // 165: scalekit.v1.connections.ConnectionService.CreateEnvironmentConnection:output_type -> scalekit.v1.connections.CreateConnectionResponse
+	21,  // 166: scalekit.v1.connections.ConnectionService.CreateConnection:output_type -> scalekit.v1.connections.CreateConnectionResponse
+	13,  // 167: scalekit.v1.connections.ConnectionService.AssignDomainsToConnection:output_type -> scalekit.v1.connections.AssignDomainsToConnectionResponse
+	30,  // 168: scalekit.v1.connections.ConnectionService.GetEnvironmentConnection:output_type -> scalekit.v1.connections.GetConnectionResponse
+	30,  // 169: scalekit.v1.connections.ConnectionService.GetConnection:output_type -> scalekit.v1.connections.GetConnectionResponse
+	32,  // 170: scalekit.v1.connections.ConnectionService.ListConnections:output_type -> scalekit.v1.connections.ListConnectionsResponse
+	35,  // 171: scalekit.v1.connections.ConnectionService.ListOrganizationConnections:output_type -> scalekit.v1.connections.ListOrganizationConnectionsResponse
+	37,  // 172: scalekit.v1.connections.ConnectionService.SearchOrganizationConnections:output_type -> scalekit.v1.connections.SearchOrganizationConnectionsResponse
+	25,  // 173: scalekit.v1.connections.ConnectionService.UpdateEnvironmentConnection:output_type -> scalekit.v1.connections.UpdateConnectionResponse
+	25,  // 174: scalekit.v1.connections.ConnectionService.UpdateConnection:output_type -> scalekit.v1.connections.UpdateConnectionResponse
+	78,  // 175: scalekit.v1.connections.ConnectionService.DeleteEnvironmentConnection:output_type -> google.protobuf.Empty
+	78,  // 176: scalekit.v1.connections.ConnectionService.DeleteConnection:output_type -> google.protobuf.Empty
+	40,  // 177: scalekit.v1.connections.ConnectionService.EnableEnvironmentConnection:output_type -> scalekit.v1.connections.ToggleConnectionResponse
+	40,  // 178: scalekit.v1.connections.ConnectionService.EnableConnection:output_type -> scalekit.v1.connections.ToggleConnectionResponse
+	40,  // 179: scalekit.v1.connections.ConnectionService.DisableEnvironmentConnection:output_type -> scalekit.v1.connections.ToggleConnectionResponse
+	40,  // 180: scalekit.v1.connections.ConnectionService.DisableConnection:output_type -> scalekit.v1.connections.ToggleConnectionResponse
+	59,  // 181: scalekit.v1.connections.ConnectionService.GetConnectionTestResult:output_type -> scalekit.v1.connections.GetConnectionTestResultResponse
+	63,  // 182: scalekit.v1.connections.ConnectionService.ListAppConnections:output_type -> scalekit.v1.connections.ListAppConnectionsResponse
+	165, // [165:183] is the sub-list for method output_type
+	147, // [147:165] is the sub-list for method input_type
+	147, // [147:147] is the sub-list for extension type_name
+	147, // [147:147] is the sub-list for extension extendee
+	0,   // [0:147] is the sub-list for field type_name
 }
 
 func init() { file_scalekit_v1_connections_connections_proto_init() }
@@ -6179,17 +5866,16 @@ func file_scalekit_v1_connections_connections_proto_init() {
 	file_scalekit_v1_connections_connections_proto_msgTypes[19].OneofWrappers = []any{}
 	file_scalekit_v1_connections_connections_proto_msgTypes[24].OneofWrappers = []any{}
 	file_scalekit_v1_connections_connections_proto_msgTypes[28].OneofWrappers = []any{}
-	file_scalekit_v1_connections_connections_proto_msgTypes[30].OneofWrappers = []any{}
-	file_scalekit_v1_connections_connections_proto_msgTypes[32].OneofWrappers = []any{}
-	file_scalekit_v1_connections_connections_proto_msgTypes[48].OneofWrappers = []any{}
-	file_scalekit_v1_connections_connections_proto_msgTypes[51].OneofWrappers = []any{}
+	file_scalekit_v1_connections_connections_proto_msgTypes[31].OneofWrappers = []any{}
+	file_scalekit_v1_connections_connections_proto_msgTypes[47].OneofWrappers = []any{}
+	file_scalekit_v1_connections_connections_proto_msgTypes[50].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_scalekit_v1_connections_connections_proto_rawDesc), len(file_scalekit_v1_connections_connections_proto_rawDesc)),
 			NumEnums:      12,
-			NumMessages:   63,
+			NumMessages:   59,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

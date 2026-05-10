@@ -1020,7 +1020,6 @@ func (x *ListDomainResponse) GetDomains() []*Domain {
 type ListAuthorizedDomainRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Origin        string                 `protobuf:"bytes,1,opt,name=origin,proto3" json:"origin,omitempty"`
-	LinkId        string                 `protobuf:"bytes,2,opt,name=link_id,json=linkId,proto3" json:"link_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1058,13 +1057,6 @@ func (*ListAuthorizedDomainRequest) Descriptor() ([]byte, []int) {
 func (x *ListAuthorizedDomainRequest) GetOrigin() string {
 	if x != nil {
 		return x.Origin
-	}
-	return ""
-}
-
-func (x *ListAuthorizedDomainRequest) GetLinkId() string {
-	if x != nil {
-		return x.LinkId
 	}
 	return ""
 }
@@ -1314,10 +1306,9 @@ const file_scalekit_v1_domains_domains_proto_rawDesc = "" +
 	"\tpage_size\x18\x01 \x01(\x05B0\x92A-2(Number of domains returned in this page.J\x011R\bpageSize\x12X\n" +
 	"\vpage_number\x18\x02 \x01(\x05B7\x92A42/Current page number in the pagination sequence.J\x011R\n" +
 	"pageNumber\x12\xa2\x01\n" +
-	"\adomains\x18\x03 \x03(\v2\x1b.scalekit.v1.domains.DomainBk\x92Ah2fArray of domain objects containing all domain details including verification status and configuration.R\adomains\"\xa6\x03\n" +
+	"\adomains\x18\x03 \x03(\v2\x1b.scalekit.v1.domains.DomainBk\x92Ah2fArray of domain objects containing all domain details including verification status and configuration.R\adomains\"\xa1\x01\n" +
 	"\x1bListAuthorizedDomainRequest\x12\x81\x01\n" +
-	"\x06origin\x18\x01 \x01(\tBi\x92Af2OThe origin URL to check for authorized domains (e.g., https://app.example.com).J\x13\"https://myapp.com\"R\x06origin\x12\x82\x02\n" +
-	"\alink_id\x18\x02 \x01(\tB\xe8\x01\x92A\xe4\x012\xb9\x01Optional link key UUID used to resolve organization-specific template redirect URI origins for pre-authentication CSP evaluation. Scope suffixes (e.g. '_pc') are stripped automatically.J&\"a1b2c3d4-e5f6-7890-abcd-ef1234567890\"R\x06linkId\"\xb0\x01\n" +
+	"\x06origin\x18\x01 \x01(\tBi\x92Af2OThe origin URL to check for authorized domains (e.g., https://app.example.com).J\x13\"https://myapp.com\"R\x06origin\"\xb0\x01\n" +
 	"\x1cListAuthorizedDomainResponse\x12\x8f\x01\n" +
 	"\adomains\x18\x01 \x03(\tBu\x92Ar2LArray of domain names that are authorized for use with the specified origin.J\"[\"example.com\", \"app.example.com\"]R\adomains\"\xb6\x0e\n" +
 	"\x06Domain\x12j\n" +
@@ -1346,9 +1337,9 @@ const file_scalekit_v1_domains_domains_proto_rawDesc = "" +
 	"DomainType\x12\x1b\n" +
 	"\x17DOMAIN_TYPE_UNSPECIFIED\x10\x00\x12\x18\n" +
 	"\x14ALLOWED_EMAIL_DOMAIN\x10\x01\x12\x17\n" +
-	"\x13ORGANIZATION_DOMAIN\x10\x022\xc6*\n" +
-	"\rDomainService\x12\x91\b\n" +
-	"\fCreateDomain\x12(.scalekit.v1.domains.CreateDomainRequest\x1a).scalekit.v1.domains.CreateDomainResponse\"\xab\a\x92A\xcd\x06\n" +
+	"\x13ORGANIZATION_DOMAIN\x10\x022\xca)\n" +
+	"\rDomainService\x12\xfc\a\n" +
+	"\fCreateDomain\x12(.scalekit.v1.domains.CreateDomainRequest\x1a).scalekit.v1.domains.CreateDomainResponse\"\x96\a\x92A\xcd\x06\n" +
 	"\aDomains\x12\rCreate Domain\x1a\xb5\x04Creates and associates a domain with an organization.\n" +
 	"\n" +
 	"Use one of the following domain types:\n" +
@@ -1363,9 +1354,8 @@ const file_scalekit_v1_domains_domains_proto_rawDesc = "" +
 	"+\x1a).scalekit.v1.domains.CreateDomainResponseJ\xa0\x01\n" +
 	"\x03400\x12\x98\x01\n" +
 	"oInvalid request — common causes invalid domain format, public or disposable domain, or domain already exists.\x12%\n" +
-	"#\x1a!#/definitions/errdetailsErrorInfo\x82\xb5\x18\x17\n" +
-	"\x13organizations_write\x18t\x82\xd3\xe4\x93\x029:\x06domain\"//api/v1/organizations/{organization_id}/domains\x12\xee\x05\n" +
-	"\fUpdateDomain\x12(.scalekit.v1.domains.UpdateDomainRequest\x1a).scalekit.v1.domains.UpdateDomainResponse\"\x88\x05\x92A\x96\x04\n" +
+	"#\x1a!#/definitions/errdetailsErrorInfo\x82\xb5\x18\x02\x18d\x82\xd3\xe4\x93\x029:\x06domain\"//api/v1/organizations/{organization_id}/domains\x12\xd9\x05\n" +
+	"\fUpdateDomain\x12(.scalekit.v1.domains.UpdateDomainRequest\x1a).scalekit.v1.domains.UpdateDomainResponse\"\xf3\x04\x92A\x96\x04\n" +
 	"\aDomains\x12\rUpdate Domain\x1a\xa1\x03Updates an existing domain's configuration within an organization. Currently supports updating domain metadata and configuration settings.\n" +
 	"\n" +
 	"Use this endpoint to modify domain properties after initial creation. Note that the domain name itself cannot be changed once created.\n" +
@@ -1373,9 +1363,8 @@ const file_scalekit_v1_domains_domains_proto_rawDesc = "" +
 	"The domain must belong to the specified organization and you must provide either the organization ID or external ID along with the domain ID.JX\n" +
 	"\x03200\x12Q\n" +
 	" Successfully updated the domain.\x12-\n" +
-	"+\x1a).scalekit.v1.domains.UpdateDomainResponse\x82\xb5\x18\x17\n" +
-	"\x13organizations_write\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02>:\x06domain24/api/v1/organizations/{organization_id}/domains/{id}\x12\xff\x06\n" +
-	"\fVerifyDomain\x12(.scalekit.v1.domains.VerifyDomainRequest\x1a\x1a.google.protobuf.BoolValue\"\xa8\x06\x92A\xb7\x05\n" +
+	"+\x1a).scalekit.v1.domains.UpdateDomainResponse\x82\xb5\x18\x02\x18d\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02>:\x06domain24/api/v1/organizations/{organization_id}/domains/{id}\x12\xea\x06\n" +
+	"\fVerifyDomain\x12(.scalekit.v1.domains.VerifyDomainRequest\x1a\x1a.google.protobuf.BoolValue\"\x93\x06\x92A\xb7\x05\n" +
 	"\aDomains\x12\rVerify Domain\x1a\x9e\x04Initiates domain ownership verification by checking the DNS TXT record that should be added to the domain's DNS configuration.\n" +
 	"\n" +
 	"Use this endpoint to manually trigger verification for domains that are in PENDING status. The system will check for the required TXT record and update the verification status accordingly.\n" +
@@ -1383,18 +1372,16 @@ const file_scalekit_v1_domains_domains_proto_rawDesc = "" +
 	"For automatically verified domains, this endpoint will return true immediately. For domains requiring manual verification, ensure the TXT record has been properly configured in your DNS settings before calling this endpoint.J|\n" +
 	"\x03200\x12u\n" +
 	"SDomain verification result. Returns true if verification succeeds, false otherwise.\x12\x1e\n" +
-	"\x1c\x1a\x1a.google.protobuf.BoolValue\x82\xb5\x18\x17\n" +
-	"\x13organizations_write\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02=2;/api/v1/organizations/{organization_id}/domains/{id}:verify\x12\x9a\x03\n" +
-	"\tGetDomain\x12%.scalekit.v1.domains.GetDomainRequest\x1a&.scalekit.v1.domains.GetDomainResponse\"\xbd\x02\x92A\xe3\x01\n" +
+	"\x1c\x1a\x1a.google.protobuf.BoolValue\x82\xb5\x18\x02\x18d\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02=2;/api/v1/organizations/{organization_id}/domains/{id}:verify\x12\x86\x03\n" +
+	"\tGetDomain\x12%.scalekit.v1.domains.GetDomainRequest\x1a&.scalekit.v1.domains.GetDomainResponse\"\xa9\x02\x92A\xe3\x01\n" +
 	"\aDomains\x12\n" +
 	"Get Domain\x1akRetrieves complete details for a domain including domain type, timestamps, and configuration information.\n" +
 	"\n" +
 	"J_\n" +
 	"\x03200\x12X\n" +
 	"*Successfully retrieved the domain details.\x12*\n" +
-	"(\x1a&.scalekit.v1.domains.GetDomainResponse\x82\xb5\x18\x16\n" +
-	"\x12organizations_read\x18t\x82\xd3\xe4\x93\x026\x124/api/v1/organizations/{organization_id}/domains/{id}\x12\xe4\x03\n" +
-	"\fDeleteDomain\x12(.scalekit.v1.domains.DeleteDomainRequest\x1a\x16.google.protobuf.Empty\"\x91\x03\x92A\xb6\x02\n" +
+	"(\x1a&.scalekit.v1.domains.GetDomainResponse\x82\xb5\x18\x02\x18d\x82\xd3\xe4\x93\x026\x124/api/v1/organizations/{organization_id}/domains/{id}\x12\xcf\x03\n" +
+	"\fDeleteDomain\x12(.scalekit.v1.domains.DeleteDomainRequest\x1a\x16.google.protobuf.Empty\"\xfc\x02\x92A\xb6\x02\n" +
 	"\aDomains\x12\rDelete Domain\x1a\xf4\x01Permanently removes a domain record from an organization.\n" +
 	"\n" +
 	"- Deleting an ORGANIZATION_DOMAIN disables SSO routing/enforcement for that domain.\n" +
@@ -1402,9 +1389,8 @@ const file_scalekit_v1_domains_domains_proto_rawDesc = "" +
 	"\n" +
 	"J%\n" +
 	"\x03200\x12\x1e\n" +
-	"\x1cDomain successfully deleted.\x82\xb5\x18\x17\n" +
-	"\x13organizations_write\x18t\x82\xd3\xe4\x93\x026*4/api/v1/organizations/{organization_id}/domains/{id}\x12\x9b\x05\n" +
-	"\vListDomains\x12&.scalekit.v1.domains.ListDomainRequest\x1a'.scalekit.v1.domains.ListDomainResponse\"\xba\x04\x92A\xe5\x03\n" +
+	"\x1cDomain successfully deleted.\x82\xb5\x18\x02\x18d\x82\xd3\xe4\x93\x026*4/api/v1/organizations/{organization_id}/domains/{id}\x12\x87\x05\n" +
+	"\vListDomains\x12&.scalekit.v1.domains.ListDomainRequest\x1a'.scalekit.v1.domains.ListDomainResponse\"\xa6\x04\x92A\xe5\x03\n" +
 	"\aDomains\x12\fList Domains\x1a\xe8\x02Retrieves a paginated list of all domains configured for the specified organization.\n" +
 	"\n" +
 	"Domain types:\n" +
@@ -1414,8 +1400,7 @@ const file_scalekit_v1_domains_domains_proto_rawDesc = "" +
 	"Ja\n" +
 	"\x03200\x12Z\n" +
 	"+Successfully retrieved the list of domains.\x12+\n" +
-	")\x1a'.scalekit.v1.domains.ListDomainResponse\x82\xb5\x18\x16\n" +
-	"\x12organizations_read\x18t\x82\xd3\xe4\x93\x021\x12//api/v1/organizations/{organization_id}/domains\x12\x90\x05\n" +
+	")\x1a'.scalekit.v1.domains.ListDomainResponse\x82\xb5\x18\x02\x18d\x82\xd3\xe4\x93\x021\x12//api/v1/organizations/{organization_id}/domains\x12\x90\x05\n" +
 	"\x15ListAuthorizedDomains\x120.scalekit.v1.domains.ListAuthorizedDomainRequest\x1a1.scalekit.v1.domains.ListAuthorizedDomainResponse\"\x91\x04\x92A\xd8\x03\n" +
 	"\aDomains\x12\x17List Authorized Domains\x1a\xbb\x02Retrieves a list of domains that are authorized for use with the specified origin URL.\n" +
 	"\n" +
