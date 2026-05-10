@@ -1,3 +1,0 @@
-# Hide the /dummy endpoint from API documentation
-# This endpoint exists only to provide an example response for ErrorInfo schema
-x-internal: true
