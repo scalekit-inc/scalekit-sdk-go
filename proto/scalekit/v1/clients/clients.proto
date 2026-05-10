@@ -1,0 +1,2773 @@
+syntax = "proto3";
+
+package scalekit.v1.clients;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/api/visibility.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "scalekit/v1/commons/commons.proto";
+import "scalekit/v1/connections/connections.proto";
+import "scalekit/v1/options/options.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/clients";
+
+service ClientService {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_tag) = {
+    name: "API Auth"
+    description: "Endpoints for managing API client applications. API clients enable secure, automated interactions between software systems without human intervention. Each client is uniquely identified by a `client_id` and can be configured with authentication settings, redirect URIs, and security parameters. Use these endpoints to create, manage, and configure API clients for your API clients."
+    external_docs: {url: "https://docs.scalekit.com/m2m/overview"}
+  };
+
+  rpc ListClient(ListClientsRequest) returns (ListClientsResponse) {
+    // FIXME how will we test this using API
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {get: "/api/v1/clients"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "API Auth"
+      summary: "List API clients"
+      description: "Retrieves a paginated list of API client applications in the environment. Returns only environment-level clients, not resource-specific clients."
+      responses: {
+        key: "200"
+        value: {
+          description: "List of clients returned successfully."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.ListClientsResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc CreateClient(CreateClientRequest) returns (CreateClientResponse) {
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/clients"
+      body: "client"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Client"
+      summary: "Create Client"
+      description: "Creates an OAuth client with properties including post-login URIs, scopes, and custom claims. Required fields: name, client_type."
+      responses: {
+        key: "200"
+        value: {
+          description: "Client created successfully. Returns the created client resource."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.CreateClientResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc GetClient(GetClientRequest) returns (GetClientResponse) {
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {get: "/api/v1/clients/{client_id}"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Client Configs"
+      summary: "Get Client Configuration"
+      description: "Retrieves complete client configuration including scopes, custom claims, redirect URIs, and access token expiration time. Use this endpoint to view or verify client settings and security parameters"
+      responses: {
+        key: "200"
+        value: {
+          description: "Client configuration retrieved successfully. Returns full client metadata including scopes, audience, custom claims, and security settings."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.GetClientResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc UpdateClient(UpdateClientRequest) returns (UpdateClientResponse) {
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {
+      patch: "/api/v1/clients/{client_id}"
+      body: "client"
+
+      // Note: This is hidden from the docs
+      // additional_bindings: {
+      //   patch: "/api/v1/clients/{client_id}"
+      //   body: "client"
+      // }
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Client Configs"
+      summary: "Update Client Configuration"
+      description: "Updates the configuration settings for a client. Only fields included in the request are modified. Updatable fields include post_login_uris, post_logout_redirect_uris, back_channel_logout_uris, initiate_login_uri, scopes, audience, and custom claims. client_id and create_time are immutable and cannot be modified."
+      responses: {
+        key: "201"
+        value: {
+          description: "Client configuration updated successfully. Returns the updated client resource with new update_time and all current settings."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.UpdateClientResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc DeleteClient(DeleteClientRequest) returns (google.protobuf.Empty) {
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {delete: "/api/v1/clients/{client_id}"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Client"
+      summary: "Delete Client"
+      description: "Permanently deletes a client and associated secrets. This operation cannot be undone. Supports WEB_APP, NTV, and SPA client types only. Cannot delete default environment clients."
+      responses: {
+        key: "200"
+        value: {description: "Client successfully deleted and no longer accessible"}
+      }
+    };
+  }
+
+  rpc CreateClientSecret(CreateClientSecretRequest) returns (CreateClientSecretResponse) {
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {post: "/api/v1/clients/{client_id}/secrets"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Client Configs"
+      summary: "Create Client Secret"
+      description: "Generates a new client secret for an API client. This endpoint creates a secure credential that can be used for OAuth 2.0 client credentials flow. The plain secret is only returned once during creation and should be stored securely by the client application."
+      responses: {
+        key: "201"
+        value: {
+          description: "Client secret created successfully. Returns the new secret ID and the plain secret value (only available at creation time)."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.CreateClientSecretResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc UpdateClientSecret(UpdateClientSecretRequest) returns (UpdateClientSecretResponse) {
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {
+      put: "/api/v1/clients/{client_id}/secrets/{secret_id}"
+      body: "secret"
+      additional_bindings: {
+        patch: "/api/v1/clients/{client_id}/secrets/{secret_id}"
+        body: "secret"
+      }
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Client Configs"
+      summary: "Update Client Secret"
+      description: "Updates the status of a client secret. This endpoint allows you to activate or deactivate a client secret. Use this to rotate secrets or revoke access for compromised credentials. The secret value itself cannot be modified - create a new secret instead."
+      responses: {
+        key: "200"
+        value: {
+          description: "Client secret updated successfully. Returns the updated secret with its current status."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.UpdateClientSecretResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc DeleteClientSecret(DeleteClientSecretRequest) returns (google.protobuf.Empty) {
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {delete: "/api/v1/clients/{client_id}/secrets/{secret_id}"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Client Configs"
+      summary: "Delete Client Secret"
+      description: "Permanently deletes a client secret. This operation cannot be undone. Use this endpoint to remove compromised or unused secrets. After deletion, the secret can no longer be used for authentication."
+      responses: {
+        key: "200"
+        value: {description: "Client secret successfully deleted and no longer accessible"}
+      }
+    };
+  }
+
+  rpc CreateOrganizationClient(CreateOrganizationClientRequest) returns (CreateOrganizationClientResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/organizations/{organization_id}/clients"
+      body: "client"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "API Auth"
+      summary: "Create organization API client"
+      description: "Creates a new API client for an organization. Returns the client details and a plain secret (available only once)."
+      responses: {
+        key: "201"
+        value: {
+          description: "API client created successfully. Returns the client ID and plain secret (only available at creation time). The client can be configured with scopes, audience values, and custom claims for fine-grained access control."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.CreateOrganizationClientResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc GetOrganizationClient(GetOrganizationClientRequest) returns (GetOrganizationClientResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {get: "/api/v1/organizations/{organization_id}/clients/{client_id}"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "API Auth"
+      summary: "Get organization API client"
+      description: "Retrieves details of a specific API client in an organization."
+      responses: {
+        key: "200"
+        value: {
+          description: "Returns the complete API client configuration, including all current settings and a list of active secrets. Note that secret values are not included in the response for security reasons."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.GetOrganizationClientResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc CreateOrganizationClientSecret(CreateOrganizationClientSecretRequest) returns (CreateOrganizationClientSecretResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {post: "/api/v1/organizations/{organization_id}/clients/{client_id}/secrets"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "API Auth"
+      summary: "Create organization API client secret"
+      description: "Creates a new secret for an organization API client. Returns the plain secret (available only once)."
+      responses: {
+        key: "201"
+        value: {
+          description: "Client secret created successfully. Returns the new secret ID and the plain secret value (only available at creation time). The secret can be used immediately for authentication."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.CreateOrganizationClientSecretResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc DeleteOrganizationClientSecret(DeleteOrganizationClientSecretRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {delete: "/api/v1/organizations/{organization_id}/clients/{client_id}/secrets/{secret_id}"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "API Auth"
+      summary: "Delete organization API client secret"
+      description: "Permanently deletes a secret from an organization API client. This operation cannot be undone."
+      responses: {
+        key: "200"
+        value: {description: "Client secret successfully deleted and no longer accessible"}
+      }
+    };
+  }
+
+  rpc UpdateOrganizationClient(UpdateOrganizationClientRequest) returns (UpdateOrganizationClientResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {
+      patch: "/api/v1/organizations/{organization_id}/clients/{client_id}"
+      body: "client"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "API Auth"
+      summary: "Update organization API client"
+      description: "Updates an existing organization API client. Only specified fields are modified."
+      responses: {
+        key: "200"
+        value: {
+          description: "Returns the updated organization API client with all current details reflected in the response, including modified scopes, audience values, and custom claims."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.UpdateOrganizationClientResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc DeleteOrganizationClient(DeleteOrganizationClientRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {delete: "/api/v1/organizations/{organization_id}/clients/{client_id}"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "API Auth"
+      summary: "Delete organization API client"
+      description: "Permanently deletes an API client from an organization. This operation cannot be undone and will revoke all access for the client. All associated secrets will also be invalidated. Use this endpoint to remove unused or compromised clients."
+      responses: {
+        key: "200"
+        value: {description: "Organization API client successfully deleted and no longer accessible"}
+      }
+    };
+  }
+
+  rpc ListOrganizationClients(ListOrganizationClientsRequest) returns (ListOrganizationClientsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {get: "/api/v1/organizations/{organization_id}/clients"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "API Auth"
+      summary: "List organization API clients"
+      description: "Retrieves a paginated list of API clients for a specific organization. Returns client details including metadata, scopes, and secret information (without exposing actual secret values)."
+      responses: {
+        key: "200"
+        value: {
+          description: "List of organization API clients returned successfully. Each client includes its configuration details and metadata."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.ListOrganizationClientsResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc CreateResource(CreateResourceRequest) returns (CreateResourceResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      post: "/api/v1/resources"
+      body: "resource"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "API Auth"
+      summary: "Create Resource"
+      description: "Creates a new client resource. The response includes the resource ID and other metadata."
+      responses: {
+        key: "201"
+        value: {
+          description: "Resource created successfully. Returns the created resource."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.CreateResourceResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc GetResource(GetResourceRequest) returns (GetResourceResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/resources/{resource_id}"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "API Auth"
+      summary: "Get Resource"
+      description: "Retrieves details of a specific client resource by ID."
+      responses: {
+        key: "200"
+        value: {
+          description: "Resource details retrieved successfully. Returns the resource."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.GetResourceResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc ListResources(ListResourcesRequest) returns (ListResourcesResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/resources"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "API Auth"
+      summary: "List applications"
+      description: "Retrieves a paginated list of API client applications."
+      responses: {
+        key: "200"
+        value: {
+          description: "List of resources returned successfully."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.ListResourcesResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc UpdateResource(UpdateResourceRequest) returns (UpdateResourceResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      patch: "/api/v1/resources/{resource_id}"
+      body: "resource"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "API Auth"
+      summary: "Update Resource"
+      description: "Updates an existing client resource. Only specified fields are modified."
+      responses: {
+        key: "200"
+        value: {
+          description: "Resource updated successfully. Returns the updated resource."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.UpdateResourceResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc DeleteResource(DeleteResourceRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {delete: "/api/v1/resources/{resource_id}"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "API Auth"
+      summary: "Delete Resource"
+      description: "Permanently deletes a client resource. This operation cannot be undone and will remove the resource along with all its associated clients and configurations."
+      responses: {
+        key: "200"
+        value: {description: "Resource successfully deleted and no longer accessible"}
+      }
+    };
+  }
+
+  rpc DeleteResourceProvider(DeleteResourceProviderRequest) returns (GetResourceResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {put: "/api/v1/resources/{resource_id}/provider:delete"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "API Auth"
+      summary: "Delete Provider from resource"
+      description: "Delete Provider from resource to use scalekit full stack authentication"
+      responses: {
+        key: "200"
+        value: {
+          description: "Resource details retrieved successfully. Returns the resource."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.GetResourceResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc CreateResourceClient(CreateResourceClientRequest) returns (CreateResourceClientResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      post: "/api/v1/resources/{resource_id}/clients"
+      body: "client"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "API Auth"
+      summary: "Create Resource Client"
+      description: "Creates a new API client under the specified resource. Returns client details and the plain secret (shown once)."
+      responses: {
+        key: "201"
+        value: {
+          description: "Client created successfully. Returns the client configuration and plain secret."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.CreateResourceClientResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc UpdateResourceClient(UpdateResourceClientRequest) returns (UpdateResourceClientResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      patch: "/api/v1/resources/{resource_id}/clients/{client_id}"
+      body: "client"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "API Auth"
+      summary: "Update Resource Client"
+      description: "Updates the configuration of an API client under the specified resource."
+      responses: {
+        key: "200"
+        value: {
+          description: "Client updated successfully. Returns the updated client configuration."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.UpdateResourceClientResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc GetResourceClient(GetResourceClientRequest) returns (GetResourceClientResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/resources/{resource_id}/clients/{client_id}"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "API Auth"
+      summary: "Get Resource API Client"
+      description: "Retrieves details of a specific API client associated with an application."
+      responses: {
+        key: "200"
+        value: {
+          description: "Client details retrieved successfully. Returns the resource and client configuration."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.GetResourceClientResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc ListResourceClients(ListResourceClientsRequest) returns (ListResourceClientsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/resources/{resource_id}/clients"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "API Auth"
+      summary: "List Resource API Clients"
+      description: "Retrieves a list of API clients associated with a specific application resource."
+      responses: {
+        key: "200"
+        value: {
+          description: "List of clients retrieved successfully. Returns the resource details and associated client configurations."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.ListResourceClientsResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc ListResourceUserConsents(ListResourceUserConsentsRequest) returns (ListResourceUserConsentsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/user_consents"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "API Auth"
+      summary: "List user consents for a resource"
+      description: "Retrieves a paginated list of user consents for a given resource, with optional search by external user ID"
+      responses: {
+        key: "200"
+        value: {
+          description: "List of user consents retrieved successfully"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.ListResourceUserConsentsResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc DeleteResourceClient(DeleteResourceClientRequest) returns (DeleteResourceClientResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {delete: "/api/v1/resources/{resource_id}/clients/{client_id}"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "API Auth"
+      summary: "Delete Resource Client"
+      description: "Deletes an API client under the specified resource."
+      responses: {
+        key: "200"
+        value: {
+          description: "Client deleted successfully."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.DeleteResourceClientResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc RegisterClient(RegisterClientRequest) returns (RegisterClientResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: NONE};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      post: "/api/v1/resources/{res_id}/clients:register"
+      body: "client"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "API Auth"
+      summary: "Register API client"
+      description: "Registers a new API client under an existing resource using dynamic client registration. Returns the created client and its secrets."
+      responses: {
+        key: "201"
+        value: {
+          description: "Client registered successfully. Returns client details and plain secret (available only once)."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.RegisterClientResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc CreateScope(CreateScopeRequest) returns (CreateScopeResponse) {
+    option deprecated = true;
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      post: "/api/v1/scopes"
+      body: "scope"
+      additional_bindings: {
+        post: "/api/v1/environments/{env_id}/scopes"
+        body: "scope"
+      }
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Create scope (Deprecated)"
+      description: "DEPRECATED: Use permission management APIs instead. Creates a new OAuth scope for API authorization. Scopes define the level of access granted to API clients. Reserved OpenID Connect scopes (profile, email, address, phone) cannot be created as they are automatically managed by the system."
+      responses: {
+        key: "201"
+        value: {
+          description: "OAuth scope created successfully. Returns the newly created scope with its name, description, and enabled status."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.CreateScopeResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc ListScopes(ListScopesRequest) returns (ListScopesResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CUSTOMER_PORTAL};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      get: "/api/v1/scopes"
+      additional_bindings: {get: "/api/v1/environments/{env_id}/scopes"}
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "List scopes"
+      description: "Retrieves all OAuth scopes configured for the environment. Returns both custom scopes and system-managed OpenID Connect scopes."
+      responses: {
+        key: "200"
+        value: {
+          description: "List of OAuth scopes returned successfully. Each scope includes its name, description, and enabled status."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.ListScopesResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc UpdateScope(UpdateScopeRequest) returns (UpdateScopeResponse) {
+    option deprecated = true;
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      patch: "/api/v1/scopes/{id}"
+      body: "scope"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Update scope (Deprecated)"
+      description: "DEPRECATED:  Use permission management APIs instead. Updates an existing OAuth scope's description and enabled status. Reserved OpenID Connect scopes (profile, email, address, phone) cannot be modified through this endpoint."
+      responses: {
+        key: "200"
+        value: {
+          description: "OAuth scope updated successfully. Returns the updated scope with all current details."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.UpdateScopeResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc DeleteScope(DeleteScopeRequest) returns (google.protobuf.Empty) {
+    option deprecated = true;
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {delete: "/api/v1/scopes/{id}"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Delete scope (Deprecated)"
+      description: "DEPRECATED: Use permission management APIs instead. Permanently deletes an OAuth scope from the environment. This operation cannot be undone. Reserved OpenID Connect scopes (profile, email, address, phone) cannot be deleted through this endpoint."
+      responses: {
+        key: "200"
+        value: {description: "OAuth scope successfully deleted and no longer accessible"}
+      }
+    };
+  }
+
+  rpc GetConsentDetails(google.protobuf.Empty) returns (GetConsentDetailsResponse) {
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (scalekit.v1.options.auth_option) = {authentication_type: NONE};
+    option (google.api.http) = {get: "/api/v1/oauth/consent/details"};
+  }
+
+  rpc RevokeUserConsent(RevokeUserConsentRequest) returns (RevokeUserConsentResponse) {
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {delete: "/api/v1/clients/{client_id}/consents/{consent_id}"};
+  }
+
+  rpc EnsureResourceConnection(EnsureResourceConnectionRequest) returns (EnsureResourceConnectionResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      post: "/api/v1/resources/{resource_id}/connections"
+      body: "*"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "API Auth"
+      summary: "Get or Create Resource Connection"
+      description: "Retrieves an existing resource connection or creates a new one if it doesn't exist."
+      responses: {
+        key: "200"
+        value: {
+          description: "Returns the existing or newly created resource connection details."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.clients.GetOrCreateResourceConnectionResponse"}
+          }
+        }
+      }
+    };
+  }
+}
+
+message CreateResourceRequest {
+  CreateResource resource = 1 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Details of the resource to be created"}
+  ];
+}
+
+message CreateResource {
+  ResourceType resource_type = 1 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Type of the resource to be created"
+      example: "\"WEB\""
+    }
+  ];
+
+  string name = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {max_len: 128},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the resource"
+      example: "\"My API Resource\""
+    }
+  ];
+
+  string description = 3 [
+    (buf.validate.field).string = {max_len: 512},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Description of the resource"
+      example: "\"Resource for accessing your organization's API resources\""
+    }
+  ];
+
+  string resource_uri = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Resource identifier for the resource. This could be the URL used to access the resource resources"
+    example: "\"https://resource.example.com\""
+  }];
+
+  int64 access_token_expiry = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Expiry time in seconds for the access token."
+    example: "3600"
+  }];
+
+  int64 refresh_token_expiry = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Expiry time in seconds for the refresh token."
+    example: "86400"
+  }];
+
+  bool disable_dynamic_client_registration = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Indicates if dynamic client registration is allowed for this resource"
+    example: "true"
+  }];
+
+  string logo_uri = 8 [
+    (buf.validate.field).string = {max_len: 512},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Logo URI for the resource"
+      example: "\"https://example.com/logo.png\""
+    }
+  ];
+  string provider = 9 [
+    (buf.validate.field).string = {max_len: 512},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Connection provider for the resource"
+      example: "\"DESCOPE\""
+    }
+  ];
+  string resource_id = 10 [
+    //    (buf.validate.field).string = {
+    //      min_len: 1
+    //      max_len: 512
+    //    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Resource identifier for the resource. This could be the URL used to access the resource resources"
+      example: "\"https://resource.example.com\""
+    }
+  ];
+  repeated string scopes = 11 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "List of OAuth scopes associated with the resource"
+    example: "[\"usr:read\", \"usr:write\"]"
+  }];
+  bool intersect_scopes_user_permission = 12 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Indicates if the scopes should be intersected with user permissions for granular control"
+    example: "true"
+  }];
+  bool enable_cimd = 13 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Specifies whether Client ID Metadata Document (CIMD) is activated for the resource"
+    example: "false"
+  }];
+  /*
+     string tos_uri = 10 [
+       (buf.validate.field).string = {max_len: 512},
+       (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+         description: "Terms of Service URI for the resource"
+         example: "\"https://example.com/tos\""
+       }
+     ];
+
+     string policy_uri = 11 [
+       (buf.validate.field).string = {max_len: 512},
+       (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+         description: "Policy URI for the resource"
+         example: "\"https://example.com/policy\""
+       }
+     ];
+  */
+}
+
+enum ResourceType {
+  RESOURCE_TYPE_UNSPECIFIED = 0;
+  WEB = 1; // Web resource
+  MOBILE = 2; // Mobile resource
+  DESKTOP = 3; // Desktop resource
+  SERVER = 4; // Server resource OR Microservices
+  MCP_SERVER = 5; // Model Context Protocol Server
+}
+
+message ResourceClient {
+  string name = 1 [
+    (buf.validate.field).string = {max_len: 128},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the client"
+      example: "\"My API Client\""
+    }
+  ];
+  string description = 2 [
+    (buf.validate.field).string = {max_len: 512},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Description of the client"
+      example: "\"Client for accessing your organization's API resources\""
+    }
+  ];
+  repeated string scopes = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "OAuth scopes for the client"
+    //example: "[\"read:users\", \"write:resources\"]"
+  }];
+  repeated string audience = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "OAuth audience values for the client"
+    example: "[\"https://api.example.com\"]"
+  }];
+  repeated CustomClaim custom_claims = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Custom claims to be included in access tokens. Please keep this to the essentials as this increases the size of the token."}];
+  int64 expiry = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Expiry time in seconds for the token generated by the client"
+    example: "3600"
+  }];
+  repeated string redirect_uris = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Redirect URI for the client"
+    example: "[\"https://example.com/callback\"]"
+  }];
+}
+
+message CreateResourceResponse {
+  Resource resource = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Details of the created resource"}];
+}
+
+message GetResourceRequest {
+  string resource_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the client resource to retrieve"
+      example: "\"app_69388798466720005\""
+    }
+  ];
+}
+
+message GetResourceResponse {
+  Resource resource = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Details of the requested resource"}];
+}
+
+message DeleteResourceProviderRequest {
+  string resource_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the client resource to retrieve"
+      example: "\"app_69388798466720005\""
+    }
+  ];
+}
+
+message DeleteResourceRequest {
+  string resource_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the client resource to delete"
+      example: "\"app_69388798466720005\""
+    }
+  ];
+}
+
+// for backward compatibility
+message Application {
+  string id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Unique identifier for the resource. Automatically generated upon creation and immutable."
+    example: "\"app_69388798466720005\""
+  }];
+
+  string name = 2 [
+    (buf.validate.field).string = {max_len: 128},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the resource"
+      example: "\"My API Resource\""
+    }
+  ];
+
+  string resource_id = 3 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 512
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Resource identifier for the resource. This could  be the URL used to access the resource resources"
+      example: "\"https://resource.example.com\""
+    }
+  ];
+
+  string description = 4 [
+    (buf.validate.field).string = {max_len: 512},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Description of the resource"
+      example: "\"Resource for accessing your organization's API resources\""
+    }
+  ];
+
+  ResourceType application_type = 5 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Type of the resource"
+      example: "\"WEB\""
+    }
+  ];
+
+  bool disable_dynamic_client_registration = 6 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Indicates if dynamic client registration is allowed for this resource"
+      example: "true"
+    }
+  ];
+
+  string logo_uri = 7 [
+    (buf.validate.field).string = {max_len: 512},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Logo URI for the resource"
+      example: "\"https://example.com/logo.png\""
+    }
+  ];
+
+  int64 access_token_expiry = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Expiry time in seconds for the access token."
+    example: "3600"
+  }];
+
+  int64 refresh_token_expiry = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Expiry time in seconds for the refresh token."
+    example: "86400"
+  }];
+
+  google.protobuf.Timestamp create_time = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp when the resource was created"
+    example: "\"2024-01-05T14:48:00.000Z\""
+  }];
+  google.protobuf.Timestamp update_time = 11 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp when the resource was last updated"
+    example: "\"2024-01-05T14:48:00.000Z\""
+  }];
+  string provider = 12 [
+    (buf.validate.field).string = {max_len: 512},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Connection provider for the resource"
+      example: "\"DESCOPE\""
+    }
+  ];
+}
+
+message Resource {
+  string id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Unique identifier for the resource. Automatically generated upon creation and immutable."
+    example: "\"app_69388798466720005\""
+  }];
+
+  string name = 2 [
+    (buf.validate.field).string = {max_len: 128},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the resource"
+      example: "\"My API Resource\""
+    }
+  ];
+
+  string resource_uri = 3 [
+    (buf.validate.field).string = {max_len: 512},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Resource identifier for the resource. This could  be the URL used to access the resource resources"
+      example: "\"https://resource.example.com\""
+    }
+  ];
+
+  string description = 4 [
+    (buf.validate.field).string = {max_len: 512},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Description of the resource"
+      example: "\"Resource for accessing your organization's API resources\""
+    }
+  ];
+
+  ResourceType resource_type = 5 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Type of the resource"
+      example: "\"WEB\""
+    }
+  ];
+
+  bool disable_dynamic_client_registration = 6 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Indicates if dynamic client registration is allowed for this resource"
+      example: "true"
+    }
+  ];
+
+  string logo_uri = 7 [
+    (buf.validate.field).string = {max_len: 512},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Logo URI for the resource"
+      example: "\"https://example.com/logo.png\""
+    }
+  ];
+
+  int64 access_token_expiry = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Expiry time in seconds for the access token."
+    example: "3600"
+  }];
+
+  int64 refresh_token_expiry = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Expiry time in seconds for the refresh token."
+    example: "86400"
+  }];
+
+  google.protobuf.Timestamp create_time = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp when the resource was created"
+    example: "\"2024-01-05T14:48:00.000Z\""
+  }];
+  google.protobuf.Timestamp update_time = 11 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp when the resource was last updated"
+    example: "\"2024-01-05T14:48:00.000Z\""
+  }];
+
+  string provider = 12 [
+    (buf.validate.field).string = {max_len: 512},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Connection provider for the resource"
+      example: "\"DESCOPE\""
+    }
+  ];
+
+  google.protobuf.Struct protected_metadata = 13 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Protected metadata for the resource. This field is used to store additional information that should not be exposed in public APIs."
+    example: "{\"resource\": \"https://example.com/mcp\",\"authorization_servers\": [\"https://example.scalekit.com/resources/res_123123123\"],\"bearer_methods_supported\": [\"header\"],\"resource_documentation\": \"https://example.com/docs\",\"scopes_supported\": [\"usr:read\"]}"
+  }];
+
+  string protected_metadata_uri = 14 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "URI to access the protected metadata for the resource"
+    example: "\"https://example.com/.well-known/oauth-protected-resource/mcp\""
+  }];
+
+  string resource_id = 15 [
+    (buf.validate.field).string = {max_len: 512},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Resource identifier for the resource. This could  be the URL used to access the resource resources"
+      example: "\"https://resource.example.com\""
+    }
+  ];
+
+  repeated Scope scopes = 16 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "List of OAuth scopes associated with the resource with enabled or disabled flag"
+    example: "[{\"id\": \"perm_\", \"name\": \"usr:read\", \"description\": \"Reading basic information of the users\", \"enabled\": true}]"
+  }];
+
+  ResourceConnection connection_details = 17 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Details of the own auth connection if any. For full stack this field will be empty or not populated"}
+  ];
+
+  bool disallow_connection_update = 18 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Indicates if updating the connection is disallowed for this resource"
+      example: "false"
+    }
+  ];
+
+  bool intersect_scopes_user_permission = 19 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Indicates if the scopes should be intersected with user permissions for granular control"
+    example: "true"
+  }];
+
+  bool enable_cimd = 20 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Specifies whether Client ID Metadata Document (CIMD) is activated for the resource"
+    example: "false"
+  }];
+}
+
+message RegisterClientRequest {
+  string res_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the client resource"
+      example: "\"app_69388798466720005\""
+    }
+  ];
+  RegisterClient client = 2 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Details of the client to be registered"}
+  ];
+}
+
+message RegisterClient {
+  string client_name = 1 [
+    (buf.validate.field).string = {max_len: 128},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the client"
+      example: "\"My API Client\""
+    }
+  ];
+  string description = 2 [
+    (buf.validate.field).string = {max_len: 512},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Description of the client"
+      example: "\"Client for accessing your organization's API resources\""
+    }
+  ];
+  repeated string redirect_uris = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Redirect URI for the client"
+    example: "[\"https://example.com/callback\"]"
+  }];
+  string scope = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "OAuth scopes for the client"
+    example: "[\"read:users\", \"write:resources\"]"
+  }];
+  string client_uri = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Client URI for the client"
+    example: "\"https://example.com\""
+  }];
+  string logo_uri = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Logo URI for the client"
+    example: "\"https://example.com/logo.png\""
+  }];
+  string tos_uri = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Terms of Service URI for the client"
+    example: "\"https://example.com/tos\""
+  }];
+  string policy_uri = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Policy URI for the client"
+    example: "\"https://example.com/policy\""
+  }];
+}
+
+message RegisterClientResponse {
+  string client_id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The unique identifier for this M2M client. This ID is used to identify the client in API requests and logs. It is automatically generated when the client is created and cannot be modified."
+    example: "\"m2morg_1231234233424344\""
+  }];
+  repeated ClientSecret secrets = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of client secrets associated with this client. Each secret can be used for authentication, but only the most recently created secret is typically active. Secrets are stored securely and their values are never returned after creation."}];
+  string name = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The display name of the M2M client. This name helps identify the client in the dashboard and logs."
+    example: "\"GitHub Actions Deployment Service\""
+  }];
+  string description = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "A detailed description of the client's purpose and usage. This helps administrators understand what the client is used for."
+    example: "\"Service account for automated deployment processes\""
+  }];
+  google.protobuf.Timestamp create_time = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The timestamp when this M2M client was created. This field is automatically set by the server and cannot be modified."
+    example: "\"2024-01-05T14:48:00.000Z\""
+  }];
+  google.protobuf.Timestamp update_time = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The timestamp when this M2M client was last updated. This field is automatically updated by the server whenever the client's configuration changes."
+    example: "\"2024-01-05T14:48:00.000Z\""
+  }];
+  repeated string scopes = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The OAuth 2.0 scopes granted to this client. These scopes determine what resources and actions the client can access."
+    example: "[\"deploy:resources\", \"read:deployments\"]"
+  }];
+  repeated string audience = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The intended recipients of access tokens issued to this client. Each audience value should be a URI that identifies an API or service."
+    example: "[\"https://api.example.com\"]"
+  }];
+  repeated CustomClaim custom_claims = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Additional claims included in access tokens issued to this client. These claims provide context about the client and can be used for authorization decisions."}];
+  int64 expiry = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The lifetime of access tokens issued to this client, in seconds. This determines how long a token remains valid before it must be refreshed."
+    example: "3600"
+  }];
+  string resource_id = 11 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The ID of the resource associated with this M2M client. This field is used to link the client to a specific resource in the system."
+    example: "\"app_1231234233424344\""
+  }];
+  repeated string redirect_uris = 12 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The redirect URI for this M2M client. This URI is used in the OAuth 2.0 authorization flow to redirect users after authentication."
+    example: "[\"https://example.com/callback\"]"
+  }];
+  string client_secret = 13 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Client secret value (only returned once at creation)"
+    example: "\"CdExsdErfccxDDssddfffgfeFHH1\""
+  }];
+  int32 client_secret_expires_at = 14 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Client secret expiry time in RFC3339 format. If the client secret does not expire, this field will be set to null."
+    example: "\"2024-12-31T23:59:59.000Z\""
+  }];
+  //  M2MClient client = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Details of the registered client"}];
+}
+
+message ListResourcesRequest {
+  ResourceType resource_type = 1 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Filter resources by type"
+      example: "\"WEB\""
+    }
+  ];
+  string page_token = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Token for the next page of results"
+    example: "\"next_page_token_123\""
+  }];
+  uint32 page_size = 3 [
+    (buf.validate.field).uint32 = {lte: 30},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Number of resources to return per page. Maximum is 30. Default is 10."
+      example: "20"
+    }
+  ];
+}
+
+message ListResourcesResponse {
+  uint32 total_size = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Total number of resources available"}];
+  string next_page_token = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Token for the next page of results"}];
+  repeated Resource resources = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of resources"}];
+  string prev_page_token = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Token for the previous page of results"}];
+}
+
+message UpdateResourceRequest {
+  string resource_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the resource to update"
+      example: "\"app_69388798466720005\""
+    }
+  ];
+  UpdateResource resource = 2 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Updated resource details"}
+  ];
+  google.protobuf.FieldMask update_mask = 99;
+}
+
+message UpdateResource {
+  string name = 1 [
+    (buf.validate.field).string = {max_len: 128},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the resource"
+      example: "\"My Updated API Resource\""
+    }
+  ];
+
+  string description = 2 [
+    (buf.validate.field).string = {max_len: 512},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Description of the resource"
+      example: "\"Updated resource for accessing your organization's API resources\""
+    }
+  ];
+
+  string resource_uri = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Resource identifier for the resource. This could be the URL used to access the resource resources"
+    example: "\"https://resource.example.com\""
+  }];
+
+  int64 access_token_expiry = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Expiry time in seconds for the access token."
+    example: "3600"
+  }];
+
+  int64 refresh_token_expiry = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Expiry time in seconds for the refresh token."
+    example: "86400"
+  }];
+
+  google.protobuf.BoolValue disable_dynamic_client_registration = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Indicates if dynamic client registration is allowed for this resource"
+    example: "true"
+  }];
+
+  string logo_uri = 7 [
+    (buf.validate.field).string = {max_len: 512},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Logo URI for the resource"
+      example: "\"https://example.com/logo.png\""
+    }
+  ];
+
+  string provider = 10 [
+    (buf.validate.field).string = {max_len: 512},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Connection provider for the resource"
+      example: "\"DESCOPE\""
+    }
+  ];
+
+  string resource_id = 11 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Resource identifier for the resource. This could be the URL used to access the resource resources"
+    example: "\"https://resource.example.com\""
+  }];
+  repeated string scopes = 12 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "List of OAuth scopes associated with the resource"
+    example: "[\"usr:read\", \"usr:write\"]"
+  }];
+  oneof settings {
+    ResourceCustomConnectionSettings custom_connection_settings = 13 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Custom connection settings for the resource"}];
+  }
+  google.protobuf.BoolValue intersect_scopes_user_permission = 14 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Indicates if the scopes should be intersected with user permissions for granular control"
+    example: "true"
+  }];
+  google.protobuf.BoolValue enable_cimd = 15 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Indicates if CIMD (Client ID Metadata Document) is enabled for the resource"
+    example: "false"
+  }];
+}
+
+message UpdateResourceResponse {
+  Resource resource = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Details of the updated resource"}];
+}
+
+message CreateResourceClientRequest {
+  string resource_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the client resource"
+      example: "\"app_69388798466720005\""
+    }
+  ];
+  ResourceClient client = 2 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Details of the client to be created"}
+  ];
+}
+
+message CreateResourceClientResponse {
+  M2MClient client = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Details of the created client"}];
+  string plain_secret = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Client secret value (only returned once at creation)"
+    example: "\"CdExsdErfccxDDssddfffgfeFHH1\""
+  }];
+}
+
+message UpdateResourceClientRequest {
+  string resource_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the resource"
+      example: "\"res_69388798466720005\""
+    }
+  ];
+  string client_id = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the client"
+      example: "\"m2m_12345678901234567\""
+    }
+  ];
+  ResourceClient client = 3 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Fields of the client to update"}
+  ];
+  google.protobuf.FieldMask update_mask = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Mask specifying which fields should be updated"}];
+}
+
+message UpdateResourceClientResponse {
+  M2MClient client = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Updated client details"}];
+}
+
+message GetResourceClientRequest {
+  string resource_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the client resource to retrieve"
+      example: "\"skc_1234567890\""
+    }
+  ];
+  string client_id = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the client associated with the resource"
+      example: "\"m2morg_1231234233424344\""
+    }
+  ];
+}
+
+message GetResourceClientResponse {
+  reserved 1; // for backward compatibility for resource
+  M2MClient client = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Details of the requested client"}];
+  repeated ConsentedUser consented_users = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of user IDs who have consented to this client. Applicable for DCR only clients."}];
+}
+
+message ConsentedUser {
+  string consent_id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The unique identifier for the consent record associated with this user and client."
+    example: "\"usrcnst_1234567890\""
+  }];
+  string external_user_id = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The external user ID of the user who has consented to this client."
+    example: "\"usr_1234567890\""
+  }];
+  repeated string scopes = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The scopes that the user has consented to for this client."
+    example: "[\"read:users\", \"write:resources\"]"
+  }];
+}
+
+message ListResourceUserConsentsRequest {
+  string resource_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the resource whose user consents are to be listed"
+      example: "\"res_69388798466720005\""
+    }
+  ];
+  string search = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Case-insensitive search over external user IDs"
+    example: "\"usr_123\""
+  }];
+  uint32 page_size = 3 [
+    (buf.validate.field).uint32 = {lte: 30},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Number of consents to return per page (max 30)"
+      example: "20"
+    }
+  ];
+  string page_token = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Pagination token to fetch the next or previous page"
+    example: "\">:abc123\""
+  }];
+}
+
+message ListResourceUserConsentsResponse {
+  uint32 total_size = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Total number of user consents matching the request"}];
+  string next_page_token = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Pagination token to fetch the next page"}];
+  repeated ResourceUserConsent consents = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of user consents"}];
+  string prev_page_token = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Pagination token to fetch the previous page"}];
+}
+
+message ResourceUserConsent {
+  string id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Unique identifier of the user consent"
+    example: "\"usrcnst_102709535608668163\""
+  }];
+  string external_user_id = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "External identifier of the consenting user"
+    example: "\"usr_83562895790637841\""
+  }];
+  string client_id = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Client identifier associated with the consent"
+    example: "\"m2m_123123123\""
+  }];
+  string client_name = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Readable client name"
+    example: "\"MCPJam\""
+  }];
+  repeated string scopes = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Scopes granted in the consent"
+    example: "[\"openid\", \"email\"]"
+  }];
+  google.protobuf.Timestamp granted_at = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp when consent was granted"
+    example: "\"2025-12-09T13:27:29.810Z\""
+  }];
+}
+
+message ListResourceClientsRequest {
+  string resource_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the resource whose clients are to be listed"
+      example: "\"skc_1234567890\""
+    }
+  ];
+}
+
+message ListResourceClientsResponse {
+  reserved 1;
+  repeated M2MClient clients = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of clients associated with the resource"}];
+  int32 total_dcr_clients = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Total number of DCR clients associated with the resource"}];
+  int32 total_static_clients = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Total number of non-DCR clients associated with the resource"}];
+}
+
+message DeleteResourceClientRequest {
+  string resource_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the resource"
+      example: "\"app_69388798466720005\""
+    }
+  ];
+  string client_id = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the client"
+      example: "\"m2m_12345678901234567\""
+    }
+  ];
+}
+
+message DeleteResourceClientResponse {}
+
+message CreateOrganizationClientRequest {
+  string organization_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the organization"
+      example: "\"org_1231234233424344\""
+    }
+  ];
+  OrganizationClient client = 2 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Details of the client to be created"}
+  ];
+}
+
+message OrganizationClient {
+  string name = 1 [
+    (buf.validate.field).string = {max_len: 128},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "A descriptive name for the API client that helps identify its purpose. This name is displayed in the dashboard and logs. Must be between 1 and 128 characters."
+      example: "\"GitHub Actions Deployment Service\""
+    }
+  ];
+  string description = 2 [
+    (buf.validate.field).string = {max_len: 512},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "A detailed explanation of the client's purpose and usage. This helps administrators understand what the client is used for and who manages it."
+      example: "\"Service account for GitHub Actions to deploy resources to production\""
+    }
+  ];
+  repeated string scopes = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "OAuth 2.0 scopes that define the permissions granted to this client. Each scope represents a specific permission or set of permissions. The client can only access resources that match its granted scopes."
+    example: "[\"deploy:resources\", \"read:deployments\"]"
+  }];
+  repeated string audience = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The intended recipients of the access tokens issued to this client. Each audience value should be a URI that identifies the API or service that will validate the token."
+    example: "[\"https://api.example.com/api/analytics\", \"https://deployment-api.acmecorp.com\"]"
+  }];
+  repeated CustomClaim custom_claims = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Additional claims to be included in access tokens issued to this client. These claims provide context about the client and can be used for authorization decisions. Keep claims minimal to avoid increasing token size."
+    example: "[{\"key\": \"environment\", \"value\": \"production\"}, {\"key\": \"service\", \"value\": \"deployment\"}]"
+  }];
+  int64 expiry = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Expiry time in seconds for the token generated by the client"
+    example: "3600"
+  }];
+}
+
+message CreateOrganizationClientResponse {
+  M2MClient client = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Details of the created client"}];
+  string plain_secret = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Client secret value (only returned once at creation)"
+    example: "\"CdExsdErfccxDDssddfffgfeFHH1\""
+  }];
+}
+
+message UpdateOrganizationClientRequest {
+  string organization_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the organization"
+      example: "\"org_1231234233424344\""
+    }
+  ];
+  string client_id = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "m2morg_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the client"
+      example: "\"m2morg_1231234233424344\""
+    }
+  ];
+  OrganizationClient client = 3 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Updated details for the client"}
+  ];
+}
+
+message UpdateOrganizationClientResponse {
+  M2MClient client = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Updated details of the client"}];
+}
+
+message M2MClient {
+  string client_id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The unique identifier for this API client. This ID is used to identify the client in API requests and logs. It is automatically generated when the client is created and cannot be modified."
+    example: "\"m2morg_1231234233424344\""
+  }];
+  repeated ClientSecret secrets = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of client secrets associated with this client. Each secret can be used for authentication, but only the most recently created secret is typically active. Secrets are stored securely and their values are never returned after creation."}];
+  string name = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The display name of the API client. This name helps identify the client in the dashboard and logs."
+    example: "\"GitHub Actions Deployment Service\""
+  }];
+  string description = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "A detailed description of the client's purpose and usage. This helps administrators understand what the client is used for."
+    example: "\"Service account for automated deployment processes\""
+  }];
+  string organization_id = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The ID of the organization that owns this API client. This ID is used to associate the client with the correct organization and enforce organization-specific access controls."
+    example: "\"org_1231234233424344\""
+  }];
+  google.protobuf.Timestamp create_time = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The timestamp when this API client was created. This field is automatically set by the server and cannot be modified."
+    example: "\"2024-01-05T14:48:00.000Z\""
+  }];
+  google.protobuf.Timestamp update_time = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The timestamp when this API client was last updated. This field is automatically updated by the server whenever the client's configuration changes."
+    example: "\"2024-01-05T14:48:00.000Z\""
+  }];
+  repeated string scopes = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The OAuth 2.0 scopes granted to this client. These scopes determine what resources and actions the client can access."
+    example: "[\"deploy:resources\", \"read:deployments\"]"
+  }];
+  repeated string audience = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The intended recipients of access tokens issued to this client. Each audience value should be a URI that identifies an API or service."
+    example: "[\"https://api.example.com\"]"
+  }];
+  repeated CustomClaim custom_claims = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Additional claims included in access tokens issued to this client. These claims provide context about the client and can be used for authorization decisions."}];
+  int64 expiry = 11 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Expiry time in seconds for the token generated by the client"
+    example: "3600"
+  }];
+  string resource_id = 12 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The ID of the resource associated with this M2M client. This field is used to link the client to a specific resource in the system."
+    example: "\"app_1231234233424344\""
+  }];
+  repeated string redirect_uris = 13 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The redirect URI for this API client. This URI is used in the OAuth 2.0 authorization flow to redirect users after authentication."
+    example: "[\"https://example.com/callback\"]"
+  }];
+  bool is_dcr = 15 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Indicates if the client was created via Dynamic Client Registration (DCR). Clients created through DCR may have different management and lifecycle policies compared to those created manually."
+    example: "false"
+  }];
+  bool is_cimd = 16 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Indicates if the client was created via Client ID Metadata Document (CIMD). CIMD clients can update their own configuration according to the CIMD specification."
+    example: "false"
+  }];
+  string metadata_uri = 17 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The URI to the client's metadata, which is utilized to obtain the client's configuration details"
+    example: "\"https://example.com/client-metadata.json\""
+  }];
+}
+
+message GetOrganizationClientRequest {
+  string organization_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the organization"
+      example: "\"org_1231234233424344\""
+    }
+  ];
+  string client_id = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "m2morg_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the API client"
+      example: "\"m2morg_1231234233424344\""
+    }
+  ];
+}
+
+message GetOrganizationClientResponse {
+  M2MClient client = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Details of the requested client"}];
+}
+
+message CustomClaim {
+  string key = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 128
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "The name of the custom claim. Must be between 1 and 128 characters. Use descriptive names that clearly indicate the claim's purpose."
+      example: "\"environment\""
+    }
+  ];
+  string value = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The value of the custom claim. This value will be included in access tokens issued to the client."
+    example: "\"production\""
+  }];
+}
+
+message CreateOrganizationClientSecretRequest {
+  string organization_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the organization"
+      example: "\"org_1231234233424344\""
+    }
+  ];
+  string client_id = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "m2morg_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the API client"
+      example: "\"m2morg_1231234233424344\""
+    }
+  ];
+}
+
+message CreateOrganizationClientSecretResponse {
+  string plain_secret = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Client secret value (only returned once at creation)"
+    example: "\"m2morg_client_secret_xyz123\""
+  }];
+  ClientSecret secret = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Details of the created client secret"}];
+}
+
+message DeleteOrganizationClientSecretRequest {
+  string organization_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the organization"
+      example: "\"org_1231234233424344\""
+    }
+  ];
+  string client_id = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "m2morg_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the API client"
+      example: "\"m2morg_1231234233424344\""
+    }
+  ];
+  string secret_id = 3 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the client secret"
+      example: "\"sec_1231234233424344\""
+    }
+  ];
+}
+
+message ListOrganizationClientsRequest {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "List Organization Clients Request"
+      description: "Request message for listing API clients within a specific organization. Supports pagination for handling large numbers of clients."
+    }
+    external_docs: {
+      description: "API Documentation"
+      url: "https://docs.scalekit.com/m2m/overview"
+    }
+  };
+
+  // Unique identifier of the organization
+  string organization_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the organization whose clients to list. Must start with 'org_' prefix."
+      example: "\"org_1231234233424344\""
+    }
+  ];
+
+  // Maximum number of clients to return per page
+  uint32 page_size = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    example: "30"
+    description: "Maximum number of API clients to return per page. Must be between 10 and 100"
+  }];
+
+  // Pagination token from the previous response
+  string page_token = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    example: "\"<page_token>\""
+    description: "Pagination token from the previous response. Use to retrieve the next page of organization clients"
+  }];
+}
+
+message ListOrganizationClientsResponse {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "List Organization Clients Response"
+      description: "Response message containing a paginated list of API clients for the specified organization."
+    }
+  };
+
+  // Pagination token for the next page of results
+  string next_page_token = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    example: "\"<next_page_token>\""
+    description: "Pagination token for the next page of results. Use this token to fetch the next page."
+  }];
+
+  // Total number of clients in the organization
+  uint32 total_size = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    example: "30"
+    description: "Total number of API clients in the organization."
+  }];
+
+  // List of organization API clients
+  repeated M2MClient clients = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of API client objects for the organization. Each client includes its configuration, metadata, and active secrets (without exposing actual secret values)."}];
+
+  // Pagination token for the previous page of results
+  string prev_page_token = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    example: "\"<prev_page_token>\""
+    description: "Pagination token for the previous page of results. Use this token to fetch the previous page."
+  }];
+}
+
+message DeleteOrganizationClientRequest {
+  // Unique identifier of the organization
+  string organization_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the organization that owns the client. Must start with 'org_' prefix."
+      example: "\"org_1231234233424344\""
+    }
+  ];
+  // Unique identifier of the client to delete
+  string client_id = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "m2morg_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the API client to permanently delete. Must start with 'm2morg_' prefix."
+      example: "\"m2morg_1231234233424344\""
+    }
+  ];
+}
+
+message GetClientRequest {
+  // Unique identifier of the client resource to retrieve
+  string client_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the client resource to retrieve. Must be 1-32 characters long."
+      example: "\"skc_1234567890\""
+    }
+  ];
+}
+
+message GetClientResponse {
+  // Complete client configuration with all settings
+  Client client = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Complete client configuration including authentication settings, redirect URIs, and secrets. This contains all current settings for the requested client resource."}];
+}
+
+message ListClientsRequest {
+  // Controls whether plain secret values are included in the response
+  bool include_plain_secret = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Whether to include plain secret values in the response. Enable only during initial client creation, then store secrets securely. Not available when filtering by ALL client types"
+    example: "false"
+  }];
+
+  // this used to client_type supporting a single client_type only. As it is not used in UI, moving this into filter and extending it to support filtering by multiple client types.
+  reserved 2;
+
+  message Filter {
+    repeated string client_type = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Filters clients by type. Valid values: ENV, WEB_APP, NTV, SPA, ALL. Defaults to ENV. ALL takes precedence and other types are ignored. For resource-specific clients (e.g., M2M), use ListResourceClients API."}];
+  }
+
+  Filter filter = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Filters clients by type: ENV, WEB_APP, NTV, SPA, or ALL."}];
+  string page_token = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Token for the next page of results"
+    example: "\"next_page_token_123\""
+  }];
+
+  uint32 page_size = 5 [
+    (buf.validate.field).uint32 = {lte: 30},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Number of clients per page. Defaults to 10, maximum 30."
+      example: "30"
+    }
+  ];
+}
+
+message ListClientsResponse {
+  // Total number of clients matching the query criteria
+  uint32 total_size = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Total number of client resources in the workspace."
+    example: "12"
+  }];
+  // List of client resources
+  repeated Client clients = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of client resource configurations matching the query criteria. Each client includes its metadata and authentication settings."}];
+  string next_page_token = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Pagination token that retrieves the next page of results"}];
+  string prev_page_token = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Token for the previous page of results"}];
+}
+
+message CreateClientRequest {
+  CreateClient client = 1 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Client parameters to create"
+      example: "{\"post_login_uris\": [\"https://app.example.com/callback\"], \"initiate_login_uri\": \"https://app.example.com/login\"}"
+    }
+  ];
+}
+
+message CreateClient {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "Create Client"
+      description: "Request message for creating a new API client with specified configuration parameters including redirect URIs and authentication settings."
+    }
+    external_docs: {
+      description: "API Documentation"
+      url: "https://docs.scalekit.com/"
+    }
+  };
+
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {max_len: 128},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "A descriptive name for the API client that helps identify its purpose. This name is displayed in the dashboard and logs. Must be between 1 and 128 characters."
+      example: "\"My Application Client\""
+    }
+  ];
+
+  string client_type = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {max_len: 128},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Client application type. Valid values: WEB_APP (web applications), SPA (single-page applications), NTV (native applications including mobile and desktop)"
+      example: "WEB_APP"
+    }
+  ];
+
+  repeated string back_channel_logout_uris = 3 [
+    (buf.validate.field).repeated = {
+      unique: true
+      items: {
+        string: {uri: true}
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "HTTPS endpoints that receive back-channel logout notifications for application-initiated logout and session management."
+      example: "[\"https://app.example.com/backchannel-logout-internal\", \"https://app.example.com/backchannel-logout-external\"]"
+    }
+  ];
+
+  repeated string post_logout_redirect_uris = 4 [
+    (buf.validate.field).repeated = {
+      unique: true
+      items: {
+        string: {uri: true}
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Allowed URIs for post-logout redirection. These URIs are used when a user is redirected after logout. Must use HTTPS and conform to security specifications."
+      example: "[\"https://app.example.com/logged-out\", \"https://app.example.com/home\"]"
+    }
+  ];
+
+  optional string initiate_login_uri = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Pre-configured URI for initiating login flows. This URI is used to start authentication flows programmatically. Must use HTTPS protocol and contain a valid domain."
+    example: "\"https://app.example.com/login\""
+  }];
+
+  repeated string post_login_uris = 6 [
+    (buf.validate.field).repeated = {unique: true},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "List of allowed post login URIs for OAuth 2.0 authorization flows. Each URI must be valid and use HTTPS in production environments. Maximum of 5 URIs allowed."
+      example: "[\"https://app.example.com/callback\", \"https://dev.example.com/auth\"]"
+    }
+  ];
+
+  int64 access_token_expiry = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Expiry time in seconds for the access token."
+    example: "3600"
+  }];
+
+  repeated string scopes = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "List of scopes to be attached to this client. These scopes must be a subset of the scopes available in the environment."
+    example: "[\"data:read\", \"data:write\"]"
+  }];
+
+  repeated CustomClaim custom_claims = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Custom claims to be included in access tokens. Please keep this to the essentials as this increases the size of the token."}];
+
+  google.protobuf.BoolValue disallow_scalekit_api_access = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "If set to true, the client will be restricted from accessing Scalekit APIs directly, enhancing security by limiting its capabilities."
+    example: "true"
+  }];
+
+  repeated string grant_types = 11 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "List of OAuth 2.0 grant types that the client is authorized to use. This defines how the client can obtain access tokens."
+    example: "[\"authorization_code\", \"refresh_token\", \"client_credentials\"]"
+  }];
+
+  google.protobuf.BoolValue enforce_pkce = 12 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Whether Proof Key for Code Exchange (PKCE) is required. PKCE mitigates authorization code interception attacks. Defaults to true for public clients."
+    example: "true"
+  }];
+}
+
+message CreateClientResponse {
+  Client client = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Created client with all settings reflected in the response"}];
+}
+
+message UpdateClientRequest {
+  string client_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the registered application to update."
+      example: "\"skc_01H9XPQR7ZY2AJKL\""
+    }
+  ];
+  UpdateClient client = 2 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Application configuration parameters to update. Contains post_login_uris and authentication settings."
+      example: "{\"post_login_uris\": [\"https://app.example.com/callback\"]}"
+    }
+  ];
+  google.protobuf.FieldMask mask = 3 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (google.api.field_visibility).restriction = "PREVIEW"
+  ];
+}
+
+message UpdateClient {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "Update Client Configuration"
+      description: "Parameters for updating an API client application's configuration. This allows modification of post_login_uris, logout settings, and other security parameters."
+    }
+    external_docs: {
+      description: "API Documentation"
+      url: "https://docs.scalekit.com/m2m/overview"
+    }
+  };
+
+  reserved 2, 3;
+  reserved "redirect_uris", "default_redirect_uri";
+
+  repeated string back_channel_logout_uris = 4 [
+    (buf.validate.field).repeated = {
+      unique: true
+      items: {
+        string: {uri: true}
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "HTTPS endpoints for receiving back-channel logout notifications. Required for implementing application-initiated logout flows and session management."
+      example: "[\"https://app.example.com/backchannel-logout\", \"https://app.example.com/backchannel-logout\"]"
+    }
+  ];
+
+  repeated string post_logout_redirect_uris = 5 [
+    (buf.validate.field).repeated = {
+      unique: true
+      items: {
+        string: {uri: true}
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Allowed URIs for post-logout redirection. These URIs are used when a user is redirected after logout. Must use HTTPS and conform to security specifications."
+      example: "[\"https://app.example.com/logged-out\", \"https://app.example.com/home\"]"
+    }
+  ];
+
+  optional string initiate_login_uri = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Pre-configured URI for initiating login flows. This URI is used to start authentication flows programmatically. Must use HTTPS protocol and contain a valid domain."
+    example: "\"https://app.example.com/login\""
+  }];
+
+  repeated string post_login_uris = 7 [
+    (buf.validate.field).repeated = {unique: true},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "List of allowed post login URIs for OAuth 2.0 authorization flows. Each URI must be valid and use HTTPS in production environments. Maximum of 5 URIs allowed."
+      example: "[\"https://app.example.com/callback\", \"https://dev.example.com/auth\"]"
+    }
+  ];
+
+  string name = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "A descriptive name for the API client that helps identify its purpose. This name is displayed in the dashboard and logs. Must be between 1 and 128 characters."
+    example: "\"My Application Client\""
+  }];
+
+  int64 access_token_expiry = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Expiry time in seconds for the access token."
+    example: "3600"
+  }];
+
+  repeated string scopes = 11 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "List of scopes to be attached to this client. These scopes must be a subset of the scopes available in the environment."
+    example: "[\"data:read\", \"data:write\"]"
+  }];
+
+  repeated CustomClaim custom_claims = 12 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Custom claims to be included in access tokens. Please keep this to the essentials as this increases the size of the token."}];
+
+  google.protobuf.BoolValue disallow_scalekit_api_access = 13 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "If set to true, the client will be restricted from accessing Scalekit APIs directly, enhancing security by limiting its capabilities."
+    example: "true"
+  }];
+
+  repeated string grant_types = 14 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "List of OAuth 2.0 grant types that the client is authorized to use. This defines how the client can obtain access tokens."
+    example: "[\"authorization_code\", \"refresh_token\", \"client_credentials\"]"
+  }];
+
+  google.protobuf.BoolValue enforce_pkce = 15 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Whether Proof Key for Code Exchange (PKCE) is required. PKCE mitigates authorization code interception attacks. Defaults to true for public clients."
+    example: "true"
+  }];
+}
+
+message UpdateClientResponse {
+  Client client = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Updated application configuration with all current settings reflected in the response"}];
+}
+
+message CreateClientSecretRequest {
+  // Unique identifier of the client for which to create a secret
+  string client_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the client application for which to create a new secret."
+      example: "\"skc_01H9XPQR7ZY2AJKL\""
+    }
+  ];
+}
+
+message CreateClientSecretResponse {
+  // The unhashed secret value; only returned once at creation time
+  string plain_secret = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Plaintext secret value. This value is only returned once at creation time and must be stored securely. It cannot be retrieved again."
+    example: "\"sec_plaintext123456\""
+  }];
+  // Metadata about the created secret (doesn't include the plain secret value)
+  ClientSecret secret = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Metadata about the newly created secret, including its ID, creation time, and status. Does not include the plaintext secret value."}];
+}
+
+message UpdateClientSecretRequest {
+  // Unique identifier of the client containing the secret
+  string client_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the client application containing the secret to update."
+      example: "\"skc_01H9XPQR7ZY2AJKL\""
+    }
+  ];
+  // Unique identifier of the secret to update
+  string secret_id = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the client secret to update. This references a specific secret within the client."
+      example: "\"sec_01H9XPQR7ZY2AJKL\""
+    }
+  ];
+  // New status to apply to the secret
+  UpdateClientSecret secret = 3 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Updated settings for the secret. Currently supports modifying the secret's status (active/inactive)."}
+  ];
+  // Fields to update (system-controlled parameter)
+  google.protobuf.FieldMask mask = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Specifies which fields to update. System-controlled parameter."}];
+}
+
+message UpdateClientSecret {
+  // Status of the secret (active or inactive)
+  ClientSecretStatus status = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Status to set for the client secret. Set to ACTIVE to enable the secret for authentication, or INACTIVE to temporarily disable it."
+    example: "INACTIVE"
+  }];
+}
+
+message UpdateClientSecretResponse {
+  // Updated secret metadata
+  ClientSecret secret = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Updated secret metadata, reflecting the changes made by the update operation. Note that the plaintext secret value is never returned."}];
+}
+
+message DeleteClientRequest {
+  // Unique identifier of the client containing the secret
+  string client_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the client to delete."
+      example: "\"webc_01H9XPQR7ZY2AJKL\""
+    }
+  ];
+}
+
+message DeleteClientSecretRequest {
+  // Unique identifier of the client containing the secret
+  string client_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Identifier of the client containing the secret"
+      example: "\"skc_01H9XPQR7ZY2AJKL\""
+    }
+  ];
+  // Unique identifier of the secret to delete
+  string secret_id = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the client secret to permanently delete. This operation cannot be undone."
+      example: "\"sec_01H9XPQR7ZY2AJKL\""
+    }
+  ];
+}
+
+message Client {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "Client Application"
+      description: "Configuration for an API client application registered with Scalekit. Contains authentication settings, redirect URIs, and other security parameters."
+    }
+  };
+
+  string id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Unique identifier for the client application. This ID is automatically generated when the client is created and cannot be modified. Used in API requests and authentication flows."
+    example: "\"skc_1234abcd5678efgh\""
+  }];
+
+  string keyId = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Identifier for the cryptographic key pair used to sign tokens. This key is used for JWT signing operations. Keys can be rotated by generating new client secrets."
+    example: "\"key_9876zyxw5432vuts\""
+  }];
+
+  google.protobuf.Timestamp create_time = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp indicating when the client configuration was initially created. This field is automatically set by the server and cannot be modified."
+    example: "\"2024-01-05T14:48:00.000Z\""
+  }];
+
+  google.protobuf.Timestamp update_time = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp of the last modification to the client configuration. This field is automatically updated by the server whenever any aspect of the client is modified."
+    example: "\"2024-01-10T09:12:00.000Z\""
+  }];
+
+  reserved 5, 6;
+  reserved "redirect_uris", "default_redirect_uri";
+
+  repeated ClientSecret secrets = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of client secrets used for authentication. Each secret is stored securely using one-way hashing (bcrypt). The plaintext secret values are only displayed during initial creation and must be stored securely by the client."}];
+
+  repeated string post_logout_redirect_uris = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Allowed URIs for post-logout redirection. These URIs are used when a user is redirected after signing out. Must use HTTPS and conform to OpenID Connect Session Management specifications."
+    example: "[\"https://auth.your-app.com/logout\"]"
+  }];
+
+  repeated string back_channel_logout_uris = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "HTTPS endpoint for receiving back-channel logout notifications. This URI is called by the authentication server when a session expires or is terminated. Required for implementing relying party-initiated logout flows."
+    example: "\"https://auth.your-app.com/backchannel-logout\""
+  }];
+
+  string initiate_login_uri = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Pre-configured URI for initiating login flows programmatically. This URI must use the HTTPS scheme and contain a valid domain. Used for starting authentication flows without user interaction."
+    example: "\"https://auth.your-app.com/initiate-auth\""
+  }];
+
+  repeated string post_login_uris = 11 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "List of allowed redirect URIs for OAuth 2.0 authorization flows. These URIs must use HTTPS protocol in production environments and comply with RFC 6749. Maximum of 5 URIs allowed."
+    example: "[\"https://auth.your-app.com/callback\", \"https://dev.example.com/auth\"]"
+  }];
+
+  string name = 12 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "A descriptive name for the client that helps identify its purpose."
+    example: "\"My Application Client\""
+  }];
+
+  optional int64 access_token_expiry = 13 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Expiry time in seconds for the access token."
+    example: "3600"
+  }];
+
+  repeated string scopes = 14 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "List of scopes to be attached to this client."
+    example: "[\"data:read\", \"data:write\"]"
+  }];
+
+  repeated CustomClaim custom_claims = 15 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Custom claims to be included in access tokens. Please keep this to the essentials as this increases the size of the token."}];
+
+  bool disallow_scalekit_api_access = 16 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "If true, the client will be restricted from accessing Scalekit APIs"
+    example: "true"
+  }];
+
+  repeated string grant_types = 17 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "List of OAuth 2.0 grant types that the client is authorized to use."
+    example: "[\"authorization_code\", \"refresh_token\", \"client_credentials\"]"
+  }];
+
+  string client_type = 18 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Type of client. Valid values: ENV, WEB_APP, NTV, SPA"
+    example: "\"ENV\""
+  }];
+
+  bool enforce_pkce = 19 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Whether Proof Key for Code Exchange (PKCE) is required. PKCE mitigates authorization code interception attacks. Defaults to true for public clients."
+    example: "true"
+  }];
+}
+
+message ClientSecret {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "Client Secret"
+      description: "A secure credential used for authenticating an API client. Each client can have multiple secrets for key rotation purposes."
+    }
+  };
+
+  string id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The unique identifier for this client secret. This ID is used to reference the secret in API requests for management operations like updating or deleting the secret."
+    example: "\"sec_1234abcd5678efgh\""
+  }];
+
+  google.protobuf.Timestamp create_time = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The timestamp when this secret was created. This field is automatically set by the server and cannot be modified."
+    example: "\"2024-01-05T14:48:00.000Z\""
+  }];
+
+  google.protobuf.Timestamp update_time = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The timestamp when this secret was last updated. This field is automatically updated by the server when the secret's status changes or other properties are modified."
+    example: "\"2024-01-10T09:12:00.000Z\""
+  }];
+
+  string secret_suffix = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "A suffix that helps identify this secret. This is the last few characters of the full secret value but is not sufficient for authentication. Helps identify which secret is being used in logs and debugging."
+    example: "\"xyzw\""
+  }];
+
+  optional string created_by = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The identifier of the user or system that created this secret. This field helps track who created the secret for audit and compliance purposes."
+    example: "\"user_12345\""
+  }];
+
+  ClientSecretStatus status = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The current status of this secret. A secret must be ACTIVE to be used for authentication. INACTIVE secrets cannot be used for authentication but are retained for audit purposes."
+    example: "\"INACTIVE\""
+  }];
+
+  google.protobuf.Timestamp expire_time = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The timestamp when this secret will expire. After this time, the secret cannot be used for authentication regardless of its status. If not set, the secret does not expire."
+    example: "\"2025-01-05T14:48:00.000Z\""
+  }];
+
+  google.protobuf.Timestamp last_used_time = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The timestamp when this secret was last used for authentication. This field helps track secret usage for security monitoring and identifying unused secrets that may be candidates for rotation."
+    example: "\"2024-02-15T10:30:00.000Z\""
+  }];
+
+  optional string plain_secret = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The full plaintext secret value. This field is only populated when the secret is first created and is never stored by the server. It must be securely stored by the client application as it cannot be retrieved again."
+    example: "\"sec_1234567890abcdefghijklmnopqrstuvwxyz\""
+  }];
+}
+
+// ClientSecretStatus indicates whether a client secret can be used for authentication.
+// ACTIVE secrets can be used for authentication while INACTIVE secrets cannot.
+enum ClientSecretStatus {
+  // The secret is active and can be used for authentication
+  ACTIVE = 0;
+  // The secret is inactive and cannot be used for authentication
+  INACTIVE = 1;
+}
+
+message Scope {
+  string id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the scope resource. Must be between 1 and 100 characters long and match the specified pattern."
+      example: "\"scope_1234567890\""
+    }
+  ];
+  string name = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9:]{1,64}$"
+    },
+    (buf.validate.field).required = true
+  ];
+  string description = 3 [(buf.validate.field).string = {max_len: 2000}];
+  bool enabled = 4 [(buf.validate.field).required = true];
+}
+
+message CreateScope {
+  string name = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9:]{1,64}$"
+    },
+    (buf.validate.field).required = true
+  ];
+  string description = 2 [(buf.validate.field).string = {max_len: 2000}];
+}
+
+message CreateScopeRequest {
+  CreateScope scope = 1 [(buf.validate.field).required = true];
+  string env_id = 2 [// added for backward compatibility
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the environment where the scope will be created. Must start with 'env_' prefix."
+      example: "\"env_1234567890\""
+    }
+  ];
+}
+
+message CreateScopeResponse {
+  Scope scope = 1;
+}
+
+message ListScopesRequest {
+  string env_id = 1 [// backward compatibility
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the environment for which to list scopes. Must start with 'env_' prefix."
+      example: "\"env_1234567890\""
+    }
+  ];
+}
+
+message ListScopesResponse {
+  repeated Scope scopes = 1;
+}
+
+message UpdateScopeRequest {
+  string id = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 100
+  }];
+  UpdateScope scope = 2 [(buf.validate.field).required = true];
+}
+
+message UpdateScope {
+  string description = 1 [(buf.validate.field).string = {max_len: 2000}];
+  google.protobuf.BoolValue enabled = 2;
+}
+
+message UpdateScopeResponse {
+  Scope scope = 1;
+}
+
+message DeleteScopeRequest {
+  string id = 1 [(buf.validate.field).string = {prefix: "scp_"}];
+}
+
+message GetConsentDetailsResponse {
+  Resource resource = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Details of the requested resource"}];
+  User user = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Details of the user who granted consent"}];
+  ConsentClient client = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Details of the client resource requesting consent"}];
+  repeated ConsentScope scopes = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of scopes for which consent was granted. Each scope includes its name and description."}];
+  Application application = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Details of the requested application"}];
+  ConsentOrganization organization = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Organization context for the consent screen."}];
+}
+
+message ConsentOrganization {
+  optional string organization_name = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Name of the organization the user is authenticating into. Omitted when not available."
+    example: "\"Acme Corp\""
+  }];
+  string organization_meta_name = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Environment-level label for what an organization is called (e.g. Workspace, Team). Always present."
+    example: "\"Organization\""
+  }];
+}
+
+message ConsentClient {
+  string name = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Name of the client resource requesting consent"
+    example: "\"VS Code\""
+  }];
+  string privacy_uri = 2 [
+    (buf.validate.field).string = {max_len: 100},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Privacy policy URI of the client application"
+      example: "\"https://yourapp.com/privacy\""
+    }
+  ];
+  string tos_uri = 3 [
+    (buf.validate.field).string = {max_len: 2000},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Terms of service URI of the client application"
+      example: "\"https://yourapp.com/terms\""
+    }
+  ];
+  string client_id = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Unique identifier of the client resource requesting consent"
+    example: "\"m2m_1234567890\""
+  }];
+  string metadata_uri = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Metadata URI of the client application - applicable for CIMD only"
+    example: "\"https://example.com/metadata.json\""
+  }];
+  string logo_uri = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Logo URI of the client application"
+    example: "\"https://cdn.example.com/logo.png\""
+  }];
+}
+
+message ConsentScope {
+  string name = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+    },
+    (buf.validate.field).required = true
+  ];
+  string description = 2 [(buf.validate.field).string = {max_len: 2000}];
+}
+
+message User {
+  string email = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Email address of the user. Must be a valid email format."
+    example: "alice.doe@example.com"
+  }];
+}
+
+message RevokeUserConsentRequest {
+  string client_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "m2m_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the client resource for which to revoke consent"
+      example: "\"m2m_1234567890\""
+    }
+  ];
+  string consent_id = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "usrcnst_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the user consent to revoke"
+      example: "\"usrcnst_1234567890\""
+    }
+  ];
+}
+
+message RevokeUserConsentResponse {}
+
+message EnsureResourceConnectionRequest {
+  string resource_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the client resource to retrieve"
+      example: "\"app_69388798466720005\""
+    }
+  ];
+}
+
+message EnsureResourceConnectionResponse {
+  ResourceConnection connection = 1 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Details of the connection resource. Contains configuration settings and status information."}
+  ];
+}
+
+message ResourceConnection {
+  string id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Unique identifier of the connection resource"
+    example: "\"conn_1234567890\""
+  }];
+  ResourceConnectionType type = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Type of connection. Determines the authentication method used for the connection."
+    example: "\"CUSTOM\""
+  }];
+  string status = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Current status of the connection. Indicates whether the connection is active, inactive, or in an error state."
+    example: "\"ACTIVE\""
+  }];
+  bool enabled = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Indicates whether the connection is enabled. Disabled connections cannot be used for authentication."
+    example: "true"
+  }];
+  google.protobuf.Struct settings = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Configuration settings for the connection. The structure of this field varies based on the connection type."
+    example: "{\"api_key\": \"abcd1234\", \"endpoint\": \"https://api.example.com\"}"
+  }];
+  string provider = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The provider of the connection. Indicates the service or platform that manages the connection."
+    example: "\"custom_provider\""
+  }];
+}
+
+message ResourceCustomConnectionSettings {
+  string authorize_uri = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      uri: true
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "The URI where users are redirected to authorize the application. Must be a valid HTTPS URL."
+      example: "\"https://auth.example.com/authorize\""
+    }
+  ];
+}
+
+enum ResourceConnectionType {
+  INVALID = 0;
+  CUSTOM = 1;
+}

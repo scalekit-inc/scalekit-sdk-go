@@ -1,0 +1,154 @@
+syntax = "proto3";
+
+package scalekit.v1.migrations;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/api/visibility.proto";
+import "google/protobuf/empty.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "scalekit/v1/commons/commons.proto";
+import "scalekit/v1/options/options.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/migrations";
+
+service MigrationService {
+  rpc MigrateFSAData(MigrateFSARequest) returns (MigrationFSAResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: NONE};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {post: "/migrations/fsa-data"};
+  }
+
+  rpc MigrateStripeCustomers(MigrateStripeCustomersRequest) returns (MigrateStripeCustomersResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: NONE};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      post: "/migrations/stripe-customers"
+      body: "migrate_stripe_customers"
+    };
+  }
+
+  rpc MigrateWorkspaceFGA(MigrateWorkspaceFGARequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: NONE};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      post: "/migrations/workspace-fga"
+      body: "*"
+    };
+  }
+
+  rpc MigrateRolePermissions(MigrateRolePermissionsRequest) returns (MigrateRolePermissionsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: NONE};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      post: "/migrations/role-permissions"
+      body: "*"
+    };
+  }
+
+  rpc MigrateEnvKeys(MigrateEnvKeysRequest) returns (MigrateEnvKeysResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: NONE};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      post: "/migrations/env-keys"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Key Management"
+      summary: "Ensure DEKs for specified environments"
+      description: "Ensures each listed environment has at least one active DEK. Only callable from the Scalekit platform environment. Provide environment_ids (e.g. env_123) in the request. Creates a DEK only for environments that do not have one (idempotent per environment). Use to backfill DEKs for specific environments."
+    };
+  }
+}
+
+message MigrateEnvKeysRequest {
+  repeated string environment_ids = 1;
+}
+
+message MigrateEnvKeysResponse {
+  int32 environments_processed = 1;
+}
+
+message MigrationServiceResponse {
+  int32 success_environments = 1;
+  int32 failed_environments = 2;
+}
+
+message MigrationSAMLRequest {
+  repeated int64 environment_ids = 1;
+  int32 batch_size = 2 [(buf.validate.field).required = true];
+}
+
+message MigrateFSARequest {
+  repeated int64 environment_ids = 1;
+  FSADataType data_type = 2 [(buf.validate.field).required = true];
+  int32 batch_size = 3 [(buf.validate.field).required = true];
+}
+
+message MigrationFSAResponse {
+  int32 success_environments = 1;
+  int32 failed_environments = 2;
+}
+
+message MigrateStripeCustomersRequest {
+  MigrateStripeCustomers migrate_stripe_customers = 1 [(buf.validate.field).required = true];
+}
+
+message MigrateStripeCustomers {
+  repeated int64 workspace_ids = 1;
+  string plan_name = 2;
+  int32 batch_size = 3;
+  bool include_test_accounts = 4;
+}
+
+message MigrateStripeCustomersResponse {
+  int32 success_count = 1;
+  int32 failed_count = 2;
+  repeated int64 failed_workspace_ids = 3;
+  repeated string error_messages = 4;
+}
+
+message MigrationSAMLResponse {
+  int32 success_environments = 1;
+  int32 failed_environments = 2;
+}
+
+enum FSADataType {
+  FSA_DATA_TYPE_UNSPECIFIED = 0;
+  FSA_DATA_TYPE_CONNECTION = 1;
+  FSA_DATA_TYPE_SESSION = 2;
+  FSA_DATA_TYPE_USER_MANAGEMENT = 3;
+}
+
+message MigrateWorkspaceFGARequest {
+  repeated int64 workspace_ids = 1; // Full workspace migration - mutually exclusive with granular IDs
+  bool async = 2;
+  // Granular migration options - mutually exclusive with workspace_ids and each other
+  repeated int64 organization_ids = 3; // Migrate specific organizations
+  repeated int64 directory_ids = 4; // Migrate specific directories
+  repeated int64 connection_ids = 5; // Migrate specific connections
+  repeated int64 client_ids = 6; // Migrate specific OIDC clients
+  repeated int64 environment_ids = 7; // Migrate specific environments
+}
+
+message PermissionList {
+  repeated string permissions = 1;
+}
+
+message MigrateRolePermissionsRequest {
+  // Map of role names to their permission lists
+  // Example: {"admin": ["read", "write"], "member": ["read"]}
+  map<string, PermissionList> role_permissions = 1 [(buf.validate.field).required = true];
+
+  // List of environment IDs to apply the migration to
+  repeated int64 environment_ids = 2 [(buf.validate.field).required = true];
+}
+
+message MigrateRolePermissionsResponse {
+  int32 success_environments = 1;
+  int32 failed_environments = 2;
+  repeated string error_messages = 3;
+  int32 roles_created = 4;
+  int32 permissions_created = 5;
+  int32 role_permission_mappings_created = 6;
+}

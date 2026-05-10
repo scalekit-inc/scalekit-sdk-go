@@ -1,0 +1,11 @@
+# Override schema properties for Domain model
+components:
+  schemas:
+    domainsDomain:
+      properties:
+        domain_type:
+          example: "ORGANIZATION_DOMAIN"
+    domainsDomainType:
+      x-enum-varnames:
+        - "ORGANIZATION_DOMAIN"
+        - "ALLOWED_EMAIL_DOMAIN"

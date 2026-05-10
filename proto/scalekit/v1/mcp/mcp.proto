@@ -1,0 +1,583 @@
+syntax = "proto3";
+
+package scalekit.v1.mcp;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/api/visibility.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "scalekit/v1/options/options.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/mcp";
+
+service McpService {
+  rpc CreateMcp(CreateMcpRequest) returns (CreateMcpResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/mcp"
+      body: "mcp"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "mcp"
+      summary: "Creates or returns the existing MCP with the given configuration."
+      description: "Creates a new MCP for the configuration. If same configuration exists, it will return the existing MCP."
+    };
+  }
+
+  rpc GetMcp(GetMcpRequest) returns (GetMcpResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.http) = {get: "/api/v1/mcp/{mcp_id}"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "mcp"
+      summary: "Get an existing MCP by ID."
+      description: "Returns the existing MCP with the given ID."
+    };
+  }
+
+  rpc ListMcp(ListMcpRequest) returns (ListMcpResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.http) = {get: "/api/v1/mcp"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "mcp"
+      summary: "List MCPs with optional filters."
+      description: "Returns a list of existing MCPs, optionally filtered by connected_account_identifier and link_token."
+    };
+  }
+
+  rpc DeleteMcp(DeleteMcpRequest) returns (DeleteMcpResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.http) = {delete: "/api/v1/mcp/{mcp_id}"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "mcp"
+      summary: "Delete an MCP by ID."
+      description: "Deletes the MCP with the given ID."
+    };
+  }
+
+  rpc CreateMcpConfig(CreateMcpConfigRequest) returns (CreateMcpConfigResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/mcp/configs"
+      body: "config"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "mcp-configs"
+      summary: "Create a new MCP configuration"
+      description: "Creates a new MCP configuration with a set of connections and tools."
+    };
+  }
+
+  rpc UpdateMcpConfig(UpdateMcpConfigRequest) returns (UpdateMcpConfigResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {
+      put: "/api/v1/mcp/configs/{config_id}"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "mcp-configs"
+      summary: "Update an existing MCP configuration"
+      description: "Updates the name, description, and connection-to-tool mappings for an existing MCP configuration."
+    };
+  }
+
+  rpc ListMcpConfigs(ListMcpConfigsRequest) returns (ListMcpConfigsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {get: "/api/v1/mcp/configs"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "mcp-configs"
+      summary: "List MCP configurations"
+      description: "Lists MCP configurations for the current environment with optional filters for id, name prefix, and provider."
+    };
+  }
+
+  rpc GetMcpConfig(GetMcpConfigRequest) returns (GetMcpConfigResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {get: "/api/v1/mcp/configs/{config_id}"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "mcp-configs"
+      summary: "Fetch an MCP configuration"
+      description: "Returns a single MCP configuration for the current environment by ID."
+    };
+  }
+
+  rpc DeleteMcpConfig(DeleteMcpConfigRequest) returns (DeleteMcpConfigResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {delete: "/api/v1/mcp/configs/{config_id}"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "mcp-configs"
+      summary: "Delete an MCP configuration"
+      description: "Deletes the MCP configuration and any associated mappings and instances in the current environment."
+    };
+  }
+
+  rpc EnsureMcpInstance(EnsureMcpInstanceRequest) returns (EnsureMcpInstanceResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/mcp/instances"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "mcp-instances"
+      summary: "Get or create an MCP instance"
+      description: "Returns an existing MCP instance for the given configuration, name, and user identifier or creates one if none exists."
+    };
+  }
+
+  rpc ListMcpInstances(ListMcpInstancesRequest) returns (ListMcpInstancesResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {get: "/api/v1/mcp/instances"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "mcp-instances"
+      summary: "List MCP instances"
+      description: "Lists MCP instances for the current environment with optional filters for instance id, name, configuration, and text search across name or user identifier."
+    };
+  }
+
+  rpc DeleteMcpInstance(DeleteMcpInstanceRequest) returns (DeleteMcpInstanceResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {delete: "/api/v1/mcp/instances/{instance_id}"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "mcp-instances"
+      summary: "Delete an MCP instance"
+      description: "Deletes a single MCP instance in the current environment."
+    };
+  }
+
+  rpc UpdateMcpInstance(UpdateMcpInstanceRequest) returns (UpdateMcpInstanceResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {
+      patch: "/api/v1/mcp/instances/{instance_id}"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "mcp-instances"
+      summary: "Update an MCP instance"
+      description: "Updates attributes of an MCP instance. Currently only the config name can be changed, which rebuilds the instance mappings."
+    };
+  }
+
+  rpc GetMcpInstance(GetMcpInstanceRequest) returns (GetMcpInstanceResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {get: "/api/v1/mcp/instances/{instance_id}"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "mcp-instances"
+      summary: "Fetch an MCP instance"
+      description: "Returns a single MCP instance for the current environment by ID."
+    };
+  }
+
+  rpc GetMcpInstanceAuthState(GetMcpInstanceAuthStateRequest) returns (GetMcpInstanceAuthStateResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {post: "/api/v1/mcp/instances/{instance_id}:get_auth_state"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "mcp-instances"
+      summary: "Fetch connection auth state for an MCP instance"
+      description: "Returns the connected account status and fresh authentication links for each connection mapped to the MCP instance."
+    };
+  }
+}
+
+message CreateMcpRequest {
+  Mcp mcp = 1 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "MCP tool configuration to create or update"}
+  ];
+}
+
+message CreateMcpResponse {
+  Mcp mcp = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The MCP server details"}];
+}
+
+message Mcp {
+  string id = 1 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique ID of the tool"
+      example: "\"res_123\""
+    }
+  ];
+  repeated ToolMapping tool_mappings = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).repeated = {min_items: 1},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Provider name (e.g. GOOGLE)"
+      example: "\"GOOGLE\""
+    }
+  ];
+  string connected_account_identifier = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {min_len: 1},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Identifier for the connected account"
+      example: "\"account_123\""
+    }
+  ];
+  string url = 4 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique ID of the tool"
+      example: "\"https://example.com/mcp/v1/abc\""
+    }
+  ];
+}
+
+message ToolMapping {
+  repeated string tool_names = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "List of tool names"
+    example: "[\"GMAIL_FETCH_MAILS\", \"LIST_DRAFTS\"]"
+  }];
+  string connection_name = 2 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Connection name for the tool"
+      example: "\"MY-GMAIL\""
+    }
+  ];
+  string status = 3 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Authentication status of the tool"
+      example: "\"ACTIVE\""
+    }
+  ];
+}
+
+message GetMcpRequest {
+  string mcp_id = 1 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "ID of the MCP to retrieve"}
+  ];
+}
+
+message GetMcpResponse {
+  Mcp mcp = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The MCP details"}];
+}
+
+message ListMcpRequest {
+  message Filter {
+    string connected_account_identifier = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Filter by connected account identifier"}];
+    string link_token = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Filter by link token"}];
+  }
+  Filter filter = 1;
+}
+
+message ListMcpResponse {
+  repeated Mcp mcps = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of MCPs"}];
+}
+
+message DeleteMcpRequest {
+  string mcp_id = 1 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "ID of the MCP to delete"}
+  ];
+}
+
+message DeleteMcpResponse {}
+
+message CreateMcpConfigRequest {
+  McpConfig config = 1 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "MCP configuration details to create"}
+  ];
+}
+
+message CreateMcpConfigResponse {
+  McpConfig config = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The created MCP configuration"}];
+}
+
+message UpdateMcpConfigRequest {
+  string config_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {min_len: 1},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "ID of the MCP configuration to update"
+      example: "\"cfg_85630864460904897\""
+    }
+  ];
+
+  string description = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Updated description for the MCP configuration"
+    example: "\"Updated daily summarizer config\""
+  }];
+
+  repeated McpConfigConnectionToolMapping connection_tool_mappings = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Updated list of connection-to-tool mappings for this MCP config"}];
+}
+
+message UpdateMcpConfigResponse {
+  McpConfig config = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The updated MCP configuration"}];
+}
+
+message DeleteMcpConfigRequest {
+  string config_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {min_len: 1},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "ID of the MCP configuration to delete"
+      example: "\"cfg_85630864460904897\""
+    }
+  ];
+}
+
+message DeleteMcpConfigResponse {}
+
+message GetMcpConfigRequest {
+  string config_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {min_len: 1},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "ID of the MCP configuration to fetch"
+      example: "\"cfg_85630864460904897\""
+    }
+  ];
+}
+
+message GetMcpConfigResponse {
+  McpConfig config = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The requested MCP configuration"}];
+}
+
+message ListMcpConfigsRequest {
+  message Filter {
+    string id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Filter by MCP configuration id"}];
+    string name = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Case-insensitive prefix search on configuration name (minimum 3 characters)"}];
+    string provider = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Filter configs that include this provider"}];
+  }
+
+  Filter filter = 1;
+  string search = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Look ahead text search on config name"}];
+  uint32 page_size = 3 [
+    (buf.validate.field).uint32 = {lte: 30},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Number of configs to return per page (max 30)"}
+  ];
+  string page_token = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Pagination token to fetch the next or previous page"}];
+}
+
+message ListMcpConfigsResponse {
+  repeated McpConfig configs = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of MCP configurations"}];
+  string next_page_token = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Pagination token to fetch the next page"}];
+  string prev_page_token = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Pagination token to fetch the previous page"}];
+  uint32 total_size = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Total number of configs matching the filter"}];
+}
+
+message EnsureMcpInstanceRequest {
+  string name = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Display name for the MCP instance"
+    example: "\"daily-digest\""
+  }];
+
+  string config_name = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {min_len: 1},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the MCP configuration to associate with the instance"
+      example: "\"daily-summarizer\""
+    }
+  ];
+
+  string user_identifier = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {min_len: 1},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Identifier for the end user requesting the instance"
+      example: "\"akshay.parihar\""
+    }
+  ];
+}
+
+message EnsureMcpInstanceResponse {
+  McpInstance instance = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Details of the MCP instance"}];
+}
+
+message ListMcpInstancesRequest {
+  message Filter {
+    string id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Filter by MCP instance id"}];
+    string name = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Filter by exact instance name"}];
+    string config_name = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Filter by MCP configuration name"}];
+    string user_identifier = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Filter by user identifier"}];
+  }
+
+  Filter filter = 1;
+  string search = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Case-insensitive look-ahead search across instance name and user identifier"}];
+  uint32 page_size = 3 [
+    (buf.validate.field).uint32 = {lte: 30},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Number of instances to return per page (max 30)"}
+  ];
+  string page_token = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Pagination token to fetch the next or previous page"}];
+}
+
+message ListMcpInstancesResponse {
+  repeated McpInstance instances = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of MCP instances"}];
+  string next_page_token = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Pagination token to fetch the next page"}];
+  string prev_page_token = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Pagination token to fetch the previous page"}];
+  uint32 total_size = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Total number of instances matching the filter"}];
+}
+
+message DeleteMcpInstanceRequest {
+  string instance_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {min_len: 1},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "ID of the MCP instance to delete"
+      example: "\"inst_88630864544790977\""
+    }
+  ];
+}
+
+message DeleteMcpInstanceResponse {}
+
+message UpdateMcpInstanceRequest {
+  string instance_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {min_len: 1},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "ID of the MCP instance to update"
+      example: "\"inst_88630864544790977\""
+    }
+  ];
+
+  string name = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "New display name for the MCP instance"
+    example: "\"daily-digest-updated\""
+  }];
+
+  string config_name = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "New MCP configuration name to attach to the instance"
+    example: "\"daily-summarizer\""
+  }];
+}
+
+message UpdateMcpInstanceResponse {
+  McpInstance instance = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Updated MCP instance"}];
+}
+
+message GetMcpInstanceRequest {
+  string instance_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {min_len: 1},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "ID of the MCP instance to fetch"
+      example: "\"inst_88630864544790977\""
+    }
+  ];
+}
+
+message GetMcpInstanceResponse {
+  McpInstance instance = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The requested MCP instance"}];
+}
+
+message GetMcpInstanceAuthStateRequest {
+  string instance_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {min_len: 1},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "ID of the MCP instance whose connection statuses are requested"
+      example: "\"inst_88630864544790977\""
+    }
+  ];
+
+  bool include_auth_links = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Whether to generate fresh authentication links for each connection"}];
+}
+
+message McpInstanceConnectionAuthState {
+  string connection_id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Underlying connection identifier"}];
+  string connection_name = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Developer-assigned connection name"}];
+  string provider = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Provider backing the connection"}];
+  string connected_account_id = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Connected account backing the connection"}];
+  string connected_account_status = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Current authentication status of the connected account"}];
+  string authentication_link = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Magic link for reconnecting the connected account"}];
+}
+
+message GetMcpInstanceAuthStateResponse {
+  repeated McpInstanceConnectionAuthState connections = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Status of each connection mapped to the instance"}];
+}
+
+message McpInstance {
+  string id = 1 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique ID of the MCP instance"
+      example: "\"inst_88630864544790977\""
+    }
+  ];
+
+  string name = 2 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Display name of the instance"
+      example: "\"daily-digest\""
+    }
+  ];
+
+  string user_identifier = 3 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Identifier for the user who owns or uses this instance"
+      example: "\"akshay.parihar\""
+    }
+  ];
+
+  McpConfig config = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Configuration backing this instance"}];
+
+  google.protobuf.Timestamp last_used_at = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp when the instance was last used"
+    example: "\"0001-01-01T00:00:00Z\""
+  }];
+
+  google.protobuf.Timestamp updated_at = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp when the instance was last updated"
+    example: "\"2025-10-07T12:21:00Z\""
+  }];
+
+  string url = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "URL to reach the MCP instance"
+    example: "\"https://example.com/mcp/v1/abc123\""
+  }];
+}
+
+message McpConfig {
+  string id = 1 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique ID of the MCP config"
+      example: "\"cfg_85630864460904897\""
+    }
+  ];
+
+  string name = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {min_len: 1},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique name for the MCP configuration"
+      example: "\"daily-summarizer\""
+    }
+  ];
+
+  string description = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Description of the MCP configuration"
+    example: "\"Summarizes daily emails and posts to Slack\""
+  }];
+
+  repeated McpConfigConnectionToolMapping connection_tool_mappings = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of connection-to-tool mappings for this MCP config"}];
+}
+
+message McpConfigConnectionToolMapping {
+  string connection_id = 1 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Unique ID of the connection"}
+  ];
+  string connection_name = 2 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Developer-assigned connection name"}
+  ];
+  string provider = 3 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Provider name for this connection"}
+  ];
+  repeated string tools = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of tool names linked to this connection (empty = all tools)"}];
+  optional string connected_account_id = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Connected account backing this connection in the MCP instance context"}];
+  optional string connected_account_status = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Authentication status for the connected account"}];
+}

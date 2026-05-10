@@ -1,0 +1,516 @@
+syntax = "proto3";
+
+package scalekit.v1.auth.webauthn;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/api/visibility.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "scalekit/v1/options/options.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/auth/webauthn";
+
+service WebAuthnService {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_tag) = {
+    name: "Passkeys"
+    description: "Endpoints for passkey-based authentication using WebAuthn/FIDO2 standards."
+  };
+
+  rpc BeginRegistration(BeginRegistrationRequest) returns (BeginRegistrationResponse) {
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (scalekit.v1.options.auth_option) = {authentication_type: SESSION_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/webauthn/registration:begin"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Start passkey registration"
+      description: "Initiates passkey registration for the current user. Returns a challenge and configuration options to be sent to the client's authenticator."
+      responses: {
+        key: "200"
+        value: {
+          description: "Registration initiated with challenge and WebAuthn options"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.auth.webauthn.BeginRegistrationResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc FinishRegistration(FinishRegistrationRequest) returns (FinishRegistrationResponse) {
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (scalekit.v1.options.auth_option) = {authentication_type: SESSION_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/webauthn/registration:finish"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Complete passkey registration"
+      description: "Completes passkey registration by validating the authenticator response. Returns success status after storing the credential."
+      responses: {
+        key: "200"
+        value: {
+          description: "Registration completed and credential stored"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.auth.webauthn.FinishRegistrationResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc BeginAuthentication(BeginAuthenticationRequest) returns (BeginAuthenticationResponse) {
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (scalekit.v1.options.auth_option) = {authentication_type: NONE};
+    option (google.api.http) = {
+      post: "/api/v1/webauthn/authentication:begin"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Start passkey authentication"
+      description: "Initiates passkey authentication. Optionally accepts an email to filter registered credentials. Returns a session ID and challenge for the client authenticator."
+      responses: {
+        key: "200"
+        value: {
+          description: "Authentication initiated with session and challenge"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.auth.webauthn.BeginAuthenticationResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc FinishAuthentication(FinishAuthenticationRequest) returns (FinishAuthenticationResponse) {
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (scalekit.v1.options.auth_option) = {authentication_type: NONE};
+    option (google.api.http) = {
+      post: "/api/v1/webauthn/authentication:finish"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Complete passkey authentication"
+      description: "Completes passkey authentication by validating the authenticator response. On success, returns the user ID and session token for establishing a user session."
+      responses: {
+        key: "200"
+        value: {
+          description: "Authentication completed with user session token"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.auth.webauthn.FinishAuthenticationResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc ListCredentials(ListCredentialsRequest) returns (ListCredentialsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {get: "/api/v1/webauthn/credentials"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "List user's passkeys"
+      description: "Retrieves all registered passkeys for the current user, including device information, creation timestamps, and display names. Use this to show users their registered authenticators."
+      responses: {
+        key: "200"
+        value: {
+          description: "List of passkeys with metadata"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.auth.webauthn.ListCredentialsResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc DeleteCredential(DeleteCredentialRequest) returns (DeleteCredentialResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {delete: "/api/v1/webauthn/credentials/{credential_id}"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Remove a passkey"
+      description: "Deletes a specific passkey credential for the current user. After removal, the authenticator can no longer be used for authentication."
+      responses: {
+        key: "200"
+        value: {
+          description: "Passkey successfully deleted"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.auth.webauthn.DeleteCredentialResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc UpdateCredential(UpdateCredentialRequest) returns (UpdateCredentialResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: SESSION_CLIENT};
+    option (google.api.http) = {
+      patch: "/api/v1/webauthn/credentials/{credential_id}"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Rename a passkey"
+      description: "Updates the display name of a passkey credential to help users identify their authenticators. Only the display name can be modified."
+      responses: {
+        key: "200"
+        value: {
+          description: "Passkey successfully updated with new name"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.auth.webauthn.UpdateCredentialResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc GetRelatedOrigins(GetRelatedOriginsRequest) returns (GetRelatedOriginsResponse) {
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (scalekit.v1.options.auth_option) = {authentication_type: NONE};
+    option (google.api.http) = {get: "/.well-known/webauthn"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Get WebAuthn related origins"
+      description: "Retrieves the list of related origins configured for cross-origin passkey authentication. Serves the standard .well-known/webauthn endpoint."
+      responses: {
+        key: "200"
+        value: {
+          description: "List of configured related origins"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.auth.webauthn.GetRelatedOriginsResponse"}
+          }
+        }
+      }
+    };
+  }
+}
+
+message BeginRegistrationRequest {}
+
+message BeginRegistrationResponse {
+  google.protobuf.Struct options = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "WebAuthn options including challenge and user information for the authenticator"}];
+}
+
+message FinishRegistrationRequest {
+  bytes credential_id = 1 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The unique credential identifier generated by the authenticator"}
+  ];
+  bytes attestation_object = 2 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The attestation object from the authenticator response, contains the credential public key"}
+  ];
+  bytes client_data_json = 3 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Client-side JSON data from the authenticator, used for verification"}
+  ];
+  string type = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Credential type, typically \"public-key\""
+    example: "\"public-key\""
+  }];
+  repeated string transports = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Optional transport hints (e.g., \"usb\", \"ble\", \"nfc\", \"internal\")"}];
+  string authenticator_attachment = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Authenticator attachment type: \"platform\" (built-in) or \"cross-platform\""
+    example: "\"platform\""
+  }];
+  google.protobuf.Struct client_extension_results = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Extension results from the client, if any extensions were requested"}];
+}
+
+message FinishRegistrationResponse {
+  bool success = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Whether the credential was successfully registered"
+    example: "true"
+  }];
+}
+
+message BeginAuthenticationRequest {
+  optional string email = 1 [
+    (buf.validate.field).string = {email: true},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Optional email to filter registered credentials (enables usernameless flow)"
+      example: "\"user@example.com\""
+    }
+  ];
+}
+
+message BeginAuthenticationResponse {
+  string session_id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Session identifier for linking begin and finish authentication calls"
+    example: "\"sess_abc123\""
+  }];
+  google.protobuf.Struct options = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "WebAuthn options including challenge and allowed credentials for the authenticator"}];
+}
+
+message FinishAuthenticationRequest {
+  string session_id = 1 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Session identifier from the BeginAuthentication call"
+      example: "\"sess_abc123\""
+    }
+  ];
+  bytes credential_id = 2 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The credential ID being used for authentication"}
+  ];
+  google.protobuf.Struct client_extension_results = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Extension results from the client, if any extensions were requested"}];
+  string type = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Credential type, typically \"public-key\""
+    example: "\"public-key\""
+  }];
+  AuthenticatorAssertionResponse response = 5 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The authenticator's response to the challenge"}
+  ];
+  string authenticator_attachment = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Authenticator attachment type: \"platform\" (built-in) or \"cross-platform\""
+    example: "\"cross-platform\""
+  }];
+}
+
+message AuthenticatorAssertionResponse {
+  bytes authenticator_data = 1 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Binary data about the authenticator state and signature"}
+  ];
+  bytes client_data_json = 2 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Client-side JSON data, includes challenge and origin for verification"}
+  ];
+  bytes signature = 3 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Cryptographic signature of the challenge, proves possession of the private key"}
+  ];
+  bytes user_handle = 4 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "User ID that authenticated, binds assertion to the registered credential"}
+  ];
+}
+
+message FinishAuthenticationResponse {
+  bool success = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Whether the authentication was successful"
+    example: "true"
+  }];
+  string user_id = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The ID of the authenticated user"
+    example: "\"user_xyz789\""
+  }];
+  string session_token = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Session token for establishing the user session"
+    example: "\"eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...\""
+  }];
+}
+
+message WebAuthnConfiguration {
+  string rp_id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Relying Party ID, typically the domain name"
+    example: "\"example.com\""
+  }];
+  string rp_origin = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Origin URL where the credential is registered"
+    example: "\"https://example.com\""
+  }];
+  string user_verification = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "User verification requirement: \"required\", \"preferred\", or \"discouraged\""
+    example: "\"preferred\""
+  }];
+  string authenticator_attachment = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Preferred authenticator type: \"platform\", \"cross-platform\", or empty for either"
+    example: "\"platform\""
+  }];
+  string resident_key = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Resident key requirement: \"required\", \"preferred\", or \"discouraged\""
+    example: "\"preferred\""
+  }];
+  int64 timeout = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timeout in milliseconds for the authenticator to complete the operation"
+    example: "60000"
+  }];
+  repeated string allowed_transports = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Allowed transport types the authenticator can use"}];
+}
+
+message ListCredentialsRequest {
+  string user_id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "User ID to list credentials for (optional, current user if not provided)"
+    example: "\"user_xyz789\""
+  }];
+}
+
+message ListCredentialsResponse {
+  repeated WebAuthnCredential credentials = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "All passkeys registered for the user"}];
+  AllAcceptedCredentialsOptions all_accepted_credentials_options = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Options including RP ID and all accepted credential IDs for authentication"}];
+}
+
+message DeleteCredentialRequest {
+  string credential_id = 1 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "The credential ID to delete"
+      example: "\"cred_abc123\""
+    }
+  ];
+}
+
+message DeleteCredentialResponse {
+  bool success = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Whether the credential was successfully deleted"
+    example: "true"
+  }];
+  UnknownCredentialOptions unknown_credential_options = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Options for handling unknown credentials in client applications"}];
+}
+
+message UnknownCredentialOptions {
+  string rp_id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The RP ID for this credential"
+    example: "\"example.com\""
+  }];
+  string credential_id = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The deleted credential ID"
+    example: "\"cred_abc123\""
+  }];
+}
+
+message AllAcceptedCredentialsOptions {
+  string rp_id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Relying Party ID for credential operations"
+    example: "\"example.com\""
+  }];
+  string user_id = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "User ID for credential verification"
+    example: "\"user_xyz789\""
+  }];
+  repeated string all_accepted_credential_ids = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of credential IDs the user can authenticate with"}];
+}
+
+message UpdateCredentialRequest {
+  string credential_id = 1 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "The credential ID to update"
+      example: "\"cred_abc123\""
+    }
+  ];
+  string display_name = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 120
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Human-friendly name for this credential (1-120 characters)"
+      example: "\"My iPhone 15 Pro\""
+    }
+  ];
+}
+
+message UpdateCredentialResponse {
+  WebAuthnCredential credential = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The updated credential with new display name"}];
+}
+
+message WebAuthnCredential {
+  message AuthenticatorFlags {
+    bool user_present = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Whether the user was present during authentication"}];
+    bool user_verified = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Whether the user was verified (e.g., fingerprint, PIN)"}];
+    bool backup_eligible = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Whether this credential can be backed up to another device"}];
+    bool backup_state = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Whether this credential was synced or backed up"}];
+  }
+
+  message Authenticator {
+    string aaguid = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Authenticator Attestation GUID (AAGUID) identifying the device model"}];
+    string name = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Human-readable name of the authenticator model"
+      example: "\"Apple Touch ID\""
+    }];
+    string attachment = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Attachment type: \"platform\" (built-in) or \"cross-platform\""
+      example: "\"platform\""
+    }];
+    string icon_dark = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Icon URL for dark theme display"}];
+    string icon_light = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Icon URL for light theme display"}];
+  }
+
+  message UserAgent {
+    string raw = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Raw user agent string from the browser"}];
+    string url = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Parsed user agent URL reference"}];
+    string browser = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Browser name (e.g., \"Chrome\", \"Safari\")"
+      example: "\"Chrome\""
+    }];
+    string browser_version = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Browser version number"
+      example: "\"120.0.6099.129\""
+    }];
+    string os = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Operating system name (e.g., \"Windows\", \"iOS\")"
+      example: "\"macOS\""
+    }];
+    string os_version = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Operating system version"
+      example: "\"14.2\""
+    }];
+    string device_type = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Device type: \"desktop\", \"mobile\", or \"tablet\""
+      example: "\"mobile\""
+    }];
+    string device_model = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Device model if available"
+      example: "\"iPhone15,2\""
+    }];
+  }
+
+  message ClientInfo {
+    string ip = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "IP address from which credential was registered"
+      example: "\"192.0.2.1\""
+    }];
+    string region = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Geographic region (e.g., \"US\")"
+      example: "\"US\""
+    }];
+    string region_subdivision = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Regional subdivision (e.g., \"CA\")"
+      example: "\"CA\""
+    }];
+    string city = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "City name"
+      example: "\"San Francisco\""
+    }];
+  }
+
+  string id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Credential unique identifier"
+    example: "\"cred_abc123\""
+  }];
+  string user_id = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "User ID this credential belongs to"
+    example: "\"user_xyz789\""
+  }];
+  bytes credential_id = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The actual credential ID bytes from the authenticator"}];
+  string attestation_type = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Type of attestation: \"none\", \"indirect\", or \"direct\""
+    example: "\"direct\""
+  }];
+  Authenticator authenticator = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Authenticator information including model and name"}];
+  repeated string transports = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Supported transports for this credential"}];
+  AuthenticatorFlags authenticator_flags = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Flags indicating authenticator capabilities"}];
+  google.protobuf.Timestamp created_at = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp when the credential was created"
+    example: "\"2025-02-15T06:23:44.560Z\""
+  }];
+  google.protobuf.Timestamp updated_at = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp of last update"
+    example: "\"2025-02-15T06:23:44.560Z\""
+  }];
+  UserAgent user_agent = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Browser and device information from registration"}];
+  ClientInfo client_info = 11 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Geographic and network information from registration"}];
+  optional string display_name = 12 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Optional user-friendly name for this passkey"
+    example: "\"My Yubikey\""
+  }];
+}
+
+message GetRelatedOriginsRequest {}
+
+message GetRelatedOriginsResponse {
+  repeated string origins = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of related origins for cross-origin passkey authentication"}];
+}

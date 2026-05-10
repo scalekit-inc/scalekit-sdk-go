@@ -1,0 +1,306 @@
+syntax = "proto3";
+
+package scalekit.v1.keys;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/api/visibility.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "scalekit/v1/options/options.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/keys";
+
+// KeyManagementService provides operations for managing encryption keys
+// including Data Encryption Keys (DEKs) and master key rotation.
+service KeyManagementService {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_tag) = {
+    name: "Key Management"
+    description: "Encryption key management for envelope encryption"
+  };
+
+  // CreateDEK creates a new Data Encryption Key (DEK) for an environment.
+  // If a DEK already exists, this will create a new version.
+  rpc CreateDEK(CreateDEKRequest) returns (CreateDEKResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/keys/deks"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Key Management"
+      summary: "Create a new DEK"
+      description: "Creates a new Data Encryption Key (DEK) for the current environment. If a DEK already exists, this creates a new version. The DEK is automatically wrapped with the current master key and stored securely."
+    };
+  }
+
+  // RotateDEK creates a new DEK version for an environment.
+  // Re-encrypts existing data (oidc_client_secrets, connection client_secrets) and deprecates old DEK versions.
+  rpc RotateDEK(RotateDEKRequest) returns (RotateDEKResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/keys/deks:rotate"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Key Management"
+      summary: "Rotate DEK"
+      description: "Creates a new DEK version for the environment. Re-encrypts existing data (oidc_client_secrets, connection client_secrets) and deprecates previous DEK versions."
+    };
+  }
+
+  // ListDEKs lists DEKs for an environment with pagination.
+  rpc ListDEKs(ListDEKsRequest) returns (ListDEKsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {get: "/api/v1/keys/deks"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Key Management"
+      summary: "List DEKs"
+      description: "Lists Data Encryption Keys (DEKs) for the current environment with pagination. Supports optional status filter (ACTIVE, DEPRECATED). Use page_token from the response to fetch the next page."
+    };
+  }
+
+  // DeleteDEK deprecates or permanently deletes a DEK version.
+  // Deprecated DEKs can still be used for decryption but not for encryption.
+  rpc DeleteDEK(DeleteDEKRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {delete: "/api/v1/keys/deks/{dek_version}"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Key Management"
+      summary: "Delete DEK"
+      description: "Deprecates a specific DEK version. Deprecated DEKs can still decrypt existing data but cannot be used for new encryption operations."
+    };
+  }
+
+  // RotateMasterKey rotates the master key and rewraps all DEKs.
+  // This operation is idempotent and supports zero-downtime rotation.
+  rpc RotateMasterKey(RotateMasterKeyRequest) returns (RotateMasterKeyResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/keys/master:rotate"
+      body: "*"
+    };
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Key Management"
+      summary: "Rotate Master Key"
+      description: "Creates a new master key version, promotes it to primary, and rewraps all DEKs with the new master key. This operation supports zero-downtime rotation."
+    };
+  }
+
+  // CreateMasterKey creates a new master key version (in a non-active state).
+  rpc CreateMasterKey(CreateMasterKeyRequest) returns (CreateMasterKeyResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/keys/master"
+      body: "*"
+    };
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Key Management"
+      summary: "Create Master Key"
+      description: "Creates a new master key version with the specified provider and key reference. The new key is created in CREATED status and is not used for encryption until it is explicitly promoted to ACTIVE via SetActiveMasterKey."
+    };
+  }
+
+  // SetActiveDEK sets a specific DEK version as active for an environment.
+  rpc SetActiveDEK(SetActiveDEKRequest) returns (SetActiveDEKResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/keys/deks/{dek_version}:setactive"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Key Management"
+      summary: "Set Active DEK"
+      description: "Sets a specific DEK version as active for the environment and deprecates other versions. This allows switching back to an older DEK version if needed."
+    };
+  }
+
+  // SetActiveMasterKey sets a specific master key version as active.
+  rpc SetActiveMasterKey(SetActiveMasterKeyRequest) returns (SetActiveMasterKeyResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/keys/master/{version}:setactive"
+      body: "*"
+    };
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Key Management"
+      summary: "Set Active Master Key"
+      description: "Sets a specific master key version as active and deprecates other versions. This promotes the specified version to primary for new encryption operations."
+    };
+  }
+
+  // DestroyDEK permanently deletes a DEK version.
+  // WARNING: This operation is irreversible and will make data encrypted with this DEK unrecoverable.
+  rpc DestroyDEK(DestroyDEKRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {delete: "/api/v1/keys/deks/{dek_version}:destroy"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Key Management"
+      summary: "Destroy DEK"
+      description: "Permanently deletes a DEK version from the database. WARNING: This operation is irreversible. Any data encrypted with this DEK will become unrecoverable. Use with extreme caution."
+    };
+  }
+
+  // DestroyMasterKey permanently deletes a master key version.
+  // WARNING: This operation is irreversible and will make DEKs wrapped with this master key unrecoverable.
+  rpc DestroyMasterKey(DestroyMasterKeyRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: CLIENT};
+    option (google.api.http) = {delete: "/api/v1/keys/master/{version}:destroy"};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Key Management"
+      summary: "Destroy Master Key"
+      description: "Permanently deletes a master key version from the database. WARNING: This operation is irreversible. Any DEKs wrapped with this master key will become unrecoverable. Use with extreme caution."
+    };
+  }
+}
+
+// DEKKeyType represents the type of Data Encryption Key
+enum DEKKeyType {
+  DEK_KEY_TYPE_UNSPECIFIED = 0; // Default: ENVIRONMENT_KEY (envelope encryption)
+  ENVIRONMENT_KEY = 1;
+  BYOK = 2; // Bring Your Own Key - key_ref points to customer KMS
+  SCALEKIT_MANAGED_KEY = 3; // Scalekit-managed KMS key
+}
+
+// CreateDEKRequest requests creation of a new DEK
+message CreateDEKRequest {
+  // Optional: key type. If BYOK or SCALEKIT_MANAGED_KEY, provider and key_ref are required.
+  optional DEKKeyType key_type = 1;
+  // KMS provider (GCP, AWS, AZURE, LOCAL). Required when key_type is BYOK or SCALEKIT_MANAGED_KEY.
+  optional string provider = 2;
+  // KMS key URI or identifier. Required when key_type is BYOK or SCALEKIT_MANAGED_KEY.
+  optional string key_ref = 3;
+}
+
+// CreateDEKResponse returns the created DEK information
+message CreateDEKResponse {
+  EnvironmentKey dek = 1;
+}
+
+// RotateDEKRequest requests DEK rotation. Empty body - uses environment from request context.
+message RotateDEKRequest {}
+
+// RotateDEKResponse returns the new DEK version
+message RotateDEKResponse {
+  EnvironmentKey dek = 1;
+}
+
+// ListDEKsRequest requests listing of DEKs with pagination.
+message ListDEKsRequest {
+  // Optional: filter by status (ACTIVE, DEPRECATED)
+  optional string status = 1;
+  // Page size. Defaults to 10, max 100.
+  uint32 page_size = 2;
+  // Page token from a previous ListDEKsResponse.next_page_token. Omit for first page.
+  string page_token = 3;
+}
+
+// ListDEKsResponse returns a page of DEKs and pagination token.
+message ListDEKsResponse {
+  repeated EnvironmentKey deks = 1;
+  // Token for the next page. Empty if no more pages.
+  string next_page_token = 2;
+  // Total number of DEKs matching the request (across all pages).
+  uint32 total_size = 3;
+}
+
+// DeleteDEKRequest requests deletion of a DEK version
+message DeleteDEKRequest {
+  // DEK version to delete
+  int32 dek_version = 1 [(buf.validate.field).int32 = {gt: 0}];
+}
+
+// RotateMasterKeyRequest requests master key rotation
+message RotateMasterKeyRequest {
+  // Empty - rotates global master key
+}
+
+// RotateMasterKeyResponse returns master key rotation result
+message RotateMasterKeyResponse {
+  MasterKey new_master_key = 1;
+}
+
+// EnvironmentKey represents a Data Encryption Key (DEK) for an environment
+message EnvironmentKey {
+  string id = 1;
+  string environment_id = 2;
+  int32 dek_version = 3;
+  int32 master_version = 4;
+  string algorithm = 5;
+  string status = 6; // CREATED, ACTIVE, DEPRECATED
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp rotated_at = 8;
+}
+
+// MasterKey represents a master key version
+message MasterKey {
+  string id = 1;
+  string provider = 2; // GCP, AWS, AZURE, LOCAL
+  string key_ref = 3; // KMS key URI
+  int32 version = 4;
+  string status = 5; // CREATED, ACTIVE, DEPRECATED, DISABLED
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp rotated_at = 7;
+}
+
+// CreateMasterKeyRequest requests creation of a new master key
+message CreateMasterKeyRequest {
+  // KMS provider (GCP, AWS, AZURE, LOCAL)
+  string provider = 1 [(buf.validate.field).string = {
+    in: [
+      "GCP",
+      "AWS",
+      "AZURE",
+      "LOCAL"
+    ]
+  }];
+  // Key reference (KMS key URI for cloud providers, identifier for LOCAL)
+  string key_ref = 2 [(buf.validate.field).string = {min_len: 1}];
+  // Optional: specify a custom version number (auto-incremented if not provided)
+  optional int32 version = 3;
+}
+
+// CreateMasterKeyResponse returns the created master key information
+message CreateMasterKeyResponse {
+  MasterKey master_key = 1;
+}
+
+// SetActiveDEKRequest requests setting a DEK version as active
+message SetActiveDEKRequest {
+  // DEK version to set as active
+  int32 dek_version = 1 [(buf.validate.field).int32 = {gt: 0}];
+}
+
+// SetActiveDEKResponse returns the updated DEK information
+message SetActiveDEKResponse {
+  EnvironmentKey dek = 1;
+}
+
+// SetActiveMasterKeyRequest requests setting a master key version as active
+message SetActiveMasterKeyRequest {
+  // Master key version to set as active
+  int32 version = 1 [(buf.validate.field).int32 = {gt: 0}];
+}
+
+// SetActiveMasterKeyResponse returns the updated master key information
+message SetActiveMasterKeyResponse {
+  MasterKey master_key = 1;
+}
+
+// DestroyDEKRequest requests permanent deletion of a DEK version
+message DestroyDEKRequest {
+  // DEK version to destroy
+  int32 dek_version = 1 [(buf.validate.field).int32 = {gt: 0}];
+}
+
+// DestroyMasterKeyRequest requests permanent deletion of a master key version
+message DestroyMasterKeyRequest {
+  // Master key version to destroy
+  int32 version = 1 [(buf.validate.field).int32 = {gt: 0}];
+}

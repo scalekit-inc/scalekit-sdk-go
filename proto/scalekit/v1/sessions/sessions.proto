@@ -1,0 +1,355 @@
+syntax = "proto3";
+
+package scalekit.v1.sessions;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/api/visibility.proto";
+import "google/protobuf/timestamp.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "scalekit/v1/options/options.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/sessions";
+
+service SessionService {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_tag) = {
+    name: "Sessions"
+    description: "Comprehensive session management for user authentication and authorization. This service provides endpoints for retrieving session details, managing user sessions across devices, revoking individual sessions, and terminating all active sessions for a user. It supports session auditing, device tracking, and security monitoring with detailed session metadata including device information, IP geolocation, and activity timestamps."
+  };
+
+  rpc GetSession(SessionDetailsRequest) returns (SessionDetails) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {get: "/api/v1/sessions/{session_id}"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Sessions"
+      summary: "Get session details"
+      description: "Retrieves comprehensive details for a specific user session including authentication status, device information, and expiration timelines. Use this endpoint to fetch current session metadata for security audits, session validation, or to display session information in user account management interfaces. Returns all session properties including the user ID, authenticated organizations, device details with browser/OS information, IP address and geolocation, and all relevant timestamps (creation, last activity, idle expiration, absolute expiration, and actual expiration if applicable)."
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved session details"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.sessions.SessionDetails"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc RevokeSession(RevokeSessionRequest) returns (RevokeSessionResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {post: "/api/v1/sessions/{session_id}/revoke"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Sessions"
+      summary: "Revoke user session"
+      description: "Immediately invalidates a specific user session by session ID, setting its status to 'revoked'. Once revoked, the session cannot be used for any future API requests or application access. Use this endpoint to implement session-level logout, force a user to reauthenticate on a specific device, or terminate suspicious sessions. The revocation is instantaneous and irreversible. Returns the revoked session details including the session ID, user ID, and the revocation timestamp."
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully revoked the session. Returns the revoked session details"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.sessions.RevokeSessionResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc GetUserSessions(UserSessionDetailsRequest) returns (UserSessionDetails) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {get: "/api/v1/users/{user_id}/sessions"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Sessions"
+      summary: "List user sessions"
+      description: "Retrieves a paginated list of all sessions associated with a specific user across all devices and browsers. Use this endpoint to audit user activity, display all active sessions in account management interfaces, or verify user authentication status across devices. Supports filtering by session status (active, expired, revoked, logout) and time range (creation date). Returns session details for each session including device information, IP address, geolocation, and current status. The response includes pagination metadata (page tokens and total count) to handle large session lists efficiently."
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved user sessions. Returns a list of sessions with pagination information"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.sessions.UserSessionDetails"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc RevokeAllUserSessions(RevokeAllUserSessionsRequest) returns (RevokeAllUserSessionsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {post: "/api/v1/users/{user_id}/sessions/revoke"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Sessions"
+      summary: "Revoke all user sessions"
+      description: "Immediately invalidates all active sessions for a specific user across all devices and browsers, setting their status to 'revoked'. Use this endpoint to implement global logout functionality, force re-authentication after security incidents, or terminate all sessions following a password reset or credential compromise. Only active sessions are revoked; already expired, logout, or previously revoked sessions remain unchanged. The revocation is atomic and instantaneous. Returns a list of all revoked sessions with their details and a total count of sessions revoked."
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully revoked all user sessions. Returns the list of revoked sessions and total count"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.sessions.RevokeAllUserSessionsResponse"}
+          }
+        }
+      }
+    };
+  }
+}
+
+message SessionDetailsRequest {
+  string session_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.pattern = "^ses_[0-9]+$",
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the session. Must start with 'ses_' prefix."
+      example: "\"ses_1234567890123456\""
+    }
+  ];
+}
+
+message UserSessionDetailsRequest {
+  string user_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.pattern = "^usr_[0-9]+$",
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the user whose sessions to retrieve. Must start with 'usr_' prefix."
+      example: "\"usr_1234567890123456\""
+    }
+  ];
+  uint32 page_size = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Maximum number of sessions to return in a single page. Optional parameter. If not specified, defaults to a server-defined limit. Use smaller values for faster responses, larger values for fewer requests."
+    example: "50"
+  }];
+  string page_token = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Pagination token from the previous response for retrieving the next page of results. Leave empty for the first page. Use the next_page_token from a previous response to fetch subsequent pages."
+    example: "\"eyJwYWdlIjogMiwgImxhc3RfaWQiOiAic2VzXzEyMzQ1In0=\""
+  }];
+  UserSessionFilter filter = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Optional filter criteria to narrow session results. Can filter by one or more statuses and/or a time range of creation dates. Leave empty to retrieve all sessions."}];
+}
+
+message UserSessionFilter {
+  repeated string status = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Filter sessions by one or more status values. Possible values: 'active', 'expired', 'revoked', 'logout'. Leave empty to include all statuses. Multiple values use OR logic (e.g., status=['active', 'expired'] returns sessions that are either active OR expired)."
+    example: "[\"active\"]"
+  }];
+  google.protobuf.Timestamp start_time = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Filter to include only sessions created on or after this timestamp. Optional. Uses RFC 3339 format. Useful for querying sessions within a specific time window."
+    example: "\"2025-01-01T00:00:00Z\""
+  }];
+  google.protobuf.Timestamp end_time = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Filter to include only sessions created on or before this timestamp. Optional. Uses RFC 3339 format. Must be after start_time if both are specified."
+    example: "\"2025-12-31T23:59:59Z\""
+  }];
+}
+
+message RevokeSessionRequest {
+  string session_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.pattern = "^ses_[0-9]+$",
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the session to revoke. Must start with 'ses_' prefix."
+      example: "\"ses_1234567890123456\""
+    }
+  ];
+}
+
+message RevokeSessionResponse {
+  RevokedSessionDetails revoked_session = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Details of the revoked session including session ID, user ID, creation and revocation timestamps, and final device information."}];
+}
+
+message RevokeAllUserSessionsRequest {
+  string user_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.pattern = "^usr_[0-9]+$",
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the user whose all sessions will be revoked. Must start with 'usr_' prefix."
+      example: "\"usr_1234567890123456\""
+    }
+  ];
+}
+
+message RevokeAllUserSessionsResponse {
+  repeated RevokedSessionDetails revoked_sessions = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of all sessions that were revoked, including detailed information for each revoked session with IDs, timestamps, and device details."}];
+  uint32 total_revoked = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Total count of active sessions that were revoked. Useful for confirmation and audit logging."
+    example: "5"
+  }];
+}
+
+message UserSessionDetails {
+  repeated SessionDetails sessions = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Array of session objects for the requested user. May contain fewer entries than the requested page_size when reaching the final page of results."}];
+  string next_page_token = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Pagination token for retrieving the next page of results. Empty string if there are no more pages (you have reached the final page of results)."
+    example: "\"eyJwYWdlIjogMiwgImxhc3RfaWQiOiAic2VzXzEyMzQ1In0=\""
+  }];
+  string prev_page_token = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Pagination token for retrieving the previous page of results. Empty string for the first page. Use this to navigate backward through result pages."
+    example: "\"eyJwYWdlIjogMCwgImZpcnN0X2lkIjogInNlc183OTAxIn0=\""
+  }];
+  uint32 total_size = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Total number of sessions matching the applied filter criteria, regardless of pagination. This represents the complete result set size before pagination is applied."
+    example: "42"
+  }];
+}
+
+message SessionDetails {
+  string session_id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Unique identifier for the session. System-generated read-only field used to reference this session."
+    example: "\"ses_1234567890123456\""
+  }];
+  string user_id = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Unique identifier for the user who owns and is authenticated within this session."
+    example: "\"usr_1234567890123456\""
+  }];
+  repeated string authenticated_organizations = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "List of organization IDs that have been authenticated for this user within the current session. Contains all organizations where the user has successfully completed SSO or authentication."
+    example: "[\"org_123\", \"org_456\"]"
+  }];
+  string organization_id = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Organization ID for the user's most recently active organization within this session. This represents the primary organization context for the current session."
+    example: "\"org_1234567890123456\""
+  }];
+  google.protobuf.Timestamp created_at = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp indicating when the session was created. This is set once at session creation and remains constant throughout the session lifetime."
+    example: "\"2025-01-15T10:30:00Z\""
+  }];
+  google.protobuf.Timestamp updated_at = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp indicating when the session was last updated. Updated whenever session state changes such as organization context changes or metadata updates."
+    example: "\"2025-01-15T10:45:00Z\""
+  }];
+  google.protobuf.Timestamp idle_expires_at = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Projected expiration timestamp if the session remains idle without user activity. This timestamp is recalculated with each user activity. Session will be automatically terminated at this time if no activity occurs."
+    example: "\"2025-01-15T11:30:00Z\""
+  }];
+  google.protobuf.Timestamp absolute_expires_at = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Hard expiration timestamp for the session regardless of user activity. The session will be forcibly terminated at this time. This represents the maximum session lifetime from creation."
+    example: "\"2025-01-22T10:30:00Z\""
+  }];
+  google.protobuf.Timestamp expired_at = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp when the session was terminated. Null if the session is still active. Set when the session expires due to reaching idle_expires_at or absolute_expires_at timeout, or when administratively revoked. Not set for user-initiated logout (see logout_at instead)."
+    example: "\"2025-01-15T12:00:00Z\""
+  }];
+  google.protobuf.Timestamp logout_at = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp when the user explicitly logged out from the session. Null if the user has not logged out. When set, indicates the session ended due to explicit user logout rather than timeout."
+    example: "\"2025-01-15T14:00:00Z\""
+  }];
+  string status = 11 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Current operational status of the session. Possible values: 'active' (session is valid and requests are allowed), 'expired' (session terminated due to idle or absolute timeout), 'revoked' (session was administratively revoked), 'logout' (user explicitly logged out). Use this to determine if the session can be used for new requests."
+    example: "\"active\""
+  }];
+  DeviceDetails device = 12 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Complete device metadata associated with this session including browser, operating system, device type, and geographic location based on IP address."}];
+  google.protobuf.Timestamp last_active_at = 13 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp of the most recent user activity detected in this session. Updated on each API request or user interaction. Used to determine if a session has exceeded the idle timeout threshold."
+    example: "\"2025-01-15T10:55:30Z\""
+  }];
+  repeated AuthenticatedClients authenticated_clients = 14 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Details of the authenticated clients for this session: client ID and organization context."}];
+}
+
+message DeviceDetails {
+  string user_agent = 12 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Complete HTTP User-Agent header string from the client request. Contains browser type, version, and operating system information. Used for detailed device fingerprinting and user agent analysis."
+    example: "\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36\""
+  }];
+  string os = 13 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Operating system name extracted from the user agent and device headers. Examples: macOS, Windows, Linux, iOS, Android."
+    example: "\"macOS\""
+  }];
+  string os_version = 14 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Version of the operating system. Represents the specific OS release the device is running."
+    example: "\"14.2\""
+  }];
+  string browser = 15 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Browser name and family extracted from the user agent. Examples: Chrome, Safari, Firefox, Edge, Mobile Safari."
+    example: "\"Chrome\""
+  }];
+  string browser_version = 16 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Version of the browser application. Represents the specific release version of the browser being used."
+    example: "\"120.0.0.0\""
+  }];
+  string device_type = 17 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Categorized device type classification. Possible values: 'desktop' (traditional computers), 'mobile' (smartphones and small tablets), 'tablet' (large tablets), 'other'. Useful for displaying session information by device category."
+    example: "\"desktop\""
+  }];
+  string ip = 19 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "IP address of the device that initiated the session. This is the public-facing IP address used to connect to the application. Useful for security audits and geographic distribution analysis."
+    example: "\"192.0.2.1\""
+  }];
+  Location location = 20 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Geographic location information derived from IP address geolocation. Includes country, region, city, and coordinates. Note: Based on IP location data and may not represent the user's exact physical location."}];
+}
+
+message RevokedSessionDetails {
+  string session_id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Unique identifier for the revoked session. System-generated read-only field."
+    example: "\"ses_1234567890123456\""
+  }];
+  string user_id = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Unique identifier for the user who owned this session."
+    example: "\"usr_1234567890123456\""
+  }];
+  google.protobuf.Timestamp created_at = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp indicating when the session was originally created before revocation."
+    example: "\"2025-01-15T10:30:00Z\""
+  }];
+  google.protobuf.Timestamp updated_at = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp indicating when the session was last modified before revocation."
+    example: "\"2025-01-15T10:45:00Z\""
+  }];
+  google.protobuf.Timestamp idle_expires_at = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The idle expiration timestamp that was configured for this session before revocation. Represents when the session would have expired due to inactivity."
+    example: "\"2025-01-15T11:30:00Z\""
+  }];
+  google.protobuf.Timestamp absolute_expires_at = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The absolute expiration timestamp that was configured for this session before revocation. Represents the hard deadline regardless of activity."
+    example: "\"2025-01-22T10:30:00Z\""
+  }];
+  google.protobuf.Timestamp expired_at = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp when the session was actually terminated. Set to the revocation time when the session is revoked."
+    example: "\"2025-01-15T12:00:00Z\""
+  }];
+  google.protobuf.Timestamp logout_at = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp when the user explicitly logged out (if applicable). Null if the session was revoked without prior logout."
+    example: "\"2025-01-15T14:00:00Z\""
+  }];
+  string status = 11 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Status of the session after revocation. Always 'revoked' since only active sessions can be revoked. Sessions that were already expired or logged out are not included in the revocation response."
+    example: "\"revoked\""
+  }];
+  google.protobuf.Timestamp last_active_at = 12 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp of the last recorded user activity in this session before revocation. Helps identify inactive sessions that were revoked."
+    example: "\"2025-01-15T10:55:30Z\""
+  }];
+}
+
+message Location {
+  string region = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Geographic region name derived from IP geolocation. Represents the country-level location (e.g., 'United States', 'France')."
+    example: "\"United States\""
+  }];
+  string region_subdivision = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Regional subdivision code or name (e.g., state abbreviation for US, province for Canada). Two-letter ISO format when applicable."
+    example: "\"CA\""
+  }];
+  string city = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "City name where the session originated based on IP geolocation. Approximate location derived from IP address."
+    example: "\"San Francisco\""
+  }];
+  string latitude = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Latitude coordinate of the estimated location. Decimal format (e.g., '37.7749'). Note: Represents IP geolocation center and may not be precise."
+    example: "\"37.7749\""
+  }];
+  string longitude = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Longitude coordinate of the estimated location. Decimal format (e.g., '-122.4194'). Note: Represents IP geolocation center and may not be precise."
+    example: "\"-122.4194\""
+  }];
+}
+
+// AuthenticatedClients represents an authenticated client in a session along with its organization context.
+message AuthenticatedClients {
+  string client_id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Unique identifier of the authenticated client application."
+    example: "\"skc_1234567890\""
+  }];
+  string organization_id = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Active or last active Organization ID associated with the authenticated client."
+    example: "\"org_1234567890\""
+  }];
+}

@@ -1,0 +1,459 @@
+syntax = "proto3";
+
+package scalekit.v1.tokens;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/api/visibility.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "scalekit/v1/options/options.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/tokens";
+
+// ApiTokenService provides API token management operations
+// for secure authentication of external systems and applications.
+service ApiTokenService {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_tag) = {
+    name: "Tokens"
+    description: "API token management for organizations and user-scoped access"
+  };
+  // CreateToken generates a new API token for an organization or user.
+  // Returns an opaque token string and token claims.
+  rpc CreateToken(CreateTokenRequest) returns (CreateTokenResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/tokens"
+      body: "token"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Tokens"
+      summary: "Create an API Token"
+      description: "Generates a new API token for an organization, with an option to scope it to a specific user. The plain-text token value is returned only at creation time, together with its token identifier and any custom claims. Use this operation to provision programmatic access credentials for automated clients"
+      responses: {
+        key: "201"
+        value: {
+          description: "Token created successfully; includes plain token string and custom claims"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.tokens.CreateTokenResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  // ValidateToken verifies an API token and returns associated context.
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/tokens:validate"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Tokens"
+      summary: "Validate an API token"
+      description: "Validates a provided plain-text opaque token or token identifier, and returns the resolved organization or user context along with related metadata"
+      responses: {
+        key: "200"
+        value: {
+          description: "Token is valid; returns resolved token details and context"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.tokens.ValidateTokenResponse"}
+          }
+        }
+      }
+      responses: {
+        key: "404"
+        value: {description: "Not Found - invalid or expired token"}
+      }
+    };
+  }
+
+  // InvalidateToken marks an API token as deleted (soft delete for audit).
+  rpc InvalidateToken(InvalidateTokenRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/tokens:invalidate"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Tokens"
+      summary: "Invalidate an API Token"
+      description: "Marks a token as invalid, in an idempotent way: the operation succeeds even if the token was already invalidated. Use this to promptly revoke programmatic access credentials"
+      responses: {
+        key: "200"
+        value: {
+          description: "Token invalidated or already invalidated; empty body"
+          schema: {
+            json_schema: {ref: ".google.protobuf.Empty"}
+          }
+        }
+      }
+      responses: {
+        key: "404"
+        value: {description: "Not Found"}
+      }
+    };
+  }
+
+  // ListTokens retrieves API tokens for an organization or user with pagination.
+  rpc ListTokens(ListTokensRequest) returns (ListTokensResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {get: "/api/v1/tokens"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Tokens"
+      summary: "List API tokens"
+      description: "Retrieves all active tokens for an organization, with optional filtering by user and support for pagination"
+      responses: {
+        key: "200"
+        value: {
+          description: "Page of token claims returned with pagination cursor details"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.tokens.ListTokensResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  // UpdateToken updates the custom claims and description of an existing token
+  rpc UpdateToken(UpdateTokenRequest) returns (UpdateTokenResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/tokens:update"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Tokens"
+      summary: "Update an API token"
+      description: "Updates the mutable fields of an active token, such as custom_claims and description. The request body can include either the plain-text token or its token identifier"
+      responses: {
+        key: "200"
+        value: {
+          description: "Token metadata updated successfully; returns updated token record"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.tokens.UpdateTokenResponse"}
+          }
+        }
+      }
+      responses: {
+        key: "404"
+        value: {description: "Not Found"}
+      }
+    };
+  }
+
+  // We dont wan to expose token fetch . So making the authentication empty. This would block the request.
+  rpc FetchToken(FetchTokenRequest) returns (FetchTokenResponse) {
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      post: "/api/v1/tokens:fetch"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Tokens"
+      summary: "Fetch plain token string"
+      description: "Returns the plain token string for an active token record identified by token_id. Token MUST be active (not expired or invalidated). Useful for redisplaying credentials to operators."
+      responses: {
+        key: "200"
+        value: {
+          description: "Token fetched successfully"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.tokens.FetchTokenResponse"}
+          }
+        }
+      }
+      responses: {
+        key: "404"
+        value: {description: "Token not found, expired, or invalidated"}
+      }
+    };
+  }
+}
+
+message CreateTokenRequest {
+  CreateToken token = 1 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Container for token creation parameters"},
+    (google.api.field_behavior) = REQUIRED
+  ];
+}
+message CreateToken {
+  string organization_id = 1 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Organization ID for token scope"
+      example: "\"org_123456789012345\""
+    },
+    (google.api.field_behavior) = REQUIRED
+  ];
+  string user_id = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "User ID (optional). If set, token is user-scoped. User must belong to organization."
+    example: "\"usr_987654321098765\""
+  }];
+  map<string, string> custom_claims = 3 [
+    (buf.validate.field).map = {
+      max_pairs: 20
+      keys: {
+        string: {
+          min_len: 1
+          max_len: 30
+        }
+      }
+      values: {
+        string: {
+          min_len: 1
+          max_len: 256
+        }
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Custom claims key-value pairs. Keys must be 1-30 characters, values must be 1-256 characters, maximum 20 entries."
+      example: "{\"env\":\"prod\",\"scope\":\"read\"}"
+    }
+  ];
+  google.protobuf.Timestamp expiry = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Optional expiry timestamp; if absent token does not expire"
+    example: "\"2025-12-01T00:00:00Z\""
+    format: "date-time"
+  }];
+  string description = 5 [
+    (buf.validate.field).string = {max_len: 255},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Optional human-readable label (≤255 chars)"
+      example: "\"CI Deployment Token\""
+    }
+  ];
+}
+message CreateTokenResponse {
+  string token = 1 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Opaque token string (Base62 encoded). Return to client."
+      example: "\"opaqueTokenValueExample\""
+    },
+    (google.api.field_behavior) = REQUIRED
+  ];
+  string token_id = 2 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Internal token identifier (format: apit_xxxxx). Do NOT share with client."
+      example: "\"apit_123456789012345\""
+    },
+    (google.api.field_behavior) = REQUIRED
+  ];
+  Token token_info = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Echoed token custom claims record"}];
+}
+message ValidateTokenRequest {
+  string token = 1 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: "\"apit_123123123123121\""
+      description: "Opaque token string OR token_id (\"apit_xxxxx\")"
+    },
+    (google.api.field_behavior) = REQUIRED
+  ];
+}
+message ValidateTokenResponse {
+  Token token_info = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Resolved token custom claims record"}];
+}
+message InvalidateTokenRequest {
+  string token = 1 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Token string or token_id; idempotent"
+      example: "\"apit_123456789012345\""
+    },
+    (google.api.field_behavior) = REQUIRED
+  ];
+}
+
+message ListTokensRequest {
+  string organization_id = 1 [
+    (buf.validate.field).string = {
+      prefix: "org_"
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Organization filter"
+      example: "\"org_123456789012345\""
+    },
+    (google.api.field_behavior) = REQUIRED
+  ];
+  optional string user_id = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Optional user filter"
+    example: "\"usr_987654321098765\""
+  }];
+  int32 page_size = 3 [
+    (buf.validate.field).int32 = {
+      gte: 0
+      lte: 30
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Page size (default 10, max 30)"
+      example: "10"
+      default: "10"
+      minimum: 0
+      maximum: 30
+    }
+  ];
+  string page_token = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Opaque pagination cursor (empty for first page)"
+    example: "\"cursor_abc123\""
+    default: ""
+  }];
+}
+message ListTokensResponse {
+  repeated Token tokens = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of token custom claims records"}];
+  int32 total_count = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Total matching tokens count"
+    example: "42"
+  }];
+  string next_page_token = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Cursor for next page (empty if end)"
+    example: "\"cursor_def456\""
+  }];
+  string prev_page_token = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Cursor for previous page (empty if start)"
+    example: "\"cursor_def456\""
+  }];
+}
+message UpdateTokenRequest {
+  string token = 1 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Opaque token string OR token_id (\"apit_xxxxx\")"
+      example: "\"apit_123456789012345\""
+    },
+    (google.api.field_behavior) = REQUIRED
+  ];
+  map<string, string> custom_claims = 3 [
+    (buf.validate.field).map = {
+      max_pairs: 20
+      keys: {
+        string: {
+          min_len: 1
+          max_len: 30
+        }
+      }
+      values: {
+        string: {
+          min_len: 1
+          max_len: 256
+        }
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "custom_claims. Keys must be 1–30 characters and values must be 1–256 characters, with a maximum of 20 entries in total. The update is merged into the existing custom claims; to remove a claim, set its value to an empty string"
+      example: "{\"env\":\"prod\"}"
+    }
+  ];
+  optional string description = 2 [
+    (buf.validate.field).string = {max_len: 255},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Optional description replacement (empty clears)"
+      example: "\"Updated CI token\""
+    }
+  ];
+}
+message UpdateTokenResponse {
+  Token token_info = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Updated token custom claims record"}];
+}
+message Token {
+  string token_id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Token identifier"
+    example: "\"apit_123456789012345\""
+  }];
+  string organization_id = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Owning organization"
+    example: "\"org_123456789012345\""
+  }];
+  string organization_external_id = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Organization external ID (if set)"
+    example: "\"org-ext-001\""
+  }];
+  optional string user_id = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "User scope (optional)"
+    example: "\"usr_987654321098765\""
+  }];
+  optional string user_external_id = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "User external ID (if set)"
+    example: "\"user-ext-001\""
+  }];
+  map<string, string> custom_claims = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Custom claims"
+    example: "{\"scope\":\"read\"}"
+  }];
+  optional google.protobuf.Timestamp expiry = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Expiry if set"
+    format: "date-time"
+    example: "\"2025-12-01T00:00:00Z\""
+  }];
+  google.protobuf.Timestamp created_at = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Creation timestamp"
+    format: "date-time"
+  }];
+  optional string description = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Optional label"
+    example: "\"Production deploy token\""
+  }];
+  string token_suffix = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Last 4 characters of token for identification"
+    example: "\"xY9Z\""
+  }];
+  optional string email = 11 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Email of the user associated with the token, if applicable"
+    example: "\"user@example.com\""
+  }];
+  repeated string roles = 12 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Roles associated with the token"
+    example: "[\"admin\",\"reader\"]"
+  }];
+}
+message UserProfile {
+  string user_id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "User identifier"
+    example: "\"usr_987654321098765\""
+  }];
+  string email = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "User email address"
+    example: "\"user@example.com\""
+  }];
+  string name = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Display name"
+    example: "\"Jane Doe\""
+  }];
+  map<string, string> attributes = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Additional user attributes"
+    example: "{\"role\":\"admin\"}"
+  }];
+}
+
+// Request message for FetchToken RPC
+message FetchTokenRequest {
+  string token_id = 1 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Token identifier (\"apit_xxxxx\") used to retrieve opaque token string. Only token_id is accepted, not opaque token strings."
+      example: "\"apit_123456789012345\""
+    },
+    (google.api.field_behavior) = REQUIRED
+  ];
+}
+
+// Response message for FetchToken RPC
+message FetchTokenResponse {
+  string token = 1 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Opaque token string (Base62 Branca encoded)"
+      example: "\"opaqueTokenValueExample\""
+    },
+    (google.api.field_behavior) = REQUIRED
+  ];
+  google.protobuf.Timestamp retrieved_at = 2 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Server timestamp when token was fetched"
+      format: "date-time"
+      example: "\"2025-11-28T12:00:00Z\""
+    },
+    (google.api.field_behavior) = REQUIRED
+  ];
+  Token token_info = 3 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Token metadata record for display/audit purposes"},
+    (google.api.field_behavior) = REQUIRED
+  ];
+}

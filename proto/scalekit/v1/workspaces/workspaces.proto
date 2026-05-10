@@ -1,0 +1,770 @@
+syntax = "proto3";
+
+package scalekit.v1.workspaces;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/api/visibility.proto"; // already used elsewhere; keep
+import "google/protobuf/any.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "scalekit/v1/commons/commons.proto";
+import "scalekit/v1/domains/domains.proto";
+import "scalekit/v1/options/options.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/workspaces";
+
+service WorkspaceService {
+  rpc CreateWorkspace(CreateWorkspaceRequest) returns (CreateWorkspaceResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: NONE};
+    option (google.api.http) = {
+      post: "/api/v1/signup"
+      body: "workspace"
+    };
+  }
+
+  rpc GetWorkspace(GetWorkspaceRequest) returns (GetWorkspaceResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE};
+    option (google.api.http) = {get: "/api/v1/workspaces/{id}"};
+  }
+
+  rpc GetCurrentWorkspace(GetCurrentWorkspaceRequest) returns (GetWorkspaceResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/workspaces:this"};
+  }
+
+  rpc UpdateWorkspace(UpdateWorkspaceRequest) returns (UpdateWorkspaceResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE};
+    option (google.api.http) = {
+      patch: "/api/v1/workspaces/{id}"
+      body: "workspace"
+    };
+  }
+
+  rpc OnboardWorkspace(OnboardWorkspaceRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE};
+    option (google.api.http) = {
+      patch: "/api/v1/workspaces:onboard"
+      body: "workspace"
+    };
+  }
+
+  rpc UpdateCurrentWorkspace(UpdateCurrentWorkspaceRequest) returns (UpdateWorkspaceResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE};
+    option (google.api.http) = {
+      patch: "/api/v1/workspaces:this"
+      body: "workspace"
+    };
+  }
+
+  rpc GetWorkspaceSubscriptions(GetWorkspaceSubscriptionsRequest) returns (GetWorkspaceSubscriptionsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE};
+    option (google.api.http) = {get: "/api/v1/workspaces/{id}/billing/subscriptions"};
+  }
+
+  rpc GetWorkspacePricingTable(GetWorkspacePricingTableRequest) returns (GetWorkspacePricingTableResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE};
+    option (google.api.http) = {get: "/api/v1/workspaces/{id}/billing/pricing-table"};
+  }
+
+  rpc GetBillingPortal(GetBillingPortalRequest) returns (GetBillingPortalResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/workspaces:this/billing/customer-portal"};
+  }
+
+  // Retrieves current billing information for the workspace.
+  // Primary action: Provide a consolidated snapshot of billing state for display in billing dashboards/settings.
+  // Use cases: Call on workspace dashboard load or billing settings view to show payment method, plan, and invoice status.
+  // Request: GetBillingInfoRequest (must include workspace context/session); no pagination.
+  // Response: GetBillingInfoResponse:
+  //   - payment_methods: list of saved payment instruments (e.g., card, ACH) with brand/type, last4, expiry (cards), bank name (ACH), and is_default flag.
+  //   - subscription: current plan/product, add-ons, status (active, past_due, canceled), billing cadence (monthly/annual), and next_renewal_at.
+  //   - billing_period: current invoice period window (billing_start_date, billing_end_date) for prorations and usage aggregation.
+  //   - last_invoice: summary of the most recent finalized invoice (number/id, issue_date, due_date, status, total_amount, currency).
+  //   - current_invoice_preview: snapshot of the in-progress period totals/estimates (non-final), including subtotal, taxes (if applicable), discounts/credits, and projected total.
+  // Behavior notes:
+  //   - All amounts are returned in minor currency units with accompanying currency code.
+  //   - current_invoice_preview is not a finalized invoice and may change until the period closes.
+  //   - payment_methods indicate availability and default selection; use is_default to preselect for checkout or updates.
+  //   - Use billing_period dates to compute prorated changes when updating plans mid-cycle.
+
+  rpc GetBillingInfo(GetBillingInfoRequest) returns (GetBillingInfoResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/workspaces:this/billing:info"};
+  }
+
+  // Retrieves current product usage and tiered pricing for the current preview billing period.
+  // Primary action: Provide dynamic, in-period usage metrics and per-product pricing breakdown for charge preview.
+  // Use cases: Show customers an estimate of charges before final invoicing; display usage details per product/feature.
+  // Request: GetProductUsageRequest (workspace context/session); supports filtering by product/feature where applicable.
+  // Response: GetProductUsageResponse:
+  //   - line_items: per-product entries with usage counts (units), measurement granularity (e.g., requests, seats, GB), and aggregation window.
+  //   - pricing_tiers: tiered structure for each line item (thresholds, unit_price per tier, effective applied tier), and computed effective_price.
+  //   - totals: preview period monetary amounts (subtotal, taxes, discounts/credits, total) in minor units with currency.
+  //   - notes: indicators for metered vs seat-based products, and whether usage is still accumulating.
+  // Behavior and differences vs GetProductCatalog:
+  //   - Invoice preview vs final: values are estimates until the billing period closes; final invoice may differ due to late-reported usage or adjustments.
+  //   - Dynamic vs static: GetProductUsage reflects actual/accumulating usage and applied tiers for the current period; GetProductCatalog exposes static product/pricing definitions without usage.
+  //   - Use pricing_tiers and effective_price to explain how the preview total was derived per product (including cross-tier allocations).
+  //   - Late or batched usage may update line_items before finalization; clients should refresh periodically for up-to-date previews.
+  // Returns payment methods, plan, last invoice, current invoice period, etc.
+  rpc GetProductUsage(GetProductUsageRequest) returns (GetProductUsageResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/workspaces:this/billing:product-usage"};
+  }
+
+  rpc GetProductCatalog(GetProductCatalogRequest) returns (GetProductCatalogResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/billing/productcatalog"};
+  }
+
+  rpc AddSubscription(AddSubscriptionRequest) returns (AddSubscriptionResponse) {
+    // Adds a subscription item for a product to the workspace's billing subscription.
+    // Use this RPC to enable an add-on product (or base product) for a workspace.
+    // Request parameters:
+    //   - Either product_name OR product_id must be provided. If both are present, product_id takes precedence.
+    // Behavior:
+    //   - Validates the product exists and is eligible (e.g. configured as an add-on when applicable).
+    //   - If the Stripe subscription already contains the product but the local DB does not, the item is attached (action="attached").
+    //   - If the product is not present in Stripe, a new subscription item is created (action="created").
+    //   - Add-on products are created with quantity=0 (licensed products generally quantity=1 unless overridden).
+    // Response:
+    //   - subscription_id: The Stripe subscription identifier.
+    //   - product_id: Resolved product ID (even if product_name was provided).
+    //   - quantity: The effective quantity stored for the subscription item.
+    // Side effects:
+    //   - Updates Stripe subscription items.
+    //   - Persists/updates a row in billing_subscriptions (and billing items) for idempotent future calls.
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/workspaces:this/billing/subscriptions:add"
+      body: "*"
+    };
+    option (google.api.method_visibility).restriction = "PREVIEW";
+  }
+
+  // Creates a checkout session for the current workspace's billing operations.
+  // Primary action: Establish a client-facing checkout experience to start, update, or complete billing
+  //                 actions such as subscriptions, plan changes, trials, add-ons, and one-time payments.
+  //
+  // Use cases:
+  //   - Initiate payment collection when upgrading/downgrading plans or adding paid features.
+  //   - Set up a new subscription or resume an incomplete payment.
+  //   - Collect payment method for future charges (setup mode) prior to enabling paid features.
+  //   - Start a one-time payment flow for metered usage or add-on purchases.
+  //
+  // Request (CreateCheckoutSessionRequest):
+  //   - mode: Required. One of {SUBSCRIPTION | PAYMENT | SETUP}. Determines the billing flow:
+  //       * SUBSCRIPTION: Creates/updates a workspace subscription; may require payment method.
+  //       * PAYMENT: Creates a one-time payment intent for immediate charge.
+  //       * SETUP: Collects a payment method for future use without immediate charge.
+  //   - items: Optional. Line items or price identifiers; required when mode=SUBSCRIPTION or PAYMENT.
+  //            Each item must include a valid price_id and quantity > 0. Prices must be active.
+  //   - return_url: Optional. URL to redirect the client after successful completion or cancellation.
+  //                 Must be HTTPS and belong to an allowed domain; max length constraints apply.
+  //   - success_url: Optional. Explicit success redirect for hosted checkout; must be HTTPS and allowed.
+  //   - ui_mode: Optional. One of {EMBEDDED | HOSTED | CUSTOM}. Controls client integration modality.
+  //   - metadata: Optional. Key-value pairs (string) for audit/correlation; keys/values length limited.
+  //   - customer_id / workspace_id: Optional. If omitted, inferred from the authenticated workspace session.
+  // Validation rules:
+  //   - Authentication: Requires WORKSPACE_CLIENT. Caller must be authorized for billing actions.
+  //   - For SUBSCRIPTION/PAYMENT: items must be present and valid; unsupported/archived prices are rejected.
+  //   - URLs (return_url/success_url) must match allowed origins; invalid URLs are rejected.
+  //   - Only one active session per workspace per identical parameter set is allowed (idempotency).
+  //
+  // Response (CreateCheckoutSessionResponse):
+  //   - session_id: Identifier of the created checkout session; use to query status or resume flow.
+  //   - client_secret: Secret for client-side SDKs (e.g., embedded UI). Treat as sensitive; never log.
+  //   - url: Hosted checkout URL when ui_mode=HOSTED or CUSTOM; omitted for EMBEDDED flows.
+  //   - mode: Echoes the requested mode for clarity.
+  //   - expires_at: UTC timestamp when the session becomes invalid (e.g., 24 hours from creation).
+  //   - status: Initial session status (e.g., CREATED). May be polled for updates via billing status RPCs.
+  //
+  // Behavior notes:
+  //   - Idempotency: Repeated calls with identical parameters within the expiration window return
+  //                  the existing session (same session_id). Parameter differences create new sessions.
+  //   - Security: client_secret is required for embedded checkout initialization; do not expose publicly.
+  //   - URL population: url is provided only for HOSTED/CUSTOM UI modes; EMBEDDED flows rely on client_secret.
+  //   - Expiration: Sessions expire after a fixed window; clients must complete the flow before expires_at.
+  //   - Retries: Safe to retry on transient errors; if parameters match, the same session is returned.
+  //
+  // Side effects:
+  //   - Creates a Stripe Checkout/Payment/Setup Session depending on mode and items.
+  //   - May create or update customer records, subscriptions, payment intents, and attach payment methods.
+  //   - Hosted session URLs are short-lived and will be invalid after expiration.
+  rpc CreateCheckoutSession(CreateCheckoutSessionRequest) returns (CreateCheckoutSessionResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      post: "/api/v1/workspaces:this/billing/checkout_sessions"
+      body: "*"
+    };
+  }
+
+  rpc UpdateWorkspaceContext(UpdateWorkspaceContextRequest) returns (UpdateWorkspaceContextResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      post: "/api/v1/workspaces:this/contexts"
+      body: "context"
+    };
+  }
+
+  rpc ListWorkspaceDomains(ListWorkspaceDomainsRequest) returns (ListWorkspaceDomainsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE};
+    option (google.api.http) = {get: "/api/v1/workspaces:this/domains"};
+  }
+
+  rpc CreateWorkspaceDomain(CreateWorkspaceDomainRequest) returns (CreateWorkspaceDomainResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE};
+    option (google.api.http) = {
+      post: "/api/v1/workspaces:this/domains"
+      body: "domain"
+    };
+  }
+
+  rpc DeleteWorkspaceDomain(DeleteWorkspaceDomainRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE};
+    option (google.api.http) = {delete: "/api/v1/workspaces:this/domains/{id}"};
+  }
+
+  rpc ValidateWorkspaceDomain(ValidateWorkspaceDomainRequest) returns (google.protobuf.BoolValue) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE};
+    option (google.api.http) = {get: "/api/v1/workspaces:validate_domain"};
+  }
+}
+
+message WorkspaceExtendedInfo {
+  bool payment_overdue = 1;
+  bool payment_method_present = 2;
+  bool free_quota_exceeded = 3;
+}
+
+message Workspace {
+  string id = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 32
+    prefix: "env"
+  }];
+  google.protobuf.Timestamp create_time = 2;
+  google.protobuf.Timestamp update_time = 3;
+  string display_name = 4 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 200
+  }];
+  scalekit.v1.commons.RegionCode region_code = 6;
+  WorkspaceExtendedInfo extended_info = 7;
+  string billing_customer_id = 8;
+  string billing_subscription_id = 9;
+  string auth_domain = 10 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Auth Domain of current workspace"
+      example: "\"auth.example.com\""
+    }
+  ];
+  string deployment = 11 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "System-generated deployment environment (staging or prod). Read-only; clients should not set this field."
+      example: "\"prod\""
+    }
+  ];
+}
+
+message CreateWorkspace {
+  string email = 1 [(buf.validate.field).cel = {
+    id: "valid_email"
+    message: "email must be a valid email"
+    expression: "this.isEmail()"
+  }];
+  optional string company = 2 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 256
+  }];
+}
+
+message UpdateWorkspace {
+  string display_name = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 256
+  }];
+}
+
+message OnboardWorkspace {
+  string workspace_display_name = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 256
+  }];
+  string user_given_name = 2 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 256
+  }];
+  string user_family_name = 3;
+  scalekit.v1.commons.AuthenticationMode authentication_mode = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The authentication mode for the environment. The default is FULL_STACK_AUTH"}];
+  bool enable_allowed_domain_join = 5;
+}
+
+message CreateWorkspaceRequest {
+  CreateWorkspace workspace = 1 [(buf.validate.field).required = true];
+}
+
+message CreateWorkspaceResponse {
+  Workspace workspace = 1;
+  string link = 2;
+}
+
+message UpdateWorkspaceRequest {
+  string id = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 32
+    prefix: "wks"
+  }];
+  UpdateWorkspace workspace = 2 [(buf.validate.field).required = true];
+}
+
+message OnboardWorkspaceRequest {
+  OnboardWorkspace workspace = 2 [(buf.validate.field).required = true];
+}
+
+message UpdateCurrentWorkspaceRequest {
+  UpdateWorkspace workspace = 1 [(buf.validate.field).required = true];
+}
+
+message UpdateWorkspaceResponse {
+  Workspace workspace = 1;
+}
+
+message GetWorkspaceRequest {
+  string id = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 32
+    prefix: "wks"
+  }];
+}
+
+message GetCurrentWorkspaceRequest {}
+
+message GetWorkspaceResponse {
+  Workspace workspace = 1;
+  google.protobuf.Struct context = 2 [(google.api.field_behavior) = OUTPUT_ONLY];
+}
+
+// GetBillingPortalRequest allows an optional flow_type controlling the initial portal view.
+// Supported values: "manage_payment_method", "view_invoices", "update_billing_details".
+// Empty or omitted flow_type defaults to Stripe's standard landing view.
+message GetBillingPortalRequest {
+  string id = 1 [(buf.validate.field).string = {
+    min_len: 0
+    max_len: 32
+  }];
+  optional string flow_type = 2;
+}
+
+message GetBillingPortalResponse {
+  string url = 1;
+  string id = 2;
+}
+
+message GetWorkspacePricingTableRequest {
+  string id = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 32
+    prefix: "wks"
+  }];
+}
+
+message GetWorkspacePricingTableResponse {
+  string id = 1;
+  string pricing_table_id = 2;
+  string publishable_token = 3;
+  string customer_session_client_secret = 4;
+  google.protobuf.Timestamp expiry = 5;
+}
+
+message GetWorkspaceSubscriptionsRequest {
+  string id = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 32
+    prefix: "wks"
+  }];
+}
+
+message GetWorkspaceSubscriptionsResponse {
+  string id = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 32
+    prefix: "wks"
+  }];
+  repeated Subscription subscriptions = 2;
+}
+
+message Subscription {
+  string id = 2;
+  string status = 7;
+}
+
+// GetBillingInfo API messages
+message GetBillingInfoRequest {
+  bool only_addons = 1;
+}
+
+message GetBillingInfoResponse {
+  BillingInfo billing_info = 1;
+}
+
+message BillingInfo {
+  string plan_name = 1;
+  // Field 2 reserved after removal of subscriptions to maintain wire compatibility
+  reserved 2;
+  CurrentInvoice current_invoice = 3;
+  PaymentMethod payment_method = 4;
+  BillingContactInfo billing_contact_info = 5;
+  repeated Addon addons = 6;
+  LastInvoice last_invoice = 7;
+  // System-generated Stripe publishable key for client-side use (not a secret); read-only.
+  string publishable_token = 8 [(google.api.field_behavior) = OUTPUT_ONLY];
+}
+
+message BillingSubscription {
+  string id = 1;
+  BillingSubscriptionStatus status = 3;
+  google.protobuf.Timestamp start_date = 4;
+  google.protobuf.Timestamp end_date = 5;
+  double amount = 6;
+  string currency = 7;
+  repeated SubscriptionItem items = 8;
+}
+
+message SubscriptionItem {
+  string id = 1;
+  string price_id = 2;
+  int64 quantity = 3;
+  SubscriptionProduct product = 4;
+  SubscriptionPrice price = 5;
+}
+
+message SubscriptionProduct {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  bool active = 4;
+}
+
+message SubscriptionPrice {
+  string id = 1;
+  double amount = 2;
+  string type = 3; // "recurring" or "one_time"
+  string interval = 4; // "month", "year", etc.
+  string billing_scheme = 5; // "per_unit", "tiered", etc.
+  string usage_type = 6; // "licensed", "metered"
+  repeated PriceTier tiers = 7; // For tiered pricing
+  int64 total_usage = 8; // Current usage for metered pricing
+  string aggregation_method = 9; // How usage is aggregated (e.g., "sum", "max")
+}
+
+message PriceTier {
+  int64 up_to = 1; // 0 means unlimited
+  double amount = 2; // Amount per unit in this tier
+}
+
+enum BillingSubscriptionStatus {
+  BILLING_SUBSCRIPTION_STATUS_UNSPECIFIED = 0;
+  BILLING_SUBSCRIPTION_ACTIVE = 1;
+  BILLING_SUBSCRIPTION_CANCELED = 2;
+  BILLING_SUBSCRIPTION_PAST_DUE = 3;
+}
+
+message CurrentInvoice {
+  string id = 1;
+  double amount = 2;
+  string currency = 3;
+  InvoiceStatus status = 4;
+  google.protobuf.Timestamp due_date = 5;
+  google.protobuf.Timestamp issued_date = 6;
+  // Start of the current billing period
+  google.protobuf.Timestamp billing_start_date = 7;
+  // End of the current billing period
+  google.protobuf.Timestamp billing_end_date = 8;
+}
+
+message LastInvoice {
+  string id = 1;
+  double amount = 2;
+  string currency = 3;
+  InvoiceStatus status = 4;
+  google.protobuf.Timestamp due_date = 5;
+  google.protobuf.Timestamp issued_date = 6;
+}
+
+enum InvoiceStatus {
+  INVOICE_STATUS_UNSPECIFIED = 0;
+  INVOICE_PAID = 1;
+  INVOICE_DUE = 2;
+  INVOICE_OVERDUE = 3;
+  INVOICE_VOID = 4;
+}
+
+message PaymentMethod {
+  string id = 1;
+  PaymentType type = 2; // e.g., "card", "bank_account"
+  string account_number = 3; // card no or bank account no (masked)
+  string account_type = 4; // e.g., "visa", "mastercard" for cards and "savings", "checking" for bank accounts
+  PaymentMethodStatus status = 5; // e.g., "active", "expired"
+  // Human-friendly account name like "Visa •••• 1234" or "Checking •••• 6789"
+  string account_name = 6;
+  // Additional info for display (brand, last4, exp, email, etc.)
+  map<string, string> payment_info = 7 [(buf.validate.field).map = {
+    max_pairs: 5
+    keys: {
+      string: {
+        in: [
+          "brand",
+          "last4",
+          "exp_month",
+          "exp_year",
+          "email"
+        ]
+      }
+    }
+    values: {
+      string: {
+        min_len: 1
+        max_len: 64
+      }
+    }
+  }];
+}
+
+enum PaymentType {
+  PAYMENT_TYPE_UNSPECIFIED = 0;
+  CARD = 1;
+  BANK_ACCOUNT = 2;
+  OFFLINE = 3;
+  LINK = 4;
+  PAYPAL = 5;
+}
+
+enum PaymentMethodStatus {
+  PAYMENT_METHOD_STATUS_UNSPECIFIED = 0;
+  PAYMENT_METHOD_ACTIVE = 1;
+  PAYMENT_METHOD_EXPIRED = 2;
+  PAYMENT_METHOD_FAILED = 3;
+}
+
+message BillingContactInfo {
+  string name = 1;
+  string email = 2;
+  string line1 = 3;
+  string line2 = 4;
+  string city = 5;
+  string state = 6;
+  string postal_code = 7;
+  string country = 8;
+}
+
+message Addon {
+  string id = 1;
+  string name = 2;
+  // Field 3 reserved after removal of description for wire compatibility
+  reserved 3;
+  repeated string features = 4;
+  bool enabled = 5;
+  double price = 6;
+  string currency = 7;
+}
+
+// GetProductUsage API messages
+message GetProductUsageRequest {}
+
+message GetProductUsageResponse {
+  repeated ProductUsage products = 1;
+  // Total monetary amount for the preview billing period (in major currency units, e.g. dollars)
+  double total_amount = 2;
+  string currency = 3;
+}
+
+message ProductUsage {
+  string product_id = 1;
+  string product_name = 2;
+  string description = 3;
+  repeated UsageTier tiers = 4;
+  double total_amount = 5;
+  double total_count = 6;
+  string currency = 7;
+  // Aggregation method used for the underlying usage metric (e.g. sum, max)
+  string aggregation_method = 8;
+}
+
+message UsageTier {
+  string tier_name = 1;
+  int64 current_count = 2;
+  int64 total_available_count = 3; // -1 for unlimited
+  double price_for_current_tier = 4;
+  string currency = 5;
+  bool is_free_tier = 6;
+}
+
+// GetProductCatalog API messages
+message GetProductCatalogRequest {}
+
+message GetProductCatalogResponse {
+  ProductCatalog catalog = 1;
+}
+
+message ProductCatalog {
+  repeated ProductCatalogItem products = 1;
+}
+
+message ProductCatalogItem {
+  CatalogProduct product = 1;
+  repeated CatalogPrice prices = 2;
+  string billing_type = 3; // "one_time" or "recurring"
+}
+
+message CatalogProduct {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  bool active = 4;
+  map<string, string> metadata = 5 [(buf.validate.field).map = {
+    max_pairs: 20
+    keys: {
+      string: {
+        min_len: 3
+        max_len: 25
+      }
+    }
+    values: {
+      string: {
+        min_len: 1
+        max_len: 256
+      }
+    }
+  }];
+  string default_price_id = 6;
+}
+
+message CatalogPrice {
+  string id = 1;
+  double amount = 2;
+  string currency = 3;
+  string type = 4; // "recurring" or "one_time"
+  string interval = 5; // "month", "year", etc. (for recurring prices)
+  string billing_scheme = 6; // "per_unit", "tiered", etc.
+  string usage_type = 7; // "licensed", "metered" (for recurring prices)
+  repeated PriceTier tiers = 8; // For tiered pricing
+}
+
+// AddSubscription API messages
+message AddSubscriptionRequest {
+  // Provide either product_name or product_id. If both are provided, product_id takes precedence.
+  string product_name = 1;
+  string product_id = 2;
+  option (buf.validate.message).cel = {
+    id: "product_name_or_id"
+    message: "either product_id or product_name must be provided"
+    expression: "this.product_id != '' || this.product_name != ''"
+  };
+}
+
+message AddSubscriptionResponse {
+  string subscription_id = 1;
+  string product_id = 2;
+  int64 quantity = 3;
+}
+
+message CreateCheckoutSessionRequest {
+  CheckoutSessionMode mode = 1; // "subscription" or "payment" or "setup"
+  optional string return_url = 2;
+  optional string success_url = 3;
+  UiMode ui_mode = 4; // "embedded" or "hosted" or "custom"
+  RedirectOnCompletion redirect_on_completion = 5; // "always", "never", "if_required"
+}
+
+message CreateCheckoutSessionResponse {
+  string id = 1;
+  string client_secret = 2;
+  optional string url = 3;
+}
+
+enum RedirectOnCompletion {
+  REDIRECT_ON_COMPLETION_UNSPECIFIED = 0;
+  never = 1;
+  always = 2;
+  if_required = 3;
+}
+
+enum UiMode {
+  UI_MODE_UNSPECIFIED = 0;
+  embedded = 1;
+  hosted = 2;
+  custom = 3;
+}
+
+enum CheckoutSessionMode {
+  CHECKOUT_SESSION_MODE_UNSPECIFIED = 0;
+  setup = 1;
+  subscription = 2;
+  payment = 3;
+}
+
+// Request for UpdateWorkspaceContext RPC.
+// Merges the provided key-value pairs into the workspace's existing context.
+// See RPC documentation for merge semantics and validation rules.
+message UpdateWorkspaceContextRequest {
+  // Required. JSON object containing key-value pairs to merge into the workspace context.
+  // Keys must be non-empty strings; values can be any JSON-compatible type (string, number,
+  // boolean, array, object, or null). Existing keys not present in this object are preserved.
+  // Keys present in this object overwrite existing values. An empty object ({}) is a no-op.
+  // Omitting this field or passing null returns a BAD_REQUEST error.
+  google.protobuf.Struct context = 1 [(buf.validate.field).required = true];
+}
+
+// Response for UpdateWorkspaceContext RPC.
+// Returns the complete merged context after applying the update.
+message UpdateWorkspaceContextResponse {
+  // The merged workspace context containing all key-value pairs after the update.
+  // Reflects both existing keys (not overwritten) and newly added/updated keys from the request.
+  // This is the authoritative state of the workspace context after the operation completes.
+  google.protobuf.Struct context = 1;
+}
+
+message ValidateWorkspaceDomainRequest {}
+
+message CreateWorkspaceDomainRequest {
+  scalekit.v1.domains.CreateDomain domain = 1 [(buf.validate.field).required = true];
+}
+
+message CreateWorkspaceDomainResponse {
+  scalekit.v1.domains.Domain domain = 1;
+}
+
+message ListWorkspaceDomainsRequest {
+  google.protobuf.Int32Value page_size = 1;
+  google.protobuf.Int32Value page_number = 2;
+  scalekit.v1.domains.DomainType domain_type = 3;
+}
+
+message ListWorkspaceDomainsResponse {
+  int32 page_size = 1;
+  int32 page_number = 2;
+  repeated scalekit.v1.domains.Domain domains = 3;
+}
+
+message DeleteWorkspaceDomainRequest {
+  string id = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 128
+  }];
+}

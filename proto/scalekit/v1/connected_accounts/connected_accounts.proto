@@ -1,0 +1,1165 @@
+syntax = "proto3";
+
+package scalekit.v1.connected_accounts;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/api/visibility.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "scalekit/v1/options/options.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/connected_accounts";
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  tags: [
+    {
+      name: "Connected Accounts"
+      description: "Manage connected accounts for third-party integrations and OAuth connections. Connected accounts represent authenticated access to external services like Google, Notion, Slack, and other applications."
+    }
+  ]
+};
+
+service ConnectedAccountService {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_tag) = {
+    name: "Connected Accounts"
+    description: "Manage connected accounts for third-party integrations and OAuth connections. Connected accounts represent authenticated access to external services like Google, Notion, Slack, and other applications."
+  };
+  // List Connected Accounts
+  rpc ListConnectedAccounts(ListConnectedAccountsRequest) returns (ListConnectedAccountsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {
+      get: "/api/v1/connected_accounts"
+      // Query params: connection, identifier
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connected Accounts"
+      summary: "List connected accounts"
+      description: "Retrieves a paginated list of connected accounts for third-party integrations. Filter by organization, user, connector type, provider, or identifier. Returns OAuth tokens, API keys, and connection status for each account. Use pagination tokens to navigate through large result sets."
+
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved the list of connected accounts with their authentication details and status"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connected_accounts.ListConnectedAccountsResponse"}
+          }
+        }
+      }
+      responses: {
+        key: "400"
+        value: {description: "Invalid request - occurs when query parameters are malformed or validation fails"}
+      }
+      responses: {
+        key: "401"
+        value: {description: "Authentication required - missing or invalid access token"}
+      }
+    };
+  }
+
+  // Search Connected Accounts
+  rpc SearchConnectedAccounts(SearchConnectedAccountsRequest) returns (SearchConnectedAccountsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {get: "/api/v1/connected_accounts:search"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connected Accounts"
+      summary: "Search connected accounts"
+      description: "Search for connected accounts in your environment using a text query that matches against identifiers, providers, or connectors. The search performs case-insensitive matching across account details. Returns paginated results with account status and authentication type information."
+
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved matching connected accounts with pagination support"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connected_accounts.SearchConnectedAccountsResponse"}
+          }
+        }
+      }
+      responses: {
+        key: "400"
+        value: {description: "Invalid request - query parameter is too short (minimum 3 characters) or validation failed"}
+      }
+      responses: {
+        key: "401"
+        value: {description: "Authentication required - missing or invalid access token"}
+      }
+    };
+  }
+
+  // Create Connected Account
+  rpc CreateConnectedAccount(CreateConnectedAccountRequest) returns (CreateConnectedAccountResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/connected_accounts"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connected Accounts"
+      summary: "Create a connected account"
+      description: "Creates a new connected account with OAuth tokens or API credentials for third-party service integration. Supply authorization details including access tokens, refresh tokens, scopes, and optional API configuration. The account can be scoped to an organization or user. Returns the created account with its unique identifier and authentication status."
+
+      responses: {
+        key: "201"
+        value: {
+          description: "Connected account created successfully with authentication credentials stored securely"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connected_accounts.CreateConnectedAccountResponse"}
+          }
+        }
+      }
+      responses: {
+        key: "400"
+        value: {description: "Invalid request - missing required fields, invalid authorization details, or validation failed"}
+      }
+      responses: {
+        key: "401"
+        value: {description: "Authentication required - missing or invalid access token"}
+      }
+      responses: {
+        key: "409"
+        value: {description: "Conflict - connected account with the same identifier already exists"}
+      }
+    };
+  }
+
+  // Update Connected Account
+  rpc UpdateConnectedAccount(UpdateConnectedAccountRequest) returns (UpdateConnectedAccountResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_ACTIONS_PORTAL_CLIENT};
+    option (google.api.http) = {
+      put: "/api/v1/connected_accounts"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connected Accounts"
+      summary: "Update connected account credentials"
+      description: "Updates authentication credentials and configuration for an existing connected account. Modify OAuth tokens, refresh tokens, access scopes, or API configuration settings. Specify the account by ID, or by combination of organization/user, connector, and identifier. Returns the updated account with new token expiry and status information."
+
+      responses: {
+        key: "200"
+        value: {
+          description: "Connected account updated successfully with new credentials or configuration"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connected_accounts.UpdateConnectedAccountResponse"}
+          }
+        }
+      }
+      responses: {
+        key: "400"
+        value: {description: "Invalid request - missing required fields, invalid authorization details, or validation failed"}
+      }
+      responses: {
+        key: "401"
+        value: {description: "Authentication required - missing or invalid access token"}
+      }
+      responses: {
+        key: "404"
+        value: {description: "Connected account not found - the specified account does not exist"}
+      }
+    };
+  }
+
+  // Delete Connected Account
+  rpc DeleteConnectedAccount(DeleteConnectedAccountRequest) returns (DeleteConnectedAccountResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/connected_accounts:delete"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connected Accounts"
+      summary: "Delete a connected account"
+      description: "Permanently removes a connected account and revokes all associated authentication credentials. Identify the account by ID, or by combination of organization/user, connector, and identifier. This action cannot be undone. All OAuth tokens and API keys for this account will be invalidated."
+
+      responses: {
+        key: "200"
+        value: {description: "Connected account deleted successfully and all credentials revoked"}
+      }
+      responses: {
+        key: "400"
+        value: {description: "Invalid request - malformed parameters or validation failed"}
+      }
+      responses: {
+        key: "401"
+        value: {description: "Authentication required - missing or invalid access token"}
+      }
+      responses: {
+        key: "404"
+        value: {description: "Connected account not found - the specified account does not exist"}
+      }
+    };
+  }
+
+  // Generate Magic Link for Account Connection
+  rpc GetMagicLinkForConnectedAccount(GetMagicLinkForConnectedAccountRequest) returns (GetMagicLinkForConnectedAccountResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/connected_accounts/magic_link"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connected Accounts"
+      summary: "Generate authentication magic link"
+      description: "Creates a time-limited magic link for connecting or re-authorizing a third-party account. The link directs users to the OAuth authorization flow for the specified connector. Returns the generated link URL and expiration timestamp. Links typically expire after a short duration for security."
+
+      responses: {
+        key: "200"
+        value: {
+          description: "Magic link generated successfully with authorization URL and expiry time"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connected_accounts.GetMagicLinkForConnectedAccountResponse"}
+          }
+        }
+      }
+      responses: {
+        key: "400"
+        value: {description: "Invalid request - missing required parameters or invalid connector"}
+      }
+      responses: {
+        key: "401"
+        value: {description: "Authentication required - missing or invalid access token"}
+      }
+    };
+  }
+
+  // Get Connected Account by ID
+  rpc GetConnectedAccount(GetConnectedAccountRequest) returns (GetConnectedAccountResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_ACTIONS_PORTAL_CLIENT};
+    option (google.api.http) = {
+      get: "/api/v1/connected_accounts/this"
+      additional_bindings: {get: "/api/v1/connected_accounts/{id}"}
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connected Accounts"
+      summary: "Get a connected account"
+      description: "Retrieves a connected account by its unique ID. Use the path '/this' (e.g. /api/v1/connected_accounts/this) to retrieve the connected account associated with the current token context."
+
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved the connected account"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connected_accounts.GetConnectedAccountResponse"}
+          }
+        }
+      }
+      responses: {
+        key: "400"
+        value: {description: "Invalid request - missing or malformed connected account ID"}
+      }
+      responses: {
+        key: "401"
+        value: {description: "Authentication required - missing or invalid access token"}
+      }
+      responses: {
+        key: "404"
+        value: {description: "Connected account not found"}
+      }
+    };
+  }
+
+  // Disconnect a Connected Account
+  rpc DisconnectConnectedAccount(DisconnectConnectedAccountRequest) returns (DisconnectConnectedAccountResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_ACTIONS_PORTAL_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/connected_accounts/{id}:disconnect"
+      body: "*"
+      additional_bindings: {
+        post: "/api/v1/connected_accounts/-:disconnect"
+        body: "*"
+      }
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connected Accounts"
+      summary: "Disconnect a connected account"
+      description: "Disconnects a connected account by setting its status to DISCONNECTED. The account record is retained but is marked as no longer active."
+
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully disconnected the connected account"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connected_accounts.DisconnectConnectedAccountResponse"}
+          }
+        }
+      }
+      responses: {
+        key: "400"
+        value: {description: "Invalid request - missing or malformed connected account ID"}
+      }
+      responses: {
+        key: "401"
+        value: {description: "Authentication required - missing or invalid access token"}
+      }
+      responses: {
+        key: "404"
+        value: {description: "Connected account not found"}
+      }
+    };
+  }
+
+  // Get Connected Account Authentication Details
+  rpc GetConnectedAccountAuth(GetConnectedAccountByIdentifierRequest) returns (GetConnectedAccountByIdentifierResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {get: "/api/v1/connected_accounts/auth"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connected Accounts"
+      summary: "Get connected account details"
+      description: "Retrieves complete authentication details for a connected account including OAuth tokens, refresh tokens, scopes, and API configuration. Query by account ID or by combination of organization/user, connector, and identifier. Returns sensitive credential information - use appropriate access controls."
+
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved connected account with full authentication details"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connected_accounts.GetConnectedAccountByIdentifierResponse"}
+          }
+        }
+      }
+      responses: {
+        key: "400"
+        value: {description: "Invalid request - missing required query parameters"}
+      }
+      responses: {
+        key: "401"
+        value: {description: "Authentication required - missing or invalid access token"}
+      }
+      responses: {
+        key: "404"
+        value: {description: "Connected account not found - no account matches the specified criteria"}
+      }
+    };
+  }
+
+  // Get Connected Account Details (without auth credentials)
+  rpc GetConnectedAccountDetails(GetConnectedAccountByIdentifierRequest) returns (GetConnectedAccountByIdentifierResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {get: "/api/v1/connected_accounts/details"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connected Accounts"
+      summary: "Get connected account details"
+      description: "Returns metadata for a connected account including status, connector type, provider, and configuration without exposing stored authorization credentials. Look up by account ID, or by a combination of organization (or user), connector, and external identifier."
+
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved connected account details"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connected_accounts.GetConnectedAccountByIdentifierResponse"}
+          }
+        }
+      }
+      responses: {
+        key: "400"
+        value: {description: "Invalid request - missing required query parameters"}
+      }
+      responses: {
+        key: "401"
+        value: {description: "Authentication required - missing or invalid access token"}
+      }
+      responses: {
+        key: "404"
+        value: {description: "Connected account not found - no account matches the specified criteria"}
+      }
+    };
+  }
+
+  // Verify connected account user after OAuth callback
+  rpc VerifyConnectedAccountUser(VerifyConnectedAccountUserRequest) returns (VerifyConnectedAccountUserResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/connected_accounts/user/verify"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connected Accounts"
+      summary: "Verify connected account user"
+      description: "Confirms the user assertion and activates the connected account after the user completes third-party OAuth. Called by the B2B app server with auth_request_id and identifier. Validates that the asserted identifier matches the one stored on the auth request and promotes pending tokens to live."
+
+      responses: {
+        key: "200"
+        value: {
+          description: "Verification successful; connected account is now ACTIVE"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connected_accounts.VerifyConnectedAccountUserResponse"}
+          }
+        }
+      }
+      responses: {
+        key: "400"
+        value: {description: "Invalid request - missing or malformed fields"}
+      }
+      responses: {
+        key: "401"
+        value: {description: "Unauthorized - invalid or missing access token"}
+      }
+      responses: {
+        key: "403"
+        value: {description: "Forbidden - identifier mismatch"}
+      }
+      responses: {
+        key: "404"
+        value: {description: "Not found - no pending flow for the given auth_request_id or already consumed"}
+      }
+    };
+  }
+}
+
+message ListConnectedAccountsRequest {
+  optional string organization_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Filter by organization ID. Returns only connected accounts associated with this organization."
+      example: "\"org_121312434123312\""
+    }
+  ];
+  optional string user_id = 2 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Filter by user ID. Returns only connected accounts associated with this user."
+      example: "\"user_121312434123312\""
+    }
+  ];
+  optional string connector = 3 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 400
+      pattern: "^[a-zA-Z0-9_: -]*$"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Filter by connector type. Connector identifier such as 'notion', 'slack', 'google', etc. Alphanumeric with spaces, hyphens, underscores, and colons allowed."
+      example: "\"notion\""
+    }
+  ];
+  optional string identifier = 4 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 100
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Filter by account identifier. The unique identifier for the connected account within the third-party service (e.g., email address, workspace ID)."
+      example: "\"user@example.com\""
+    }
+  ];
+  string provider = 5 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 50
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Filter by OAuth provider. The authentication provider name such as 'google', 'microsoft', 'github', etc."
+      example: "\"google\""
+    }
+  ];
+  uint32 page_size = 6 [
+    (buf.validate.field).uint32 = {
+      gte: 0
+      lt: 100
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Maximum number of connected accounts to return per page. Must be between 0 and 100. Default is typically 10."
+      example: "10"
+    }
+  ];
+  string page_token = 7 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 100
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Pagination token from a previous response. Use the next_page_token value from ListConnectedAccountsResponse to fetch the next page."
+      example: "\"eyJvZmZzZXQiOjEwfQ==\""
+    }
+  ];
+  string query = 8 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 100
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Text search query to filter connected accounts by name, identifier, or other searchable fields. Case-insensitive."
+      example: "\"john@example\""
+    }
+  ];
+}
+
+message ListConnectedAccountsResponse {
+  repeated ConnectedAccountForList connected_accounts = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of connected accounts matching the filter criteria. Excludes sensitive authorization details for security."}];
+  uint32 total_size = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Total count of connected accounts matching the filter criteria across all pages. Use for calculating pagination."
+    example: "100"
+  }];
+  string next_page_token = 3 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Pagination token for retrieving the next page. Empty if this is the last page. Pass this value to page_token in the next request."
+      example: "\"eyJvZmZzZXQiOjIwfQ==\""
+    }
+  ];
+  string prev_page_token = 4 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Pagination token for retrieving the previous page. Empty if this is the first page. Pass this value to page_token to go back."
+      example: "\"eyJvZmZzZXQiOjB9\""
+    }
+  ];
+}
+
+message SearchConnectedAccountsRequest {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "Search Connected Accounts"
+      description: "Search for connected accounts in your environment using a text query that matches against identifiers, providers, or connectors"
+    }
+    example: "query=google&page_size=30&page_token=eyJwYWdlIjoyLCJsaW1pdCI6MzB9"
+  };
+
+  string query = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 3
+      max_len: 200
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: "google"
+      description: "Search term to match against connected account identifiers, providers, or connectors. Must be at least 3 characters. Case insensitive."
+    }
+  ];
+
+  uint32 page_size = 2 [
+    (buf.validate.field).uint32 = {lte: 30},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: "30"
+      description: "Maximum number of connected accounts to return per page. Value must be between 1 and 30."
+    }
+  ];
+  string page_token = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    example: "eyJwYWdlIjoyLCJsaW1pdCI6MzB9"
+    description: "Token from a previous response for pagination. Provide this to retrieve the next page of results."
+  }];
+
+  string connection_id = 4 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Connection ID to filter connected accounts"
+      example: "\"conn_123\""
+    }
+  ];
+}
+
+message SearchConnectedAccountsResponse {
+  repeated ConnectedAccountForList connected_accounts = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of connected accounts matching the search query. Excludes sensitive authorization details."}];
+  uint32 total_size = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Total count of accounts matching the search query across all pages."
+    example: "100"
+  }];
+  string next_page_token = 3 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Pagination token for the next page. Empty if this is the last page."
+      example: "\"eyJvZmZzZXQiOjMwfQ==\""
+    }
+  ];
+  string prev_page_token = 4 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Pagination token for the previous page. Empty if this is the first page."
+      example: "\"eyJvZmZzZXQiOjB9\""
+    }
+  ];
+}
+
+message CreateConnectedAccountRequest {
+  optional string organization_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Organization ID for the connector"
+      example: "\"org_121312434123312\""
+    }
+  ];
+  optional string user_id = 2 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "User ID for the connector"
+      example: "\"user_121312434123312\""
+    }
+  ];
+  optional string connector = 3 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 400
+      pattern: "^[a-zA-Z0-9_: -]*$"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Connector identifier"
+      example: "\"notion\""
+    }
+  ];
+  optional string identifier = 4 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 100
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "The unique identifier for the connected account within the third-party service (e.g., email address, user ID, workspace identifier)."
+      example: "\"user@example.com\""
+    }
+  ];
+  CreateConnectedAccount connected_account = 5 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Details of the connected account to create"
+      example: "{ \"authorization_type\": \"OAUTH2\", \"authorization_details\": { \"oauth_token\": { \"access_token\": \"...\", \"refresh_token\": \"...\", \"scopes\": [\"read\", \"write\"] } } }"
+    }
+  ];
+}
+
+message CreateConnectedAccountResponse {
+  ConnectedAccount connected_account = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The newly created connected account with its unique identifier, status, and complete authorization details including access tokens."}];
+}
+
+message UpdateConnectedAccountRequest {
+  optional string organization_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Organization ID for the connector"
+      example: "\"org_121312434123312\""
+    }
+  ];
+  optional string user_id = 2 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "User ID for the connector"
+      example: "\"user_121312434123312\""
+    }
+  ];
+  optional string connector = 3 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 400
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Connector identifier"
+      example: "\"notion\""
+    }
+  ];
+  optional string identifier = 4 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 100
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "The unique identifier for the connected account within the third-party service (e.g., email address, user ID, workspace identifier)."
+      example: "\"user@example.com\""
+    }
+  ];
+
+  optional string id = 6 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+      prefix: "ca_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the connected account to update"
+      example: "\"ca_123\""
+    }
+  ];
+
+  UpdateConnectedAccount connected_account = 5 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Details of the connected account to update"
+      example: "{ \"authorization_type\": \"OAUTH2\", \"authorization_details\": { \"oauth_token\": { \"access_token\": \"...\", \"refresh_token\": \"...\", \"scopes\": [\"read\", \"write\"] } } }"
+    }
+  ];
+}
+
+message UpdateConnectedAccountResponse {
+  ConnectedAccount connected_account = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The updated connected account with refreshed credentials, new token expiry, and modified configuration settings."}];
+}
+
+message DeleteConnectedAccountRequest {
+  optional string organization_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Organization ID for the connector"
+      example: "\"org_121312434123312\""
+    }
+  ];
+  optional string user_id = 2 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "User ID for the connector"
+      example: "\"user_121312434123312\""
+    }
+  ];
+  optional string connector = 3 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 400
+      pattern: "^[a-zA-Z0-9_: -]*$"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Connector identifier"
+      example: "\"notion\""
+    }
+  ];
+  optional string identifier = 4 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 100
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "The unique identifier for the connected account within the third-party service (e.g., email address, user ID, workspace identifier)."
+      example: "\"user@example.com\""
+    }
+  ];
+  optional string id = 5 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+      prefix: "ca_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the connected account to delete"
+      example: "\"ca_123\""
+    }
+  ];
+}
+
+message DeleteConnectedAccountResponse {}
+
+message GetMagicLinkForConnectedAccountRequest {
+  optional string organization_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Organization ID for the connector"
+      example: "\"org_121312434123312\""
+    }
+  ];
+  optional string user_id = 2 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "User ID for the connector"
+      example: "\"user_121312434123312\""
+    }
+  ];
+  optional string connector = 3 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 400
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Connector identifier"
+      example: "\"notion\""
+    }
+  ];
+  optional string identifier = 4 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 100
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "The unique identifier for the connected account within the third-party service (e.g., email address, user ID, workspace identifier)."
+      example: "\"user@example.com\""
+    }
+  ];
+  optional string id = 5 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+      prefix: "ca_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the connected account"
+      example: "\"ca_123\""
+    }
+  ];
+  optional string state = 7 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 512
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Optional opaque state value. State added to the user verify redirect URL query params to validate the user verification"
+      example: "\"QVNDSUFyY2hhYml0dGVyXzE2ODQ5NzIwNzI0NTY=\""
+    }
+  ];
+  optional string user_verify_url = 8 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 2048
+      pattern: "^$|^https?://"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "B2B app's user verify redirect URL"
+      example: "\"https://app.yourapp.com/user/verify/callback\""
+    }
+  ];
+}
+
+message GetMagicLinkForConnectedAccountResponse {
+  string link = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Authentication link for the connector"
+    example: "\"https://notion.com/oauth/authorize?client_id=...\""
+  }];
+  google.protobuf.Timestamp expiry = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Expiry timestamp for the authentication link"
+    example: "\"2024-03-20T15:04:05Z\""
+  }];
+}
+
+message VerifyConnectedAccountUserRequest {
+  string auth_request_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 1000
+    },
+    (google.api.field_behavior) = REQUIRED,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Auth request ID as base64url-encoded opaque token from the user verify redirect URL query params"
+      example: "\"QVNDSUFyY2hhYml0dGVyXzE2ODQ5NzIwNzI0NTY=\""
+    }
+  ];
+  string identifier = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 200
+    },
+    (google.api.field_behavior) = REQUIRED,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Current logged in user's connected account identifier"
+      example: "\"user@example.com\""
+    }
+  ];
+}
+
+message VerifyConnectedAccountUserResponse {
+  string post_user_verify_redirect_url = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "URL to redirect the user to after successful verification"
+    example: "\"https://env1.example.com/connect/success\""
+  }];
+}
+
+message GetConnectedAccountByIdentifierRequest {
+  optional string organization_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Organization ID for the connector"
+      example: "\"org_121312434123312\""
+    }
+  ];
+  optional string user_id = 2 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "User ID for the connector"
+      example: "\"user_121312434123312\""
+    }
+  ];
+  optional string connector = 3 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 400
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Connector identifier"
+      example: "\"notion\""
+    }
+  ];
+  optional string identifier = 4 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 100
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "The unique identifier for the connected account within the third-party service (e.g., email address, user ID, workspace identifier)."
+      example: "\"user@example.com\""
+    }
+  ];
+  optional string id = 5 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+      prefix: "ca_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the connected account"
+      example: "\"ca_123\""
+    }
+  ];
+}
+
+message GetConnectedAccountByIdentifierResponse {
+  ConnectedAccount connected_account = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The connected account with complete details including sensitive authorization credentials (access tokens, refresh tokens, scopes). Handle with appropriate access controls."}];
+}
+
+message ConnectedAccount {
+  string identifier = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The unique identifier for this account in the third-party service. Typically an email address, user ID, or workspace identifier."
+    example: "\"user@example.com\""
+  }];
+  string provider = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "OAuth provider name (e.g., 'google', 'microsoft', 'github'). Identifies which authentication service manages this connection."
+    example: "\"google\""
+  }];
+  ConnectorStatus status = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Current status of the connected account. Indicates if the account is active, expired, pending authorization, or pending user identity verification."}];
+  ConnectorType authorization_type = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Type of authorization mechanism used. Specifies whether this connection uses OAuth, API keys, bearer tokens, or other auth methods."}];
+  AuthorizationDetails authorization_details = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Sensitive authentication credentials including access tokens, refresh tokens, and scopes. Contains either OAuth tokens or static auth details."}];
+  google.protobuf.Timestamp token_expires_at = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Expiration timestamp for the access token. After this time, the token must be refreshed or re-authorized."
+    example: "\"2024-12-31T23:59:59Z\""
+  }];
+  google.protobuf.Timestamp updated_at = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp when this connected account was last modified. Updated whenever credentials or configuration changes."
+    example: "\"2024-03-20T15:04:05Z\""
+  }];
+  string connector = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Connector identifier (e.g., 'notion', 'slack', 'salesforce'). Indicates which third-party application this account connects to."
+    example: "\"notion\""
+  }];
+  google.protobuf.Timestamp last_used_at = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp when this connected account was last used to make an API call. Useful for tracking active connections."
+    example: "\"2024-03-20T14:30:00Z\""
+  }];
+  string id = 10 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+      prefix: "ca_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique Scalekit-generated identifier for this connected account. Always prefixed with 'ca_'."
+      example: "\"ca_24834495392086178\""
+    }
+  ];
+  string connection_id = 11 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Reference to the parent connection configuration. Links this account to a specific connector setup in your environment."
+      example: "\"conn_24834495392086178\""
+    }
+  ];
+  google.protobuf.Struct api_config = 12 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Optional JSON configuration for connector-specific API settings such as rate limits, custom endpoints, or feature flags."
+    example: "{\"rate_limit\": 1000, \"timeout\": 30, \"base_url\": \"https://api.custom-domain.com\"}"
+  }];
+}
+
+// Payload for creating a new connected account - authorization details are optional
+message CreateConnectedAccount {
+  reserved 1, 2, 3, 4, 6, 7, 8, 9, 10; // System-managed fields not set during creation
+  AuthorizationDetails authorization_details = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Optional authentication credentials for the connected account. Include OAuth tokens (access_token, refresh_token, scopes) or static auth details (API keys, bearer tokens). Can be provided later via update."
+    example: "{\"oauth_token\": {\"access_token\": \"ya29.a0...\", \"refresh_token\": \"1//0g...\", \"scopes\": [\"email\", \"profile\"]}}"
+  }];
+  google.protobuf.Struct api_config = 11 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Optional JSON configuration for connector-specific API settings such as rate limits, custom API endpoints, timeouts, or feature flags."
+    example: "{\"rate_limit\": 1000, \"timeout\": 30, \"base_url\": \"https://api.custom-domain.com\"}"
+  }];
+}
+
+// Payload for updating an existing connected account - all fields optional
+message UpdateConnectedAccount {
+  reserved 1, 2, 3, 4, 6, 7, 8, 9; // System-managed fields not user-updatable
+  AuthorizationDetails authorization_details = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Updated authentication credentials. Provide new OAuth tokens (e.g., after refresh) or updated static auth details. Only included fields will be modified."
+    example: "{\"oauth_token\": {\"access_token\": \"ya29.new_token...\", \"refresh_token\": \"1//0g...\", \"scopes\": [\"email\", \"profile\", \"calendar\"]}}"
+  }];
+  google.protobuf.Struct api_config = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Updated JSON configuration for API-specific settings. Merges with existing configuration - only provided fields are modified."
+    example: "{\"rate_limit\": 2000, \"timeout\": 60}"
+  }];
+}
+
+// Connected account summary for list operations - excludes sensitive authorization details
+message ConnectedAccountForList {
+  reserved 5; // authorization_details excluded for security
+  string identifier = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The unique identifier for this account in the third-party service."
+    example: "\"user@example.com\""
+  }];
+  string provider = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "OAuth provider name (e.g., 'google', 'microsoft')."
+    example: "\"google\""
+  }];
+  ConnectorStatus status = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Current connection status."}];
+  ConnectorType authorization_type = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Authorization mechanism type."}];
+  google.protobuf.Timestamp token_expires_at = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Token expiration timestamp."
+    example: "\"2024-12-31T23:59:59Z\""
+  }];
+  google.protobuf.Timestamp updated_at = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Last modification timestamp."
+    example: "\"2024-03-20T15:04:05Z\""
+  }];
+  string connector = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Connector identifier."
+    example: "\"notion\""
+  }];
+  google.protobuf.Timestamp last_used_at = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Last usage timestamp."
+    example: "\"2024-03-20T14:30:00Z\""
+  }];
+  string id = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Unique connected account identifier."
+    example: "\"ca_24834495392086178\""
+  }];
+  string connection_id = 11 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Parent connection configuration reference."
+      example: "\"conn_24834495392086178\""
+    }
+  ];
+}
+
+// Status of a connected account indicating its current state
+enum ConnectorStatus {
+  CONNECTION_STATUS_UNSPECIFIED = 0; // Default/unknown status
+  ACTIVE = 1; // Account is connected and credentials are valid
+  EXPIRED = 2; // Access token has expired and needs refresh
+  PENDING_AUTH = 3; // Account awaiting user authorization (re-auth initiated)
+  PENDING_VERIFICATION = 4; // OAuth complete; awaiting user identity verification before activation
+  DISCONNECTED = 5; // Account has been manually disconnected
+}
+
+// Type of authentication mechanism used for the connected account
+enum ConnectorType {
+  CONNECTION_TYPE_UNSPECIFIED = 0; // Default/unknown type
+  OAUTH = 1; // OAuth 2.0 authorization with access and refresh tokens
+  API_KEY = 2; // Static API key authentication
+  BASIC_AUTH = 3; // HTTP Basic Authentication (username/password)
+  BEARER_TOKEN = 4; // Bearer token authentication
+  CUSTOM = 5; // Custom authentication mechanism
+  BASIC = 6; // Basic authentication (alias)
+  OAUTH_M2M = 7; // OAuth 2.0 client credentials (machine-to-machine)
+  TRELLO_OAUTH1 = 8; // Trello token-based OAuth1-style browser authorization
+}
+
+// Authentication credentials container supporting multiple auth types
+message AuthorizationDetails {
+  oneof details {
+    OauthToken oauth_token = 1; // OAuth 2.0 credentials
+    StaticAuth static_auth = 2; // Static authentication credentials
+  }
+}
+
+// OAuth 2.0 access and refresh tokens with scopes
+message OauthToken {
+  string access_token = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "OAuth access token for API requests. Typically short-lived and must be refreshed after expiration."
+    example: "\"ya29.a0AfH6SMBx...\""
+  }];
+  string refresh_token = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "OAuth refresh token for obtaining new access tokens. Long-lived and used to maintain persistent authorization."
+    example: "\"1//0gHJxZ-Lb2...\""
+  }];
+  repeated string scopes = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "List of granted OAuth scopes defining the permissions and access levels for this connection."
+    example: "[\"https://www.googleapis.com/auth/drive.readonly\", \"https://www.googleapis.com/auth/userinfo.email\"]"
+  }];
+  string domain = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Associated domain for workspace or organization-scoped OAuth connections (e.g., Google Workspace domain)."
+    example: "\"example.com\""
+  }];
+}
+
+// Static authentication credentials for API keys, bearer tokens, or basic auth
+message StaticAuth {
+  google.protobuf.Struct details = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Flexible JSON structure containing static credentials. Format varies by connector type (API key, username/password, etc.)."
+    example: "{\"api_key\": \"sk_live_...\", \"api_secret\": \"...\"}"
+  }];
+}
+
+message GetConnectedAccountRequest {
+  string id = 1 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the connected account. Always prefixed with 'ca_'. If omitted (via the /this path), the connected account is resolved from the current token context."
+      example: "\"ca_24834495392086178\""
+    }
+  ];
+}
+
+message GetConnectedAccountResponse {
+  ConnectedAccount connected_account = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The connected account with its details and authentication status."}];
+}
+
+message DisconnectConnectedAccountRequest {
+  string id = 1 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the connected account to disconnect. Always prefixed with 'ca_'."
+      example: "\"ca_24834495392086178\""
+    }
+  ];
+}
+
+message DisconnectConnectedAccountResponse {
+  ConnectedAccount connected_account = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The connected account with its updated DISCONNECTED status."}];
+}

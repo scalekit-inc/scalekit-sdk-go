@@ -1,0 +1,585 @@
+syntax = "proto3";
+
+package scalekit.v1.interceptors;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/api/visibility.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "scalekit/v1/commons/commons.proto";
+import "scalekit/v1/errdetails/errdetails.proto";
+import "scalekit/v1/options/options.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/interceptors";
+
+service InterceptorService {
+  rpc CreateInterceptor(CreateInterceptorRequest) returns (CreateInterceptorResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      post: "/api/v1/interceptors"
+      body: "interceptor"
+    };
+  }
+
+  rpc GetInterceptor(GetInterceptorRequest) returns (GetInterceptorResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/interceptors/{id}"};
+  }
+
+  rpc ListInterceptors(ListInterceptorsRequest) returns (ListInterceptorsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/interceptors"};
+  }
+
+  rpc UpdateInterceptor(UpdateInterceptorRequest) returns (UpdateInterceptorResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      patch: "/api/v1/interceptors/{id}"
+      body: "interceptor"
+    };
+  }
+
+  rpc DeleteInterceptor(DeleteInterceptorRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {delete: "/api/v1/interceptors/{id}"};
+  }
+
+  rpc EnableInterceptor(EnableInterceptorRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {patch: "/api/v1/interceptors/{id}:enable"};
+  }
+
+  rpc DisableInterceptor(DisableInterceptorRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {patch: "/api/v1/interceptors/{id}:disable"};
+  }
+
+  rpc TestInterceptor(TestInterceptorRequest) returns (TestInterceptorResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      post: "/api/v1/interceptors/{id}/test"
+      body: "data"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Test an Interceptor"
+      description: "Test an interceptor with sample data."
+    };
+  }
+}
+
+enum TriggerPoint {
+  TRIGGER_POINT_UNSPECIFIED = 0;
+  POST_USER_AUTHENTICATION = 1;
+  PRE_SIGNUP = 2;
+  PRE_SESSION_CREATION = 3;
+  PRE_USER_INVITATION = 4;
+  PRE_M2M_TOKEN_CREATION = 5;
+  ACCESS_TOKEN_CREATION = 6;
+}
+
+enum InterceptorType {
+  INTERCEPTOR_TYPE_UNSPECIFIED = 0;
+  AUTH = 1;
+}
+
+enum FailurePolicy {
+  FAILURE_POLICY_UNSPECIFIED = 0;
+  FAIL_OPEN = 1;
+  FAIL_CLOSED = 2;
+}
+
+enum InterceptorDecision {
+  INTERCEPTOR_DECISION_UNSPECIFIED = 0;
+  ALLOW = 1;
+  DENY = 2;
+}
+
+message CreateInterceptor {
+  string display_name = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 255
+  }];
+
+  string description = 2 [(buf.validate.field).string = {max_len: 1024}];
+
+  TriggerPoint trigger_point = 3 [
+    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum.not_in = 0
+  ];
+
+  optional InterceptorType interceptor_type = 4 [
+    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum.not_in = 0,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Type of interceptor. AUTH for authentication interceptors."
+      example: "AUTH"
+    }
+  ];
+
+  optional string api_url = 5 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 6000
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "HTTPS api URL that will receive the custom interceptor request"
+      example: "\"https://b2b.com/pre-login\""
+    }
+  ];
+
+  optional Config config = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Configuration for the interceptor"}];
+
+  optional uint64 timeout_ms = 7 [
+    (buf.validate.field).uint64 = {
+      lte: 30000
+      gte: 100
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Interceptor timeout duration"
+      default: "10000"
+      example: "10000"
+    }
+  ];
+
+  optional FailurePolicy failure_policy = 8 [
+    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum.not_in = 0,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "How to handle failures when the interceptor endpoint is unreachable"
+      example: "FAIL_OPEN"
+    }
+  ];
+
+  optional string request_template = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Jsonnet template for transforming request data"}];
+  optional string response_template = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Jsonnet template for transforming response data"}];
+}
+
+message Interceptor {
+  string id = 1 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the interceptor"
+      example: "\"icp_11897349538316810\""
+    }
+  ];
+
+  string display_name = 2 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 255
+  }];
+
+  string description = 3 [(buf.validate.field).string = {max_len: 1024}];
+
+  TriggerPoint trigger_point = 4 [
+    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum.not_in = 0
+  ];
+
+  InterceptorType interceptor_type = 5 [
+    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum.not_in = 0,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Type of interceptor"
+      example: "AUTH"
+    }
+  ];
+
+  string api_url = 6 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 6000
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "HTTPS api URL that will receive the custom interceptor request"
+      example: "\"https://b2b.com/pre-login\""
+    }
+  ];
+
+  optional Config config = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Configuration for the interceptor"}];
+
+  uint64 timeout_ms = 8 [
+    (buf.validate.field).uint64 = {
+      lte: 30000
+      gte: 100
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Interceptor timeout duration"
+      default: "10000"
+      example: "10000"
+    }
+  ];
+
+  FailurePolicy failure_policy = 9 [
+    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum.not_in = 0,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "How to handle failures when the interceptor endpoint is unreachable"
+      example: "FAIL_OPEN"
+    }
+  ];
+
+  optional string request_template = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Jsonnet template for transforming request data"}];
+  optional string response_template = 11 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Jsonnet template for transforming response data"}];
+
+  string secret_id = 12 [(google.api.field_behavior) = OUTPUT_ONLY];
+  string secret_suffix = 13 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  bool enabled = 14 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Whether this custom interceptor is currently active"
+    example: "true"
+  }];
+
+  google.protobuf.Timestamp created_at = 15 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Timestamp when the interceptor was created"}
+  ];
+
+  google.protobuf.Timestamp updated_at = 16 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Timestamp when the interceptor was last updated"}
+  ];
+
+  optional google.protobuf.Timestamp last_executed_at = 17 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Timestamp when the interceptor was last used"}
+  ];
+}
+
+message Config {
+  AuthenticationConfig auth_config = 1;
+}
+
+message AuthenticationConfig {
+  oneof auth_config {
+    ApiKeyAuth api_key = 1;
+    Oauth2Auth oauth2 = 2;
+  }
+  AuthConfigType auth_config_type = 3 [
+    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum.not_in = 0
+  ];
+}
+
+message ApiKeyAuth {
+  string api_key = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 2048
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "API key value"
+      example: "\"my-secret-api-key\""
+    }
+  ];
+  string header_name = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 255
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "HTTP header name to send the API key in"
+      example: "\"x-api-key\""
+    }
+  ];
+}
+
+message Oauth2Auth {
+  string token_url = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 2048
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "OAuth2 token URL"
+      example: "\"https://auth.example.com/oauth2/token\""
+    }
+  ];
+  string client_id = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 255
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "OAuth2 client ID"
+      example: "\"my-client-id\""
+    }
+  ];
+  string client_secret = 3 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 2048
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "OAuth2 client secret"
+      example: "\"my-client-secret\""
+    }
+  ];
+  string scope = 4 [
+    (buf.validate.field).string = {max_len: 1024},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "OAuth2 scopes"
+      example: "\"read write\""
+    }
+  ];
+}
+
+enum AuthConfigType {
+  AUTH_CONFIG_TYPE_UNSPECIFIED = 0;
+  API_KEY = 1;
+  OAUTH2 = 2;
+}
+
+message CreateInterceptorRequest {
+  CreateInterceptor interceptor = 1 [(buf.validate.field).required = true];
+}
+
+message CreateInterceptorResponse {
+  Interceptor interceptor = 1;
+}
+
+message GetInterceptorRequest {
+  string id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "icp_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Interceptor ID"
+      example: "\"icp_91735381321449672\""
+    }
+  ];
+}
+
+message GetInterceptorResponse {
+  Interceptor interceptor = 1;
+}
+
+message EnableInterceptorRequest {
+  string id = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 32
+    prefix: "icp_"
+  }];
+}
+
+message DisableInterceptorRequest {
+  string id = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 32
+    prefix: "icp_"
+  }];
+}
+
+message ListInterceptorsRequest {
+  optional TriggerPoint trigger_point = 1 [
+    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum.not_in = 0,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Filter by trigger point"}
+  ];
+
+  optional bool enabled = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Only return enabled interceptors"}];
+
+  uint32 page_size = 3 [
+    (buf.validate.field).uint32 = {lte: 100},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Number of results to return per page (1-100)"
+      example: "20"
+    }
+  ];
+
+  optional string page_token = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Token for pagination"
+    example: ""
+  }];
+}
+
+message ListInterceptorsResponse {
+  repeated Interceptor interceptors = 1;
+
+  string next_page_token = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Token for retrieving the next page of results. Empty if there are no more pages."
+    example: "\"\""
+  }];
+
+  uint32 total_size = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Total number of interceptors matching the request criteria, regardless of pagination."
+    example: "1042"
+  }];
+
+  string prev_page_token = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Token for retrieving the previous page of results. Empty if this is the first page."
+    example: "\"\""
+  }];
+}
+
+message UpdateInterceptorRequest {
+  string id = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 32
+    prefix: "icp_"
+  }];
+  UpdateInterceptor interceptor = 2 [(buf.validate.field).required = true];
+}
+
+message UpdateInterceptor {
+  optional string display_name = 1 [
+    (buf.validate.field).string = {max_len: 255},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Descriptive name for the custom interceptor"
+      example: "\"Validate User Compliance\""
+    }
+  ];
+
+  optional string description = 2 [
+    (buf.validate.field).string = {max_len: 1024},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Detailed description of what this interceptor does"
+      example: "\"Checks user compliance with security policies before login\""
+    }
+  ];
+
+  optional TriggerPoint trigger_point = 3 [
+    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum.not_in = 0,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The trigger point where this interceptor should execute"}
+  ];
+
+  optional string api_url = 4 [
+    (buf.validate.field).string = {max_len: 6000},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "HTTPS api URL that will receive the custom interceptor request"
+      example: "\"https://b2b.com/auth-interceptors/pre-login\""
+    }
+  ];
+
+  optional Config config = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Configuration for the interceptor"}];
+
+  optional uint64 timeout_ms = 6 [
+    (buf.validate.field).uint64 = {
+      lte: 30000
+      gte: 100
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Interceptor timeout duration in milliseconds"
+      example: "10000"
+    }
+  ];
+
+  optional FailurePolicy failure_policy = 7 [
+    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum.not_in = 0,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "How to handle failures when the interceptor endpoint is unreachable"
+      example: "FAIL_OPEN"
+    }
+  ];
+
+  optional string request_template = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Jsonnet request template for transforming request data"
+    example: "\"local user = ctx.user; { user: user, timestamp: std.now() }\""
+  }];
+
+  optional string response_template = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Jsonnet response template for transforming response data"
+    example: "\"local user = ctx.user; { user: user, timestamp: std.now() }\""
+  }];
+}
+
+message UpdateInterceptorResponse {
+  Interceptor interceptor = 1;
+}
+
+message DeleteInterceptorRequest {
+  string id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 255
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Interceptor identifier"}
+  ];
+}
+
+message InterceptorError {
+  string code = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 50
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Error code"}
+  ];
+  string message = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 500
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Error message"}
+  ];
+}
+
+message TestInterceptorRequest {
+  string id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "icp_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Interceptor identifier"}
+  ];
+
+  google.protobuf.Struct data = 2 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Test data payload for the interceptor. Should contain user, organization, and context information."
+      example: "{\"user\": {\"email\": \"test@example.com\", \"first_name\": \"John\"}, \"organization\": {\"name\": \"Test Org\"}}"
+    }
+  ];
+}
+
+message TestInterceptorResponse {
+  google.protobuf.Struct interceptor_response = 1;
+  optional scalekit.v1.errdetails.ValidationErrorInfo validation_error = 2;
+  optional ErrorMessage error = 3;
+}
+
+message ErrorMessage {
+  string code = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 50
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Error code"}
+  ];
+  string message = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 500
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Error message"}
+  ];
+  google.protobuf.Struct details = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Additional error details"}];
+}
+
+message InterceptorResponse {
+  InterceptorDecision decision = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).enum.defined_only = true,
+    (buf.validate.field).enum.not_in = 0,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The decision made by the interceptor"}
+  ];
+  optional InterceptorError error = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Error information if the interceptor failed"}];
+}

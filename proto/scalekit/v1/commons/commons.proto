@@ -1,0 +1,353 @@
+syntax = "proto3";
+
+package scalekit.v1.commons;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/api/visibility.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/commons";
+
+enum RegionCode {
+  /*
+     If the region code is unspecified the selected region will automatically be decided based on the origin of the call.
+  */
+  REGION_CODE_UNSPECIFIED = 0;
+  US = 1;
+  EU = 2;
+}
+
+enum EnvironmentType {
+  ENVIRONMENT_TYPE_UNSPECIFIED = 0;
+  PRD = 1;
+  DEV = 2;
+}
+
+message OrganizationMembership {
+  string organization_id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Unique identifier for the organization. Immutable and read-only."
+    example: "\"org_1234abcd5678efgh\""
+  }];
+  google.protobuf.Timestamp join_time = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Timestamp when the membership was created. Automatically set by the server."}];
+  MembershipStatus membership_status = 3;
+  repeated Role roles = 4;
+  optional string name = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Organization name. This field stores the formal organization name used for identification and display purposes."
+    example: "\"AcmeCorp\""
+  }];
+  map<string, string> metadata = 7 [
+    (buf.validate.field).map = {
+      max_pairs: 20
+      keys: {
+        string: {
+          min_len: 3
+          max_len: 25
+        }
+      }
+      values: {
+        string: {
+          min_len: 1
+          max_len: 256
+        }
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Custom key-value pairs for storing additional user context. Keys (3-25 chars), values (1-256 chars)."
+      example: "{\"department\": \"engineering\", \"location\": \"nyc-office\"}"
+    }
+  ];
+  optional string display_name = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Organization display name. This field stores a user-friendly name for the organization that may be different from the formal name, often used for UI display purposes."
+    example: "\"Acme Corporation\""
+  }];
+  optional string inviter_email = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "ID of the user who invited this user."}];
+
+  optional google.protobuf.Timestamp created_at = 11 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Timestamp when the invitation was created."}];
+
+  optional google.protobuf.Timestamp accepted_at = 12 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Timestamp when the user accepted the invitation."}];
+
+  optional google.protobuf.Timestamp expires_at = 13 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Timestamp when the invitation expired."}];
+
+  optional string provisioning_method = 14 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "How the user was provisioned. \nPossible values: \n- `jit_using_sso` (Just-in-time provisioning during SSO login)\n- `allowed_email_domain` (User joined via allowed email domain matching)\n- `org_creator` (User created the organization)\n- `direct_provision` (User was directly provisioned via API or SCIM)\n- `invitation` (User was invited and accepted an invitation)"}];
+
+  repeated string permissions = 15 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Effective permissions granted to the user within the organization (including inherited permissions from assigned roles). Lists the specific actions and access rights the user can perform."
+    example: "[\"read_projects\", \"write_tasks\", \"manage_users\"]"
+  }];
+}
+
+message Role {
+  string id = 1 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Role ID"
+      example: "\"role_79643236410327240\""
+    }
+  ];
+  string name = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Attribute name/identifier for the role used in system operations and API calls. This should be a machine-readable identifier that follows naming conventions."
+    example: "\"team_dev\""
+  }];
+  string display_name = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Human-readable name for the role"
+    example: "\"Dev Team\""
+  }];
+}
+
+enum MembershipStatus {
+  Membership_Status_UNSPECIFIED = 0;
+  ACTIVE = 1;
+  INACTIVE = 2;
+  PENDING_INVITE = 3;
+  INVITE_EXPIRED = 4;
+}
+
+message UserProfile {
+  string id = 1 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique system-generated identifier for the user profile. Immutable and read-only."
+      example: "\"usr_profile_1234abcd5678efgh\""
+    }
+  ];
+
+  string given_name = 2 [
+    (buf.validate.field).string = {max_len: 255},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "The user's given name (first name). This field stores the user's first name and is used for personalization, display purposes, and when generating the full display name. The given name appears in user interfaces, formal communications, and user listings throughout the system. Maximum 255 characters allowed."
+      example: "\"John\""
+    }
+  ];
+
+  string family_name = 3 [
+    (buf.validate.field).string = {max_len: 255},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "The user's family name (last name or surname). This field stores the user's last name and is combined with the given name to create the full display name. The family name is used in formal communications, user listings, and organizational directories throughout the system. Maximum 255 characters allowed."
+      example: "\"Doe\""
+    }
+  ];
+
+  string name = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The user's complete display name in formatted form. This field stores the full name as a single string and is typically used when you want to set the complete name rather than using separate given and family names. This name appears in user interfaces, reports, directory listings, and anywhere a formatted display name is needed. This field serves as a formatted display name that complements the individual given_name and family_name fields."
+    example: "\"John Michael Doe\""
+  }];
+
+  string locale = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The user's preferred language and region settings using BCP-47 format codes. This field customizes the user's experience with localized content, date formats, number formatting, and UI language throughout the system. When not specified, the user inherits the organization's default locale settings. Common values include `en-US`, `en-GB`, `fr-FR`, `de-DE`, and `es-ES`."
+    example: "\"en-US\""
+  }];
+
+  bool email_verified = 6 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Indicates if the user's email address has been verified. Automatically updated by the system."
+      example: "true"
+    }
+  ];
+
+  string phone_number = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The user's phone number in E.164 international format. This field stores the phone number for user contact and identification purposes. The phone number must include the country code and be formatted according to E.164 standards (e.g., `+1` for US numbers). This field is optional."
+    example: "\"+14155552671\""
+  }];
+
+  map<string, string> metadata = 8 [
+    (buf.validate.field).map = {
+      max_pairs: 20
+      keys: {
+        string: {
+          min_len: 3
+          max_len: 25
+        }
+      }
+      values: {
+        string: {
+          min_len: 1
+          max_len: 256
+        }
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Raw attributes received from identity providers during authentication. This field stores the original user profile data as received from external IdP systems (SAML, OIDC, etc.) including provider-specific claims and attributes. These fields preserve the complete set of attributes received from the identity source and are used for mapping, synchronization, and audit purposes. Keys must be 3-25 characters, values must be 1-256 characters, with a maximum of 20 key-value pairs."
+      example: "{\"idp_user_id\": \"12345\", \"department\": \"engineering\", \"employee_type\": \"full-time\"}"
+    }
+  ];
+
+  map<string, string> custom_attributes = 9 [
+    (buf.validate.field).map = {
+      max_pairs: 20
+      keys: {
+        string: {
+          min_len: 3
+          max_len: 25
+        }
+      }
+      values: {
+        string: {
+          min_len: 1
+          max_len: 256
+        }
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Custom attributes for extended user profile data and application-specific information. This field stores business-specific user data like department, job title, security clearances, project assignments, or any other organizational attributes your application requires. Unlike system metadata, these attributes are typically managed by administrators or applications and are visible to end users for personalization and business logic. Keys must be 3-25 characters, values must be 1-256 characters, with a maximum of 20 key-value pairs."
+      example: "{\"department\": \"engineering\", \"security_clearance\": \"level2\"}"
+    }
+  ];
+
+  string first_name = 21 [
+    deprecated = true,
+    (buf.validate.field).string = {max_len: 255},
+    (google.api.field_visibility).restriction = "PREVIEW",
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "[DEPRECATED] Use given_name instead. User's given name. Maximum 255 characters."
+      example: "\"John\""
+    }
+  ];
+  string last_name = 22 [
+    deprecated = true,
+    (buf.validate.field).string = {max_len: 255},
+    (google.api.field_visibility).restriction = "PREVIEW",
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "[DEPRECATED] Use family_name instead. User's family name. Maximum 255 characters."
+      example: "\"Doe\""
+    }
+  ];
+  string preferred_username = 12 [
+    (buf.validate.field).string = {max_len: 512},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "The user's preferred username for display and identification purposes. This field stores a custom username that the user prefers to be known by, which may differ from their email or formal name. This username appears in user interfaces, mentions, informal communications, and collaborative features throughout the system. Maximum 512 characters allowed."
+      example: "\"johndoe\""
+    }
+  ];
+
+  bool phone_number_verified = 13 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Indicates if the user's phone number has been verified. Automatically updated by the system."
+      example: "true"
+    }
+  ];
+
+  string picture = 14 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The URL to the user's profile picture or avatar image. This field stores the location of the user's profile photo that appears in user interfaces, directory listings, and collaborative features throughout the system. The URL should point to a publicly accessible image file. Supported formats typically include JPEG, PNG, and GIF. This image is used for visual identification and personalization across the platform."
+    example: "\"https://example.com/avatar.jpg\""
+  }];
+
+  repeated string groups = 15 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The list of group names the user belongs to within the organization. This field stores the user's group memberships for role-based access control, team assignments, and organizational structure. Groups are typically used for permission management, collaborative access, and organizational hierarchy. Each group name represents a distinct organizational unit or team that the user is associated with."
+    example: "[\"admin\", \"developer\"]"
+  }];
+
+  string gender = 16 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The user's gender identity information. This field stores the user's gender identity for personalization, compliance reporting, or organizational analytics purposes. This field supports any string value to accommodate diverse gender identities and should be handled with appropriate privacy considerations according to your organization's policies and applicable regulations."
+    example: "\"male\""
+  }];
+
+  repeated ExternalIdentity external_identities = 10 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of external identity connections associated with the user profile."}
+  ];
+}
+message ExternalIdentity {
+  // Identifier for this connection.
+  string connection_id = 1 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the external identity connection. Immutable and read-only."
+      example: "\"conn_1234abcd5678efgh\""
+    }
+  ];
+
+  // Connection name.
+  string connection_type = 2 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the external identity connection."
+      example: "\"OAUTH\""
+    }
+  ];
+
+  // Name of connection, e.g. Google.
+  IdentityProviderType connection_provider = 3 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Type of the identity provider."
+      example: "\"GOOGLE\""
+    }
+  ];
+
+  // Unique identifier of the user for this identity.
+  string connection_user_id = 4 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the user in the external identity provider system. Immutable and read-only."
+      example: "\"ext_user_12345\""
+    }
+  ];
+
+  // Whether this identity is from a social provider (true) or not (false).
+  bool is_social = 5 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Indicates if the identity provider is a social provider (true) or enterprise/custom provider (false). Read-only."
+      example: "true"
+    }
+  ];
+
+  // Last successful login time with this IdP for the user.
+  google.protobuf.Timestamp last_login_time = 6 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Timestamp of the user's last successful login via this external identity provider. Automatically updated by the system."}
+  ];
+
+  // Creation of this external identity with the IdP for the user.
+  google.protobuf.Timestamp created_time = 7 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Timestamp when this external identity connection was first created. Immutable and read-only."}
+  ];
+
+  // Last time when sync of data happened for this user from external IdP.
+  google.protobuf.Timestamp last_synced_time = 8 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Timestamp of the last data synchronization for this external identity from the provider. Automatically updated by the system."}
+  ];
+}
+
+enum IdentityProviderType {
+  IDENTITY_PROVIDER_UNSPECIFIED = 0;
+  OKTA = 1;
+  GOOGLE = 2;
+  MICROSOFT_AD = 3;
+  AUTH0 = 4;
+  ONELOGIN = 5;
+  PING_IDENTITY = 6;
+  JUMPCLOUD = 7;
+  CUSTOM = 8;
+  GITHUB = 9;
+  GITLAB = 10;
+  LINKEDIN = 11;
+  SALESFORCE = 12;
+  MICROSOFT = 13;
+  IDP_SIMULATOR = 14;
+  SCALEKIT = 15;
+  ADFS = 16;
+}
+
+enum AuthenticationMode {
+  AUTHENTICATION_MODE_UNSPECIFIED = 0;
+  MODULAR_AUTH = 1;
+  FULL_STACK_AUTH = 2;
+}
+
+enum TimeUnit {
+  SESSION_TIME_UNIT_UNSPECIFIED = 0;
+  MINUTES = 1;
+  HOURS = 2;
+  DAYS = 3;
+}
