@@ -13,6 +13,7 @@ type UpdateUserResponse = usersv1.UpdateUserResponse
 type GetUserResponse = usersv1.GetUserResponse
 type ListOrganizationUsersResponse = usersv1.ListOrganizationUsersResponse
 type ListUsersResponse = usersv1.ListUsersResponse
+type SearchUsersResponse = usersv1.SearchUsersResponse
 type CreateMembershipResponse = usersv1.CreateMembershipResponse
 type UpdateMembershipResponse = usersv1.UpdateMembershipResponse
 type ListUserRolesResponse = usersv1.ListUserRolesResponse
@@ -24,11 +25,18 @@ type ListUsersOptions struct {
 	PageToken string
 }
 
+// SearchUsersOptions represents optional parameters for searching users
+type SearchUsersOptions struct {
+	PageSize  uint32
+	PageToken string
+}
+
 type UserService interface {
 	CreateUserAndMembership(ctx context.Context, organizationId string, user *usersv1.CreateUser, sendInvitationEmail bool) (*CreateUserAndMembershipResponse, error)
 	UpdateUser(ctx context.Context, userId string, updateUser *usersv1.UpdateUser) (*UpdateUserResponse, error)
 	GetUser(ctx context.Context, userId string) (*GetUserResponse, error)
 	ListUsers(ctx context.Context, options *ListUsersOptions) (*ListUsersResponse, error)
+	SearchUsers(ctx context.Context, query string, options *SearchUsersOptions) (*SearchUsersResponse, error)
 	ListOrganizationUsers(ctx context.Context, organizationId string, options *ListUsersOptions) (*ListOrganizationUsersResponse, error)
 	DeleteUser(ctx context.Context, userId string) error
 	CreateMembership(ctx context.Context, organizationId string, userId string, membership *usersv1.CreateMembership, sendInvitationEmail bool) (*CreateMembershipResponse, error)
@@ -103,6 +111,24 @@ func (u *userService) ListUsers(ctx context.Context, options *ListUsersOptions) 
 	return newConnectExecuter(
 		u.coreClient,
 		u.client.ListUsers,
+		request,
+	).exec(ctx)
+}
+
+// SearchUsers searches users across the environment using a query string with optional pagination.
+// Pass nil options to use server defaults.
+func (u *userService) SearchUsers(ctx context.Context, query string, options *SearchUsersOptions) (*SearchUsersResponse, error) {
+	request := &usersv1.SearchUsersRequest{
+		Query: query,
+	}
+	if options != nil {
+		request.PageSize = options.PageSize
+		request.PageToken = options.PageToken
+	}
+
+	return newConnectExecuter(
+		u.coreClient,
+		u.client.SearchUsers,
 		request,
 	).exec(ctx)
 }
