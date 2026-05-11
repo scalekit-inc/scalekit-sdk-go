@@ -10,7 +10,6 @@ import (
 	errors "errors"
 	domains "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/domains"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
-	wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
 	http "net/http"
 	strings "strings"
 )
@@ -61,7 +60,7 @@ const (
 type DomainServiceClient interface {
 	CreateDomain(context.Context, *connect.Request[domains.CreateDomainRequest]) (*connect.Response[domains.CreateDomainResponse], error)
 	UpdateDomain(context.Context, *connect.Request[domains.UpdateDomainRequest]) (*connect.Response[domains.UpdateDomainResponse], error)
-	VerifyDomain(context.Context, *connect.Request[domains.VerifyDomainRequest]) (*connect.Response[wrapperspb.BoolValue], error)
+	VerifyDomain(context.Context, *connect.Request[domains.VerifyDomainRequest]) (*connect.Response[domains.VerifyDomainResponse], error)
 	GetDomain(context.Context, *connect.Request[domains.GetDomainRequest]) (*connect.Response[domains.GetDomainResponse], error)
 	DeleteDomain(context.Context, *connect.Request[domains.DeleteDomainRequest]) (*connect.Response[emptypb.Empty], error)
 	ListDomains(context.Context, *connect.Request[domains.ListDomainRequest]) (*connect.Response[domains.ListDomainResponse], error)
@@ -91,7 +90,7 @@ func NewDomainServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(domainServiceMethods.ByName("UpdateDomain")),
 			connect.WithClientOptions(opts...),
 		),
-		verifyDomain: connect.NewClient[domains.VerifyDomainRequest, wrapperspb.BoolValue](
+		verifyDomain: connect.NewClient[domains.VerifyDomainRequest, domains.VerifyDomainResponse](
 			httpClient,
 			baseURL+DomainServiceVerifyDomainProcedure,
 			connect.WithSchema(domainServiceMethods.ByName("VerifyDomain")),
@@ -128,7 +127,7 @@ func NewDomainServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 type domainServiceClient struct {
 	createDomain          *connect.Client[domains.CreateDomainRequest, domains.CreateDomainResponse]
 	updateDomain          *connect.Client[domains.UpdateDomainRequest, domains.UpdateDomainResponse]
-	verifyDomain          *connect.Client[domains.VerifyDomainRequest, wrapperspb.BoolValue]
+	verifyDomain          *connect.Client[domains.VerifyDomainRequest, domains.VerifyDomainResponse]
 	getDomain             *connect.Client[domains.GetDomainRequest, domains.GetDomainResponse]
 	deleteDomain          *connect.Client[domains.DeleteDomainRequest, emptypb.Empty]
 	listDomains           *connect.Client[domains.ListDomainRequest, domains.ListDomainResponse]
@@ -146,7 +145,7 @@ func (c *domainServiceClient) UpdateDomain(ctx context.Context, req *connect.Req
 }
 
 // VerifyDomain calls scalekit.v1.domains.DomainService.VerifyDomain.
-func (c *domainServiceClient) VerifyDomain(ctx context.Context, req *connect.Request[domains.VerifyDomainRequest]) (*connect.Response[wrapperspb.BoolValue], error) {
+func (c *domainServiceClient) VerifyDomain(ctx context.Context, req *connect.Request[domains.VerifyDomainRequest]) (*connect.Response[domains.VerifyDomainResponse], error) {
 	return c.verifyDomain.CallUnary(ctx, req)
 }
 
@@ -174,7 +173,7 @@ func (c *domainServiceClient) ListAuthorizedDomains(ctx context.Context, req *co
 type DomainServiceHandler interface {
 	CreateDomain(context.Context, *connect.Request[domains.CreateDomainRequest]) (*connect.Response[domains.CreateDomainResponse], error)
 	UpdateDomain(context.Context, *connect.Request[domains.UpdateDomainRequest]) (*connect.Response[domains.UpdateDomainResponse], error)
-	VerifyDomain(context.Context, *connect.Request[domains.VerifyDomainRequest]) (*connect.Response[wrapperspb.BoolValue], error)
+	VerifyDomain(context.Context, *connect.Request[domains.VerifyDomainRequest]) (*connect.Response[domains.VerifyDomainResponse], error)
 	GetDomain(context.Context, *connect.Request[domains.GetDomainRequest]) (*connect.Response[domains.GetDomainResponse], error)
 	DeleteDomain(context.Context, *connect.Request[domains.DeleteDomainRequest]) (*connect.Response[emptypb.Empty], error)
 	ListDomains(context.Context, *connect.Request[domains.ListDomainRequest]) (*connect.Response[domains.ListDomainResponse], error)
@@ -263,7 +262,7 @@ func (UnimplementedDomainServiceHandler) UpdateDomain(context.Context, *connect.
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.domains.DomainService.UpdateDomain is not implemented"))
 }
 
-func (UnimplementedDomainServiceHandler) VerifyDomain(context.Context, *connect.Request[domains.VerifyDomainRequest]) (*connect.Response[wrapperspb.BoolValue], error) {
+func (UnimplementedDomainServiceHandler) VerifyDomain(context.Context, *connect.Request[domains.VerifyDomainRequest]) (*connect.Response[domains.VerifyDomainResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.domains.DomainService.VerifyDomain is not implemented"))
 }
 
