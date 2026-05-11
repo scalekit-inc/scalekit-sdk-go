@@ -141,3 +141,32 @@ func TestDirectory_ListDirectoryUsers_UpdatedAfter(t *testing.T) {
 		assert.NotEmpty(t, user.GetEmail())
 	}
 }
+
+func TestDirectory_DeleteDirectory_EnabledDirectory_ReturnsValidationError(t *testing.T) {
+	ctx := context.Background()
+	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
+	defer DeleteTestOrganization(t, ctx, orgId)
+
+	createResp, err := client.Directory().CreateDirectory(ctx, orgId, &directories.CreateDirectory{
+		DirectoryType:     directories.DirectoryType_SCIM,
+		DirectoryProvider: directories.DirectoryProvider_OKTA,
+	})
+	if err != nil {
+		t.Skipf("CreateDirectory not supported: %v", err)
+	}
+	require.NotNil(t, createResp)
+	require.NotNil(t, createResp.GetDirectory())
+	dirId := createResp.GetDirectory().GetId()
+	defer DeleteTestDirectory(t, ctx, orgId, dirId)
+
+	_, err = client.Directory().EnableDirectory(ctx, orgId, dirId)
+	if err != nil {
+		t.Skipf("EnableDirectory not supported: %v", err)
+	}
+
+	err = client.Directory().DeleteDirectory(ctx, orgId, dirId)
+	require.Error(t, err)
+	msg := err.Error()
+	assert.Contains(t, msg, "directory is enabled")
+	assert.Contains(t, msg, "disable")
+}

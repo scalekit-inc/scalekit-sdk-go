@@ -26,8 +26,8 @@ const (
 )
 
 var (
-	webhookToleranceInSeconds = 5 * time.Minute
-	webhookSignatureVersion   = "v1"
+	webhookTolerance        = 5 * time.Minute
+	webhookSignatureVersion = "v1"
 )
 
 type GrantType = string
@@ -40,25 +40,31 @@ type Scalekit interface {
 	User() UserService
 	Passwordless() PasswordlessService
 	Auth() AuthService
+	Client() ClientService
 	Session() SessionService
 	Role() RoleService
 	Permission() PermissionService
 	WebAuthn() WebAuthnService
 	Token() TokenService
+	M2M() M2MService
 	GetAuthorizationUrl(redirectUri string, options AuthorizationUrlOptions) (*url.URL, error)
-	AuthenticateWithCode(
-		ctx context.Context,
-		code string,
-		redirectUri string,
-		options AuthenticationOptions,
-	) (*AuthenticationResponse, error)
+	AuthenticateWithCode(ctx context.Context, code string, redirectUri string, options AuthenticationOptions) (*AuthenticationResponse, error)
 	GetIdpInitiatedLoginClaims(ctx context.Context, idpInitiateLoginToken string) (*IdpInitiatedLoginClaims, error)
 	ValidateAccessToken(ctx context.Context, accessToken string) (bool, error)
+	ValidateTokenWithOptions(ctx context.Context, token string, options *ValidateTokenOptions) (bool, error)
 	VerifyWebhookPayload(secret string, headers map[string]string, payload []byte) (bool, error)
 	VerifyInterceptorPayload(secret string, headers map[string]string, payload []byte) (bool, error)
 	RefreshAccessToken(ctx context.Context, refreshToken string) (*TokenResponse, error)
 	GetLogoutUrl(options LogoutUrlOptions) (*url.URL, error)
+	GenerateClientToken(ctx context.Context, options GenerateClientTokenOptions) (*ClientTokenResponse, error)
+	GetClientAccessToken(ctx context.Context) (string, error)
+	// ValidateToken validates the token signature and expiry, then returns all
+	// claims as a Claims map (map[string]interface{}). For strongly-typed claim
+	// structs use the package-level generic ValidateToken[T] function directly.
+	ValidateToken(ctx context.Context, token string) (Claims, error)
 	GetAccessTokenClaims(ctx context.Context, accessToken string) (*AccessTokenClaims, error)
+	GeneratePKCEConfiguration(options PKCEOptions) (*PKCEConfiguration, error)
+	WithSecret(clientSecret string) Scalekit
 }
 
 type scalekitClient struct {
@@ -70,11 +76,13 @@ type scalekitClient struct {
 	user         UserService
 	passwordless PasswordlessService
 	auth         AuthService
+	oidcClient   ClientService
 	session      SessionService
 	role         RoleService
 	permission   PermissionService
 	webauthn     WebAuthnService
 	token        TokenService
+	m2m          M2MService
 }
 
 type AuthorizationUrlOptions struct {
@@ -95,6 +103,17 @@ type AuthenticationOptions struct {
 	CodeVerifier string
 }
 
+// ValidateTokenOptions defines optional validations for token verification.
+type ValidateTokenOptions struct {
+	// Audience is the optional set of accepted aud claim values. Validation
+	// succeeds when any configured audience matches.
+	Audience []string
+
+	// Scopes is the optional set of scopes that must be present in the token's
+	// space-delimited scope claim.
+	Scopes []string
+}
+
 type AuthenticationResponse struct {
 	User         User
 	IdToken      string
@@ -107,6 +126,7 @@ type (
 	Claims  map[string]interface{}
 	idAlias IdTokenClaims
 	atAlias AccessTokenClaims
+	tkAlias TokenClaims
 )
 
 type IdTokenClaims struct {
@@ -150,6 +170,19 @@ func (a *AccessTokenClaims) UnmarshalJSON(data []byte) error {
 	return unmarshalJson(data, (*atAlias)(a), &a.Claims)
 }
 
+type TokenClaims struct {
+	Sub      string   `json:"sub"`
+	Iss      string   `json:"iss"`
+	Audience Audience `json:"aud,omitempty"`
+	Iat      int      `json:"iat"`
+	Exp      int      `json:"exp"`
+	Claims   Claims   `json:"-"`
+}
+
+func (t *TokenClaims) UnmarshalJSON(data []byte) error {
+	return unmarshalJson(data, (*tkAlias)(t), &t.Claims)
+}
+
 type User = IdTokenClaims
 
 type Identity struct {
@@ -170,8 +203,30 @@ type IdpInitiatedLoginClaims struct {
 
 type TokenResponse struct {
 	AccessToken  string
+	IdToken      string
 	RefreshToken string
 	ExpiresIn    int
+}
+
+// GenerateClientTokenOptions defines inputs for client-credentials token generation.
+type GenerateClientTokenOptions struct {
+	// ClientID is the OAuth client identifier used for the token request.
+	// Required.
+	ClientID string
+
+	// ClientSecret is the OAuth client secret paired with ClientID.
+	// Required.
+	ClientSecret string
+
+	// Scopes is the optional set of scopes to request. When provided, the SDK
+	// sends them as a single space-delimited "scope" parameter.
+	// Optional.
+	Scopes []string
+}
+
+type ClientTokenResponse struct {
+	AccessToken string
+	ExpiresIn   int
 }
 
 type LogoutUrlOptions struct {
@@ -180,8 +235,21 @@ type LogoutUrlOptions struct {
 	State                 string
 }
 
-func NewScalekitClient(envUrl, clientId, clientSecret string) Scalekit {
-	coreClient := newCoreClient(envUrl, clientId, clientSecret)
+// NewScalekitClient creates a new Scalekit client.
+//
+// For backward compatibility, when a value is provided in opts and opts[0] is a
+// string, it is treated as client_secret.
+func NewScalekitClient(envUrl, clientId string, opts ...any) Scalekit {
+	clientSecret := ""
+	if len(opts) > 0 {
+		if secret, ok := opts[0].(string); ok {
+			clientSecret = secret
+		}
+	}
+	return newScalekitClient(newCoreClient(envUrl, clientId, clientSecret))
+}
+
+func newScalekitClient(coreClient *coreClient) *scalekitClient {
 	return &scalekitClient{
 		coreClient:   coreClient,
 		connection:   newConnectionClient(coreClient),
@@ -191,12 +259,22 @@ func NewScalekitClient(envUrl, clientId, clientSecret string) Scalekit {
 		user:         newUserClient(coreClient),
 		passwordless: newPasswordlessClient(coreClient),
 		auth:         newAuthService(coreClient),
+		oidcClient:   newClientService(coreClient),
 		session:      newSessionClient(coreClient),
 		role:         newRoleService(coreClient),
 		permission:   newPermissionService(coreClient),
 		webauthn:     newWebAuthnClient(coreClient),
 		token:        newTokenService(coreClient),
+		m2m:          newM2MService(coreClient),
 	}
+}
+
+func (s *scalekitClient) WithSecret(clientSecret string) Scalekit {
+	core := newCoreClient(s.coreClient.envUrl, s.coreClient.clientId, clientSecret)
+	core.sdkVersion = s.coreClient.sdkVersion
+	core.apiVersion = s.coreClient.apiVersion
+	core.userAgent = s.coreClient.userAgent
+	return newScalekitClient(core)
 }
 
 func (s *scalekitClient) Connection() Connection {
@@ -227,6 +305,10 @@ func (s *scalekitClient) Auth() AuthService {
 	return s.auth
 }
 
+func (s *scalekitClient) Client() ClientService {
+	return s.oidcClient
+}
+
 func (s *scalekitClient) Session() SessionService {
 	return s.session
 }
@@ -245,6 +327,10 @@ func (s *scalekitClient) WebAuthn() WebAuthnService {
 
 func (s *scalekitClient) Token() TokenService {
 	return s.token
+}
+
+func (s *scalekitClient) M2M() M2MService {
+	return s.m2m
 }
 
 func (s *scalekitClient) GetAuthorizationUrl(redirectUri string, options AuthorizationUrlOptions) (*url.URL, error) {
@@ -304,21 +390,29 @@ func (s *scalekitClient) AuthenticateWithCode(
 	redirectUri string,
 	options AuthenticationOptions,
 ) (*AuthenticationResponse, error) {
-	if code == "" || redirectUri == "" {
-		return nil, errors.New("code and redirect uri is required")
+	if code == "" {
+		return nil, ErrCodeRequired
+	}
+	if redirectUri == "" {
+		return nil, ErrRedirectUriRequired
 	}
 	qs := url.Values{}
 	qs.Add("code", code)
 	qs.Add("redirect_uri", redirectUri)
 	qs.Add("grant_type", GrantTypeAuthorizationCode)
 	qs.Add("client_id", s.coreClient.clientId)
-	qs.Add("client_secret", s.coreClient.clientSecret)
+	if s.coreClient.clientSecret != "" {
+		qs.Add("client_secret", s.coreClient.clientSecret)
+	}
 	if options.CodeVerifier != "" {
 		qs.Add("code_verifier", options.CodeVerifier)
 	}
 	authResp, err := s.coreClient.authenticate(ctx, qs)
 	if err != nil {
 		return nil, err
+	}
+	if authResp.IdToken == "" {
+		return nil, ErrAuthenticationResponseMissingIdToken
 	}
 	claims, err := ValidateToken[IdTokenClaims](ctx, authResp.IdToken, s.coreClient.GetJwks)
 	if err != nil {
@@ -339,11 +433,7 @@ func (s *scalekitClient) GetIdpInitiatedLoginClaims(ctx context.Context, idpInit
 }
 
 func (s *scalekitClient) GetAccessTokenClaims(ctx context.Context, accessToken string) (*AccessTokenClaims, error) {
-	at, err := ValidateToken[AccessTokenClaims](ctx, accessToken, s.coreClient.GetJwks)
-	if err != nil {
-		return nil, err
-	}
-	return at, nil
+	return ValidateToken[AccessTokenClaims](ctx, accessToken, s.coreClient.GetJwks)
 }
 
 func (s *scalekitClient) ValidateAccessToken(ctx context.Context, accessToken string) (bool, error) {
@@ -351,6 +441,62 @@ func (s *scalekitClient) ValidateAccessToken(ctx context.Context, accessToken st
 	if err != nil {
 		return false, err
 	}
+	return true, nil
+}
+
+// ValidateTokenWithOptions validates a signed JWT (access token or ID token)
+// and enforces optional checks such as audience and scope validation.
+func (s *scalekitClient) ValidateTokenWithOptions(ctx context.Context, token string, options *ValidateTokenOptions) (bool, error) {
+	claims, err := ValidateToken[TokenClaims](ctx, token, s.coreClient.GetJwks)
+	if err != nil {
+		return false, err
+	}
+	if options == nil {
+		return true, nil
+	}
+
+	if len(options.Audience) > 0 {
+		audienceSet := map[string]struct{}{}
+		for _, audience := range claims.Audience {
+			audienceSet[audience] = struct{}{}
+		}
+
+		matched := false
+		for _, audience := range options.Audience {
+			if _, ok := audienceSet[audience]; ok {
+				matched = true
+				break
+			}
+		}
+		if !matched {
+			return false, fmt.Errorf("none of the expected audiences found in token aud claim")
+		}
+	}
+
+	if len(options.Scopes) == 0 {
+		return true, nil
+	}
+
+	scopeClaim, ok := claims.Claims["scope"]
+	if !ok {
+		return false, fmt.Errorf("token missing scope claim")
+	}
+	scopeValue, ok := scopeClaim.(string)
+	if !ok {
+		return false, fmt.Errorf("token scope claim must be a string")
+	}
+
+	scopeSet := map[string]struct{}{}
+	for _, scope := range strings.Fields(scopeValue) {
+		scopeSet[scope] = struct{}{}
+	}
+
+	for _, scope := range options.Scopes {
+		if _, ok := scopeSet[scope]; !ok {
+			return false, fmt.Errorf("missing expected scope %q in token scope claim", scope)
+		}
+	}
+
 	return true, nil
 }
 
@@ -367,15 +513,19 @@ func (s *scalekitClient) VerifyPayloadSignature(
 	headers map[string]string,
 	payload []byte,
 ) (bool, error) {
-	webhookId := headers["webhook-id"]
-	webhookTimestamp := headers["webhook-timestamp"]
-	webhookSignature := headers["webhook-signature"]
+	normalizedHeaders := make(map[string]string, len(headers))
+	for k, v := range headers {
+		normalizedHeaders[strings.ToLower(k)] = v
+	}
+	webhookId := normalizedHeaders["webhook-id"]
+	webhookTimestamp := normalizedHeaders["webhook-timestamp"]
+	webhookSignature := normalizedHeaders["webhook-signature"]
 	if webhookId == "" || webhookTimestamp == "" || webhookSignature == "" {
-		return false, errors.New("Missing required headers")
+		return false, ErrMissingRequiredHeaders
 	}
 	secretParts := strings.Split(secret, "_")
 	if len(secretParts) < 2 {
-		return false, errors.New("Invalid secret")
+		return false, ErrInvalidSecret
 	}
 	secretBytes, err := base64.StdEncoding.DecodeString(secretParts[1])
 	if err != nil {
@@ -387,8 +537,8 @@ func (s *scalekitClient) VerifyPayloadSignature(
 	}
 	data := fmt.Sprintf("%s.%d.%s", webhookId, timestamp.Unix(), payload)
 	computedSignature := computeSignature(secretBytes, data)
-	recievedSignatures := strings.Split(webhookSignature, " ")
-	for _, versionedSignature := range recievedSignatures {
+	receivedSignatures := strings.Split(webhookSignature, " ")
+	for _, versionedSignature := range receivedSignatures {
 		signatureParts := strings.Split(versionedSignature, ",")
 		if len(signatureParts) < 2 {
 			continue
@@ -403,7 +553,7 @@ func (s *scalekitClient) VerifyPayloadSignature(
 		}
 	}
 
-	return false, errors.New("Invalid signature")
+	return false, ErrInvalidSignature
 }
 
 func (s *scalekitClient) VerifyInterceptorPayload(
@@ -421,16 +571,28 @@ func verifyTimestamp(timestampStr string) (*time.Time, error) {
 		return nil, err
 	}
 	timestamp := time.Unix(unixTimestamp, 0)
-	if now.Sub(timestamp) > webhookToleranceInSeconds {
-		return nil, errors.New("Message timestamp too old")
+	if now.Sub(timestamp) > webhookTolerance {
+		return nil, ErrMessageTimestampTooOld
 	}
-	if timestamp.Unix() > now.Add(webhookToleranceInSeconds).Unix() {
-		return nil, errors.New("Message timestamp too new")
+	if timestamp.Unix() > now.Add(webhookTolerance).Unix() {
+		return nil, ErrMessageTimestampTooNew
 	}
 	return &timestamp, nil
 }
 
+// ValidateToken verifies a JWT's signature using keys from jwksFn, unmarshals the claims
+// into T, and checks that the token has a valid, non-expired exp claim.
+// Returns ErrTokenRequired if token is empty, ErrMissingExpClaim if exp is absent,
+// or ErrTokenExpired if it is in the past.
 func ValidateToken[T interface{}](ctx context.Context, token string, jwksFn func(context.Context) (*jose.JSONWebKeySet, error)) (*T, error) {
+	if token == "" {
+		// Join ErrTokenRequired with ErrTokenValidationFailed so callers can rely on either
+		// sentinel when handling empty tokens, preserving backward compatibility.
+		return nil, errors.Join(ErrTokenRequired, ErrTokenValidationFailed)
+	}
+	if jwksFn == nil {
+		return nil, ErrJwksFunctionRequired
+	}
 	var claims T
 	keySet, err := jwksFn(ctx)
 	if err != nil {
@@ -449,23 +611,19 @@ func ValidateToken[T interface{}](ctx context.Context, token string, jwksFn func
 		return nil, err
 	}
 
-	// Check token expiration
-	var rawClaims map[string]interface{}
-	err = json.Unmarshal(jwt, &rawClaims)
-	if err != nil {
+	// Check token expiration. Use a typed struct so json.Unmarshal handles
+	// the numeric conversion directly — no type assertion needed.
+	var expClaims struct {
+		Exp *float64 `json:"exp"`
+	}
+	if err = json.Unmarshal(jwt, &expClaims); err != nil {
 		return nil, err
 	}
-
-	if exp, ok := rawClaims["exp"]; ok {
-		expFloat, ok := exp.(float64)
-		if !ok {
-			return nil, ErrInvalidExpClaimFormat
-		}
-
-		expTime := int64(expFloat)
-		if time.Now().Unix() >= expTime {
-			return nil, ErrTokenExpired
-		}
+	if expClaims.Exp == nil {
+		return nil, ErrMissingExpClaim
+	}
+	if time.Now().Unix() >= int64(*expClaims.Exp) {
+		return nil, ErrTokenExpired
 	}
 
 	return &claims, nil
@@ -488,8 +646,9 @@ func (s *scalekitClient) RefreshAccessToken(ctx context.Context, refreshToken st
 	qs.Add("refresh_token", refreshToken)
 	qs.Add("grant_type", GrantTypeRefreshToken)
 	qs.Add("client_id", s.coreClient.clientId)
-	qs.Add("client_secret", s.coreClient.clientSecret)
-
+	if s.coreClient.clientSecret != "" {
+		qs.Add("client_secret", s.coreClient.clientSecret)
+	}
 	authResp, err := s.coreClient.authenticate(ctx, qs)
 	if err != nil {
 		return nil, err
@@ -499,7 +658,63 @@ func (s *scalekitClient) RefreshAccessToken(ctx context.Context, refreshToken st
 		AccessToken:  authResp.AccessToken,
 		RefreshToken: authResp.RefreshToken,
 		ExpiresIn:    authResp.ExpiresIn,
+		IdToken:      authResp.IdToken,
 	}, nil
+}
+
+// GenerateClientToken creates a client-credentials access token.
+//
+// The options parameter controls the request payload:
+//   - ClientID: required OAuth client identifier.
+//   - ClientSecret: required OAuth client secret for ClientID.
+//   - Scopes: optional scopes sent as a space-delimited "scope" parameter.
+func (s *scalekitClient) GenerateClientToken(ctx context.Context, options GenerateClientTokenOptions) (*ClientTokenResponse, error) {
+	if options.ClientID == "" {
+		return nil, ErrClientIdRequired
+	}
+	if options.ClientSecret == "" {
+		return nil, ErrClientSecretRequired
+	}
+
+	qs := url.Values{}
+	qs.Add("grant_type", GrantTypeClientCredentials)
+	qs.Add("client_id", options.ClientID)
+	qs.Add("client_secret", options.ClientSecret)
+	if len(options.Scopes) > 0 {
+		qs.Add("scope", strings.Join(options.Scopes, " "))
+	}
+
+	authResp, err := s.coreClient.authenticate(ctx, qs)
+	if err != nil {
+		return nil, err
+	}
+	if authResp.AccessToken == "" {
+		return nil, ErrAuthenticationResponseMissingAccessToken
+	}
+
+	return &ClientTokenResponse{
+		AccessToken: authResp.AccessToken,
+		ExpiresIn:   authResp.ExpiresIn,
+	}, nil
+}
+
+func (s *scalekitClient) GetClientAccessToken(ctx context.Context) (string, error) {
+	resp, err := s.GenerateClientToken(ctx, GenerateClientTokenOptions{
+		ClientID:     s.coreClient.clientId,
+		ClientSecret: s.coreClient.clientSecret,
+	})
+	if err != nil {
+		return "", err
+	}
+	return resp.AccessToken, nil
+}
+
+func (s *scalekitClient) ValidateToken(ctx context.Context, token string) (Claims, error) {
+	claims, err := ValidateToken[Claims](ctx, token, s.coreClient.GetJwks)
+	if err != nil {
+		return nil, err
+	}
+	return *claims, nil
 }
 
 func (s *scalekitClient) GetLogoutUrl(options LogoutUrlOptions) (*url.URL, error) {

@@ -21,7 +21,7 @@ type PermissionService interface {
 	// Permission management
 	CreatePermission(ctx context.Context, permission *rolesv1.CreatePermission) (*CreatePermissionResponse, error)
 	GetPermission(ctx context.Context, permissionName string) (*GetPermissionResponse, error)
-	ListPermissions(ctx context.Context, pageToken ...string) (*ListPermissionsResponse, error)
+	ListPermissions(ctx context.Context, pageToken string, pageSize uint32) (*ListPermissionsResponse, error)
 	UpdatePermission(ctx context.Context, permissionName string, permission *rolesv1.CreatePermission) (*UpdatePermissionResponse, error)
 	DeletePermission(ctx context.Context, permissionName string) error
 
@@ -68,11 +68,15 @@ func (p *permissionService) GetPermission(ctx context.Context, permissionName st
 	).exec(ctx)
 }
 
-// ListPermissions lists all permissions with optional pagination
-func (p *permissionService) ListPermissions(ctx context.Context, pageToken ...string) (*ListPermissionsResponse, error) {
+// ListPermissions lists all permissions with optional pagination.
+// Pass empty string for pageToken and 0 for pageSize to use server defaults.
+func (p *permissionService) ListPermissions(ctx context.Context, pageToken string, pageSize uint32) (*ListPermissionsResponse, error) {
 	req := &rolesv1.ListPermissionsRequest{}
-	if len(pageToken) > 0 {
-		req.PageToken = &pageToken[0]
+	if pageToken != "" {
+		req.PageToken = &pageToken
+	}
+	if pageSize > 0 {
+		req.PageSize = &pageSize
 	}
 	return newConnectExecuter(
 		p.coreClient,

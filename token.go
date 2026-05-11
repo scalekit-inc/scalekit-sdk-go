@@ -3,7 +3,6 @@ package scalekit
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	connect "connectrpc.com/connect"
@@ -15,6 +14,7 @@ import (
 type CreateTokenResponse = tokensv1.CreateTokenResponse
 type ValidateTokenResponse = tokensv1.ValidateTokenResponse
 type ListTokensResponse = tokensv1.ListTokensResponse
+type UpdateTokenResponse = tokensv1.UpdateTokenResponse
 type TokenInfo = tokensv1.Token
 
 type CreateTokenOptions struct {
@@ -30,11 +30,21 @@ type ListTokensOptions struct {
 	PageToken string
 }
 
+type UpdateTokenOptions struct {
+	// CustomClaims replaces the full set of custom claims on the token.
+	// Omit this field (nil) to leave existing claims unchanged.
+	// Empty-string claim values are not accepted by the server.
+	CustomClaims map[string]string
+	// Description replacement; nil means do not change, empty string clears the description.
+	Description *string
+}
+
 type TokenService interface {
 	CreateToken(ctx context.Context, organizationId string, options CreateTokenOptions) (*CreateTokenResponse, error)
 	ValidateToken(ctx context.Context, token string) (*ValidateTokenResponse, error)
 	InvalidateToken(ctx context.Context, token string) error
 	ListTokens(ctx context.Context, organizationId string, options ListTokensOptions) (*ListTokensResponse, error)
+	UpdateToken(ctx context.Context, token string, options UpdateTokenOptions) (*UpdateTokenResponse, error)
 }
 
 type tokenService struct {
@@ -51,7 +61,7 @@ func newTokenService(coreClient *coreClient) TokenService {
 
 func (t *tokenService) CreateToken(ctx context.Context, organizationId string, options CreateTokenOptions) (*CreateTokenResponse, error) {
 	if organizationId == "" {
-		return nil, errors.New("organizationId is required")
+		return nil, ErrOrganizationIdRequired
 	}
 	createToken := &tokensv1.CreateToken{
 		OrganizationId: organizationId,
@@ -80,7 +90,8 @@ func (t *tokenService) CreateToken(ctx context.Context, organizationId string, o
 
 func (t *tokenService) ValidateToken(ctx context.Context, token string) (*ValidateTokenResponse, error) {
 	if token == "" {
-		return nil, fmt.Errorf("token is required: %w", ErrTokenValidationFailed)
+		// Join so both errors.Is(err, ErrTokenRequired) and errors.Is(err, ErrTokenValidationFailed) match for backward compatibility.
+		return nil, errors.Join(ErrTokenRequired, ErrTokenValidationFailed)
 	}
 	result, err := newConnectExecuter(
 		t.coreClient,
@@ -103,7 +114,7 @@ func (t *tokenService) ValidateToken(ctx context.Context, token string) (*Valida
 
 func (t *tokenService) InvalidateToken(ctx context.Context, token string) error {
 	if token == "" {
-		return errors.New("token is required")
+		return ErrTokenRequired
 	}
 	_, err := newConnectExecuter(
 		t.coreClient,
@@ -116,9 +127,29 @@ func (t *tokenService) InvalidateToken(ctx context.Context, token string) error 
 	return err
 }
 
+func (t *tokenService) UpdateToken(ctx context.Context, token string, options UpdateTokenOptions) (*UpdateTokenResponse, error) {
+	if token == "" {
+		return nil, ErrTokenRequired
+	}
+	request := &tokensv1.UpdateTokenRequest{
+		Token: token,
+	}
+	if options.CustomClaims != nil {
+		request.CustomClaims = options.CustomClaims
+	}
+	if options.Description != nil {
+		request.Description = options.Description
+	}
+	return newConnectExecuter(
+		t.coreClient,
+		t.client.UpdateToken,
+		request,
+	).exec(ctx)
+}
+
 func (t *tokenService) ListTokens(ctx context.Context, organizationId string, options ListTokensOptions) (*ListTokensResponse, error) {
 	if organizationId == "" {
-		return nil, errors.New("organizationId is required")
+		return nil, ErrOrganizationIdRequired
 	}
 	request := &tokensv1.ListTokensRequest{
 		OrganizationId: organizationId,

@@ -2,7 +2,6 @@ package scalekit
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	directoriesv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/directories"
@@ -159,7 +158,7 @@ func (d *directory) GetPrimaryDirectoryByOrganizationId(ctx context.Context, org
 		return nil, err
 	}
 	if len(listDirectories.GetDirectories()) == 0 {
-		return nil, errors.New("directory does not exist for organization")
+		return nil, ErrDirectoryNotFound
 	}
 	response := &GetDirectoryResponse{
 		Directory: listDirectories.GetDirectories()[0],

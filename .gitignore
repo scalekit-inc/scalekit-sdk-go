@@ -182,4 +182,8 @@ tags
 
 __debug_bin*
 /.history
+**/.env
+.env
+**/.tools/
+.claude/settings.local.json
 proto/

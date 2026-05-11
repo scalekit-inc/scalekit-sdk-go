@@ -90,6 +90,9 @@ func DeleteTestDirectory(t *testing.T, ctx context.Context, orgID, directoryID s
 	if client == nil {
 		return
 	}
+	if _, disableErr := client.Directory().DisableDirectory(ctx, orgID, directoryID); disableErr != nil {
+		t.Logf("DeleteTestDirectory: DisableDirectory %s: %v (continuing with delete)", directoryID, disableErr)
+	}
 	err := client.Directory().DeleteDirectory(ctx, orgID, directoryID)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") || strings.Contains(err.Error(), "NotFound") {
