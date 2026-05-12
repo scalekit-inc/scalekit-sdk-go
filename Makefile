@@ -2,7 +2,7 @@ SHELL := /bin/bash
 
 GO := go
 TOOLS_BIN := $(CURDIR)/.tools/bin
-GO_TOOLCHAIN := 'go1.25.10'
+GO_TOOLCHAIN := 1.25.10
 
 PROTO_REPO_URL := https://github.com/scalekit-inc/scalekit.git
 PROTO_REF := v0.1.120.2
