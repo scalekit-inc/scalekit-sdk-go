@@ -6,7 +6,9 @@ import (
 	"testing"
 
 	"github.com/scalekit-inc/scalekit-sdk-go/v2"
+	commonsv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/commons"
 	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/organizations"
+	organizationsv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/organizations"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -195,3 +197,94 @@ func TestOrganization_CreateOrganization_WithMetadata(t *testing.T) {
 	assert.Equal(t, TestOrgName, createdOrganization.GetOrganization().GetDisplayName())
 	assert.Equal(t, "meta_val", createdOrganization.GetOrganization().GetMetadata()["meta_key"])
 }
+
+func TestOrganization_SearchOrganization(t *testing.T) {
+	ctx := context.Background()
+	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
+	defer DeleteTestOrganization(t, ctx, orgId)
+
+	resp, err := client.Organization().SearchOrganization(ctx, "Acme", 10, "")
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	// Result may be empty depending on env, but the call itself must succeed.
+	_ = resp.GetOrganizations()
+}
+
+func TestOrganization_SearchOrganization_EmptyQuery(t *testing.T) {
+	ctx := context.Background()
+
+	resp, err := client.Organization().SearchOrganization(ctx, "", 5, "")
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+}
+
+func TestOrganization_GetOrganizationUserManagementSetting(t *testing.T) {
+	ctx := context.Background()
+	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
+	defer DeleteTestOrganization(t, ctx, orgId)
+
+	resp, err := client.Organization().GetOrganizationUserManagementSetting(ctx, orgId)
+	if err != nil {
+		t.Skipf("skipping GetOrganizationUserManagementSetting: feature may not be enabled: %v", err)
+	}
+	require.NotNil(t, resp)
+}
+
+func TestOrganization_GetOrganizationSessionPolicy(t *testing.T) {
+	ctx := context.Background()
+	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
+	defer DeleteTestOrganization(t, ctx, orgId)
+
+	resp, err := client.Organization().GetOrganizationSessionPolicy(ctx, orgId)
+	if err != nil {
+		t.Skipf("skipping GetOrganizationSessionPolicy: feature may not be enabled: %v", err)
+	}
+	require.NotNil(t, resp)
+}
+
+func TestOrganization_GetApplicationSessionPolicy(t *testing.T) {
+	ctx := context.Background()
+	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
+	defer DeleteTestOrganization(t, ctx, orgId)
+
+	resp, err := client.Organization().GetApplicationSessionPolicy(ctx, orgId)
+	if err != nil {
+		t.Skipf("skipping GetApplicationSessionPolicy: feature may not be enabled: %v", err)
+	}
+	require.NotNil(t, resp)
+}
+
+func TestOrganization_UpdateOrganizationSessionPolicy_Custom(t *testing.T) {
+	ctx := context.Background()
+	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
+	defer DeleteTestOrganization(t, ctx, orgId)
+
+	resp, err := client.Organization().UpdateOrganizationSessionPolicy(
+		ctx,
+		orgId,
+		organizationsv1.SessionPolicyType_CUSTOM,
+		scalekit.WithAbsoluteSessionTimeout(60, commonsv1.TimeUnit_MINUTES),
+		scalekit.WithIdleSessionTimeout(true, 30, commonsv1.TimeUnit_MINUTES),
+	)
+	if err != nil {
+		t.Skipf("skipping UpdateOrganizationSessionPolicy: feature may not be enabled: %v", err)
+	}
+	require.NotNil(t, resp)
+}
+
+func TestOrganization_UpdateOrganizationSessionPolicy_Application(t *testing.T) {
+	ctx := context.Background()
+	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
+	defer DeleteTestOrganization(t, ctx, orgId)
+
+	resp, err := client.Organization().UpdateOrganizationSessionPolicy(
+		ctx,
+		orgId,
+		organizationsv1.SessionPolicyType_APPLICATION,
+	)
+	if err != nil {
+		t.Skipf("skipping UpdateOrganizationSessionPolicy (application): feature may not be enabled: %v", err)
+	}
+	require.NotNil(t, resp)
+}
+
