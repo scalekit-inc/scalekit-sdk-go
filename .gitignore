@@ -186,3 +186,4 @@ __debug_bin*
 .env
 **/.tools/
 .claude/settings.local.json
+proto/

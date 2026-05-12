@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	commonsv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/commons"
 	organizationsv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/organizations"
 	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/organizations/organizationsconnect"
 	"google.golang.org/protobuf/types/known/wrapperspb"
@@ -28,6 +29,45 @@ type OrganizationUserManagementSettings struct {
 	MaxAllowedUsers *int32
 }
 
+// SessionPolicySource indicates whether an organization uses its own policy or inherits the application default.
+type SessionPolicySource = organizationsv1.SessionPolicyType
+
+const (
+	SessionPolicySourceApplication = organizationsv1.SessionPolicyType_APPLICATION
+	SessionPolicySourceCustom      = organizationsv1.SessionPolicyType_CUSTOM
+)
+
+// TimeUnit for session timeout fields accepted in UpdateOrganizationSessionPolicy.
+type TimeUnit = commonsv1.TimeUnit
+
+const (
+	TimeUnitMinutes = commonsv1.TimeUnit_MINUTES
+	TimeUnitHours   = commonsv1.TimeUnit_HOURS
+	TimeUnitDays    = commonsv1.TimeUnit_DAYS
+)
+
+// OrganizationSessionPolicy is the input type for UpdateOrganizationSessionPolicy.
+// Set PolicySource to SessionPolicySourceApplication to revert the organization to application defaults.
+// Set PolicySource to SessionPolicySourceCustom and supply timeout values to activate a custom policy.
+type OrganizationSessionPolicy struct {
+	PolicySource               SessionPolicySource
+	AbsoluteSessionTimeout     *int32
+	AbsoluteSessionTimeoutUnit TimeUnit
+	IdleSessionTimeoutEnabled  *bool
+	IdleSessionTimeout         *int32
+	IdleSessionTimeoutUnit     TimeUnit
+}
+
+// OrganizationSessionPolicySettings is the response type for session policy operations.
+type OrganizationSessionPolicySettings = organizationsv1.OrganizationSessionPolicySettings
+
+var (
+	ErrAbsoluteTimeoutUnitRequired                  = errors.New("absolute session timeout unit is required when absolute session timeout is set")
+	ErrIdleTimeoutUnitRequired                      = errors.New("idle session timeout unit is required when idle session timeout is set")
+	ErrGetOrganizationSessionPolicyMissingPolicy    = errors.New("get organization session policy: response missing policy")
+	ErrUpdateOrganizationSessionPolicyMissingPolicy = errors.New("update organization session policy: response missing policy")
+)
+
 type CreateOrganizationOptions struct {
 	ExternalId string
 	Metadata   map[string]string
@@ -44,6 +84,8 @@ type Organization interface {
 	GeneratePortalLink(ctx context.Context, organizationId string) (*Link, error)
 	UpdateOrganizationSettings(ctx context.Context, id string, settings OrganizationSettings) (*GetOrganizationResponse, error)
 	UpsertUserManagementSettings(ctx context.Context, organizationId string, settings OrganizationUserManagementSettings) (*organizationsv1.OrganizationUserManagementSettings, error)
+	GetOrganizationSessionPolicy(ctx context.Context, organizationId string) (*OrganizationSessionPolicySettings, error)
+	UpdateOrganizationSessionPolicy(ctx context.Context, organizationId string, policy OrganizationSessionPolicy) (*OrganizationSessionPolicySettings, error)
 }
 
 type organization struct {
@@ -207,4 +249,67 @@ func (o *organization) UpsertUserManagementSettings(ctx context.Context, organiz
 		return nil, errors.New("upsert user management settings: response missing settings")
 	}
 	return resp.Settings, nil
+}
+
+func (o *organization) GetOrganizationSessionPolicy(ctx context.Context, organizationId string) (*OrganizationSessionPolicySettings, error) {
+	resp, err := newConnectExecuter(
+		o.coreClient,
+		o.client.GetOrganizationSessionPolicy,
+		&organizationsv1.GetOrganizationSessionPolicyRequest{
+			OrganizationId: organizationId,
+		},
+	).exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if resp == nil || resp.Policy == nil {
+		return nil, ErrGetOrganizationSessionPolicyMissingPolicy
+	}
+
+	return resp.Policy, nil
+}
+
+func (o *organization) UpdateOrganizationSessionPolicy(ctx context.Context, organizationId string, policy OrganizationSessionPolicy) (*OrganizationSessionPolicySettings, error) {
+	if policy.AbsoluteSessionTimeout != nil && policy.AbsoluteSessionTimeoutUnit == commonsv1.TimeUnit_SESSION_TIME_UNIT_UNSPECIFIED {
+		return nil, ErrAbsoluteTimeoutUnitRequired
+	}
+	if policy.IdleSessionTimeout != nil && policy.IdleSessionTimeoutUnit == commonsv1.TimeUnit_SESSION_TIME_UNIT_UNSPECIFIED {
+		return nil, ErrIdleTimeoutUnitRequired
+	}
+
+	req := &organizationsv1.UpdateOrganizationSessionPolicyRequest{
+		OrganizationId: organizationId,
+		PolicySource:   policy.PolicySource,
+	}
+	if policy.AbsoluteSessionTimeout != nil {
+		req.AbsoluteSessionTimeout = wrapperspb.Int32(*policy.AbsoluteSessionTimeout)
+	}
+	if policy.AbsoluteSessionTimeoutUnit != commonsv1.TimeUnit_SESSION_TIME_UNIT_UNSPECIFIED {
+		u := policy.AbsoluteSessionTimeoutUnit
+		req.AbsoluteSessionTimeoutUnit = &u
+	}
+	if policy.IdleSessionTimeoutEnabled != nil {
+		req.IdleSessionTimeoutEnabled = wrapperspb.Bool(*policy.IdleSessionTimeoutEnabled)
+	}
+	if policy.IdleSessionTimeout != nil {
+		req.IdleSessionTimeout = wrapperspb.Int32(*policy.IdleSessionTimeout)
+	}
+	if policy.IdleSessionTimeoutUnit != commonsv1.TimeUnit_SESSION_TIME_UNIT_UNSPECIFIED {
+		u := policy.IdleSessionTimeoutUnit
+		req.IdleSessionTimeoutUnit = &u
+	}
+
+	resp, err := newConnectExecuter(
+		o.coreClient,
+		o.client.UpdateOrganizationSessionPolicy,
+		req,
+	).exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if resp == nil || resp.Policy == nil {
+		return nil, ErrUpdateOrganizationSessionPolicyMissingPolicy
+	}
+
+	return resp.Policy, nil
 }

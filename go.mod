@@ -1,6 +1,8 @@
 module github.com/scalekit-inc/scalekit-sdk-go/v2
 
-go 1.25.9
+go 1.25.0
+
+toolchain go1.25.10
 
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.34.2-20240717164558-a6c49f84cc0f.2
@@ -18,6 +20,6 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.13.1 // indirect
-	golang.org/x/net v0.47.0 // indirect
+	golang.org/x/net v0.54.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
