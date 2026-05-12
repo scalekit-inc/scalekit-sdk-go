@@ -2622,6 +2622,172 @@ _ = settings.MaxAllowedUsers
 </dl>
 </details>
 
+<details><summary><code>client.Organization().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/organization.go">GetOrganizationSessionPolicy</a>(ctx, organizationId) -> (*OrganizationSessionPolicySettings, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieves the session policy for an organization. Returns `PolicySource = SessionPolicySourceApplication` when the organization inherits application-level defaults, or `PolicySource = SessionPolicySourceCustom` with the configured timeout values when a custom policy is active.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+policy, err := client.Organization().GetOrganizationSessionPolicy(ctx, "org_123")
+if err != nil {
+  // handle
+}
+if policy.PolicySource == scalekit.SessionPolicySourceCustom {
+  _ = policy.AbsoluteSessionTimeout.GetValue()
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**organizationId:** `string` - Organization ID
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Organization().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/organization.go">UpdateOrganizationSessionPolicy</a>(ctx, organizationId, policy) -> (*OrganizationSessionPolicySettings, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Sets a custom session policy for an organization or reverts it to application defaults. Pass `PolicySource: SessionPolicySourceApplication` to revert. Pass `PolicySource: SessionPolicySourceCustom` with timeout values to activate a custom policy. The system applies the stricter of application and organization values at session creation time.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+// Set a custom policy
+timeout := int32(360)
+idleTimeout := int32(60)
+idleEnabled := true
+policy, err := client.Organization().UpdateOrganizationSessionPolicy(ctx, "org_123", scalekit.OrganizationSessionPolicy{
+  PolicySource:               scalekit.SessionPolicySourceCustom,
+  AbsoluteSessionTimeout:     &timeout,
+  AbsoluteSessionTimeoutUnit: scalekit.TimeUnitMinutes,
+  IdleSessionTimeoutEnabled:  &idleEnabled,
+  IdleSessionTimeout:         &idleTimeout,
+  IdleSessionTimeoutUnit:     scalekit.TimeUnitMinutes,
+})
+if err != nil {
+  // handle
+}
+_ = policy
+
+// Revert to application defaults
+reverted, err := client.Organization().UpdateOrganizationSessionPolicy(ctx, "org_123", scalekit.OrganizationSessionPolicy{
+  PolicySource: scalekit.SessionPolicySourceApplication,
+})
+if err != nil {
+  // handle
+}
+_ = reverted
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**organizationId:** `string` - Organization ID
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**policy:** `OrganizationSessionPolicy`
+- `PolicySource SessionPolicySource` - `SessionPolicySourceApplication` or `SessionPolicySourceCustom`
+- `AbsoluteSessionTimeout *int32` - Absolute timeout value (required when CUSTOM)
+- `AbsoluteSessionTimeoutUnit TimeUnit` - `TimeUnitMinutes`, `TimeUnitHours`, or `TimeUnitDays`
+- `IdleSessionTimeoutEnabled *bool` - Whether idle timeout is enabled (optional)
+- `IdleSessionTimeout *int32` - Idle timeout value (optional)
+- `IdleSessionTimeoutUnit TimeUnit` - Unit for idle timeout (optional)
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+</dd>
+</dl>
+</details>
+
 ## Connections
 
 <details><summary><code>client.Connection().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/connection.go">CreateConnection</a>(ctx, organizationId, connection) -> (*CreateConnectionResponse, error)</code></summary>
