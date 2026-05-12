@@ -50,6 +50,10 @@ func TestOrganizationSessionPolicy_SetCustomPolicy(t *testing.T) {
 	assert.Equal(t, int32(360), fetched.AbsoluteSessionTimeout.GetValue())
 	require.NotNil(t, fetched.IdleSessionTimeoutEnabled)
 	assert.True(t, fetched.IdleSessionTimeoutEnabled.GetValue())
+	assert.Equal(t, scalekit.TimeUnitMinutes, fetched.GetAbsoluteSessionTimeoutUnit())
+	require.NotNil(t, fetched.IdleSessionTimeout)
+	assert.Equal(t, int32(60), fetched.IdleSessionTimeout.GetValue())
+	assert.Equal(t, scalekit.TimeUnitMinutes, fetched.GetIdleSessionTimeoutUnit())
 }
 
 func TestOrganizationSessionPolicy_RevertToApplication(t *testing.T) {
@@ -71,6 +75,11 @@ func TestOrganizationSessionPolicy_RevertToApplication(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, reverted)
 	assert.Equal(t, scalekit.SessionPolicySourceApplication, reverted.PolicySource)
+
+	fetched, err := client.Organization().GetOrganizationSessionPolicy(ctx, orgId)
+	require.NoError(t, err)
+	require.NotNil(t, fetched)
+	assert.Equal(t, scalekit.SessionPolicySourceApplication, fetched.PolicySource)
 }
 
 func TestOrganizationSessionPolicy_SetIdleTimeoutDisabled(t *testing.T) {
@@ -92,4 +101,10 @@ func TestOrganizationSessionPolicy_SetIdleTimeoutDisabled(t *testing.T) {
 	assert.Equal(t, scalekit.SessionPolicySourceCustom, policy.PolicySource)
 	require.NotNil(t, policy.IdleSessionTimeoutEnabled)
 	assert.False(t, policy.IdleSessionTimeoutEnabled.GetValue())
+
+	fetched, err := client.Organization().GetOrganizationSessionPolicy(ctx, orgId)
+	require.NoError(t, err)
+	require.NotNil(t, fetched)
+	require.NotNil(t, fetched.IdleSessionTimeoutEnabled)
+	assert.False(t, fetched.IdleSessionTimeoutEnabled.GetValue())
 }
