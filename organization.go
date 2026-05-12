@@ -62,10 +62,10 @@ type OrganizationSessionPolicy struct {
 type OrganizationSessionPolicySettings = organizationsv1.OrganizationSessionPolicySettings
 
 var (
-	errAbsoluteTimeoutUnitRequired                  = errors.New("absolute session timeout unit is required when absolute session timeout is set")
-	errIdleTimeoutUnitRequired                      = errors.New("idle session timeout unit is required when idle session timeout is set")
-	errGetOrganizationSessionPolicyMissingPolicy    = errors.New("get organization session policy: response missing policy")
-	errUpdateOrganizationSessionPolicyMissingPolicy = errors.New("update organization session policy: response missing policy")
+	ErrAbsoluteTimeoutUnitRequired                  = errors.New("absolute session timeout unit is required when absolute session timeout is set")
+	ErrIdleTimeoutUnitRequired                      = errors.New("idle session timeout unit is required when idle session timeout is set")
+	ErrGetOrganizationSessionPolicyMissingPolicy    = errors.New("get organization session policy: response missing policy")
+	ErrUpdateOrganizationSessionPolicyMissingPolicy = errors.New("update organization session policy: response missing policy")
 )
 
 type CreateOrganizationOptions struct {
@@ -263,7 +263,7 @@ func (o *organization) GetOrganizationSessionPolicy(ctx context.Context, organiz
 		return nil, err
 	}
 	if resp == nil || resp.Policy == nil {
-		return nil, errGetOrganizationSessionPolicyMissingPolicy
+		return nil, ErrGetOrganizationSessionPolicyMissingPolicy
 	}
 
 	return resp.Policy, nil
@@ -271,10 +271,10 @@ func (o *organization) GetOrganizationSessionPolicy(ctx context.Context, organiz
 
 func (o *organization) UpdateOrganizationSessionPolicy(ctx context.Context, organizationId string, policy OrganizationSessionPolicy) (*OrganizationSessionPolicySettings, error) {
 	if policy.AbsoluteSessionTimeout != nil && policy.AbsoluteSessionTimeoutUnit == commonsv1.TimeUnit_SESSION_TIME_UNIT_UNSPECIFIED {
-		return nil, errAbsoluteTimeoutUnitRequired
+		return nil, ErrAbsoluteTimeoutUnitRequired
 	}
 	if policy.IdleSessionTimeout != nil && policy.IdleSessionTimeoutUnit == commonsv1.TimeUnit_SESSION_TIME_UNIT_UNSPECIFIED {
-		return nil, errIdleTimeoutUnitRequired
+		return nil, ErrIdleTimeoutUnitRequired
 	}
 
 	req := &organizationsv1.UpdateOrganizationSessionPolicyRequest{
@@ -308,7 +308,7 @@ func (o *organization) UpdateOrganizationSessionPolicy(ctx context.Context, orga
 		return nil, err
 	}
 	if resp == nil || resp.Policy == nil {
-		return nil, errUpdateOrganizationSessionPolicyMissingPolicy
+		return nil, ErrUpdateOrganizationSessionPolicyMissingPolicy
 	}
 
 	return resp.Policy, nil
