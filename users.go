@@ -17,6 +17,9 @@ type CreateMembershipResponse = usersv1.CreateMembershipResponse
 type UpdateMembershipResponse = usersv1.UpdateMembershipResponse
 type ListUserRolesResponse = usersv1.ListUserRolesResponse
 type ListUserPermissionsResponse = usersv1.ListUserPermissionsResponse
+type SearchUsersResponse = usersv1.SearchUsersResponse
+type SearchOrganizationUsersResponse = usersv1.SearchOrganizationUsersResponse
+type AssignUserRolesResponse = usersv1.AssignUserRolesResponse
 
 // ListUsersOptions represents optional parameters for listing users
 type ListUsersOptions struct {
@@ -37,6 +40,10 @@ type UserService interface {
 	ResendInvite(ctx context.Context, organizationId string, userId string) (*usersv1.ResendInviteResponse, error)
 	ListUserRoles(ctx context.Context, organizationId string, userId string) (*ListUserRolesResponse, error)
 	ListUserPermissions(ctx context.Context, organizationId string, userId string) (*ListUserPermissionsResponse, error)
+	SearchUsers(ctx context.Context, query string, pageSize uint32, pageToken string) (*SearchUsersResponse, error)
+	SearchOrganizationUsers(ctx context.Context, organizationId string, query string, pageSize uint32, pageToken string) (*SearchOrganizationUsersResponse, error)
+	AssignUserRoles(ctx context.Context, organizationId string, userId string, roles []*usersv1.AssignRoleRequest) (*AssignUserRolesResponse, error)
+	RemoveUserRole(ctx context.Context, organizationId string, userId string, roleName string) error
 }
 
 type userService struct {
@@ -222,4 +229,58 @@ func (u *userService) ListUserPermissions(ctx context.Context, organizationId st
 			UserId:         userId,
 		},
 	).exec(ctx)
+}
+
+// SearchUsers searches for users across the environment matching the given query
+func (u *userService) SearchUsers(ctx context.Context, query string, pageSize uint32, pageToken string) (*SearchUsersResponse, error) {
+	return newConnectExecuter(
+		u.coreClient,
+		u.client.SearchUsers,
+		&usersv1.SearchUsersRequest{
+			Query:     query,
+			PageSize:  pageSize,
+			PageToken: pageToken,
+		},
+	).exec(ctx)
+}
+
+// SearchOrganizationUsers searches for users within the given organization matching the query
+func (u *userService) SearchOrganizationUsers(ctx context.Context, organizationId string, query string, pageSize uint32, pageToken string) (*SearchOrganizationUsersResponse, error) {
+	return newConnectExecuter(
+		u.coreClient,
+		u.client.SearchOrganizationUsers,
+		&usersv1.SearchOrganizationUsersRequest{
+			OrganizationId: organizationId,
+			Query:          query,
+			PageSize:       pageSize,
+			PageToken:      pageToken,
+		},
+	).exec(ctx)
+}
+
+// AssignUserRoles assigns the given roles to the user in the specified organization
+func (u *userService) AssignUserRoles(ctx context.Context, organizationId string, userId string, roles []*usersv1.AssignRoleRequest) (*AssignUserRolesResponse, error) {
+	return newConnectExecuter(
+		u.coreClient,
+		u.client.AssignUserRoles,
+		&usersv1.AssignUserRolesRequest{
+			OrganizationId: organizationId,
+			UserId:         userId,
+			Roles:          roles,
+		},
+	).exec(ctx)
+}
+
+// RemoveUserRole removes the named role from the user in the specified organization
+func (u *userService) RemoveUserRole(ctx context.Context, organizationId string, userId string, roleName string) error {
+	_, err := newConnectExecuter(
+		u.coreClient,
+		u.client.RemoveUserRole,
+		&usersv1.RemoveUserRoleRequest{
+			OrganizationId: organizationId,
+			UserId:         userId,
+			RoleName:       roleName,
+		},
+	).exec(ctx)
+	return err
 }
