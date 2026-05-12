@@ -61,6 +61,13 @@ type OrganizationSessionPolicy struct {
 // OrganizationSessionPolicySettings is the response type for session policy operations.
 type OrganizationSessionPolicySettings = organizationsv1.OrganizationSessionPolicySettings
 
+var (
+	errAbsoluteTimeoutUnitRequired                  = errors.New("absolute session timeout unit is required when absolute session timeout is set")
+	errIdleTimeoutUnitRequired                      = errors.New("idle session timeout unit is required when idle session timeout is set")
+	errGetOrganizationSessionPolicyMissingPolicy    = errors.New("get organization session policy: response missing policy")
+	errUpdateOrganizationSessionPolicyMissingPolicy = errors.New("update organization session policy: response missing policy")
+)
+
 type CreateOrganizationOptions struct {
 	ExternalId string
 	Metadata   map[string]string
@@ -255,11 +262,21 @@ func (o *organization) GetOrganizationSessionPolicy(ctx context.Context, organiz
 	if err != nil {
 		return nil, err
 	}
+	if resp == nil || resp.Policy == nil {
+		return nil, errGetOrganizationSessionPolicyMissingPolicy
+	}
 
 	return resp.Policy, nil
 }
 
 func (o *organization) UpdateOrganizationSessionPolicy(ctx context.Context, organizationId string, policy OrganizationSessionPolicy) (*OrganizationSessionPolicySettings, error) {
+	if policy.AbsoluteSessionTimeout != nil && policy.AbsoluteSessionTimeoutUnit == commonsv1.TimeUnit_SESSION_TIME_UNIT_UNSPECIFIED {
+		return nil, errAbsoluteTimeoutUnitRequired
+	}
+	if policy.IdleSessionTimeout != nil && policy.IdleSessionTimeoutUnit == commonsv1.TimeUnit_SESSION_TIME_UNIT_UNSPECIFIED {
+		return nil, errIdleTimeoutUnitRequired
+	}
+
 	req := &organizationsv1.UpdateOrganizationSessionPolicyRequest{
 		OrganizationId: organizationId,
 		PolicySource:   policy.PolicySource,
@@ -289,6 +306,9 @@ func (o *organization) UpdateOrganizationSessionPolicy(ctx context.Context, orga
 	).exec(ctx)
 	if err != nil {
 		return nil, err
+	}
+	if resp == nil || resp.Policy == nil {
+		return nil, errUpdateOrganizationSessionPolicyMissingPolicy
 	}
 
 	return resp.Policy, nil
