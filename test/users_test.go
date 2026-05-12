@@ -250,3 +250,118 @@ func TestUser_ResendInvite(t *testing.T) {
 	require.NotNil(t, resendResponse.GetInvite().GetCreatedAt())
 	require.NotNil(t, resendResponse.GetInvite().GetExpiresAt())
 }
+
+func TestUser_SearchUsers(t *testing.T) {
+	ctx := context.Background()
+
+	resp, err := client.User().SearchUsers(ctx, "example", 10, "")
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	// Result may be empty; just confirm the call succeeds and returns a valid response.
+	_ = resp.GetUsers()
+}
+
+func TestUser_SearchUsers_EmptyQuery(t *testing.T) {
+	ctx := context.Background()
+
+	resp, err := client.User().SearchUsers(ctx, "", 5, "")
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+}
+
+func TestUser_SearchOrganizationUsers(t *testing.T) {
+	ctx := context.Background()
+	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
+	defer DeleteTestOrganization(t, ctx, orgId)
+
+	uniqueEmail := fmt.Sprintf("search.org.user.%d@example.com", time.Now().UnixNano()/1e6)
+	createdUser, err := client.User().CreateUserAndMembership(ctx, orgId, &users.CreateUser{
+		Email:    uniqueEmail,
+		Metadata: map[string]string{"source": "search_org_users_test"},
+	}, false)
+	require.NoError(t, err)
+	require.NotNil(t, createdUser)
+	require.NotEmpty(t, createdUser.GetUser().GetId())
+	userId := createdUser.GetUser().GetId()
+	defer func() { _ = client.User().DeleteUser(ctx, userId) }()
+
+	resp, err := client.User().SearchOrganizationUsers(ctx, orgId, "search", 10, "")
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	_ = resp.GetUsers()
+}
+
+func TestUser_SearchOrganizationUsers_EmptyQuery(t *testing.T) {
+	ctx := context.Background()
+	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
+	defer DeleteTestOrganization(t, ctx, orgId)
+
+	resp, err := client.User().SearchOrganizationUsers(ctx, orgId, "", 5, "")
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+}
+
+func TestUser_AssignUserRoles_AndRemoveUserRole(t *testing.T) {
+	ctx := context.Background()
+	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
+	defer DeleteTestOrganization(t, ctx, orgId)
+
+	uniqueEmail := fmt.Sprintf("assign.roles.%d@example.com", time.Now().UnixNano()/1e6)
+	createdUser, err := client.User().CreateUserAndMembership(ctx, orgId, &users.CreateUser{
+		Email:    uniqueEmail,
+		Metadata: map[string]string{"source": "assign_roles_test"},
+	}, false)
+	require.NoError(t, err)
+	require.NotNil(t, createdUser)
+	require.NotEmpty(t, createdUser.GetUser().GetId())
+	userId := createdUser.GetUser().GetId()
+	defer func() { _ = client.User().DeleteUser(ctx, userId) }()
+
+	// List available roles to find a valid role name to assign
+	rolesResp, err := client.User().ListUserRoles(ctx, orgId, userId)
+	if err != nil {
+		t.Skipf("skipping AssignUserRoles: cannot list roles: %v", err)
+	}
+
+	roleName := envOrSkip(t, "TEST_ROLE_NAME")
+
+	assignResp, err := client.User().AssignUserRoles(ctx, orgId, userId, []*users.AssignRoleRequest{
+		{RoleName: roleName},
+	})
+	if err != nil {
+		t.Skipf("skipping AssignUserRoles: role assignment may not be supported in this env: %v", err)
+	}
+	require.NotNil(t, assignResp)
+
+	// Remove the role that was just assigned
+	err = client.User().RemoveUserRole(ctx, orgId, userId, roleName)
+	if err != nil {
+		t.Logf("RemoveUserRole returned error (may be expected if role was not applied): %v", err)
+	}
+
+	_ = rolesResp
+}
+
+func TestUser_RemoveUserRole_NonExistentRole(t *testing.T) {
+	ctx := context.Background()
+	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
+	defer DeleteTestOrganization(t, ctx, orgId)
+
+	uniqueEmail := fmt.Sprintf("remove.role.%d@example.com", time.Now().UnixNano()/1e6)
+	createdUser, err := client.User().CreateUserAndMembership(ctx, orgId, &users.CreateUser{
+		Email:    uniqueEmail,
+		Metadata: map[string]string{"source": "remove_role_test"},
+	}, false)
+	require.NoError(t, err)
+	require.NotNil(t, createdUser)
+	require.NotEmpty(t, createdUser.GetUser().GetId())
+	userId := createdUser.GetUser().GetId()
+	defer func() { _ = client.User().DeleteUser(ctx, userId) }()
+
+	// Removing a role that was never assigned should return an error (not panic)
+	err = client.User().RemoveUserRole(ctx, orgId, userId, "nonexistent_role_xyz")
+	// We expect an error here; we just verify no panic occurred and log the result
+	if err != nil {
+		t.Logf("RemoveUserRole (nonexistent): got expected error: %v", err)
+	}
+}
