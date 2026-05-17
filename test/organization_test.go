@@ -180,6 +180,70 @@ func TestOrganization_UpsertUserManagementSettings(t *testing.T) {
 	assert.Equal(t, updatedMaxUsers, settings.GetMaxAllowedUsers().GetValue())
 }
 
+func TestOrganization_CreateOrganization_WithLogoUrl(t *testing.T) {
+	ctx := context.Background()
+	logoURL := "https://cdn.example.com/acme-logo.png"
+
+	created, err := client.Organization().CreateOrganization(ctx, TestOrgName, scalekit.CreateOrganizationOptions{
+		ExternalId: UniqueSuffix(),
+		LogoUrl:    logoURL,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, created.GetOrganization())
+	defer DeleteTestOrganization(t, ctx, created.GetOrganization().GetId())
+
+	assert.Equal(t, logoURL, created.GetOrganization().GetLogoUrl())
+
+	retrieved, err := client.Organization().GetOrganization(ctx, created.GetOrganization().GetId())
+	require.NoError(t, err)
+	assert.Equal(t, logoURL, retrieved.GetOrganization().GetLogoUrl())
+}
+
+func TestOrganization_UpdateOrganization_LogoUrl(t *testing.T) {
+	ctx := context.Background()
+	logoURL := "https://cdn.example.com/acme-logo.png"
+	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
+	defer DeleteTestOrganization(t, ctx, orgId)
+
+	// set logo_url
+	updated, err := client.Organization().UpdateOrganization(ctx, orgId, &organizations.UpdateOrganization{
+		LogoUrl: &logoURL,
+	})
+	require.NoError(t, err)
+	assert.Equal(t, logoURL, updated.GetOrganization().GetLogoUrl())
+
+	// clear logo_url
+	empty := ""
+	cleared, err := client.Organization().UpdateOrganization(ctx, orgId, &organizations.UpdateOrganization{
+		LogoUrl: &empty,
+	})
+	require.NoError(t, err)
+	assert.Equal(t, "", cleared.GetOrganization().GetLogoUrl())
+}
+
+func TestOrganization_LogoUrl_PreservedAfterSettingsUpdate(t *testing.T) {
+	ctx := context.Background()
+	logoURL := "https://cdn.example.com/acme-logo.png"
+	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
+	defer DeleteTestOrganization(t, ctx, orgId)
+
+	// stamp logo_url
+	_, err := client.Organization().UpdateOrganization(ctx, orgId, &organizations.UpdateOrganization{
+		LogoUrl: &logoURL,
+	})
+	require.NoError(t, err)
+
+	// update features — must not wipe logo_url
+	_, err = client.Organization().UpdateOrganizationSettings(ctx, orgId, scalekit.OrganizationSettings{
+		Features: []scalekit.Feature{{Name: "sso", Enabled: true}},
+	})
+	require.NoError(t, err)
+
+	retrieved, err := client.Organization().GetOrganization(ctx, orgId)
+	require.NoError(t, err)
+	assert.Equal(t, logoURL, retrieved.GetOrganization().GetLogoUrl())
+}
+
 func TestOrganization_CreateOrganization_WithMetadata(t *testing.T) {
 	ctx := context.Background()
 	externalId := UniqueSuffix()

@@ -70,6 +70,7 @@ var (
 
 type CreateOrganizationOptions struct {
 	ExternalId string
+	LogoUrl    string
 	Metadata   map[string]string
 }
 
@@ -109,6 +110,9 @@ func (o *organization) CreateOrganization(ctx context.Context, name string, opti
 	}
 	if options.ExternalId != "" {
 		req.Organization.ExternalId = &options.ExternalId
+	}
+	if options.LogoUrl != "" {
+		req.Organization.LogoUrl = &options.LogoUrl
 	}
 	return newConnectExecuter(
 		o.coreClient,
