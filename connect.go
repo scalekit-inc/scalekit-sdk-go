@@ -83,6 +83,13 @@ func isUnauthenticated(err error) bool {
 	return errors.As(err, &connectErr) && connectErr.Code() == connect.CodeUnauthenticated
 }
 
+// isDeadlineExceeded reports whether err is a Connect CodeDeadlineExceeded,
+// which occurs when the gRPC channel is in TRANSIENT_FAILURE or IDLE and is safe to retry.
+func isDeadlineExceeded(err error) bool {
+	var connectErr *connect.Error
+	return errors.As(err, &connectErr) && connectErr.Code() == connect.CodeDeadlineExceeded
+}
+
 // exec runs the Connect RPC. Errors (including validation/CodeInvalidArgument) are returned
 // as-is; use errors.As(err, &connectErr) with *connect.Error to inspect Code() and Details().
 func (r *connectExecuter[TRequest, TResponse]) exec(ctx context.Context) (*TResponse, error) {
@@ -99,6 +106,10 @@ func (r *connectExecuter[TRequest, TResponse]) exec(ctx context.Context) (*TResp
 			if authErr := r.coreClient.authenticateClient(ctx); authErr != nil {
 				return nil, authErr
 			}
+			r.retries++
+			return r.exec(ctx)
+		}
+		if r.maxRetries-r.retries > 0 && isDeadlineExceeded(err) {
 			r.retries++
 			return r.exec(ctx)
 		}
