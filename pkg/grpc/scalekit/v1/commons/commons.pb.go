@@ -220,6 +220,58 @@ func (IdentityProviderType) EnumDescriptor() ([]byte, []int) {
 	return file_scalekit_v1_commons_commons_proto_rawDescGZIP(), []int{2}
 }
 
+type TimeUnit int32
+
+const (
+	TimeUnit_SESSION_TIME_UNIT_UNSPECIFIED TimeUnit = 0
+	TimeUnit_MINUTES                       TimeUnit = 1
+	TimeUnit_HOURS                         TimeUnit = 2
+	TimeUnit_DAYS                          TimeUnit = 3
+)
+
+// Enum value maps for TimeUnit.
+var (
+	TimeUnit_name = map[int32]string{
+		0: "SESSION_TIME_UNIT_UNSPECIFIED",
+		1: "MINUTES",
+		2: "HOURS",
+		3: "DAYS",
+	}
+	TimeUnit_value = map[string]int32{
+		"SESSION_TIME_UNIT_UNSPECIFIED": 0,
+		"MINUTES":                       1,
+		"HOURS":                         2,
+		"DAYS":                          3,
+	}
+)
+
+func (x TimeUnit) Enum() *TimeUnit {
+	p := new(TimeUnit)
+	*p = x
+	return p
+}
+
+func (x TimeUnit) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (TimeUnit) Descriptor() protoreflect.EnumDescriptor {
+	return file_scalekit_v1_commons_commons_proto_enumTypes[3].Descriptor()
+}
+
+func (TimeUnit) Type() protoreflect.EnumType {
+	return &file_scalekit_v1_commons_commons_proto_enumTypes[3]
+}
+
+func (x TimeUnit) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use TimeUnit.Descriptor instead.
+func (TimeUnit) EnumDescriptor() ([]byte, []int) {
+	return file_scalekit_v1_commons_commons_proto_rawDescGZIP(), []int{3}
+}
+
 type OrganizationMembership struct {
 	state              protoimpl.MessageState `protogen:"open.v1"`
 	OrganizationId     string                 `protobuf:"bytes,1,opt,name=organization_id,json=organizationId,proto3" json:"organization_id,omitempty"`
@@ -823,7 +875,12 @@ const file_scalekit_v1_commons_commons_proto_rawDesc = "" +
 	"\tMICROSOFT\x10\r\x12\x11\n" +
 	"\rIDP_SIMULATOR\x10\x0e\x12\f\n" +
 	"\bSCALEKIT\x10\x0f\x12\b\n" +
-	"\x04ADFS\x10\x10B\xde\x01\n" +
+	"\x04ADFS\x10\x10*O\n" +
+	"\bTimeUnit\x12!\n" +
+	"\x1dSESSION_TIME_UNIT_UNSPECIFIED\x10\x00\x12\v\n" +
+	"\aMINUTES\x10\x01\x12\t\n" +
+	"\x05HOURS\x10\x02\x12\b\n" +
+	"\x04DAYS\x10\x03B\xde\x01\n" +
 	"\x17com.scalekit.v1.commonsB\fCommonsProtoP\x01ZGgithub.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/commons\xa2\x02\x03SVC\xaa\x02\x13Scalekit.V1.Commons\xca\x02\x13Scalekit\\V1\\Commons\xe2\x02\x1fScalekit\\V1\\Commons\\GPBMetadata\xea\x02\x15Scalekit::V1::Commonsb\x06proto3"
 
 var (
@@ -838,36 +895,37 @@ func file_scalekit_v1_commons_commons_proto_rawDescGZIP() []byte {
 	return file_scalekit_v1_commons_commons_proto_rawDescData
 }
 
-var file_scalekit_v1_commons_commons_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_scalekit_v1_commons_commons_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
 var file_scalekit_v1_commons_commons_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_scalekit_v1_commons_commons_proto_goTypes = []any{
 	(RegionCode)(0),                // 0: scalekit.v1.commons.RegionCode
 	(MembershipStatus)(0),          // 1: scalekit.v1.commons.MembershipStatus
 	(IdentityProviderType)(0),      // 2: scalekit.v1.commons.IdentityProviderType
-	(*OrganizationMembership)(nil), // 3: scalekit.v1.commons.OrganizationMembership
-	(*Role)(nil),                   // 4: scalekit.v1.commons.Role
-	(*UserProfile)(nil),            // 5: scalekit.v1.commons.UserProfile
-	(*ExternalIdentity)(nil),       // 6: scalekit.v1.commons.ExternalIdentity
-	nil,                            // 7: scalekit.v1.commons.OrganizationMembership.MetadataEntry
-	nil,                            // 8: scalekit.v1.commons.UserProfile.MetadataEntry
-	nil,                            // 9: scalekit.v1.commons.UserProfile.CustomAttributesEntry
-	(*timestamppb.Timestamp)(nil),  // 10: google.protobuf.Timestamp
+	(TimeUnit)(0),                  // 3: scalekit.v1.commons.TimeUnit
+	(*OrganizationMembership)(nil), // 4: scalekit.v1.commons.OrganizationMembership
+	(*Role)(nil),                   // 5: scalekit.v1.commons.Role
+	(*UserProfile)(nil),            // 6: scalekit.v1.commons.UserProfile
+	(*ExternalIdentity)(nil),       // 7: scalekit.v1.commons.ExternalIdentity
+	nil,                            // 8: scalekit.v1.commons.OrganizationMembership.MetadataEntry
+	nil,                            // 9: scalekit.v1.commons.UserProfile.MetadataEntry
+	nil,                            // 10: scalekit.v1.commons.UserProfile.CustomAttributesEntry
+	(*timestamppb.Timestamp)(nil),  // 11: google.protobuf.Timestamp
 }
 var file_scalekit_v1_commons_commons_proto_depIdxs = []int32{
-	10, // 0: scalekit.v1.commons.OrganizationMembership.join_time:type_name -> google.protobuf.Timestamp
+	11, // 0: scalekit.v1.commons.OrganizationMembership.join_time:type_name -> google.protobuf.Timestamp
 	1,  // 1: scalekit.v1.commons.OrganizationMembership.membership_status:type_name -> scalekit.v1.commons.MembershipStatus
-	4,  // 2: scalekit.v1.commons.OrganizationMembership.roles:type_name -> scalekit.v1.commons.Role
-	7,  // 3: scalekit.v1.commons.OrganizationMembership.metadata:type_name -> scalekit.v1.commons.OrganizationMembership.MetadataEntry
-	10, // 4: scalekit.v1.commons.OrganizationMembership.created_at:type_name -> google.protobuf.Timestamp
-	10, // 5: scalekit.v1.commons.OrganizationMembership.accepted_at:type_name -> google.protobuf.Timestamp
-	10, // 6: scalekit.v1.commons.OrganizationMembership.expires_at:type_name -> google.protobuf.Timestamp
-	8,  // 7: scalekit.v1.commons.UserProfile.metadata:type_name -> scalekit.v1.commons.UserProfile.MetadataEntry
-	9,  // 8: scalekit.v1.commons.UserProfile.custom_attributes:type_name -> scalekit.v1.commons.UserProfile.CustomAttributesEntry
-	6,  // 9: scalekit.v1.commons.UserProfile.external_identities:type_name -> scalekit.v1.commons.ExternalIdentity
+	5,  // 2: scalekit.v1.commons.OrganizationMembership.roles:type_name -> scalekit.v1.commons.Role
+	8,  // 3: scalekit.v1.commons.OrganizationMembership.metadata:type_name -> scalekit.v1.commons.OrganizationMembership.MetadataEntry
+	11, // 4: scalekit.v1.commons.OrganizationMembership.created_at:type_name -> google.protobuf.Timestamp
+	11, // 5: scalekit.v1.commons.OrganizationMembership.accepted_at:type_name -> google.protobuf.Timestamp
+	11, // 6: scalekit.v1.commons.OrganizationMembership.expires_at:type_name -> google.protobuf.Timestamp
+	9,  // 7: scalekit.v1.commons.UserProfile.metadata:type_name -> scalekit.v1.commons.UserProfile.MetadataEntry
+	10, // 8: scalekit.v1.commons.UserProfile.custom_attributes:type_name -> scalekit.v1.commons.UserProfile.CustomAttributesEntry
+	7,  // 9: scalekit.v1.commons.UserProfile.external_identities:type_name -> scalekit.v1.commons.ExternalIdentity
 	2,  // 10: scalekit.v1.commons.ExternalIdentity.connection_provider:type_name -> scalekit.v1.commons.IdentityProviderType
-	10, // 11: scalekit.v1.commons.ExternalIdentity.last_login_time:type_name -> google.protobuf.Timestamp
-	10, // 12: scalekit.v1.commons.ExternalIdentity.created_time:type_name -> google.protobuf.Timestamp
-	10, // 13: scalekit.v1.commons.ExternalIdentity.last_synced_time:type_name -> google.protobuf.Timestamp
+	11, // 11: scalekit.v1.commons.ExternalIdentity.last_login_time:type_name -> google.protobuf.Timestamp
+	11, // 12: scalekit.v1.commons.ExternalIdentity.created_time:type_name -> google.protobuf.Timestamp
+	11, // 13: scalekit.v1.commons.ExternalIdentity.last_synced_time:type_name -> google.protobuf.Timestamp
 	14, // [14:14] is the sub-list for method output_type
 	14, // [14:14] is the sub-list for method input_type
 	14, // [14:14] is the sub-list for extension type_name
@@ -886,7 +944,7 @@ func file_scalekit_v1_commons_commons_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_scalekit_v1_commons_commons_proto_rawDesc), len(file_scalekit_v1_commons_commons_proto_rawDesc)),
-			NumEnums:      3,
+			NumEnums:      4,
 			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   0,

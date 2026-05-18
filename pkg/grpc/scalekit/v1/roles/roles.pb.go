@@ -3164,7 +3164,7 @@ const file_scalekit_v1_roles_roles_proto_rawDesc = "" +
 	"\x0ePermissionType\x12\a\n" +
 	"\x03ALL\x10\x00\x12\f\n" +
 	"\bSCALEKIT\x10\x01\x12\x0f\n" +
-	"\vENVIRONMENT\x10\x022\xeb\xbb\x01\n" +
+	"\vENVIRONMENT\x10\x022\x84\xbc\x01\n" +
 	"\fRolesService\x12\xcf\x05\n" +
 	"\n" +
 	"CreateRole\x12$.scalekit.v1.roles.CreateRoleRequest\x1a%.scalekit.v1.roles.CreateRoleResponse\"\xf3\x04\x92A\xce\x04\n" +
@@ -3202,17 +3202,19 @@ const file_scalekit_v1_roles_roles_proto_rawDesc = "" +
 	"\x05Roles\x12\x18Update organization role\x1a\xa4\x03Modifies an existing organization role's properties including display name, description, permissions, and inheritance settings. Use this endpoint to update role metadata, change permission assignments, or modify role hierarchy within the organization. Only the fields you specify will be updated, leaving other properties unchanged. When updating permissions, the new list replaces all existing permissions for the role.J\xa2\x01\n" +
 	"\x03200\x12\x9a\x01\n" +
 	"aOrganization role updated successfully. Returns the modified role object with updated timestamps.\x125\n" +
-	"3\x1a1.scalekit.v1.roles.UpdateOrganizationRoleResponse\x82\xb5\x18\x02\x18D\x82\xd3\xe4\x93\x028:\x04role\x1a0/api/v1/organizations/{org_id}/roles/{role_name}\x12\xa0\a\n" +
-	"\x13GetOrganizationRole\x12-.scalekit.v1.roles.GetOrganizationRoleRequest\x1a..scalekit.v1.roles.GetOrganizationRoleResponse\"\xa9\x06\x92A\xe7\x05\n" +
+	"3\x1a1.scalekit.v1.roles.UpdateOrganizationRoleResponse\x82\xb5\x18\x02\x18D\x82\xd3\xe4\x93\x028:\x04role\x1a0/api/v1/organizations/{org_id}/roles/{role_name}\x12\xb4\a\n" +
+	"\x13GetOrganizationRole\x12-.scalekit.v1.roles.GetOrganizationRoleRequest\x1a..scalekit.v1.roles.GetOrganizationRoleResponse\"\xbd\x06\x92A\xe7\x05\n" +
 	"\x05Roles\x12\x1dGet organization role details\x1a\xbf\x03Retrieves complete information for a specific organization role including metadata, inheritance details, and optionally permissions. Use this endpoint to audit role configuration and understand the role's place in the organization's role hierarchy. You can include permission details to see what capabilities the role provides. This operation is useful for role management, user assignment decisions, or understanding organization access controls.J\xfc\x01\n" +
 	"\x03200\x12\xf4\x01\n" +
 	"\xbd\x01Successfully retrieved organization role details. Returns the role object including metadata and inheritance details. Permissions are included only when requested via the include parameter.\x122\n" +
-	"0\x1a..scalekit.v1.roles.GetOrganizationRoleResponse\x82\xb5\x18\x02\x18d\x82\xd3\xe4\x93\x022\x120/api/v1/organizations/{org_id}/roles/{role_name}\x12\xa3\x06\n" +
-	"\x15ListOrganizationRoles\x12/.scalekit.v1.roles.ListOrganizationRolesRequest\x1a0.scalekit.v1.roles.ListOrganizationRolesResponse\"\xa6\x05\x92A\xf0\x04\n" +
+	"0\x1a..scalekit.v1.roles.GetOrganizationRoleResponse\x82\xb5\x18\x16\n" +
+	"\x12organizations_read\x18t\x82\xd3\xe4\x93\x022\x120/api/v1/organizations/{org_id}/roles/{role_name}\x12\xb7\x06\n" +
+	"\x15ListOrganizationRoles\x12/.scalekit.v1.roles.ListOrganizationRolesRequest\x1a0.scalekit.v1.roles.ListOrganizationRolesResponse\"\xba\x05\x92A\xf0\x04\n" +
 	"\x05Roles\x12\x17List organization roles\x1a\x90\x03Retrieves all environment roles and organization specific roles. Use this endpoint to view all role definitions, including custom roles and their configurations. You can optionally include permission details for each role to understand their capabilities. This is useful for role management, auditing organization access controls, or understanding the available access levels within the organization.J\xba\x01\n" +
 	"\x03200\x12\xb2\x01\n" +
 	"zSuccessfully retrieved list of organization roles. Returns all roles with their metadata and optionally their permissions.\x124\n" +
-	"2\x1a0.scalekit.v1.roles.ListOrganizationRolesResponse\x82\xb5\x18\x02\x18d\x82\xd3\xe4\x93\x02&\x12$/api/v1/organizations/{org_id}/roles\x12\x8a\x06\n" +
+	"2\x1a0.scalekit.v1.roles.ListOrganizationRolesResponse\x82\xb5\x18\x16\n" +
+	"\x12organizations_read\x18t\x82\xd3\xe4\x93\x02&\x12$/api/v1/organizations/{org_id}/roles\x12\x8a\x06\n" +
 	"\x16DeleteOrganizationRole\x120.scalekit.v1.roles.DeleteOrganizationRoleRequest\x1a\x16.google.protobuf.Empty\"\xa5\x05\x92A\xe3\x04\n" +
 	"\x05Roles\x12\x18Delete organization role\x1a\xd6\x03Permanently removes a role from the organization and optionally reassigns users who had that role to a different role. Use this endpoint when you need to clean up unused roles or restructure your organization's access control system. If users are assigned to the role being deleted, you can provide a reassign_role_name to move those users to a different role before deletion. This action cannot be undone, so ensure no critical users depend on the role before deletion.Jg\n" +
 	"\x03200\x12`\n" +
@@ -3245,11 +3247,11 @@ const file_scalekit_v1_roles_roles_proto_rawDesc = "" +
 	"\x0eDeleteRoleBase\x12(.scalekit.v1.roles.DeleteRoleBaseRequest\x1a\x16.google.protobuf.Empty\"\xe2\x05\x92A\xb2\x05\n" +
 	"\x05Roles\x12$Delete role inheritance relationship\x1a\x86\x04Removes the base role inheritance relationship for a specified role, effectively eliminating all inherited permissions from the base role. Use this endpoint when you want to break the hierarchical relationship between roles and remove inherited permissions. The role will retain only its directly assigned permissions after this operation. This action cannot be undone, so ensure the role has sufficient direct permissions before removing inheritance. Returns no content on successful removal of the base relationship.Jz\n" +
 	"\x03200\x12s\n" +
-	"qBase role inheritance relationship successfully removed. The role now has only its directly assigned permissions.\x82\xb5\x18\x02\x18D\x82\xd3\xe4\x93\x02 *\x1e/api/v1/roles/{role_name}/base\x12\xe6\x06\n" +
-	"\x1aDeleteOrganizationRoleBase\x124.scalekit.v1.roles.DeleteOrganizationRoleBaseRequest\x1a\x16.google.protobuf.Empty\"\xf9\x05\x92A\xa3\x05\n" +
+	"qBase role inheritance relationship successfully removed. The role now has only its directly assigned permissions.\x82\xb5\x18\x02\x18D\x82\xd3\xe4\x93\x02 *\x1e/api/v1/roles/{role_name}/base\x12\xd7\x06\n" +
+	"\x1aDeleteOrganizationRoleBase\x124.scalekit.v1.roles.DeleteOrganizationRoleBaseRequest\x1a\x16.google.protobuf.Empty\"\xea\x05\x92A\xa3\x05\n" +
 	"\x05Roles\x12$Remove organization role inheritance\x1a\xe8\x03Removes the base role inheritance relationship for a specified organization role, effectively eliminating all inherited permissions from the base role. Use this endpoint when you want to break the hierarchical relationship between roles and remove inherited permissions within the organization. The role will retain only its directly assigned permissions after this operation. This action cannot be undone, so ensure the role has sufficient direct permissions before removing inheritance.J\x88\x01\n" +
 	"\x03200\x12\x80\x01\n" +
-	"~Organization role base inheritance relationship successfully removed. The role now has only its directly assigned permissions.\x82\xb5\x18\x02\x18D\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x027*5/api/v1/organizations/{org_id}/roles/{role_name}/base\x12\xcf\a\n" +
+	"~Organization role base inheritance relationship successfully removed. The role now has only its directly assigned permissions.\x82\xb5\x18\x02\x18D\x82\xd3\xe4\x93\x027*5/api/v1/organizations/{org_id}/roles/{role_name}/base\x12\xcf\a\n" +
 	"\x10CreatePermission\x12*.scalekit.v1.roles.CreatePermissionRequest\x1a+.scalekit.v1.roles.CreatePermissionResponse\"\xe1\x06\x92A\xb0\x06\n" +
 	"\vPermissions\x12\x15Create new permission\x1a\xc6\x04Creates a new permission that represents a specific action users can perform within the environment. Use this endpoint to define granular access controls for your RBAC system. You can provide a unique permission name following the format 'action:resource' (for example, 'read:documents', 'write:users') and an optional description explaining the permission's purpose. The permission name must be unique across the environment and follows alphanumeric naming conventions with colons and underscores. Returns the created permission object including system-generated ID and timestamps.J\xc0\x01\n" +
 	"\x03201\x12\xb8\x01\n" +

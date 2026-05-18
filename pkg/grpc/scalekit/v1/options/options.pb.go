@@ -91,10 +91,18 @@ const (
 	AuthenticationType_WORKSPACE_CUSTOMER_PORTAL                AuthenticationType = 96 // workspace_id,organization_id is in claims and client Id is in subject
 	AuthenticationType_USER                                     AuthenticationType = 8  // user_id is in claims
 	// client is environment primary client ID
-	AuthenticationType_CLIENT                         AuthenticationType = 4  // client Id is in subject
-	AuthenticationType_SESSION_CLIENT                 AuthenticationType = 20 // UI in audience or client Id is in subject
-	AuthenticationType_WORKSPACE_SESSION_CLIENT       AuthenticationType = 84 // workspace_id is in claims, UI in audience and client Id is in subject
-	AuthenticationType_CUSTOMER_PORTAL_SESSION_CLIENT AuthenticationType = 52 // claims has organisation ID, UI in audience and client Id is in subject
+	AuthenticationType_CLIENT                                                  AuthenticationType = 4  // client Id is in subject
+	AuthenticationType_SESSION_CLIENT                                          AuthenticationType = 20 // UI in audience or client Id is in subject
+	AuthenticationType_WORKSPACE_SESSION_CLIENT                                AuthenticationType = 84 // workspace_id is in claims, UI in audience and client Id is in subject
+	AuthenticationType_CUSTOMER_PORTAL_SESSION_CLIENT                          AuthenticationType = 52 // claims has organisation ID, UI in audience and client Id is in subject
+	AuthenticationType_SESSION_USER                                            AuthenticationType = 24
+	AuthenticationType_ACTIONS_PORTAL                                          AuthenticationType = 128
+	AuthenticationType_WORKSPACE_SESSION_CUSTOMER_PORTAL_ACTIONS_PORTAL        AuthenticationType = 240 // workspace_id,organization_id is in claims and UI in audience
+	AuthenticationType_WORKSPACE_SESSION_CUSTOMER_PORTAL_ACTIONS_PORTAL_CLIENT AuthenticationType = 244 // workspace_id,organization_id is in claims, UI in audience and client Id is in subject
+	AuthenticationType_WORKSPACE_ACTIONS_PORTAL                                AuthenticationType = 192 // workspace_id is in claims and UI in audience
+	AuthenticationType_WORKSPACE_ACTIONS_PORTAL_CLIENT                         AuthenticationType = 196 // workspace_id is in claims, UI in audience and client Id is in subject
+	AuthenticationType_WORKSPACE_ACTIONS_PORTAL_CUSTOMER_PORTAL_CLIENT         AuthenticationType = 228
+	AuthenticationType_WORKSPACE_CUSTOMER_PORTAL_ACTIONS_PORTAL                AuthenticationType = 224 // workspace_id,organization_id is in claims and UI in audience
 )
 
 // Enum value maps for AuthenticationType.
@@ -116,6 +124,14 @@ var (
 		20:  "SESSION_CLIENT",
 		84:  "WORKSPACE_SESSION_CLIENT",
 		52:  "CUSTOMER_PORTAL_SESSION_CLIENT",
+		24:  "SESSION_USER",
+		128: "ACTIONS_PORTAL",
+		240: "WORKSPACE_SESSION_CUSTOMER_PORTAL_ACTIONS_PORTAL",
+		244: "WORKSPACE_SESSION_CUSTOMER_PORTAL_ACTIONS_PORTAL_CLIENT",
+		192: "WORKSPACE_ACTIONS_PORTAL",
+		196: "WORKSPACE_ACTIONS_PORTAL_CLIENT",
+		228: "WORKSPACE_ACTIONS_PORTAL_CUSTOMER_PORTAL_CLIENT",
+		224: "WORKSPACE_CUSTOMER_PORTAL_ACTIONS_PORTAL",
 	}
 	AuthenticationType_value = map[string]int32{
 		"BLOCKED":                           0,
@@ -134,6 +150,14 @@ var (
 		"SESSION_CLIENT":                           20,
 		"WORKSPACE_SESSION_CLIENT":                 84,
 		"CUSTOMER_PORTAL_SESSION_CLIENT":           52,
+		"SESSION_USER":                             24,
+		"ACTIONS_PORTAL":                           128,
+		"WORKSPACE_SESSION_CUSTOMER_PORTAL_ACTIONS_PORTAL":        240,
+		"WORKSPACE_SESSION_CUSTOMER_PORTAL_ACTIONS_PORTAL_CLIENT": 244,
+		"WORKSPACE_ACTIONS_PORTAL":                                192,
+		"WORKSPACE_ACTIONS_PORTAL_CLIENT":                         196,
+		"WORKSPACE_ACTIONS_PORTAL_CUSTOMER_PORTAL_CLIENT":         228,
+		"WORKSPACE_CUSTOMER_PORTAL_ACTIONS_PORTAL":                224,
 	}
 )
 
@@ -254,7 +278,7 @@ const file_scalekit_v1_options_options_proto_rawDesc = "" +
 	"\x06Policy\x12\b\n" +
 	"\x04DENY\x10\x00\x12\v\n" +
 	"\aPARTIAL\x10\x01\x12\t\n" +
-	"\x05ALLOW\x10\x02*\x8f\x03\n" +
+	"\x05ALLOW\x10\x02*\xd5\x05\n" +
 	"\x12AuthenticationType\x12\v\n" +
 	"\aBLOCKED\x10\x00\x12\b\n" +
 	"\x04NONE\x10\x01\x12\r\n" +
@@ -272,7 +296,15 @@ const file_scalekit_v1_options_options_proto_rawDesc = "" +
 	"\x06CLIENT\x10\x04\x12\x12\n" +
 	"\x0eSESSION_CLIENT\x10\x14\x12\x1c\n" +
 	"\x18WORKSPACE_SESSION_CLIENT\x10T\x12\"\n" +
-	"\x1eCUSTOMER_PORTAL_SESSION_CLIENT\x104:b\n" +
+	"\x1eCUSTOMER_PORTAL_SESSION_CLIENT\x104\x12\x10\n" +
+	"\fSESSION_USER\x10\x18\x12\x13\n" +
+	"\x0eACTIONS_PORTAL\x10\x80\x01\x125\n" +
+	"0WORKSPACE_SESSION_CUSTOMER_PORTAL_ACTIONS_PORTAL\x10\xf0\x01\x12<\n" +
+	"7WORKSPACE_SESSION_CUSTOMER_PORTAL_ACTIONS_PORTAL_CLIENT\x10\xf4\x01\x12\x1d\n" +
+	"\x18WORKSPACE_ACTIONS_PORTAL\x10\xc0\x01\x12$\n" +
+	"\x1fWORKSPACE_ACTIONS_PORTAL_CLIENT\x10\xc4\x01\x124\n" +
+	"/WORKSPACE_ACTIONS_PORTAL_CUSTOMER_PORTAL_CLIENT\x10\xe4\x01\x12-\n" +
+	"(WORKSPACE_CUSTOMER_PORTAL_ACTIONS_PORTAL\x10\xe0\x01:b\n" +
 	"\vauth_option\x12\x1e.google.protobuf.MethodOptions\x18І\x03 \x01(\v2\x1f.scalekit.v1.options.AuthOptionR\n" +
 	"authOptionB\xde\x01\n" +
 	"\x17com.scalekit.v1.optionsB\fOptionsProtoP\x01ZGgithub.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/options\xa2\x02\x03SVO\xaa\x02\x13Scalekit.V1.Options\xca\x02\x13Scalekit\\V1\\Options\xe2\x02\x1fScalekit\\V1\\Options\\GPBMetadata\xea\x02\x15Scalekit::V1::Optionsb\x06proto3"

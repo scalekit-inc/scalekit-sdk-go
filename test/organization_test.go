@@ -2,7 +2,9 @@ package test
 
 import (
 	"context"
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/scalekit-inc/scalekit-sdk-go/v2"
 	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/organizations"
@@ -166,6 +168,41 @@ func TestOrganization_UpsertUserManagementSettings(t *testing.T) {
 	require.NotNil(t, settings)
 	require.NotNil(t, settings.GetMaxAllowedUsers())
 	assert.Equal(t, updatedMaxUsers, settings.GetMaxAllowedUsers().GetValue())
+}
+
+func TestOrganization_CreateOrganization_WithSlug(t *testing.T) {
+	ctx := context.Background()
+	slug := fmt.Sprintf("test-slug-%d", time.Now().UnixNano()/1e6)
+	externalId := UniqueSuffix()
+
+	createdOrganization, err := client.Organization().CreateOrganization(ctx, TestOrgName, scalekit.CreateOrganizationOptions{
+		ExternalId: externalId,
+		Slug:       slug,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, createdOrganization)
+	require.NotNil(t, createdOrganization.GetOrganization())
+	defer DeleteTestOrganization(t, ctx, createdOrganization.GetOrganization().GetId())
+
+	assert.Equal(t, slug, createdOrganization.GetOrganization().GetSlug())
+
+	retrieved, err := client.Organization().GetOrganization(ctx, createdOrganization.GetOrganization().GetId())
+	require.NoError(t, err)
+	assert.Equal(t, slug, retrieved.GetOrganization().GetSlug())
+}
+
+func TestOrganization_UpdateOrganization_WithSlug(t *testing.T) {
+	ctx := context.Background()
+	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
+	defer DeleteTestOrganization(t, ctx, orgId)
+
+	slug := fmt.Sprintf("upd-slug-%d", time.Now().UnixNano()/1e6)
+	updated, err := client.Organization().UpdateOrganization(ctx, orgId, &organizations.UpdateOrganization{
+		Slug: toPtr(slug),
+	})
+	require.NoError(t, err)
+	require.NotNil(t, updated)
+	assert.Equal(t, slug, updated.GetOrganization().GetSlug())
 }
 
 func TestOrganization_CreateOrganization_WithMetadata(t *testing.T) {

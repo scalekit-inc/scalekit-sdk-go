@@ -88,6 +88,12 @@ const (
 	// ConnectionServiceListAppConnectionsProcedure is the fully-qualified name of the
 	// ConnectionService's ListAppConnections RPC.
 	ConnectionServiceListAppConnectionsProcedure = "/scalekit.v1.connections.ConnectionService/ListAppConnections"
+	// ConnectionServiceGetConnectionContextProcedure is the fully-qualified name of the
+	// ConnectionService's GetConnectionContext RPC.
+	ConnectionServiceGetConnectionContextProcedure = "/scalekit.v1.connections.ConnectionService/GetConnectionContext"
+	// ConnectionServiceUpdateConnectionContextProcedure is the fully-qualified name of the
+	// ConnectionService's UpdateConnectionContext RPC.
+	ConnectionServiceUpdateConnectionContextProcedure = "/scalekit.v1.connections.ConnectionService/UpdateConnectionContext"
 )
 
 // ConnectionServiceClient is a client for the scalekit.v1.connections.ConnectionService service.
@@ -110,6 +116,8 @@ type ConnectionServiceClient interface {
 	DisableConnection(context.Context, *connect.Request[connections.ToggleConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error)
 	GetConnectionTestResult(context.Context, *connect.Request[connections.GetConnectionTestResultRequest]) (*connect.Response[connections.GetConnectionTestResultResponse], error)
 	ListAppConnections(context.Context, *connect.Request[connections.ListAppConnectionsRequest]) (*connect.Response[connections.ListAppConnectionsResponse], error)
+	GetConnectionContext(context.Context, *connect.Request[connections.GetConnectionContextRequest]) (*connect.Response[connections.GetConnectionContextResponse], error)
+	UpdateConnectionContext(context.Context, *connect.Request[connections.UpdateConnectionContextRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewConnectionServiceClient constructs a client for the scalekit.v1.connections.ConnectionService
@@ -231,6 +239,18 @@ func NewConnectionServiceClient(httpClient connect.HTTPClient, baseURL string, o
 			connect.WithSchema(connectionServiceMethods.ByName("ListAppConnections")),
 			connect.WithClientOptions(opts...),
 		),
+		getConnectionContext: connect.NewClient[connections.GetConnectionContextRequest, connections.GetConnectionContextResponse](
+			httpClient,
+			baseURL+ConnectionServiceGetConnectionContextProcedure,
+			connect.WithSchema(connectionServiceMethods.ByName("GetConnectionContext")),
+			connect.WithClientOptions(opts...),
+		),
+		updateConnectionContext: connect.NewClient[connections.UpdateConnectionContextRequest, emptypb.Empty](
+			httpClient,
+			baseURL+ConnectionServiceUpdateConnectionContextProcedure,
+			connect.WithSchema(connectionServiceMethods.ByName("UpdateConnectionContext")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -254,6 +274,8 @@ type connectionServiceClient struct {
 	disableConnection             *connect.Client[connections.ToggleConnectionRequest, connections.ToggleConnectionResponse]
 	getConnectionTestResult       *connect.Client[connections.GetConnectionTestResultRequest, connections.GetConnectionTestResultResponse]
 	listAppConnections            *connect.Client[connections.ListAppConnectionsRequest, connections.ListAppConnectionsResponse]
+	getConnectionContext          *connect.Client[connections.GetConnectionContextRequest, connections.GetConnectionContextResponse]
+	updateConnectionContext       *connect.Client[connections.UpdateConnectionContextRequest, emptypb.Empty]
 }
 
 // CreateEnvironmentConnection calls
@@ -355,6 +377,16 @@ func (c *connectionServiceClient) ListAppConnections(ctx context.Context, req *c
 	return c.listAppConnections.CallUnary(ctx, req)
 }
 
+// GetConnectionContext calls scalekit.v1.connections.ConnectionService.GetConnectionContext.
+func (c *connectionServiceClient) GetConnectionContext(ctx context.Context, req *connect.Request[connections.GetConnectionContextRequest]) (*connect.Response[connections.GetConnectionContextResponse], error) {
+	return c.getConnectionContext.CallUnary(ctx, req)
+}
+
+// UpdateConnectionContext calls scalekit.v1.connections.ConnectionService.UpdateConnectionContext.
+func (c *connectionServiceClient) UpdateConnectionContext(ctx context.Context, req *connect.Request[connections.UpdateConnectionContextRequest]) (*connect.Response[emptypb.Empty], error) {
+	return c.updateConnectionContext.CallUnary(ctx, req)
+}
+
 // ConnectionServiceHandler is an implementation of the scalekit.v1.connections.ConnectionService
 // service.
 type ConnectionServiceHandler interface {
@@ -376,6 +408,8 @@ type ConnectionServiceHandler interface {
 	DisableConnection(context.Context, *connect.Request[connections.ToggleConnectionRequest]) (*connect.Response[connections.ToggleConnectionResponse], error)
 	GetConnectionTestResult(context.Context, *connect.Request[connections.GetConnectionTestResultRequest]) (*connect.Response[connections.GetConnectionTestResultResponse], error)
 	ListAppConnections(context.Context, *connect.Request[connections.ListAppConnectionsRequest]) (*connect.Response[connections.ListAppConnectionsResponse], error)
+	GetConnectionContext(context.Context, *connect.Request[connections.GetConnectionContextRequest]) (*connect.Response[connections.GetConnectionContextResponse], error)
+	UpdateConnectionContext(context.Context, *connect.Request[connections.UpdateConnectionContextRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewConnectionServiceHandler builds an HTTP handler from the service implementation. It returns
@@ -493,6 +527,18 @@ func NewConnectionServiceHandler(svc ConnectionServiceHandler, opts ...connect.H
 		connect.WithSchema(connectionServiceMethods.ByName("ListAppConnections")),
 		connect.WithHandlerOptions(opts...),
 	)
+	connectionServiceGetConnectionContextHandler := connect.NewUnaryHandler(
+		ConnectionServiceGetConnectionContextProcedure,
+		svc.GetConnectionContext,
+		connect.WithSchema(connectionServiceMethods.ByName("GetConnectionContext")),
+		connect.WithHandlerOptions(opts...),
+	)
+	connectionServiceUpdateConnectionContextHandler := connect.NewUnaryHandler(
+		ConnectionServiceUpdateConnectionContextProcedure,
+		svc.UpdateConnectionContext,
+		connect.WithSchema(connectionServiceMethods.ByName("UpdateConnectionContext")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/scalekit.v1.connections.ConnectionService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ConnectionServiceCreateEnvironmentConnectionProcedure:
@@ -531,6 +577,10 @@ func NewConnectionServiceHandler(svc ConnectionServiceHandler, opts ...connect.H
 			connectionServiceGetConnectionTestResultHandler.ServeHTTP(w, r)
 		case ConnectionServiceListAppConnectionsProcedure:
 			connectionServiceListAppConnectionsHandler.ServeHTTP(w, r)
+		case ConnectionServiceGetConnectionContextProcedure:
+			connectionServiceGetConnectionContextHandler.ServeHTTP(w, r)
+		case ConnectionServiceUpdateConnectionContextProcedure:
+			connectionServiceUpdateConnectionContextHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -610,4 +660,12 @@ func (UnimplementedConnectionServiceHandler) GetConnectionTestResult(context.Con
 
 func (UnimplementedConnectionServiceHandler) ListAppConnections(context.Context, *connect.Request[connections.ListAppConnectionsRequest]) (*connect.Response[connections.ListAppConnectionsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.ListAppConnections is not implemented"))
+}
+
+func (UnimplementedConnectionServiceHandler) GetConnectionContext(context.Context, *connect.Request[connections.GetConnectionContextRequest]) (*connect.Response[connections.GetConnectionContextResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.GetConnectionContext is not implemented"))
+}
+
+func (UnimplementedConnectionServiceHandler) UpdateConnectionContext(context.Context, *connect.Request[connections.UpdateConnectionContextRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.UpdateConnectionContext is not implemented"))
 }

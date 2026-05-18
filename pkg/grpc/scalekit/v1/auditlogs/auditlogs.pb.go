@@ -10,6 +10,7 @@ import (
 	_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
 	_ "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/options"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
+	_ "google.golang.org/genproto/googleapis/api/visibility"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
@@ -453,7 +454,7 @@ var File_scalekit_v1_auditlogs_auditlogs_proto protoreflect.FileDescriptor
 
 const file_scalekit_v1_auditlogs_auditlogs_proto_rawDesc = "" +
 	"\n" +
-	"%scalekit/v1/auditlogs/auditlogs.proto\x12\x15scalekit.v1.auditlogs\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\x1a!scalekit/v1/options/options.proto\"\xb0\x03\n" +
+	"%scalekit/v1/auditlogs/auditlogs.proto\x12\x15scalekit.v1.auditlogs\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/api/visibility.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a.protoc-gen-openapiv2/options/annotations.proto\x1a!scalekit/v1/options/options.proto\"\xb0\x03\n" +
 	"\x12ListAuthLogRequest\x12\x1b\n" +
 	"\tpage_size\x18\x01 \x01(\rR\bpageSize\x12\x1d\n" +
 	"\n" +
@@ -494,15 +495,15 @@ const file_scalekit_v1_auditlogs_auditlogs_proto_rawDesc = "" +
 	"\tclient_id\x18\x10 \x01(\tB`\x92A]2IUnique identifier of the client associated with this authentication eventJ\x10\"skc_1234567890\"R\bclientId\x12K\n" +
 	"\vclient_name\x18\x11 \x01(\tB*\x92A'2\x1aDisplay name of the clientJ\t\"Default\"R\n" +
 	"clientName\x12f\n" +
-	"\vclient_type\x18\x12 \x01(\tBE\x92AB29Type of the client application (e.g., WEB, NTV, SPA, M2M)J\x05\"WEB\"R\n" +
+	"\vclient_type\x18\x12 \x01(\tBE\x92AB29Type of the client application (e.g., ENV, NTV, SPA, M2M)J\x05\"ENV\"R\n" +
 	"clientType\"\xbb\x01\n" +
 	"\x11ConnectionDetails\x12#\n" +
 	"\rconnection_id\x18\x01 \x01(\tR\fconnectionId\x12'\n" +
 	"\x0forganization_id\x18\x02 \x01(\tR\x0eorganizationId\x12'\n" +
 	"\x0fconnection_type\x18\x03 \x01(\tR\x0econnectionType\x12/\n" +
-	"\x13connection_provider\x18\x04 \x01(\tR\x12connectionProvider2\xb2\x01\n" +
-	"\x10AuditLogsService\x12\x9d\x01\n" +
-	"\x10ListAuthRequests\x12).scalekit.v1.auditlogs.ListAuthLogRequest\x1a*.scalekit.v1.auditlogs.ListAuthLogResponse\"2\x82\xb5\x18\x02\x18D\x82\xd3\xe4\x93\x02&\x12$/api/v1/logs/authentication/requestsB\xec\x01\n" +
+	"\x13connection_provider\x18\x04 \x01(\tR\x12connectionProvider2\xc1\x01\n" +
+	"\x10AuditLogsService\x12\xac\x01\n" +
+	"\x10ListAuthRequests\x12).scalekit.v1.auditlogs.ListAuthLogRequest\x1a*.scalekit.v1.auditlogs.ListAuthLogResponse\"A\x82\xb5\x18\x02\x18D\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02&\x12$/api/v1/logs/authentication/requestsB\xec\x01\n" +
 	"\x19com.scalekit.v1.auditlogsB\x0eAuditlogsProtoP\x01ZIgithub.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/auditlogs\xa2\x02\x03SVA\xaa\x02\x15Scalekit.V1.Auditlogs\xca\x02\x15Scalekit\\V1\\Auditlogs\xe2\x02!Scalekit\\V1\\Auditlogs\\GPBMetadata\xea\x02\x17Scalekit::V1::Auditlogsb\x06proto3"
 
 var (

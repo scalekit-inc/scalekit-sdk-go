@@ -28,6 +28,7 @@ type OrganizationUserManagementSettings struct {
 
 type CreateOrganizationOptions struct {
 	ExternalId string
+	Slug       string
 	Metadata   map[string]string
 }
 
@@ -57,16 +58,18 @@ func newOrganizationClient(coreClient *coreClient) Organization {
 }
 
 func (o *organization) CreateOrganization(ctx context.Context, name string, options CreateOrganizationOptions) (*CreateOrganizationResponse, error) {
+	org := &organizationsv1.CreateOrganization{
+		DisplayName: name,
+		ExternalId:  &options.ExternalId,
+		Metadata:    options.Metadata,
+	}
+	if options.Slug != "" {
+		org.Slug = &options.Slug
+	}
 	return newConnectExecuter(
 		o.coreClient,
 		o.client.CreateOrganization,
-		&organizationsv1.CreateOrganizationRequest{
-			Organization: &organizationsv1.CreateOrganization{
-				DisplayName: name,
-				ExternalId:  &options.ExternalId,
-				Metadata:    options.Metadata,
-			},
-		},
+		&organizationsv1.CreateOrganizationRequest{Organization: org},
 	).exec(ctx)
 }
 

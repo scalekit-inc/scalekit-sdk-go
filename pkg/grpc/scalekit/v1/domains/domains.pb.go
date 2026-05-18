@@ -29,6 +29,58 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type VerificationMethod int32
+
+const (
+	VerificationMethod_VERIFICATION_METHOD_UNSPECIFIED VerificationMethod = 0
+	VerificationMethod_ADMIN                           VerificationMethod = 1
+	VerificationMethod_DNS                             VerificationMethod = 2
+	VerificationMethod_NOT_APPLICABLE                  VerificationMethod = 3
+)
+
+// Enum value maps for VerificationMethod.
+var (
+	VerificationMethod_name = map[int32]string{
+		0: "VERIFICATION_METHOD_UNSPECIFIED",
+		1: "ADMIN",
+		2: "DNS",
+		3: "NOT_APPLICABLE",
+	}
+	VerificationMethod_value = map[string]int32{
+		"VERIFICATION_METHOD_UNSPECIFIED": 0,
+		"ADMIN":                           1,
+		"DNS":                             2,
+		"NOT_APPLICABLE":                  3,
+	}
+)
+
+func (x VerificationMethod) Enum() *VerificationMethod {
+	p := new(VerificationMethod)
+	*p = x
+	return p
+}
+
+func (x VerificationMethod) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (VerificationMethod) Descriptor() protoreflect.EnumDescriptor {
+	return file_scalekit_v1_domains_domains_proto_enumTypes[0].Descriptor()
+}
+
+func (VerificationMethod) Type() protoreflect.EnumType {
+	return &file_scalekit_v1_domains_domains_proto_enumTypes[0]
+}
+
+func (x VerificationMethod) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use VerificationMethod.Descriptor instead.
+func (VerificationMethod) EnumDescriptor() ([]byte, []int) {
+	return file_scalekit_v1_domains_domains_proto_rawDescGZIP(), []int{0}
+}
+
 type VerificationStatus int32
 
 const (
@@ -68,11 +120,11 @@ func (x VerificationStatus) String() string {
 }
 
 func (VerificationStatus) Descriptor() protoreflect.EnumDescriptor {
-	return file_scalekit_v1_domains_domains_proto_enumTypes[0].Descriptor()
+	return file_scalekit_v1_domains_domains_proto_enumTypes[1].Descriptor()
 }
 
 func (VerificationStatus) Type() protoreflect.EnumType {
-	return &file_scalekit_v1_domains_domains_proto_enumTypes[0]
+	return &file_scalekit_v1_domains_domains_proto_enumTypes[1]
 }
 
 func (x VerificationStatus) Number() protoreflect.EnumNumber {
@@ -81,7 +133,7 @@ func (x VerificationStatus) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use VerificationStatus.Descriptor instead.
 func (VerificationStatus) EnumDescriptor() ([]byte, []int) {
-	return file_scalekit_v1_domains_domains_proto_rawDescGZIP(), []int{0}
+	return file_scalekit_v1_domains_domains_proto_rawDescGZIP(), []int{1}
 }
 
 type DomainType int32
@@ -117,11 +169,11 @@ func (x DomainType) String() string {
 }
 
 func (DomainType) Descriptor() protoreflect.EnumDescriptor {
-	return file_scalekit_v1_domains_domains_proto_enumTypes[1].Descriptor()
+	return file_scalekit_v1_domains_domains_proto_enumTypes[2].Descriptor()
 }
 
 func (DomainType) Type() protoreflect.EnumType {
-	return &file_scalekit_v1_domains_domains_proto_enumTypes[1]
+	return &file_scalekit_v1_domains_domains_proto_enumTypes[2]
 }
 
 func (x DomainType) Number() protoreflect.EnumNumber {
@@ -130,7 +182,7 @@ func (x DomainType) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use DomainType.Descriptor instead.
 func (DomainType) EnumDescriptor() ([]byte, []int) {
-	return file_scalekit_v1_domains_domains_proto_rawDescGZIP(), []int{1}
+	return file_scalekit_v1_domains_domains_proto_rawDescGZIP(), []int{2}
 }
 
 type CreateDomainRequest struct {
@@ -957,6 +1009,50 @@ func (*VerifyDomainRequest_OrganizationId) isVerifyDomainRequest_Identities() {}
 
 func (*VerifyDomainRequest_ExternalId) isVerifyDomainRequest_Identities() {}
 
+type VerifyDomainResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Verified      bool                   `protobuf:"varint,1,opt,name=verified,proto3" json:"verified,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VerifyDomainResponse) Reset() {
+	*x = VerifyDomainResponse{}
+	mi := &file_scalekit_v1_domains_domains_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VerifyDomainResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VerifyDomainResponse) ProtoMessage() {}
+
+func (x *VerifyDomainResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_scalekit_v1_domains_domains_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VerifyDomainResponse.ProtoReflect.Descriptor instead.
+func (*VerifyDomainResponse) Descriptor() ([]byte, []int) {
+	return file_scalekit_v1_domains_domains_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *VerifyDomainResponse) GetVerified() bool {
+	if x != nil {
+		return x.Verified
+	}
+	return false
+}
+
 type ListDomainResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	PageSize      int32                  `protobuf:"varint,1,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
@@ -968,7 +1064,7 @@ type ListDomainResponse struct {
 
 func (x *ListDomainResponse) Reset() {
 	*x = ListDomainResponse{}
-	mi := &file_scalekit_v1_domains_domains_proto_msgTypes[11]
+	mi := &file_scalekit_v1_domains_domains_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -980,7 +1076,7 @@ func (x *ListDomainResponse) String() string {
 func (*ListDomainResponse) ProtoMessage() {}
 
 func (x *ListDomainResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_domains_domains_proto_msgTypes[11]
+	mi := &file_scalekit_v1_domains_domains_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -993,7 +1089,7 @@ func (x *ListDomainResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDomainResponse.ProtoReflect.Descriptor instead.
 func (*ListDomainResponse) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_domains_domains_proto_rawDescGZIP(), []int{11}
+	return file_scalekit_v1_domains_domains_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *ListDomainResponse) GetPageSize() int32 {
@@ -1020,13 +1116,14 @@ func (x *ListDomainResponse) GetDomains() []*Domain {
 type ListAuthorizedDomainRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Origin        string                 `protobuf:"bytes,1,opt,name=origin,proto3" json:"origin,omitempty"`
+	LinkId        string                 `protobuf:"bytes,2,opt,name=link_id,json=linkId,proto3" json:"link_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListAuthorizedDomainRequest) Reset() {
 	*x = ListAuthorizedDomainRequest{}
-	mi := &file_scalekit_v1_domains_domains_proto_msgTypes[12]
+	mi := &file_scalekit_v1_domains_domains_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1038,7 +1135,7 @@ func (x *ListAuthorizedDomainRequest) String() string {
 func (*ListAuthorizedDomainRequest) ProtoMessage() {}
 
 func (x *ListAuthorizedDomainRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_domains_domains_proto_msgTypes[12]
+	mi := &file_scalekit_v1_domains_domains_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1051,12 +1148,19 @@ func (x *ListAuthorizedDomainRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAuthorizedDomainRequest.ProtoReflect.Descriptor instead.
 func (*ListAuthorizedDomainRequest) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_domains_domains_proto_rawDescGZIP(), []int{12}
+	return file_scalekit_v1_domains_domains_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ListAuthorizedDomainRequest) GetOrigin() string {
 	if x != nil {
 		return x.Origin
+	}
+	return ""
+}
+
+func (x *ListAuthorizedDomainRequest) GetLinkId() string {
+	if x != nil {
+		return x.LinkId
 	}
 	return ""
 }
@@ -1070,7 +1174,7 @@ type ListAuthorizedDomainResponse struct {
 
 func (x *ListAuthorizedDomainResponse) Reset() {
 	*x = ListAuthorizedDomainResponse{}
-	mi := &file_scalekit_v1_domains_domains_proto_msgTypes[13]
+	mi := &file_scalekit_v1_domains_domains_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1082,7 +1186,7 @@ func (x *ListAuthorizedDomainResponse) String() string {
 func (*ListAuthorizedDomainResponse) ProtoMessage() {}
 
 func (x *ListAuthorizedDomainResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_domains_domains_proto_msgTypes[13]
+	mi := &file_scalekit_v1_domains_domains_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1095,7 +1199,7 @@ func (x *ListAuthorizedDomainResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAuthorizedDomainResponse.ProtoReflect.Descriptor instead.
 func (*ListAuthorizedDomainResponse) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_domains_domains_proto_rawDescGZIP(), []int{13}
+	return file_scalekit_v1_domains_domains_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *ListAuthorizedDomainResponse) GetDomains() []string {
@@ -1117,13 +1221,14 @@ type Domain struct {
 	CreateTime         *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
 	UpdateTime         *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=update_time,json=updateTime,proto3" json:"update_time,omitempty"`
 	DomainType         DomainType             `protobuf:"varint,12,opt,name=domain_type,json=domainType,proto3,enum=scalekit.v1.domains.DomainType" json:"domain_type,omitempty"`
+	VerificationMethod VerificationMethod     `protobuf:"varint,13,opt,name=verification_method,json=verificationMethod,proto3,enum=scalekit.v1.domains.VerificationMethod" json:"verification_method,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
 
 func (x *Domain) Reset() {
 	*x = Domain{}
-	mi := &file_scalekit_v1_domains_domains_proto_msgTypes[14]
+	mi := &file_scalekit_v1_domains_domains_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1135,7 +1240,7 @@ func (x *Domain) String() string {
 func (*Domain) ProtoMessage() {}
 
 func (x *Domain) ProtoReflect() protoreflect.Message {
-	mi := &file_scalekit_v1_domains_domains_proto_msgTypes[14]
+	mi := &file_scalekit_v1_domains_domains_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1148,7 +1253,7 @@ func (x *Domain) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Domain.ProtoReflect.Descriptor instead.
 func (*Domain) Descriptor() ([]byte, []int) {
-	return file_scalekit_v1_domains_domains_proto_rawDescGZIP(), []int{14}
+	return file_scalekit_v1_domains_domains_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *Domain) GetId() string {
@@ -1219,6 +1324,13 @@ func (x *Domain) GetDomainType() DomainType {
 		return x.DomainType
 	}
 	return DomainType_DOMAIN_TYPE_UNSPECIFIED
+}
+
+func (x *Domain) GetVerificationMethod() VerificationMethod {
+	if x != nil {
+		return x.VerificationMethod
+	}
+	return VerificationMethod_VERIFICATION_METHOD_UNSPECIFIED
 }
 
 var File_scalekit_v1_domains_domains_proto protoreflect.FileDescriptor
@@ -1301,31 +1413,47 @@ const file_scalekit_v1_domains_domains_proto_rawDesc = "" +
 	"externalId\x12\x99\x01\n" +
 	"\x02id\x18\x04 \x01(\tB\x88\x01\x92Aw2\\Scalekit-generated unique identifier of the domain to verify. Must start with 'dom_' prefix.J\x17\"dom_88351643129225005\"\xbaH\vr\t\x10\x01\x18 :\x03domR\x02idB\f\n" +
 	"\n" +
-	"identities\"\xe2\x02\n" +
+	"identities\"\xde\x01\n" +
+	"\x14VerifyDomainResponse\x12\xc5\x01\n" +
+	"\bverified\x18\x01 \x01(\bB\xa8\x01\x92A\xa4\x012\xa1\x01True when the domain's DNS TXT record matched and the domain is now verified; false otherwise (e.g., TXT record missing, domain not found, verification pending).R\bverified\"\xe2\x02\n" +
 	"\x12ListDomainResponse\x12M\n" +
 	"\tpage_size\x18\x01 \x01(\x05B0\x92A-2(Number of domains returned in this page.J\x011R\bpageSize\x12X\n" +
 	"\vpage_number\x18\x02 \x01(\x05B7\x92A42/Current page number in the pagination sequence.J\x011R\n" +
 	"pageNumber\x12\xa2\x01\n" +
-	"\adomains\x18\x03 \x03(\v2\x1b.scalekit.v1.domains.DomainBk\x92Ah2fArray of domain objects containing all domain details including verification status and configuration.R\adomains\"\xa1\x01\n" +
+	"\adomains\x18\x03 \x03(\v2\x1b.scalekit.v1.domains.DomainBk\x92Ah2fArray of domain objects containing all domain details including verification status and configuration.R\adomains\"\xa6\x03\n" +
 	"\x1bListAuthorizedDomainRequest\x12\x81\x01\n" +
-	"\x06origin\x18\x01 \x01(\tBi\x92Af2OThe origin URL to check for authorized domains (e.g., https://app.example.com).J\x13\"https://myapp.com\"R\x06origin\"\xb0\x01\n" +
+	"\x06origin\x18\x01 \x01(\tBi\x92Af2OThe origin URL to check for authorized domains (e.g., https://app.example.com).J\x13\"https://myapp.com\"R\x06origin\x12\x82\x02\n" +
+	"\alink_id\x18\x02 \x01(\tB\xe8\x01\x92A\xe4\x012\xb9\x01Optional link key UUID used to resolve organization-specific template redirect URI origins for pre-authentication CSP evaluation. Scope suffixes (e.g. '_pc') are stripped automatically.J&\"a1b2c3d4-e5f6-7890-abcd-ef1234567890\"R\x06linkId\"\xb0\x01\n" +
 	"\x1cListAuthorizedDomainResponse\x12\x8f\x01\n" +
-	"\adomains\x18\x01 \x03(\tBu\x92Ar2LArray of domain names that are authorized for use with the specified origin.J\"[\"example.com\", \"app.example.com\"]R\adomains\"\xb6\x0e\n" +
+	"\adomains\x18\x01 \x03(\tBu\x92Ar2LArray of domain names that are authorized for use with the specified origin.J\"[\"example.com\", \"app.example.com\"]R\adomains\"\x8f\x12\n" +
 	"\x06Domain\x12j\n" +
 	"\x02id\x18\x01 \x01(\tBZ\x92AW2<Scalekit-generated unique identifier for this domain record.J\x17\"dom_88351643129225005\"R\x02id\x12\xb4\x01\n" +
 	"\x06domain\x18\x02 \x01(\tB\x9b\x01\x92A\x97\x012\x7fThe business domain name that was configured for allowed email domain functionality (e.g., company.com, subdomain.company.com).J\x14\"customerdomain.com\"R\x06domain\x12x\n" +
 	"\x0eenvironment_id\x18\x03 \x01(\tBQ\x92AN23The environment ID where this domain is configured.J\x17\"env_58345499215790610\"R\renvironmentId\x12t\n" +
 	"\x0forganization_id\x18\x04 \x01(\tBK\x92AH2-The organization to which the domain belongs.J\x17\"org_81667076086825451\"R\x0eorganizationId\x12\xa8\x01\n" +
 	"\x0etxt_record_key\x18\x06 \x01(\tB\x81\x01\x92Ao2GThe DNS TXT record key that should be added to verify domain ownership.J$\"scalekit-verification=abc123def456\"\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEWR\ftxtRecordKey\x12\xa8\x01\n" +
-	"\x11txt_record_secret\x18\a \x01(\tB|\x92Aj2IThe DNS TXT record value that should be added to verify domain ownership.J\x1d\"scalekit-verification-value\"\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEWR\x0ftxtRecordSecret\x12\xdb\x02\n" +
-	"\x13verification_status\x18\b \x01(\x0e2'.scalekit.v1.domains.VerificationStatusB\x80\x02\x92A\xed\x012\xd9\x01Current verification status of the domain. AUTO_VERIFIED means the domain was automatically verified without DNS changes, VERIFIED means manually verified via DNS TXT record, PENDING requires manual DNS configuration.J\x0f\"AUTO_VERIFIED\"\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEWR\x12verificationStatus\x12\x8a\x01\n" +
+	"\x11txt_record_secret\x18\a \x01(\tB|\x92Aj2IThe DNS TXT record value that should be added to verify domain ownership.J\x1d\"scalekit-verification-value\"\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEWR\x0ftxtRecordSecret\x12\xa8\x03\n" +
+	"\x13verification_status\x18\b \x01(\x0e2'.scalekit.v1.domains.VerificationStatusB\xcd\x02\x92A\xc9\x022\xb5\x02Verification status of the domain.\n" +
+	"- PENDING: DNS TXT record has not been validated yet.\n" +
+	"- VERIFIED: domain confirmed via DNS TXT record validation or admin approval.\n" +
+	"- AUTO_VERIFIED: domain verified automatically without DNS changes.\n" +
+	"- FAILED: DNS TXT record was not validated within the verification window.J\x0f\"AUTO_VERIFIED\"R\x12verificationStatus\x12\x8a\x01\n" +
 	"\vcreate_time\x18\t \x01(\v2\x1a.google.protobuf.TimestampBM\x92AJ2,Timestamp when the domain was first created.J\x1a\"2025-09-01T12:14:43.100Z\"R\n" +
 	"createTime\x12\x8f\x01\n" +
 	"\vupdate_time\x18\n" +
 	" \x01(\v2\x1a.google.protobuf.TimestampBR\x92AO2+Timestamp when the domain was last updated.J \"2025-09-01T12:14:43.110455169Z\"R\n" +
 	"updateTime\x12\xb9\x02\n" +
 	"\vdomain_type\x18\f \x01(\x0e2\x1f.scalekit.v1.domains.DomainTypeB\xf6\x01\x92A\xf2\x012\xd8\x01The type of domain configuration. ALLOWED_EMAIL_DOMAIN enables automatic organization suggestions for users with matching email domains during sign-in/sign-up. ORGANIZATION_DOMAIN is for primary organization domains.J\x15\"ORGANIZATION_DOMAIN\"R\n" +
-	"domainTypeJ\x04\b\x05\x10\x06J\x04\b\v\x10\f*s\n" +
+	"domainType\x12\x89\x03\n" +
+	"\x13verification_method\x18\r \x01(\x0e2'.scalekit.v1.domains.VerificationMethodB\xae\x02\x92A\xaa\x022\x9e\x02Method that determines how domain ownership is verified.\n" +
+	"- ADMIN: domain is marked verified without DNS validation, typically by an admin.\n" +
+	"- DNS: domain must be verified by adding a TXT record to your DNS configuration.\n" +
+	"- NOT_APPLICABLE: verification does not apply to this domain type.J\a\"ADMIN\"R\x12verificationMethodJ\x04\b\x05\x10\x06J\x04\b\v\x10\f*a\n" +
+	"\x12VerificationMethod\x12#\n" +
+	"\x1fVERIFICATION_METHOD_UNSPECIFIED\x10\x00\x12\t\n" +
+	"\x05ADMIN\x10\x01\x12\a\n" +
+	"\x03DNS\x10\x02\x12\x12\n" +
+	"\x0eNOT_APPLICABLE\x10\x03*s\n" +
 	"\x12VerificationStatus\x12#\n" +
 	"\x1fVERIFICATION_STATUS_UNSPECIFIED\x10\x00\x12\v\n" +
 	"\aPENDING\x10\x01\x12\f\n" +
@@ -1337,9 +1465,9 @@ const file_scalekit_v1_domains_domains_proto_rawDesc = "" +
 	"DomainType\x12\x1b\n" +
 	"\x17DOMAIN_TYPE_UNSPECIFIED\x10\x00\x12\x18\n" +
 	"\x14ALLOWED_EMAIL_DOMAIN\x10\x01\x12\x17\n" +
-	"\x13ORGANIZATION_DOMAIN\x10\x022\xca)\n" +
-	"\rDomainService\x12\xfc\a\n" +
-	"\fCreateDomain\x12(.scalekit.v1.domains.CreateDomainRequest\x1a).scalekit.v1.domains.CreateDomainResponse\"\x96\a\x92A\xcd\x06\n" +
+	"\x13ORGANIZATION_DOMAIN\x10\x022\xed*\n" +
+	"\rDomainService\x12\x91\b\n" +
+	"\fCreateDomain\x12(.scalekit.v1.domains.CreateDomainRequest\x1a).scalekit.v1.domains.CreateDomainResponse\"\xab\a\x92A\xcd\x06\n" +
 	"\aDomains\x12\rCreate Domain\x1a\xb5\x04Creates and associates a domain with an organization.\n" +
 	"\n" +
 	"Use one of the following domain types:\n" +
@@ -1354,8 +1482,9 @@ const file_scalekit_v1_domains_domains_proto_rawDesc = "" +
 	"+\x1a).scalekit.v1.domains.CreateDomainResponseJ\xa0\x01\n" +
 	"\x03400\x12\x98\x01\n" +
 	"oInvalid request — common causes invalid domain format, public or disposable domain, or domain already exists.\x12%\n" +
-	"#\x1a!#/definitions/errdetailsErrorInfo\x82\xb5\x18\x02\x18d\x82\xd3\xe4\x93\x029:\x06domain\"//api/v1/organizations/{organization_id}/domains\x12\xd9\x05\n" +
-	"\fUpdateDomain\x12(.scalekit.v1.domains.UpdateDomainRequest\x1a).scalekit.v1.domains.UpdateDomainResponse\"\xf3\x04\x92A\x96\x04\n" +
+	"#\x1a!#/definitions/errdetailsErrorInfo\x82\xb5\x18\x17\n" +
+	"\x13organizations_write\x18t\x82\xd3\xe4\x93\x029:\x06domain\"//api/v1/organizations/{organization_id}/domains\x12\xee\x05\n" +
+	"\fUpdateDomain\x12(.scalekit.v1.domains.UpdateDomainRequest\x1a).scalekit.v1.domains.UpdateDomainResponse\"\x88\x05\x92A\x96\x04\n" +
 	"\aDomains\x12\rUpdate Domain\x1a\xa1\x03Updates an existing domain's configuration within an organization. Currently supports updating domain metadata and configuration settings.\n" +
 	"\n" +
 	"Use this endpoint to modify domain properties after initial creation. Note that the domain name itself cannot be changed once created.\n" +
@@ -1363,25 +1492,28 @@ const file_scalekit_v1_domains_domains_proto_rawDesc = "" +
 	"The domain must belong to the specified organization and you must provide either the organization ID or external ID along with the domain ID.JX\n" +
 	"\x03200\x12Q\n" +
 	" Successfully updated the domain.\x12-\n" +
-	"+\x1a).scalekit.v1.domains.UpdateDomainResponse\x82\xb5\x18\x02\x18d\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02>:\x06domain24/api/v1/organizations/{organization_id}/domains/{id}\x12\xea\x06\n" +
-	"\fVerifyDomain\x12(.scalekit.v1.domains.VerifyDomainRequest\x1a\x1a.google.protobuf.BoolValue\"\x93\x06\x92A\xb7\x05\n" +
+	"+\x1a).scalekit.v1.domains.UpdateDomainResponse\x82\xb5\x18\x17\n" +
+	"\x13organizations_write\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02>:\x06domain24/api/v1/organizations/{organization_id}/domains/{id}\x12\xa6\a\n" +
+	"\fVerifyDomain\x12(.scalekit.v1.domains.VerifyDomainRequest\x1a).scalekit.v1.domains.VerifyDomainResponse\"\xc0\x06\x92A\xcf\x05\n" +
 	"\aDomains\x12\rVerify Domain\x1a\x9e\x04Initiates domain ownership verification by checking the DNS TXT record that should be added to the domain's DNS configuration.\n" +
 	"\n" +
 	"Use this endpoint to manually trigger verification for domains that are in PENDING status. The system will check for the required TXT record and update the verification status accordingly.\n" +
 	"\n" +
-	"For automatically verified domains, this endpoint will return true immediately. For domains requiring manual verification, ensure the TXT record has been properly configured in your DNS settings before calling this endpoint.J|\n" +
-	"\x03200\x12u\n" +
-	"SDomain verification result. Returns true if verification succeeds, false otherwise.\x12\x1e\n" +
-	"\x1c\x1a\x1a.google.protobuf.BoolValue\x82\xb5\x18\x02\x18d\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02=2;/api/v1/organizations/{organization_id}/domains/{id}:verify\x12\x86\x03\n" +
-	"\tGetDomain\x12%.scalekit.v1.domains.GetDomainRequest\x1a&.scalekit.v1.domains.GetDomainResponse\"\xa9\x02\x92A\xe3\x01\n" +
+	"For automatically verified domains, this endpoint will return true immediately. For domains requiring manual verification, ensure the TXT record has been properly configured in your DNS settings before calling this endpoint.J\x93\x01\n" +
+	"\x03200\x12\x8b\x01\n" +
+	"ZDomain verification result. `verified` is true if verification succeeded, false otherwise.\x12-\n" +
+	"+\x1a).scalekit.v1.domains.VerifyDomainResponse\x82\xb5\x18\x17\n" +
+	"\x13organizations_write\x18t\xfa\xd2\xe4\x93\x02\t\x12\aPREVIEW\x82\xd3\xe4\x93\x02=2;/api/v1/organizations/{organization_id}/domains/{id}:verify\x12\x9a\x03\n" +
+	"\tGetDomain\x12%.scalekit.v1.domains.GetDomainRequest\x1a&.scalekit.v1.domains.GetDomainResponse\"\xbd\x02\x92A\xe3\x01\n" +
 	"\aDomains\x12\n" +
 	"Get Domain\x1akRetrieves complete details for a domain including domain type, timestamps, and configuration information.\n" +
 	"\n" +
 	"J_\n" +
 	"\x03200\x12X\n" +
 	"*Successfully retrieved the domain details.\x12*\n" +
-	"(\x1a&.scalekit.v1.domains.GetDomainResponse\x82\xb5\x18\x02\x18d\x82\xd3\xe4\x93\x026\x124/api/v1/organizations/{organization_id}/domains/{id}\x12\xcf\x03\n" +
-	"\fDeleteDomain\x12(.scalekit.v1.domains.DeleteDomainRequest\x1a\x16.google.protobuf.Empty\"\xfc\x02\x92A\xb6\x02\n" +
+	"(\x1a&.scalekit.v1.domains.GetDomainResponse\x82\xb5\x18\x16\n" +
+	"\x12organizations_read\x18t\x82\xd3\xe4\x93\x026\x124/api/v1/organizations/{organization_id}/domains/{id}\x12\xe4\x03\n" +
+	"\fDeleteDomain\x12(.scalekit.v1.domains.DeleteDomainRequest\x1a\x16.google.protobuf.Empty\"\x91\x03\x92A\xb6\x02\n" +
 	"\aDomains\x12\rDelete Domain\x1a\xf4\x01Permanently removes a domain record from an organization.\n" +
 	"\n" +
 	"- Deleting an ORGANIZATION_DOMAIN disables SSO routing/enforcement for that domain.\n" +
@@ -1389,8 +1521,9 @@ const file_scalekit_v1_domains_domains_proto_rawDesc = "" +
 	"\n" +
 	"J%\n" +
 	"\x03200\x12\x1e\n" +
-	"\x1cDomain successfully deleted.\x82\xb5\x18\x02\x18d\x82\xd3\xe4\x93\x026*4/api/v1/organizations/{organization_id}/domains/{id}\x12\x87\x05\n" +
-	"\vListDomains\x12&.scalekit.v1.domains.ListDomainRequest\x1a'.scalekit.v1.domains.ListDomainResponse\"\xa6\x04\x92A\xe5\x03\n" +
+	"\x1cDomain successfully deleted.\x82\xb5\x18\x17\n" +
+	"\x13organizations_write\x18t\x82\xd3\xe4\x93\x026*4/api/v1/organizations/{organization_id}/domains/{id}\x12\x9b\x05\n" +
+	"\vListDomains\x12&.scalekit.v1.domains.ListDomainRequest\x1a'.scalekit.v1.domains.ListDomainResponse\"\xba\x04\x92A\xe5\x03\n" +
 	"\aDomains\x12\fList Domains\x1a\xe8\x02Retrieves a paginated list of all domains configured for the specified organization.\n" +
 	"\n" +
 	"Domain types:\n" +
@@ -1400,7 +1533,8 @@ const file_scalekit_v1_domains_domains_proto_rawDesc = "" +
 	"Ja\n" +
 	"\x03200\x12Z\n" +
 	"+Successfully retrieved the list of domains.\x12+\n" +
-	")\x1a'.scalekit.v1.domains.ListDomainResponse\x82\xb5\x18\x02\x18d\x82\xd3\xe4\x93\x021\x12//api/v1/organizations/{organization_id}/domains\x12\x90\x05\n" +
+	")\x1a'.scalekit.v1.domains.ListDomainResponse\x82\xb5\x18\x16\n" +
+	"\x12organizations_read\x18t\x82\xd3\xe4\x93\x021\x12//api/v1/organizations/{organization_id}/domains\x12\x90\x05\n" +
 	"\x15ListAuthorizedDomains\x120.scalekit.v1.domains.ListAuthorizedDomainRequest\x1a1.scalekit.v1.domains.ListAuthorizedDomainResponse\"\x91\x04\x92A\xd8\x03\n" +
 	"\aDomains\x12\x17List Authorized Domains\x1a\xbb\x02Retrieves a list of domains that are authorized for use with the specified origin URL.\n" +
 	"\n" +
@@ -1429,65 +1563,67 @@ func file_scalekit_v1_domains_domains_proto_rawDescGZIP() []byte {
 	return file_scalekit_v1_domains_domains_proto_rawDescData
 }
 
-var file_scalekit_v1_domains_domains_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_scalekit_v1_domains_domains_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_scalekit_v1_domains_domains_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_scalekit_v1_domains_domains_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_scalekit_v1_domains_domains_proto_goTypes = []any{
-	(VerificationStatus)(0),              // 0: scalekit.v1.domains.VerificationStatus
-	(DomainType)(0),                      // 1: scalekit.v1.domains.DomainType
-	(*CreateDomainRequest)(nil),          // 2: scalekit.v1.domains.CreateDomainRequest
-	(*CreateDomainResponse)(nil),         // 3: scalekit.v1.domains.CreateDomainResponse
-	(*CreateDomain)(nil),                 // 4: scalekit.v1.domains.CreateDomain
-	(*UpdateDomainRequest)(nil),          // 5: scalekit.v1.domains.UpdateDomainRequest
-	(*UpdateDomain)(nil),                 // 6: scalekit.v1.domains.UpdateDomain
-	(*UpdateDomainResponse)(nil),         // 7: scalekit.v1.domains.UpdateDomainResponse
-	(*GetDomainRequest)(nil),             // 8: scalekit.v1.domains.GetDomainRequest
-	(*GetDomainResponse)(nil),            // 9: scalekit.v1.domains.GetDomainResponse
-	(*DeleteDomainRequest)(nil),          // 10: scalekit.v1.domains.DeleteDomainRequest
-	(*ListDomainRequest)(nil),            // 11: scalekit.v1.domains.ListDomainRequest
-	(*VerifyDomainRequest)(nil),          // 12: scalekit.v1.domains.VerifyDomainRequest
-	(*ListDomainResponse)(nil),           // 13: scalekit.v1.domains.ListDomainResponse
-	(*ListAuthorizedDomainRequest)(nil),  // 14: scalekit.v1.domains.ListAuthorizedDomainRequest
-	(*ListAuthorizedDomainResponse)(nil), // 15: scalekit.v1.domains.ListAuthorizedDomainResponse
-	(*Domain)(nil),                       // 16: scalekit.v1.domains.Domain
-	(*wrapperspb.Int32Value)(nil),        // 17: google.protobuf.Int32Value
-	(*timestamppb.Timestamp)(nil),        // 18: google.protobuf.Timestamp
-	(*wrapperspb.BoolValue)(nil),         // 19: google.protobuf.BoolValue
-	(*emptypb.Empty)(nil),                // 20: google.protobuf.Empty
+	(VerificationMethod)(0),              // 0: scalekit.v1.domains.VerificationMethod
+	(VerificationStatus)(0),              // 1: scalekit.v1.domains.VerificationStatus
+	(DomainType)(0),                      // 2: scalekit.v1.domains.DomainType
+	(*CreateDomainRequest)(nil),          // 3: scalekit.v1.domains.CreateDomainRequest
+	(*CreateDomainResponse)(nil),         // 4: scalekit.v1.domains.CreateDomainResponse
+	(*CreateDomain)(nil),                 // 5: scalekit.v1.domains.CreateDomain
+	(*UpdateDomainRequest)(nil),          // 6: scalekit.v1.domains.UpdateDomainRequest
+	(*UpdateDomain)(nil),                 // 7: scalekit.v1.domains.UpdateDomain
+	(*UpdateDomainResponse)(nil),         // 8: scalekit.v1.domains.UpdateDomainResponse
+	(*GetDomainRequest)(nil),             // 9: scalekit.v1.domains.GetDomainRequest
+	(*GetDomainResponse)(nil),            // 10: scalekit.v1.domains.GetDomainResponse
+	(*DeleteDomainRequest)(nil),          // 11: scalekit.v1.domains.DeleteDomainRequest
+	(*ListDomainRequest)(nil),            // 12: scalekit.v1.domains.ListDomainRequest
+	(*VerifyDomainRequest)(nil),          // 13: scalekit.v1.domains.VerifyDomainRequest
+	(*VerifyDomainResponse)(nil),         // 14: scalekit.v1.domains.VerifyDomainResponse
+	(*ListDomainResponse)(nil),           // 15: scalekit.v1.domains.ListDomainResponse
+	(*ListAuthorizedDomainRequest)(nil),  // 16: scalekit.v1.domains.ListAuthorizedDomainRequest
+	(*ListAuthorizedDomainResponse)(nil), // 17: scalekit.v1.domains.ListAuthorizedDomainResponse
+	(*Domain)(nil),                       // 18: scalekit.v1.domains.Domain
+	(*wrapperspb.Int32Value)(nil),        // 19: google.protobuf.Int32Value
+	(*timestamppb.Timestamp)(nil),        // 20: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),                // 21: google.protobuf.Empty
 }
 var file_scalekit_v1_domains_domains_proto_depIdxs = []int32{
-	4,  // 0: scalekit.v1.domains.CreateDomainRequest.domain:type_name -> scalekit.v1.domains.CreateDomain
-	16, // 1: scalekit.v1.domains.CreateDomainResponse.domain:type_name -> scalekit.v1.domains.Domain
-	1,  // 2: scalekit.v1.domains.CreateDomain.domain_type:type_name -> scalekit.v1.domains.DomainType
-	6,  // 3: scalekit.v1.domains.UpdateDomainRequest.domain:type_name -> scalekit.v1.domains.UpdateDomain
-	16, // 4: scalekit.v1.domains.UpdateDomainResponse.domain:type_name -> scalekit.v1.domains.Domain
-	16, // 5: scalekit.v1.domains.GetDomainResponse.domain:type_name -> scalekit.v1.domains.Domain
-	17, // 6: scalekit.v1.domains.ListDomainRequest.page_size:type_name -> google.protobuf.Int32Value
-	17, // 7: scalekit.v1.domains.ListDomainRequest.page_number:type_name -> google.protobuf.Int32Value
-	1,  // 8: scalekit.v1.domains.ListDomainRequest.domain_type:type_name -> scalekit.v1.domains.DomainType
-	16, // 9: scalekit.v1.domains.ListDomainResponse.domains:type_name -> scalekit.v1.domains.Domain
-	0,  // 10: scalekit.v1.domains.Domain.verification_status:type_name -> scalekit.v1.domains.VerificationStatus
-	18, // 11: scalekit.v1.domains.Domain.create_time:type_name -> google.protobuf.Timestamp
-	18, // 12: scalekit.v1.domains.Domain.update_time:type_name -> google.protobuf.Timestamp
-	1,  // 13: scalekit.v1.domains.Domain.domain_type:type_name -> scalekit.v1.domains.DomainType
-	2,  // 14: scalekit.v1.domains.DomainService.CreateDomain:input_type -> scalekit.v1.domains.CreateDomainRequest
-	5,  // 15: scalekit.v1.domains.DomainService.UpdateDomain:input_type -> scalekit.v1.domains.UpdateDomainRequest
-	12, // 16: scalekit.v1.domains.DomainService.VerifyDomain:input_type -> scalekit.v1.domains.VerifyDomainRequest
-	8,  // 17: scalekit.v1.domains.DomainService.GetDomain:input_type -> scalekit.v1.domains.GetDomainRequest
-	10, // 18: scalekit.v1.domains.DomainService.DeleteDomain:input_type -> scalekit.v1.domains.DeleteDomainRequest
-	11, // 19: scalekit.v1.domains.DomainService.ListDomains:input_type -> scalekit.v1.domains.ListDomainRequest
-	14, // 20: scalekit.v1.domains.DomainService.ListAuthorizedDomains:input_type -> scalekit.v1.domains.ListAuthorizedDomainRequest
-	3,  // 21: scalekit.v1.domains.DomainService.CreateDomain:output_type -> scalekit.v1.domains.CreateDomainResponse
-	7,  // 22: scalekit.v1.domains.DomainService.UpdateDomain:output_type -> scalekit.v1.domains.UpdateDomainResponse
-	19, // 23: scalekit.v1.domains.DomainService.VerifyDomain:output_type -> google.protobuf.BoolValue
-	9,  // 24: scalekit.v1.domains.DomainService.GetDomain:output_type -> scalekit.v1.domains.GetDomainResponse
-	20, // 25: scalekit.v1.domains.DomainService.DeleteDomain:output_type -> google.protobuf.Empty
-	13, // 26: scalekit.v1.domains.DomainService.ListDomains:output_type -> scalekit.v1.domains.ListDomainResponse
-	15, // 27: scalekit.v1.domains.DomainService.ListAuthorizedDomains:output_type -> scalekit.v1.domains.ListAuthorizedDomainResponse
-	21, // [21:28] is the sub-list for method output_type
-	14, // [14:21] is the sub-list for method input_type
-	14, // [14:14] is the sub-list for extension type_name
-	14, // [14:14] is the sub-list for extension extendee
-	0,  // [0:14] is the sub-list for field type_name
+	5,  // 0: scalekit.v1.domains.CreateDomainRequest.domain:type_name -> scalekit.v1.domains.CreateDomain
+	18, // 1: scalekit.v1.domains.CreateDomainResponse.domain:type_name -> scalekit.v1.domains.Domain
+	2,  // 2: scalekit.v1.domains.CreateDomain.domain_type:type_name -> scalekit.v1.domains.DomainType
+	7,  // 3: scalekit.v1.domains.UpdateDomainRequest.domain:type_name -> scalekit.v1.domains.UpdateDomain
+	18, // 4: scalekit.v1.domains.UpdateDomainResponse.domain:type_name -> scalekit.v1.domains.Domain
+	18, // 5: scalekit.v1.domains.GetDomainResponse.domain:type_name -> scalekit.v1.domains.Domain
+	19, // 6: scalekit.v1.domains.ListDomainRequest.page_size:type_name -> google.protobuf.Int32Value
+	19, // 7: scalekit.v1.domains.ListDomainRequest.page_number:type_name -> google.protobuf.Int32Value
+	2,  // 8: scalekit.v1.domains.ListDomainRequest.domain_type:type_name -> scalekit.v1.domains.DomainType
+	18, // 9: scalekit.v1.domains.ListDomainResponse.domains:type_name -> scalekit.v1.domains.Domain
+	1,  // 10: scalekit.v1.domains.Domain.verification_status:type_name -> scalekit.v1.domains.VerificationStatus
+	20, // 11: scalekit.v1.domains.Domain.create_time:type_name -> google.protobuf.Timestamp
+	20, // 12: scalekit.v1.domains.Domain.update_time:type_name -> google.protobuf.Timestamp
+	2,  // 13: scalekit.v1.domains.Domain.domain_type:type_name -> scalekit.v1.domains.DomainType
+	0,  // 14: scalekit.v1.domains.Domain.verification_method:type_name -> scalekit.v1.domains.VerificationMethod
+	3,  // 15: scalekit.v1.domains.DomainService.CreateDomain:input_type -> scalekit.v1.domains.CreateDomainRequest
+	6,  // 16: scalekit.v1.domains.DomainService.UpdateDomain:input_type -> scalekit.v1.domains.UpdateDomainRequest
+	13, // 17: scalekit.v1.domains.DomainService.VerifyDomain:input_type -> scalekit.v1.domains.VerifyDomainRequest
+	9,  // 18: scalekit.v1.domains.DomainService.GetDomain:input_type -> scalekit.v1.domains.GetDomainRequest
+	11, // 19: scalekit.v1.domains.DomainService.DeleteDomain:input_type -> scalekit.v1.domains.DeleteDomainRequest
+	12, // 20: scalekit.v1.domains.DomainService.ListDomains:input_type -> scalekit.v1.domains.ListDomainRequest
+	16, // 21: scalekit.v1.domains.DomainService.ListAuthorizedDomains:input_type -> scalekit.v1.domains.ListAuthorizedDomainRequest
+	4,  // 22: scalekit.v1.domains.DomainService.CreateDomain:output_type -> scalekit.v1.domains.CreateDomainResponse
+	8,  // 23: scalekit.v1.domains.DomainService.UpdateDomain:output_type -> scalekit.v1.domains.UpdateDomainResponse
+	14, // 24: scalekit.v1.domains.DomainService.VerifyDomain:output_type -> scalekit.v1.domains.VerifyDomainResponse
+	10, // 25: scalekit.v1.domains.DomainService.GetDomain:output_type -> scalekit.v1.domains.GetDomainResponse
+	21, // 26: scalekit.v1.domains.DomainService.DeleteDomain:output_type -> google.protobuf.Empty
+	15, // 27: scalekit.v1.domains.DomainService.ListDomains:output_type -> scalekit.v1.domains.ListDomainResponse
+	17, // 28: scalekit.v1.domains.DomainService.ListAuthorizedDomains:output_type -> scalekit.v1.domains.ListAuthorizedDomainResponse
+	22, // [22:29] is the sub-list for method output_type
+	15, // [15:22] is the sub-list for method input_type
+	15, // [15:15] is the sub-list for extension type_name
+	15, // [15:15] is the sub-list for extension extendee
+	0,  // [0:15] is the sub-list for field type_name
 }
 
 func init() { file_scalekit_v1_domains_domains_proto_init() }
@@ -1524,8 +1660,8 @@ func file_scalekit_v1_domains_domains_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_scalekit_v1_domains_domains_proto_rawDesc), len(file_scalekit_v1_domains_domains_proto_rawDesc)),
-			NumEnums:      2,
-			NumMessages:   15,
+			NumEnums:      3,
+			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
