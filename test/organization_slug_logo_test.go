@@ -13,7 +13,7 @@ import (
 
 const (
 	testLogoURL = "https://logo.debounce.com/microsoft.com"
-	testSlug    = "app.acmecorp.com"
+	testSlug    = "auth.megasoft.com"
 )
 
 func TestOrganization_CreateWithLogoUrl(t *testing.T) {
@@ -83,18 +83,18 @@ func TestOrganization_UpdateSlug(t *testing.T) {
 
 	updated, err := client.Organization().UpdateOrganization(ctx, orgId, &organizations.UpdateOrganization{
 		Slug:     toPtr(testSlug),
-		Metadata: map[string]string{"custom_domain": "app.acmecorp.com"},
+		Metadata: map[string]string{"custom_domain": "auth.megasoft.com"},
 	})
 	require.NoError(t, err)
 	require.NotNil(t, updated)
 	require.NotNil(t, updated.GetOrganization())
 	assert.Equal(t, testSlug, updated.GetOrganization().GetSlug())
-	assert.Equal(t, "app.acmecorp.com", updated.GetOrganization().GetMetadata()["custom_domain"])
+	assert.Equal(t, "auth.megasoft.com", updated.GetOrganization().GetMetadata()["custom_domain"])
 
 	fetched, err := client.Organization().GetOrganization(ctx, orgId)
 	require.NoError(t, err)
 	require.NotNil(t, fetched)
 	require.NotNil(t, fetched.GetOrganization())
 	assert.Equal(t, testSlug, fetched.GetOrganization().GetSlug())
-	assert.Equal(t, "app.acmecorp.com", fetched.GetOrganization().GetMetadata()["custom_domain"])
+	assert.Equal(t, "auth.megasoft.com", fetched.GetOrganization().GetMetadata()["custom_domain"])
 }
