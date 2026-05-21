@@ -4,7 +4,7 @@ GO := go
 TOOLS_BIN := $(CURDIR)/.tools/bin
 GO_TOOLCHAIN := go1.25.10
 
-PROTO_REPO_URL := git@github.com:scalekit-inc/scalekit.git
+PROTO_REPO_URL := https://github.com/scalekit-inc/scalekit.git
 PROTO_REF := v0.1.123.0
 PROTO_SUBDIR := proto
 PROTO_REMOTE_INPUT := $(PROTO_REPO_URL)\#ref=$(PROTO_REF),subdir=$(PROTO_SUBDIR)
