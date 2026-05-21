@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	testLogoURL = "https://cdn.acmecorp.com/logo.png"
+	testLogoURL = "https://logo.debounce.com/microsoft.com"
 	testSlug    = "app.acmecorp.com"
 )
 
