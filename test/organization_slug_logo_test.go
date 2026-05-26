@@ -2,7 +2,6 @@ package test
 
 import (
 	"context"
-	"strings"
 	"testing"
 
 	"github.com/scalekit-inc/scalekit-sdk-go/v2"
@@ -21,14 +20,9 @@ func TestOrganization_CreateWithLogoUrl(t *testing.T) {
 
 	resp, err := client.Organization().CreateOrganization(ctx, TestOrgName, scalekit.CreateOrganizationOptions{
 		ExternalId: UniqueSuffix(),
-		LogoUrl:    toPtr(testLogoURL),
+		LogoUrl:    testLogoURL,
 	})
-	if err != nil {
-		if strings.Contains(err.Error(), "logo_url is not allowed") {
-			t.Skipf("skipping logo_url test: environment does not support logo_url (%v)", err)
-		}
-		require.NoError(t, err)
-	}
+	require.NoError(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, resp.GetOrganization())
 	defer DeleteTestOrganization(t, ctx, resp.GetOrganization().GetId())
@@ -41,7 +35,7 @@ func TestOrganization_CreateWithSlug(t *testing.T) {
 
 	resp, err := client.Organization().CreateOrganization(ctx, TestOrgName, scalekit.CreateOrganizationOptions{
 		ExternalId: UniqueSuffix(),
-		Slug:       toPtr(testSlug),
+		Slug:       testSlug,
 	})
 	require.NoError(t, err)
 	require.NotNil(t, resp)
@@ -59,12 +53,7 @@ func TestOrganization_UpdateLogoUrl(t *testing.T) {
 	updated, err := client.Organization().UpdateOrganization(ctx, orgId, &organizations.UpdateOrganization{
 		LogoUrl: toPtr(testLogoURL),
 	})
-	if err != nil {
-		if strings.Contains(err.Error(), "logo_url is not allowed") {
-			t.Skipf("skipping logo_url test: environment does not support logo_url (%v)", err)
-		}
-		require.NoError(t, err)
-	}
+	require.NoError(t, err)
 	require.NotNil(t, updated)
 	require.NotNil(t, updated.GetOrganization())
 	assert.Equal(t, testLogoURL, updated.GetOrganization().GetLogoUrl())
