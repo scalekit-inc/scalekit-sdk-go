@@ -21,9 +21,16 @@ const (
 	TestExternalIDPrefix = "acmecorp"
 )
 
-// UniqueSuffix returns a short unique suffix for test resources (e.g. acmecorp-20060102150405).
+// UniqueSuffix returns a unique suffix for test resources using nanosecond precision to avoid
+// collisions when tests run in parallel.
 func UniqueSuffix() string {
-	return fmt.Sprintf("%s-%d", TestExternalIDPrefix, time.Now().UnixNano()/1e6)
+	return fmt.Sprintf("%s-%d", TestExternalIDPrefix, time.Now().UnixNano())
+}
+
+// generateTestSlug returns a unique DNS-safe org slug per test invocation.
+// Uses nanosecond precision so concurrent t.Parallel() calls don't collide.
+func generateTestSlug() string {
+	return fmt.Sprintf("acmecorp-%d", time.Now().UnixNano())
 }
 
 // DeleteTestOrganization deletes the org by ID. Idempotent: ignores "not found" errors.

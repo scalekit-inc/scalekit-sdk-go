@@ -767,6 +767,72 @@ func (x *ExternalIdentity) GetLastSyncedTime() *timestamppb.Timestamp {
 	return nil
 }
 
+type OrganizationCustomizations struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// organization_logo_branding indicates whether org logo branding is active for this environment.
+	OrganizationLogoBranding bool `protobuf:"varint,1,opt,name=organization_logo_branding,json=organizationLogoBranding,proto3" json:"organization_logo_branding,omitempty"`
+	// display_name is the organization's display name.
+	DisplayName string `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	// logo_url is the organization's logo URL. Carried for future use.
+	LogoUrl *string `protobuf:"bytes,3,opt,name=logo_url,json=logoUrl,proto3,oneof" json:"logo_url,omitempty"`
+}
+
+func (x *OrganizationCustomizations) Reset() {
+	*x = OrganizationCustomizations{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_scalekit_v1_commons_commons_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *OrganizationCustomizations) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OrganizationCustomizations) ProtoMessage() {}
+
+func (x *OrganizationCustomizations) ProtoReflect() protoreflect.Message {
+	mi := &file_scalekit_v1_commons_commons_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OrganizationCustomizations.ProtoReflect.Descriptor instead.
+func (*OrganizationCustomizations) Descriptor() ([]byte, []int) {
+	return file_scalekit_v1_commons_commons_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *OrganizationCustomizations) GetOrganizationLogoBranding() bool {
+	if x != nil {
+		return x.OrganizationLogoBranding
+	}
+	return false
+}
+
+func (x *OrganizationCustomizations) GetDisplayName() string {
+	if x != nil {
+		return x.DisplayName
+	}
+	return ""
+}
+
+func (x *OrganizationCustomizations) GetLogoUrl() string {
+	if x != nil && x.LogoUrl != nil {
+		return *x.LogoUrl
+	}
+	return ""
+}
+
 var File_scalekit_v1_commons_commons_proto protoreflect.FileDescriptor
 
 var file_scalekit_v1_commons_commons_proto_rawDesc = []byte{
@@ -1427,7 +1493,27 @@ var file_scalekit_v1_commons_commons_proto_rawDesc = []byte{
 	0x6f, 0x6d, 0x61, 0x74, 0x69, 0x63, 0x61, 0x6c, 0x6c, 0x79, 0x20, 0x75, 0x70, 0x64, 0x61, 0x74,
 	0x65, 0x64, 0x20, 0x62, 0x79, 0x20, 0x74, 0x68, 0x65, 0x20, 0x73, 0x79, 0x73, 0x74, 0x65, 0x6d,
 	0x2e, 0xe0, 0x41, 0x03, 0x52, 0x0e, 0x6c, 0x61, 0x73, 0x74, 0x53, 0x79, 0x6e, 0x63, 0x65, 0x64,
-	0x54, 0x69, 0x6d, 0x65, 0x2a, 0x39, 0x0a, 0x0a, 0x52, 0x65, 0x67, 0x69, 0x6f, 0x6e, 0x43, 0x6f,
+	0x54, 0x69, 0x6d, 0x65, 0x22, 0xbd, 0x02, 0x0a, 0x1a, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x43, 0x75, 0x73, 0x74, 0x6f, 0x6d, 0x69, 0x7a, 0x61, 0x74, 0x69,
+	0x6f, 0x6e, 0x73, 0x12, 0x41, 0x0a, 0x1a, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x5f, 0x6c, 0x6f, 0x67, 0x6f, 0x5f, 0x62, 0x72, 0x61, 0x6e, 0x64, 0x69, 0x6e,
+	0x67, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x42, 0x03, 0xe0, 0x41, 0x03, 0x52, 0x18, 0x6f, 0x72,
+	0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x4c, 0x6f, 0x67, 0x6f, 0x42, 0x72,
+	0x61, 0x6e, 0x64, 0x69, 0x6e, 0x67, 0x12, 0x55, 0x0a, 0x0c, 0x64, 0x69, 0x73, 0x70, 0x6c, 0x61,
+	0x79, 0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42, 0x32, 0x92, 0x41,
+	0x2f, 0x32, 0x20, 0x44, 0x69, 0x73, 0x70, 0x6c, 0x61, 0x79, 0x20, 0x6e, 0x61, 0x6d, 0x65, 0x20,
+	0x6f, 0x66, 0x20, 0x74, 0x68, 0x65, 0x20, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x4a, 0x0b, 0x22, 0x41, 0x63, 0x6d, 0x65, 0x20, 0x43, 0x6f, 0x72, 0x70, 0x22,
+	0x52, 0x0b, 0x64, 0x69, 0x73, 0x70, 0x6c, 0x61, 0x79, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x78, 0x0a,
+	0x08, 0x6c, 0x6f, 0x67, 0x6f, 0x5f, 0x75, 0x72, 0x6c, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x42,
+	0x58, 0x92, 0x41, 0x55, 0x32, 0x24, 0x48, 0x54, 0x54, 0x50, 0x53, 0x20, 0x55, 0x52, 0x4c, 0x20,
+	0x6f, 0x66, 0x20, 0x74, 0x68, 0x65, 0x20, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x27, 0x73, 0x20, 0x6c, 0x6f, 0x67, 0x6f, 0x4a, 0x27, 0x22, 0x68, 0x74, 0x74,
+	0x70, 0x73, 0x3a, 0x2f, 0x2f, 0x63, 0x64, 0x6e, 0x2e, 0x65, 0x78, 0x61, 0x6d, 0x70, 0x6c, 0x65,
+	0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x61, 0x63, 0x6d, 0x65, 0x2d, 0x6c, 0x6f, 0x67, 0x6f, 0x2e, 0x70,
+	0x6e, 0x67, 0x22, 0xa2, 0x02, 0x03, 0x75, 0x72, 0x69, 0x48, 0x00, 0x52, 0x07, 0x6c, 0x6f, 0x67,
+	0x6f, 0x55, 0x72, 0x6c, 0x88, 0x01, 0x01, 0x42, 0x0b, 0x0a, 0x09, 0x5f, 0x6c, 0x6f, 0x67, 0x6f,
+	0x5f, 0x75, 0x72, 0x6c, 0x2a, 0x39, 0x0a, 0x0a, 0x52, 0x65, 0x67, 0x69, 0x6f, 0x6e, 0x43, 0x6f,
 	0x64, 0x65, 0x12, 0x1b, 0x0a, 0x17, 0x52, 0x45, 0x47, 0x49, 0x4f, 0x4e, 0x5f, 0x43, 0x4f, 0x44,
 	0x45, 0x5f, 0x55, 0x4e, 0x53, 0x50, 0x45, 0x43, 0x49, 0x46, 0x49, 0x45, 0x44, 0x10, 0x00, 0x12,
 	0x06, 0x0a, 0x02, 0x55, 0x53, 0x10, 0x01, 0x12, 0x06, 0x0a, 0x02, 0x45, 0x55, 0x10, 0x02, 0x2a,
@@ -1491,36 +1577,37 @@ func file_scalekit_v1_commons_commons_proto_rawDescGZIP() []byte {
 }
 
 var file_scalekit_v1_commons_commons_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_scalekit_v1_commons_commons_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_scalekit_v1_commons_commons_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_scalekit_v1_commons_commons_proto_goTypes = []interface{}{
-	(RegionCode)(0),                // 0: scalekit.v1.commons.RegionCode
-	(MembershipStatus)(0),          // 1: scalekit.v1.commons.MembershipStatus
-	(IdentityProviderType)(0),      // 2: scalekit.v1.commons.IdentityProviderType
-	(TimeUnit)(0),                  // 3: scalekit.v1.commons.TimeUnit
-	(*OrganizationMembership)(nil), // 4: scalekit.v1.commons.OrganizationMembership
-	(*Role)(nil),                   // 5: scalekit.v1.commons.Role
-	(*UserProfile)(nil),            // 6: scalekit.v1.commons.UserProfile
-	(*ExternalIdentity)(nil),       // 7: scalekit.v1.commons.ExternalIdentity
-	nil,                            // 8: scalekit.v1.commons.OrganizationMembership.MetadataEntry
-	nil,                            // 9: scalekit.v1.commons.UserProfile.MetadataEntry
-	nil,                            // 10: scalekit.v1.commons.UserProfile.CustomAttributesEntry
-	(*timestamppb.Timestamp)(nil),  // 11: google.protobuf.Timestamp
+	(RegionCode)(0),                    // 0: scalekit.v1.commons.RegionCode
+	(MembershipStatus)(0),              // 1: scalekit.v1.commons.MembershipStatus
+	(IdentityProviderType)(0),          // 2: scalekit.v1.commons.IdentityProviderType
+	(TimeUnit)(0),                      // 3: scalekit.v1.commons.TimeUnit
+	(*OrganizationMembership)(nil),     // 4: scalekit.v1.commons.OrganizationMembership
+	(*Role)(nil),                       // 5: scalekit.v1.commons.Role
+	(*UserProfile)(nil),                // 6: scalekit.v1.commons.UserProfile
+	(*ExternalIdentity)(nil),           // 7: scalekit.v1.commons.ExternalIdentity
+	(*OrganizationCustomizations)(nil), // 8: scalekit.v1.commons.OrganizationCustomizations
+	nil,                                // 9: scalekit.v1.commons.OrganizationMembership.MetadataEntry
+	nil,                                // 10: scalekit.v1.commons.UserProfile.MetadataEntry
+	nil,                                // 11: scalekit.v1.commons.UserProfile.CustomAttributesEntry
+	(*timestamppb.Timestamp)(nil),      // 12: google.protobuf.Timestamp
 }
 var file_scalekit_v1_commons_commons_proto_depIdxs = []int32{
-	11, // 0: scalekit.v1.commons.OrganizationMembership.join_time:type_name -> google.protobuf.Timestamp
+	12, // 0: scalekit.v1.commons.OrganizationMembership.join_time:type_name -> google.protobuf.Timestamp
 	1,  // 1: scalekit.v1.commons.OrganizationMembership.membership_status:type_name -> scalekit.v1.commons.MembershipStatus
 	5,  // 2: scalekit.v1.commons.OrganizationMembership.roles:type_name -> scalekit.v1.commons.Role
-	8,  // 3: scalekit.v1.commons.OrganizationMembership.metadata:type_name -> scalekit.v1.commons.OrganizationMembership.MetadataEntry
-	11, // 4: scalekit.v1.commons.OrganizationMembership.created_at:type_name -> google.protobuf.Timestamp
-	11, // 5: scalekit.v1.commons.OrganizationMembership.accepted_at:type_name -> google.protobuf.Timestamp
-	11, // 6: scalekit.v1.commons.OrganizationMembership.expires_at:type_name -> google.protobuf.Timestamp
-	9,  // 7: scalekit.v1.commons.UserProfile.metadata:type_name -> scalekit.v1.commons.UserProfile.MetadataEntry
-	10, // 8: scalekit.v1.commons.UserProfile.custom_attributes:type_name -> scalekit.v1.commons.UserProfile.CustomAttributesEntry
+	9,  // 3: scalekit.v1.commons.OrganizationMembership.metadata:type_name -> scalekit.v1.commons.OrganizationMembership.MetadataEntry
+	12, // 4: scalekit.v1.commons.OrganizationMembership.created_at:type_name -> google.protobuf.Timestamp
+	12, // 5: scalekit.v1.commons.OrganizationMembership.accepted_at:type_name -> google.protobuf.Timestamp
+	12, // 6: scalekit.v1.commons.OrganizationMembership.expires_at:type_name -> google.protobuf.Timestamp
+	10, // 7: scalekit.v1.commons.UserProfile.metadata:type_name -> scalekit.v1.commons.UserProfile.MetadataEntry
+	11, // 8: scalekit.v1.commons.UserProfile.custom_attributes:type_name -> scalekit.v1.commons.UserProfile.CustomAttributesEntry
 	7,  // 9: scalekit.v1.commons.UserProfile.external_identities:type_name -> scalekit.v1.commons.ExternalIdentity
 	2,  // 10: scalekit.v1.commons.ExternalIdentity.connection_provider:type_name -> scalekit.v1.commons.IdentityProviderType
-	11, // 11: scalekit.v1.commons.ExternalIdentity.last_login_time:type_name -> google.protobuf.Timestamp
-	11, // 12: scalekit.v1.commons.ExternalIdentity.created_time:type_name -> google.protobuf.Timestamp
-	11, // 13: scalekit.v1.commons.ExternalIdentity.last_synced_time:type_name -> google.protobuf.Timestamp
+	12, // 11: scalekit.v1.commons.ExternalIdentity.last_login_time:type_name -> google.protobuf.Timestamp
+	12, // 12: scalekit.v1.commons.ExternalIdentity.created_time:type_name -> google.protobuf.Timestamp
+	12, // 13: scalekit.v1.commons.ExternalIdentity.last_synced_time:type_name -> google.protobuf.Timestamp
 	14, // [14:14] is the sub-list for method output_type
 	14, // [14:14] is the sub-list for method input_type
 	14, // [14:14] is the sub-list for extension type_name
@@ -1582,15 +1669,28 @@ func file_scalekit_v1_commons_commons_proto_init() {
 				return nil
 			}
 		}
+		file_scalekit_v1_commons_commons_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*OrganizationCustomizations); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	file_scalekit_v1_commons_commons_proto_msgTypes[0].OneofWrappers = []interface{}{}
+	file_scalekit_v1_commons_commons_proto_msgTypes[4].OneofWrappers = []interface{}{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_scalekit_v1_commons_commons_proto_rawDesc,
 			NumEnums:      4,
-			NumMessages:   7,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
