@@ -73,18 +73,18 @@ func TestOrganization_UpdateSlug(t *testing.T) {
 
 	updated, err := client.Organization().UpdateOrganization(ctx, orgId, &organizations.UpdateOrganization{
 		Slug:     toPtr(slug),
-		Metadata: map[string]string{"custom_domain": "auth.megasoft.com"},
+		Metadata: map[string]string{"custom_domain": slug},
 	})
 	require.NoError(t, err)
 	require.NotNil(t, updated)
 	require.NotNil(t, updated.GetOrganization())
 	assert.Equal(t, slug, updated.GetOrganization().GetSlug())
-	assert.Equal(t, "auth.megasoft.com", updated.GetOrganization().GetMetadata()["custom_domain"])
+	assert.Equal(t, slug, updated.GetOrganization().GetMetadata()["custom_domain"])
 
 	fetched, err := client.Organization().GetOrganization(ctx, orgId)
 	require.NoError(t, err)
 	require.NotNil(t, fetched)
 	require.NotNil(t, fetched.GetOrganization())
 	assert.Equal(t, slug, fetched.GetOrganization().GetSlug())
-	assert.Equal(t, "auth.megasoft.com", fetched.GetOrganization().GetMetadata()["custom_domain"])
+	assert.Equal(t, slug, fetched.GetOrganization().GetMetadata()["custom_domain"])
 }
