@@ -12,7 +12,6 @@ import (
 
 const (
 	testLogoURL = "https://logo.debounce.com/microsoft.com"
-	testSlug    = "auth.megasoft.com"
 )
 
 func TestOrganization_CreateWithLogoUrl(t *testing.T) {
@@ -32,17 +31,18 @@ func TestOrganization_CreateWithLogoUrl(t *testing.T) {
 
 func TestOrganization_CreateWithSlug(t *testing.T) {
 	ctx := context.Background()
+	slug := generateTestSlug()
 
 	resp, err := client.Organization().CreateOrganization(ctx, TestOrgName, scalekit.CreateOrganizationOptions{
 		ExternalId: UniqueSuffix(),
-		Slug:       testSlug,
+		Slug:       slug,
 	})
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 	require.NotNil(t, resp.GetOrganization())
 	defer DeleteTestOrganization(t, ctx, resp.GetOrganization().GetId())
 
-	assert.Equal(t, testSlug, resp.GetOrganization().GetSlug())
+	assert.Equal(t, slug, resp.GetOrganization().GetSlug())
 }
 
 func TestOrganization_UpdateLogoUrl(t *testing.T) {
@@ -69,21 +69,22 @@ func TestOrganization_UpdateSlug(t *testing.T) {
 	ctx := context.Background()
 	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
 	defer DeleteTestOrganization(t, ctx, orgId)
+	slug := generateTestSlug()
 
 	updated, err := client.Organization().UpdateOrganization(ctx, orgId, &organizations.UpdateOrganization{
-		Slug:     toPtr(testSlug),
+		Slug:     toPtr(slug),
 		Metadata: map[string]string{"custom_domain": "auth.megasoft.com"},
 	})
 	require.NoError(t, err)
 	require.NotNil(t, updated)
 	require.NotNil(t, updated.GetOrganization())
-	assert.Equal(t, testSlug, updated.GetOrganization().GetSlug())
+	assert.Equal(t, slug, updated.GetOrganization().GetSlug())
 	assert.Equal(t, "auth.megasoft.com", updated.GetOrganization().GetMetadata()["custom_domain"])
 
 	fetched, err := client.Organization().GetOrganization(ctx, orgId)
 	require.NoError(t, err)
 	require.NotNil(t, fetched)
 	require.NotNil(t, fetched.GetOrganization())
-	assert.Equal(t, testSlug, fetched.GetOrganization().GetSlug())
+	assert.Equal(t, slug, fetched.GetOrganization().GetSlug())
 	assert.Equal(t, "auth.megasoft.com", fetched.GetOrganization().GetMetadata()["custom_domain"])
 }

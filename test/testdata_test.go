@@ -26,6 +26,11 @@ func UniqueSuffix() string {
 	return fmt.Sprintf("%s-%d", TestExternalIDPrefix, time.Now().UnixNano()/1e6)
 }
 
+// generateTestSlug returns a unique DNS-safe org slug for each test run to avoid parallel-run collisions.
+func generateTestSlug() string {
+	return fmt.Sprintf("acmecorp-%d", time.Now().UnixNano()/1e6)
+}
+
 // DeleteTestOrganization deletes the org by ID. Idempotent: ignores "not found" errors.
 func DeleteTestOrganization(t *testing.T, ctx context.Context, orgID string) {
 	t.Helper()
