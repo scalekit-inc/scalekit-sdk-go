@@ -11,10 +11,11 @@ import (
 )
 
 const (
-	testLogoURL = "https://logo.debounce.com/microsoft.com"
+	testLogoURL = "https://example.com/logo.png"
 )
 
 func TestOrganization_CreateWithLogoUrl(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 
 	resp, err := client.Organization().CreateOrganization(ctx, TestOrgName, scalekit.CreateOrganizationOptions{
@@ -30,6 +31,7 @@ func TestOrganization_CreateWithLogoUrl(t *testing.T) {
 }
 
 func TestOrganization_CreateWithSlug(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	slug := generateTestSlug()
 
@@ -46,6 +48,7 @@ func TestOrganization_CreateWithSlug(t *testing.T) {
 }
 
 func TestOrganization_UpdateLogoUrl(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
 	defer DeleteTestOrganization(t, ctx, orgId)
@@ -66,6 +69,7 @@ func TestOrganization_UpdateLogoUrl(t *testing.T) {
 }
 
 func TestOrganization_UpdateSlug(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
 	defer DeleteTestOrganization(t, ctx, orgId)
