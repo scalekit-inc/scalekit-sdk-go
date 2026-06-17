@@ -217,6 +217,101 @@ func TestUser_MembershipOperations(t *testing.T) {
 	assert.Equal(t, userId, userAfterDelete.GetUser().GetId())
 }
 
+func TestUserExternalIdOperations(t *testing.T) {
+	ctx := context.Background()
+
+	// Two orgs: user is initially a member of org1, then added to org2 via external ID
+	orgId1 := createOrg(t, ctx, TestOrgName, UniqueSuffix())
+	defer DeleteTestOrganization(t, ctx, orgId1)
+	orgId2 := createOrg(t, ctx, "Acme Corp 2", UniqueSuffix())
+	defer DeleteTestOrganization(t, ctx, orgId2)
+
+	// Unique external ID for this test run
+	extID := fmt.Sprintf("ext-user-%d", time.Now().UnixNano()/1e6)
+	uniqueEmail := fmt.Sprintf("extid.user.%d@example.com", time.Now().UnixNano()/1e6)
+
+	// Create user with an external_id
+	newUser := &users.CreateUser{
+		Email:      uniqueEmail,
+		ExternalId: &extID,
+		Metadata:   map[string]string{"source": "external_id_test"},
+	}
+	createdUser, err := client.User().CreateUserAndMembership(ctx, orgId1, newUser, false)
+	require.NoError(t, err)
+	require.NotNil(t, createdUser)
+	require.NotNil(t, createdUser.GetUser())
+	userId := createdUser.GetUser().GetId()
+	require.NotEmpty(t, userId)
+	// Cleanup: delete the user after the test (best-effort)
+	defer func() { _ = client.User().DeleteUser(ctx, userId) }()
+
+	// 1. GetUserByExternalId
+	gotUser, err := client.User().GetUserByExternalId(ctx, extID)
+	require.NoError(t, err)
+	require.NotNil(t, gotUser)
+	require.NotNil(t, gotUser.GetUser())
+	assert.Equal(t, userId, gotUser.GetUser().GetId())
+	assert.Equal(t, extID, gotUser.GetUser().GetExternalId())
+
+	// 2. UpdateUserByExternalId
+	givenName := "External"
+	familyName := "User"
+	updateReq := &users.UpdateUser{
+		UserProfile: &users.UpdateUserProfile{
+			GivenName:  &givenName,
+			FamilyName: &familyName,
+		},
+	}
+	updatedUser, err := client.User().UpdateUserByExternalId(ctx, extID, updateReq)
+	require.NoError(t, err)
+	require.NotNil(t, updatedUser)
+	require.NotNil(t, updatedUser.GetUser().GetUserProfile())
+	assert.Equal(t, "External", updatedUser.GetUser().GetUserProfile().GetGivenName())
+	assert.Equal(t, "User", updatedUser.GetUser().GetUserProfile().GetFamilyName())
+
+	// 3. CreateMembershipByExternalId — add user to org2
+	membership := &users.CreateMembership{
+		Roles: []*commons.Role{
+			{Name: "admin"},
+		},
+		Metadata: map[string]string{"membership_type": "external_id_test"},
+	}
+	membershipResp, err := client.User().CreateMembershipByExternalId(ctx, orgId2, extID, membership, false)
+	require.NoError(t, err)
+	require.NotNil(t, membershipResp)
+	require.NotNil(t, membershipResp.GetUser())
+	assert.Equal(t, userId, membershipResp.GetUser().GetId())
+
+	// 4. UpdateMembershipByExternalId — change role to member
+	updateMembership := &users.UpdateMembership{
+		Roles: []*commons.Role{
+			{Name: "member"},
+		},
+		Metadata: map[string]string{"membership_type": "updated_external_id_test"},
+	}
+	updatedMembershipResp, err := client.User().UpdateMembershipByExternalId(ctx, orgId2, extID, updateMembership)
+	require.NoError(t, err)
+	require.NotNil(t, updatedMembershipResp)
+
+	// 5. DeleteMembershipByExternalId — remove from org2
+	err = client.User().DeleteMembershipByExternalId(ctx, orgId2, extID, false)
+	require.NoError(t, err)
+
+	// Verify user still exists after membership deletion
+	userAfterMembershipDelete, err := client.User().GetUser(ctx, userId)
+	require.NoError(t, err)
+	require.NotNil(t, userAfterMembershipDelete)
+	assert.Equal(t, userId, userAfterMembershipDelete.GetUser().GetId())
+
+	// 6. DeleteUserByExternalId
+	err = client.User().DeleteUserByExternalId(ctx, extID)
+	require.NoError(t, err)
+
+	// Verify user is gone — subsequent GetUser should return an error
+	_, err = client.User().GetUser(ctx, userId)
+	assert.Error(t, err, "expected error after deleting user by external ID")
+}
+
 func TestUser_ResendInvite(t *testing.T) {
 	ctx := context.Background()
 	orgId := createOrg(t, ctx, TestOrgName, UniqueSuffix())
