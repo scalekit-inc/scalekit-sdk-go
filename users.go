@@ -8,15 +8,17 @@ import (
 )
 
 // Type aliases for response types
-type CreateUserAndMembershipResponse = usersv1.CreateUserAndMembershipResponse
-type UpdateUserResponse = usersv1.UpdateUserResponse
-type GetUserResponse = usersv1.GetUserResponse
-type ListOrganizationUsersResponse = usersv1.ListOrganizationUsersResponse
-type ListUsersResponse = usersv1.ListUsersResponse
-type CreateMembershipResponse = usersv1.CreateMembershipResponse
-type UpdateMembershipResponse = usersv1.UpdateMembershipResponse
-type ListUserRolesResponse = usersv1.ListUserRolesResponse
-type ListUserPermissionsResponse = usersv1.ListUserPermissionsResponse
+type (
+	CreateUserAndMembershipResponse = usersv1.CreateUserAndMembershipResponse
+	UpdateUserResponse              = usersv1.UpdateUserResponse
+	GetUserResponse                 = usersv1.GetUserResponse
+	ListOrganizationUsersResponse   = usersv1.ListOrganizationUsersResponse
+	ListUsersResponse               = usersv1.ListUsersResponse
+	CreateMembershipResponse        = usersv1.CreateMembershipResponse
+	UpdateMembershipResponse        = usersv1.UpdateMembershipResponse
+	ListUserRolesResponse           = usersv1.ListUserRolesResponse
+	ListUserPermissionsResponse     = usersv1.ListUserPermissionsResponse
+)
 
 // ListUsersOptions represents optional parameters for listing users
 type ListUsersOptions struct {
@@ -28,12 +30,18 @@ type UserService interface {
 	CreateUserAndMembership(ctx context.Context, organizationId string, user *usersv1.CreateUser, sendInvitationEmail bool) (*CreateUserAndMembershipResponse, error)
 	UpdateUser(ctx context.Context, userId string, updateUser *usersv1.UpdateUser) (*UpdateUserResponse, error)
 	GetUser(ctx context.Context, userId string) (*GetUserResponse, error)
+	GetUserByExternalId(ctx context.Context, externalId string) (*GetUserResponse, error)
+	UpdateUserByExternalId(ctx context.Context, externalId string, updateUser *usersv1.UpdateUser) (*UpdateUserResponse, error)
+	DeleteUserByExternalId(ctx context.Context, externalId string) error
 	ListUsers(ctx context.Context, options *ListUsersOptions) (*ListUsersResponse, error)
 	ListOrganizationUsers(ctx context.Context, organizationId string, options *ListUsersOptions) (*ListOrganizationUsersResponse, error)
 	DeleteUser(ctx context.Context, userId string) error
 	CreateMembership(ctx context.Context, organizationId string, userId string, membership *usersv1.CreateMembership, sendInvitationEmail bool) (*CreateMembershipResponse, error)
 	UpdateMembership(ctx context.Context, organizationId string, userId string, membership *usersv1.UpdateMembership) (*UpdateMembershipResponse, error)
 	DeleteMembership(ctx context.Context, organizationId string, userId string, cascade bool) error
+	CreateMembershipByExternalId(ctx context.Context, organizationId string, externalId string, membership *usersv1.CreateMembership, sendInvitationEmail bool) (*CreateMembershipResponse, error)
+	UpdateMembershipByExternalId(ctx context.Context, organizationId string, externalId string, membership *usersv1.UpdateMembership) (*UpdateMembershipResponse, error)
+	DeleteMembershipByExternalId(ctx context.Context, organizationId string, externalId string, cascade bool) error
 	ResendInvite(ctx context.Context, organizationId string, userId string) (*usersv1.ResendInviteResponse, error)
 	ListUserRoles(ctx context.Context, organizationId string, userId string) (*ListUserRolesResponse, error)
 	ListUserPermissions(ctx context.Context, organizationId string, userId string) (*ListUserPermissionsResponse, error)
@@ -89,6 +97,45 @@ func (u *userService) GetUser(ctx context.Context, userId string) (*GetUserRespo
 		u.client.GetUser,
 		request,
 	).exec(ctx)
+}
+
+// GetUserByExternalId retrieves a user by their external ID
+func (u *userService) GetUserByExternalId(ctx context.Context, externalId string) (*GetUserResponse, error) {
+	request := &usersv1.GetUserRequest{}
+	request.Identities = &usersv1.GetUserRequest_ExternalId{ExternalId: externalId}
+
+	return newConnectExecuter(
+		u.coreClient,
+		u.client.GetUser,
+		request,
+	).exec(ctx)
+}
+
+// UpdateUserByExternalId updates an existing user identified by their external ID
+func (u *userService) UpdateUserByExternalId(ctx context.Context, externalId string, updateUser *usersv1.UpdateUser) (*UpdateUserResponse, error) {
+	request := &usersv1.UpdateUserRequest{
+		User: updateUser,
+	}
+	request.Identities = &usersv1.UpdateUserRequest_ExternalId{ExternalId: externalId}
+
+	return newConnectExecuter(
+		u.coreClient,
+		u.client.UpdateUser,
+		request,
+	).exec(ctx)
+}
+
+// DeleteUserByExternalId deletes a user identified by their external ID
+func (u *userService) DeleteUserByExternalId(ctx context.Context, externalId string) error {
+	request := &usersv1.DeleteUserRequest{}
+	request.Identities = &usersv1.DeleteUserRequest_ExternalId{ExternalId: externalId}
+
+	_, err := newConnectExecuter(
+		u.coreClient,
+		u.client.DeleteUser,
+		request,
+	).exec(ctx)
+	return err
 }
 
 // ListUsers retrieves all users across the environment with optional pagination.
@@ -177,6 +224,55 @@ func (u *userService) DeleteMembership(ctx context.Context, organizationId strin
 		Cascade:        &cascade,
 	}
 	request.Identities = &usersv1.DeleteMembershipRequest_Id{Id: userId}
+
+	_, err := newConnectExecuter(
+		u.coreClient,
+		u.client.DeleteMembership,
+		request,
+	).exec(ctx)
+	return err
+}
+
+// CreateMembershipByExternalId creates a membership for a user (identified by external ID) in an organization
+func (u *userService) CreateMembershipByExternalId(ctx context.Context, organizationId string, externalId string, membership *usersv1.CreateMembership, sendInvitationEmail bool) (*CreateMembershipResponse, error) {
+	request := &usersv1.CreateMembershipRequest{
+		OrganizationId:      organizationId,
+		Membership:          membership,
+		SendInvitationEmail: &sendInvitationEmail,
+	}
+	request.Identities = &usersv1.CreateMembershipRequest_ExternalId{ExternalId: externalId}
+
+	return newConnectExecuter(
+		u.coreClient,
+		u.client.CreateMembership,
+		request,
+	).exec(ctx)
+}
+
+// UpdateMembershipByExternalId updates a user's membership (identified by external ID) in an organization
+func (u *userService) UpdateMembershipByExternalId(ctx context.Context, organizationId string, externalId string, membership *usersv1.UpdateMembership) (*UpdateMembershipResponse, error) {
+	request := &usersv1.UpdateMembershipRequest{
+		OrganizationId: organizationId,
+		Membership:     membership,
+	}
+	request.Identities = &usersv1.UpdateMembershipRequest_ExternalId{ExternalId: externalId}
+
+	return newConnectExecuter(
+		u.coreClient,
+		u.client.UpdateMembership,
+		request,
+	).exec(ctx)
+}
+
+// DeleteMembershipByExternalId deletes a user's membership (identified by external ID) from an organization.
+// cascade, when true, also removes the user from any sub-organizations or nested groups
+// within the organization. Pass false to remove only the direct membership.
+func (u *userService) DeleteMembershipByExternalId(ctx context.Context, organizationId string, externalId string, cascade bool) error {
+	request := &usersv1.DeleteMembershipRequest{
+		OrganizationId: organizationId,
+		Cascade:        &cascade,
+	}
+	request.Identities = &usersv1.DeleteMembershipRequest_ExternalId{ExternalId: externalId}
 
 	_, err := newConnectExecuter(
 		u.coreClient,
