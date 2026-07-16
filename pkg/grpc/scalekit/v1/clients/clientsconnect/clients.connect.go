@@ -108,6 +108,12 @@ const (
 	// ClientServiceListResourceClientsProcedure is the fully-qualified name of the ClientService's
 	// ListResourceClients RPC.
 	ClientServiceListResourceClientsProcedure = "/scalekit.v1.clients.ClientService/ListResourceClients"
+	// ClientServiceListCurrentAgentConsentsProcedure is the fully-qualified name of the ClientService's
+	// ListCurrentAgentConsents RPC.
+	ClientServiceListCurrentAgentConsentsProcedure = "/scalekit.v1.clients.ClientService/ListCurrentAgentConsents"
+	// ClientServiceRevokeCurrentAgentConsentProcedure is the fully-qualified name of the
+	// ClientService's RevokeCurrentAgentConsent RPC.
+	ClientServiceRevokeCurrentAgentConsentProcedure = "/scalekit.v1.clients.ClientService/RevokeCurrentAgentConsent"
 	// ClientServiceListResourceUserConsentsProcedure is the fully-qualified name of the ClientService's
 	// ListResourceUserConsents RPC.
 	ClientServiceListResourceUserConsentsProcedure = "/scalekit.v1.clients.ClientService/ListResourceUserConsents"
@@ -167,6 +173,22 @@ type ClientServiceClient interface {
 	UpdateResourceClient(context.Context, *connect.Request[clients.UpdateResourceClientRequest]) (*connect.Response[clients.UpdateResourceClientResponse], error)
 	GetResourceClient(context.Context, *connect.Request[clients.GetResourceClientRequest]) (*connect.Response[clients.GetResourceClientResponse], error)
 	ListResourceClients(context.Context, *connect.Request[clients.ListResourceClientsRequest]) (*connect.Response[clients.ListResourceClientsResponse], error)
+	// Phase 2 — SESSION_USER-authed counterpart for the /ui end-user
+	// surface. Resolves the Gateway resource from the env's
+	// gateway_configurations.application_id automatically; external_user_id
+	// is forced from the session, so the caller cannot list another user's
+	// consents. Shape mirrors ListResourceUserConsentsResponse so the
+	// frontend's consent-list consumer doesn't need to branch on mode.
+	ListCurrentAgentConsents(context.Context, *connect.Request[clients.ListCurrentAgentConsentsRequest]) (*connect.Response[clients.ListCurrentAgentConsentsResponse], error)
+	// Phase 2 — SESSION_USER revoke. The caller can only revoke a
+	// consent row whose external_user_id matches the calling user's
+	// session (server-side ownership check). Revocation atomically
+	// deletes the consent row AND marks every ACTIVE refresh token
+	// minted for (env, client_id, external_user_id) as REVOKED so the
+	// agent cannot mint new access tokens. Access tokens already in
+	// the wild continue to work until their bounded JWT TTL — that
+	// window is configurable per MCP server via access_token_expiry.
+	RevokeCurrentAgentConsent(context.Context, *connect.Request[clients.RevokeCurrentAgentConsentRequest]) (*connect.Response[clients.RevokeCurrentAgentConsentResponse], error)
 	ListResourceUserConsents(context.Context, *connect.Request[clients.ListResourceUserConsentsRequest]) (*connect.Response[clients.ListResourceUserConsentsResponse], error)
 	DeleteResourceClient(context.Context, *connect.Request[clients.DeleteResourceClientRequest]) (*connect.Response[clients.DeleteResourceClientResponse], error)
 	RegisterClient(context.Context, *connect.Request[clients.RegisterClientRequest]) (*connect.Response[clients.RegisterClientResponse], error)
@@ -343,6 +365,18 @@ func NewClientServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(clientServiceMethods.ByName("ListResourceClients")),
 			connect.WithClientOptions(opts...),
 		),
+		listCurrentAgentConsents: connect.NewClient[clients.ListCurrentAgentConsentsRequest, clients.ListCurrentAgentConsentsResponse](
+			httpClient,
+			baseURL+ClientServiceListCurrentAgentConsentsProcedure,
+			connect.WithSchema(clientServiceMethods.ByName("ListCurrentAgentConsents")),
+			connect.WithClientOptions(opts...),
+		),
+		revokeCurrentAgentConsent: connect.NewClient[clients.RevokeCurrentAgentConsentRequest, clients.RevokeCurrentAgentConsentResponse](
+			httpClient,
+			baseURL+ClientServiceRevokeCurrentAgentConsentProcedure,
+			connect.WithSchema(clientServiceMethods.ByName("RevokeCurrentAgentConsent")),
+			connect.WithClientOptions(opts...),
+		),
 		listResourceUserConsents: connect.NewClient[clients.ListResourceUserConsentsRequest, clients.ListResourceUserConsentsResponse](
 			httpClient,
 			baseURL+ClientServiceListResourceUserConsentsProcedure,
@@ -433,6 +467,8 @@ type clientServiceClient struct {
 	updateResourceClient           *connect.Client[clients.UpdateResourceClientRequest, clients.UpdateResourceClientResponse]
 	getResourceClient              *connect.Client[clients.GetResourceClientRequest, clients.GetResourceClientResponse]
 	listResourceClients            *connect.Client[clients.ListResourceClientsRequest, clients.ListResourceClientsResponse]
+	listCurrentAgentConsents       *connect.Client[clients.ListCurrentAgentConsentsRequest, clients.ListCurrentAgentConsentsResponse]
+	revokeCurrentAgentConsent      *connect.Client[clients.RevokeCurrentAgentConsentRequest, clients.RevokeCurrentAgentConsentResponse]
 	listResourceUserConsents       *connect.Client[clients.ListResourceUserConsentsRequest, clients.ListResourceUserConsentsResponse]
 	deleteResourceClient           *connect.Client[clients.DeleteResourceClientRequest, clients.DeleteResourceClientResponse]
 	registerClient                 *connect.Client[clients.RegisterClientRequest, clients.RegisterClientResponse]
@@ -572,6 +608,16 @@ func (c *clientServiceClient) ListResourceClients(ctx context.Context, req *conn
 	return c.listResourceClients.CallUnary(ctx, req)
 }
 
+// ListCurrentAgentConsents calls scalekit.v1.clients.ClientService.ListCurrentAgentConsents.
+func (c *clientServiceClient) ListCurrentAgentConsents(ctx context.Context, req *connect.Request[clients.ListCurrentAgentConsentsRequest]) (*connect.Response[clients.ListCurrentAgentConsentsResponse], error) {
+	return c.listCurrentAgentConsents.CallUnary(ctx, req)
+}
+
+// RevokeCurrentAgentConsent calls scalekit.v1.clients.ClientService.RevokeCurrentAgentConsent.
+func (c *clientServiceClient) RevokeCurrentAgentConsent(ctx context.Context, req *connect.Request[clients.RevokeCurrentAgentConsentRequest]) (*connect.Response[clients.RevokeCurrentAgentConsentResponse], error) {
+	return c.revokeCurrentAgentConsent.CallUnary(ctx, req)
+}
+
 // ListResourceUserConsents calls scalekit.v1.clients.ClientService.ListResourceUserConsents.
 func (c *clientServiceClient) ListResourceUserConsents(ctx context.Context, req *connect.Request[clients.ListResourceUserConsentsRequest]) (*connect.Response[clients.ListResourceUserConsentsResponse], error) {
 	return c.listResourceUserConsents.CallUnary(ctx, req)
@@ -655,6 +701,22 @@ type ClientServiceHandler interface {
 	UpdateResourceClient(context.Context, *connect.Request[clients.UpdateResourceClientRequest]) (*connect.Response[clients.UpdateResourceClientResponse], error)
 	GetResourceClient(context.Context, *connect.Request[clients.GetResourceClientRequest]) (*connect.Response[clients.GetResourceClientResponse], error)
 	ListResourceClients(context.Context, *connect.Request[clients.ListResourceClientsRequest]) (*connect.Response[clients.ListResourceClientsResponse], error)
+	// Phase 2 — SESSION_USER-authed counterpart for the /ui end-user
+	// surface. Resolves the Gateway resource from the env's
+	// gateway_configurations.application_id automatically; external_user_id
+	// is forced from the session, so the caller cannot list another user's
+	// consents. Shape mirrors ListResourceUserConsentsResponse so the
+	// frontend's consent-list consumer doesn't need to branch on mode.
+	ListCurrentAgentConsents(context.Context, *connect.Request[clients.ListCurrentAgentConsentsRequest]) (*connect.Response[clients.ListCurrentAgentConsentsResponse], error)
+	// Phase 2 — SESSION_USER revoke. The caller can only revoke a
+	// consent row whose external_user_id matches the calling user's
+	// session (server-side ownership check). Revocation atomically
+	// deletes the consent row AND marks every ACTIVE refresh token
+	// minted for (env, client_id, external_user_id) as REVOKED so the
+	// agent cannot mint new access tokens. Access tokens already in
+	// the wild continue to work until their bounded JWT TTL — that
+	// window is configurable per MCP server via access_token_expiry.
+	RevokeCurrentAgentConsent(context.Context, *connect.Request[clients.RevokeCurrentAgentConsentRequest]) (*connect.Response[clients.RevokeCurrentAgentConsentResponse], error)
 	ListResourceUserConsents(context.Context, *connect.Request[clients.ListResourceUserConsentsRequest]) (*connect.Response[clients.ListResourceUserConsentsResponse], error)
 	DeleteResourceClient(context.Context, *connect.Request[clients.DeleteResourceClientRequest]) (*connect.Response[clients.DeleteResourceClientResponse], error)
 	RegisterClient(context.Context, *connect.Request[clients.RegisterClientRequest]) (*connect.Response[clients.RegisterClientResponse], error)
@@ -827,6 +889,18 @@ func NewClientServiceHandler(svc ClientServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(clientServiceMethods.ByName("ListResourceClients")),
 		connect.WithHandlerOptions(opts...),
 	)
+	clientServiceListCurrentAgentConsentsHandler := connect.NewUnaryHandler(
+		ClientServiceListCurrentAgentConsentsProcedure,
+		svc.ListCurrentAgentConsents,
+		connect.WithSchema(clientServiceMethods.ByName("ListCurrentAgentConsents")),
+		connect.WithHandlerOptions(opts...),
+	)
+	clientServiceRevokeCurrentAgentConsentHandler := connect.NewUnaryHandler(
+		ClientServiceRevokeCurrentAgentConsentProcedure,
+		svc.RevokeCurrentAgentConsent,
+		connect.WithSchema(clientServiceMethods.ByName("RevokeCurrentAgentConsent")),
+		connect.WithHandlerOptions(opts...),
+	)
 	clientServiceListResourceUserConsentsHandler := connect.NewUnaryHandler(
 		ClientServiceListResourceUserConsentsProcedure,
 		svc.ListResourceUserConsents,
@@ -939,6 +1013,10 @@ func NewClientServiceHandler(svc ClientServiceHandler, opts ...connect.HandlerOp
 			clientServiceGetResourceClientHandler.ServeHTTP(w, r)
 		case ClientServiceListResourceClientsProcedure:
 			clientServiceListResourceClientsHandler.ServeHTTP(w, r)
+		case ClientServiceListCurrentAgentConsentsProcedure:
+			clientServiceListCurrentAgentConsentsHandler.ServeHTTP(w, r)
+		case ClientServiceRevokeCurrentAgentConsentProcedure:
+			clientServiceRevokeCurrentAgentConsentHandler.ServeHTTP(w, r)
 		case ClientServiceListResourceUserConsentsProcedure:
 			clientServiceListResourceUserConsentsHandler.ServeHTTP(w, r)
 		case ClientServiceDeleteResourceClientProcedure:
@@ -1066,6 +1144,14 @@ func (UnimplementedClientServiceHandler) GetResourceClient(context.Context, *con
 
 func (UnimplementedClientServiceHandler) ListResourceClients(context.Context, *connect.Request[clients.ListResourceClientsRequest]) (*connect.Response[clients.ListResourceClientsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.clients.ClientService.ListResourceClients is not implemented"))
+}
+
+func (UnimplementedClientServiceHandler) ListCurrentAgentConsents(context.Context, *connect.Request[clients.ListCurrentAgentConsentsRequest]) (*connect.Response[clients.ListCurrentAgentConsentsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.clients.ClientService.ListCurrentAgentConsents is not implemented"))
+}
+
+func (UnimplementedClientServiceHandler) RevokeCurrentAgentConsent(context.Context, *connect.Request[clients.RevokeCurrentAgentConsentRequest]) (*connect.Response[clients.RevokeCurrentAgentConsentResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.clients.ClientService.RevokeCurrentAgentConsent is not implemented"))
 }
 
 func (UnimplementedClientServiceHandler) ListResourceUserConsents(context.Context, *connect.Request[clients.ListResourceUserConsentsRequest]) (*connect.Response[clients.ListResourceUserConsentsResponse], error) {
