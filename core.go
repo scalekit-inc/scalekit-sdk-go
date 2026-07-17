@@ -20,7 +20,7 @@ import (
 const (
 	tokenEndpoint      = "oauth/token"
 	jwksEndpoint       = "keys"
-	sdkVersionNumber   = "2.6.0"
+	sdkVersionNumber   = "2.7.0"
 	sdkVersion         = "Scalekit-Go/" + sdkVersionNumber
 	defaultHTTPTimeout = 10 * time.Second
 	maxErrorBodyBytes  = 8 * 1024
@@ -100,7 +100,7 @@ func (h *headerInterceptor) RoundTrip(r *http.Request) (*http.Response, error) {
 
 func newCoreClient(envUrl, clientId, clientSecret string) *coreClient {
 	sdkVersion := sdkVersion
-	apiVersion := "20260312"
+	apiVersion := "20260716"
 	client := &coreClient{
 		sdkVersion:   sdkVersion,
 		apiVersion:   apiVersion,
