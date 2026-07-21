@@ -7233,3 +7233,167 @@ if err := client.Auth().UpdateLoginUserDetails(ctx, req); err != nil {
 </dd>
 </dl>
 </details>
+
+## Events
+
+<details><summary><code>client.Events().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/events.go">ListEvents</a>(ctx, options?) -> (*ListEventsResponse, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists events for the current environment, ordered most-recent first, including a total count of matching events. Pass `AuthRequestId` in `ListEventsOptions` to see every event a specific authentication request produced — correlate it with the `AuthRequestId` returned by `AuditLogs().ListAuthRequests`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+resp, err := client.Events().ListEvents(ctx, &scalekit.ListEventsOptions{
+  AuthRequestId: "areq_123456",
+  PageSize:      10,
+})
+if err != nil {
+  // handle
+}
+fmt.Println("total events:", resp.GetTotalSize())
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**options?:** `*ListEventsOptions`
+- `EventTypes []string` - Filter by one or more event type names
+- `StartTime *timestamppb.Timestamp` - Only return events at or after this timestamp
+- `EndTime *timestamppb.Timestamp` - Only return events at or before this timestamp
+- `OrganizationId string` - Filter by organization ID
+- `Source EventSource` - `EventSourceUnspecified`, `EventSourceScalekit`, or `EventSourceDirSync`
+- `AuthRequestId string` - Filter by the authentication request that produced the events
+- `InterceptorId string` - Filter by interceptor ID
+- `InterceptorStatus string` - Filter by interceptor status
+- `InterceptorDecision string` - Filter by interceptor decision
+- `ConnectionId string` - Filter by connection ID
+- `ConnectedAccountId string` - Filter by connected account ID
+- `PageSize uint32` - Number of events to return per page
+- `PageToken string` - Opaque pagination cursor from a previous response
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+</dd>
+</dl>
+</details>
+
+## Audit Logs
+
+<details><summary><code>client.AuditLogs().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/auditlogs.go">ListAuthRequests</a>(ctx, options?) -> (*ListAuthRequestsResponse, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists authentication request logs for the current environment, ordered most-recent first. Each log's `AuthRequestId` can be passed to `Events().ListEvents` via `ListEventsOptions.AuthRequestId` to see every event a specific login produced.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+resp, err := client.AuditLogs().ListAuthRequests(ctx, &scalekit.ListAuthRequestsOptions{
+  Email:    "jane.doe@example.com",
+  PageSize: 10,
+})
+if err != nil {
+  // handle
+}
+for _, entry := range resp.GetAuthRequests() {
+  fmt.Println(entry.GetAuthRequestId(), entry.GetStatus())
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**options?:** `*ListAuthRequestsOptions`
+- `PageSize uint32` - Number of authentication request logs to return per page
+- `PageToken string` - Opaque pagination cursor from a previous response
+- `Email string` - Filter by the end user's email address
+- `Status []string` - Filter by one or more outcome statuses (e.g. `SUCCESS`, `FAILED`)
+- `StartTime *timestamppb.Timestamp` - Only return authentication logs at or after this timestamp
+- `EndTime *timestamppb.Timestamp` - Only return authentication logs at or before this timestamp
+- `ResourceId string` - Filter by resource ID
+- `ConnectedAccountIdentifier string` - Filter by connected account identifier
+- `ClientId string` - Filter by client ID
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+</dd>
+</dl>
+</details>
