@@ -47,6 +47,8 @@ type Scalekit interface {
 	WebAuthn() WebAuthnService
 	Token() TokenService
 	M2M() M2MService
+	Events() Events
+	AuditLogs() AuditLogs
 	GetAuthorizationUrl(redirectUri string, options AuthorizationUrlOptions) (*url.URL, error)
 	AuthenticateWithCode(ctx context.Context, code string, redirectUri string, options AuthenticationOptions) (*AuthenticationResponse, error)
 	GetIdpInitiatedLoginClaims(ctx context.Context, idpInitiateLoginToken string) (*IdpInitiatedLoginClaims, error)
@@ -83,6 +85,8 @@ type scalekitClient struct {
 	webauthn     WebAuthnService
 	token        TokenService
 	m2m          M2MService
+	events       Events
+	auditLogs    AuditLogs
 }
 
 type AuthorizationUrlOptions struct {
@@ -266,6 +270,8 @@ func newScalekitClient(coreClient *coreClient) *scalekitClient {
 		webauthn:     newWebAuthnClient(coreClient),
 		token:        newTokenService(coreClient),
 		m2m:          newM2MService(coreClient),
+		events:       newEventsClient(coreClient),
+		auditLogs:    newAuditLogsClient(coreClient),
 	}
 }
 
@@ -331,6 +337,14 @@ func (s *scalekitClient) Token() TokenService {
 
 func (s *scalekitClient) M2M() M2MService {
 	return s.m2m
+}
+
+func (s *scalekitClient) Events() Events {
+	return s.events
+}
+
+func (s *scalekitClient) AuditLogs() AuditLogs {
+	return s.auditLogs
 }
 
 func (s *scalekitClient) GetAuthorizationUrl(redirectUri string, options AuthorizationUrlOptions) (*url.URL, error) {
