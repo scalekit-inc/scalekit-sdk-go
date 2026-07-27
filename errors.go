@@ -99,6 +99,16 @@ var (
 
 	// ErrJwksEmptyKeySet is returned when the JWKS endpoint returns a key set with no keys.
 	ErrJwksEmptyKeySet = errors.New("JWKS endpoint returned empty key set")
+
+	// ErrIssuerMismatch is returned when a token's iss claim does not match the
+	// expected issuer supplied via ValidateTokenOptions.Issuer. The error wraps
+	// this sentinel, so callers can match it with errors.Is while the message
+	// still carries the actual and expected issuer values.
+	ErrIssuerMismatch = errors.New("token issuer mismatch")
+
+	// ErrInvalidPageSize is returned when a requested page size is negative or
+	// exceeds the uint32 range accepted by the API.
+	ErrInvalidPageSize = errors.New("page size is out of range")
 )
 
 // errorCore holds the common fields for SDK errors. Unexported so HTTPError can embed it without

@@ -36,10 +36,11 @@ func TestValidateTokenWithOptionsWrongIssuer(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, valid)
 
-	// Wrong issuer must fail validation.
+	// Wrong issuer must fail validation with the issuer-mismatch sentinel, so
+	// this branch cannot pass on an unrelated token or JWKS failure.
 	valid, err = client.ValidateTokenWithOptions(ctx, accessToken, &scalekit.ValidateTokenOptions{
 		Issuer: issuer + "-wrong",
 	})
-	assert.Error(t, err)
+	assert.ErrorIs(t, err, scalekit.ErrIssuerMismatch)
 	assert.False(t, valid)
 }

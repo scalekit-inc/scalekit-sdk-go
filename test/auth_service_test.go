@@ -50,10 +50,16 @@ func TestAuthServiceUpdateLoginUserDetailsValidation(t *testing.T) {
 // connection id and login request id are supplied via the environment, and
 // asserts the typed response carries the auth request id. Skipped otherwise.
 func TestAuthServiceUpdateLoginUserDetailsLive(t *testing.T) {
+	// This is a live write RPC, so identity values must come from a dedicated,
+	// isolated test account supplied via the environment — never hard-coded, to
+	// avoid overwriting a real user or failing because the values do not belong
+	// to the login request.
 	connectionId := os.Getenv("SCALEKIT_TEST_CONNECTION_ID")
 	loginRequestId := os.Getenv("SCALEKIT_TEST_LOGIN_REQUEST_ID")
-	if connectionId == "" || loginRequestId == "" {
-		t.Skip("set SCALEKIT_TEST_CONNECTION_ID and SCALEKIT_TEST_LOGIN_REQUEST_ID to run this test")
+	userSub := os.Getenv("SCALEKIT_TEST_USER_SUB")
+	userEmail := os.Getenv("SCALEKIT_TEST_USER_EMAIL")
+	if connectionId == "" || loginRequestId == "" || userSub == "" || userEmail == "" {
+		t.Skip("set SCALEKIT_TEST_CONNECTION_ID, SCALEKIT_TEST_LOGIN_REQUEST_ID, SCALEKIT_TEST_USER_SUB and SCALEKIT_TEST_USER_EMAIL to run this test")
 	}
 
 	ctx := context.Background()
@@ -61,8 +67,8 @@ func TestAuthServiceUpdateLoginUserDetailsLive(t *testing.T) {
 		ConnectionId:   connectionId,
 		LoginRequestId: loginRequestId,
 		User: &scalekit.LoggedInUserDetails{
-			Sub:   "sub",
-			Email: "user@example.com",
+			Sub:   userSub,
+			Email: userEmail,
 		},
 	})
 	require.NoError(t, err)

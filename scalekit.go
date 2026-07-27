@@ -485,7 +485,7 @@ func (s *scalekitClient) ValidateTokenWithOptions(ctx context.Context, token str
 	}
 
 	if options.Issuer != "" && options.Issuer != claims.Iss {
-		return false, fmt.Errorf("token issuer %q does not match expected issuer %q", claims.Iss, options.Issuer)
+		return false, fmt.Errorf("%w: token issuer %q does not match expected issuer %q", ErrIssuerMismatch, claims.Iss, options.Issuer)
 	}
 
 	if len(options.Scopes) == 0 {

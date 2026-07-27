@@ -2,6 +2,7 @@ package scalekit
 
 import (
 	"context"
+	"math"
 
 	eventsv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/events"
 	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/events/eventsconnect"
@@ -46,6 +47,9 @@ func (e *eventsService) ListEventsPaginated(ctx context.Context, options ListEve
 		PageToken: options.PageToken,
 	}
 	if options.PageSize > 0 {
+		if uint64(options.PageSize) > math.MaxUint32 {
+			return nil, ErrInvalidPageSize
+		}
 		request.PageSize = uint32(options.PageSize)
 	}
 	return newConnectExecuter(
