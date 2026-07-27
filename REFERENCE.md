@@ -1091,6 +1091,7 @@ _ = valid
 **options:** `*ValidateTokenOptions`
 - `Audience []string` - Optional set of accepted aud claim values
 - `Scopes []string` - Optional set of scopes that must be present in the token
+- `Issuer string` - Optional expected issuer; when non-empty, validation fails unless it matches the token's iss claim
 
 </dd>
 </dl>
@@ -7160,7 +7161,7 @@ Deletes a passkey credential by credential ID.
 
 ## Auth
 
-<details><summary><code>client.Auth().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/auth_service.go">UpdateLoginUserDetails</a>(ctx, req) -> error</code></summary>
+<details><summary><code>client.Auth().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/auth_service.go">UpdateLoginUserDetails</a>(ctx, req) -> (*UpdateLoginUserDetailsResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -7198,9 +7199,11 @@ req := &scalekit.UpdateLoginUserDetailsRequest{
   },
 }
 
-if err := client.Auth().UpdateLoginUserDetails(ctx, req); err != nil {
+resp, err := client.Auth().UpdateLoginUserDetails(ctx, req)
+if err != nil {
   // handle
 }
+_ = resp.GetAuthRequestId()
 ```
 </dd>
 </dl>
@@ -7224,6 +7227,81 @@ if err := client.Auth().UpdateLoginUserDetails(ctx, req); err != nil {
 <dd>
 
 **req:** `*UpdateLoginUserDetailsRequest`
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+</dd>
+</dl>
+</details>
+
+## Events
+
+<details><summary><code>client.Events().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/events.go">ListEventsPaginated</a>(ctx, options) -> (*ListEventsPaginatedResponse, error)</code></summary>
+<dl>
+<dd>
+
+### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists events for the environment with cursor-based pagination and optional filtering.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+resp, err := client.Events().ListEventsPaginated(ctx, scalekit.ListEventsOptions{
+  PageSize: 10,
+})
+if err != nil {
+  // handle
+}
+for _, event := range resp.GetEvents() {
+  _ = event
+}
+_ = resp.GetNextPageToken()
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**options:** `ListEventsOptions`
+- `Filter *EventFilter` - Optional: filters (event types, time range, organization, source, etc.) applied to the query
+- `PageSize int` - Optional: maximum number of events to return per page
+- `PageToken string` - Optional: cursor from a previous call used to fetch the next page
 
 </dd>
 </dl>

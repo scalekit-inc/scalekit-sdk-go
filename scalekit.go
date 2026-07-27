@@ -46,6 +46,7 @@ type Scalekit interface {
 	Permission() PermissionService
 	WebAuthn() WebAuthnService
 	Token() TokenService
+	Events() EventsService
 	M2M() M2MService
 	GetAuthorizationUrl(redirectUri string, options AuthorizationUrlOptions) (*url.URL, error)
 	AuthenticateWithCode(ctx context.Context, code string, redirectUri string, options AuthenticationOptions) (*AuthenticationResponse, error)
@@ -82,6 +83,7 @@ type scalekitClient struct {
 	permission   PermissionService
 	webauthn     WebAuthnService
 	token        TokenService
+	events       EventsService
 	m2m          M2MService
 }
 
@@ -112,6 +114,10 @@ type ValidateTokenOptions struct {
 	// Scopes is the optional set of scopes that must be present in the token's
 	// space-delimited scope claim.
 	Scopes []string
+
+	// Issuer is the optional expected issuer. When non-empty, validation fails
+	// unless it matches the token's iss claim.
+	Issuer string
 }
 
 type AuthenticationResponse struct {
@@ -265,6 +271,7 @@ func newScalekitClient(coreClient *coreClient) *scalekitClient {
 		permission:   newPermissionService(coreClient),
 		webauthn:     newWebAuthnClient(coreClient),
 		token:        newTokenService(coreClient),
+		events:       newEventsService(coreClient),
 		m2m:          newM2MService(coreClient),
 	}
 }
@@ -327,6 +334,10 @@ func (s *scalekitClient) WebAuthn() WebAuthnService {
 
 func (s *scalekitClient) Token() TokenService {
 	return s.token
+}
+
+func (s *scalekitClient) Events() EventsService {
+	return s.events
 }
 
 func (s *scalekitClient) M2M() M2MService {
@@ -471,6 +482,10 @@ func (s *scalekitClient) ValidateTokenWithOptions(ctx context.Context, token str
 		if !matched {
 			return false, fmt.Errorf("none of the expected audiences found in token aud claim")
 		}
+	}
+
+	if options.Issuer != "" && options.Issuer != claims.Iss {
+		return false, fmt.Errorf("%w: token issuer %q does not match expected issuer %q", ErrIssuerMismatch, claims.Iss, options.Issuer)
 	}
 
 	if len(options.Scopes) == 0 {
