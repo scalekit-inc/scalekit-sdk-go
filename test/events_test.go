@@ -18,8 +18,10 @@ func TestListEventsPaginated(t *testing.T) {
 	})
 	require.NoError(t, err)
 	require.NotNil(t, resp)
-	// Events may legitimately be empty for a fresh test environment.
-	assert.GreaterOrEqual(t, len(resp.GetEvents()), 0)
+	// Events may legitimately be empty for a fresh test environment; the page
+	// tokens must be readable regardless of whether more pages exist.
+	_ = resp.GetNextPageToken()
+	_ = resp.GetPrevPageToken()
 }
 
 // TestListEventsPaginatedRejectsInvalidPageSize verifies that out-of-range page
