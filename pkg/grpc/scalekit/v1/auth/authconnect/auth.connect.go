@@ -84,7 +84,7 @@ type AuthServiceClient interface {
 	Logout(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error)
 	GetAuthCustomizations(context.Context, *connect.Request[auth.GetAuthCustomizationsRequest]) (*connect.Response[auth.GetAuthCustomizationsResponse], error)
 	GetAuthFeatures(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[auth.GetAuthFeaturesResponse], error)
-	UpdateLoginUserDetails(context.Context, *connect.Request[auth.UpdateLoginUserDetailsRequest]) (*connect.Response[emptypb.Empty], error)
+	UpdateLoginUserDetails(context.Context, *connect.Request[auth.UpdateLoginUserDetailsRequest]) (*connect.Response[auth.UpdateLoginUserDetailsResponse], error)
 }
 
 // NewAuthServiceClient constructs a client for the scalekit.v1.auth.AuthService service. By
@@ -164,7 +164,7 @@ func NewAuthServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(authServiceMethods.ByName("GetAuthFeatures")),
 			connect.WithClientOptions(opts...),
 		),
-		updateLoginUserDetails: connect.NewClient[auth.UpdateLoginUserDetailsRequest, emptypb.Empty](
+		updateLoginUserDetails: connect.NewClient[auth.UpdateLoginUserDetailsRequest, auth.UpdateLoginUserDetailsResponse](
 			httpClient,
 			baseURL+AuthServiceUpdateLoginUserDetailsProcedure,
 			connect.WithSchema(authServiceMethods.ByName("UpdateLoginUserDetails")),
@@ -186,7 +186,7 @@ type authServiceClient struct {
 	logout                 *connect.Client[emptypb.Empty, emptypb.Empty]
 	getAuthCustomizations  *connect.Client[auth.GetAuthCustomizationsRequest, auth.GetAuthCustomizationsResponse]
 	getAuthFeatures        *connect.Client[emptypb.Empty, auth.GetAuthFeaturesResponse]
-	updateLoginUserDetails *connect.Client[auth.UpdateLoginUserDetailsRequest, emptypb.Empty]
+	updateLoginUserDetails *connect.Client[auth.UpdateLoginUserDetailsRequest, auth.UpdateLoginUserDetailsResponse]
 }
 
 // ListAuthMethods calls scalekit.v1.auth.AuthService.ListAuthMethods.
@@ -245,7 +245,7 @@ func (c *authServiceClient) GetAuthFeatures(ctx context.Context, req *connect.Re
 }
 
 // UpdateLoginUserDetails calls scalekit.v1.auth.AuthService.UpdateLoginUserDetails.
-func (c *authServiceClient) UpdateLoginUserDetails(ctx context.Context, req *connect.Request[auth.UpdateLoginUserDetailsRequest]) (*connect.Response[emptypb.Empty], error) {
+func (c *authServiceClient) UpdateLoginUserDetails(ctx context.Context, req *connect.Request[auth.UpdateLoginUserDetailsRequest]) (*connect.Response[auth.UpdateLoginUserDetailsResponse], error) {
 	return c.updateLoginUserDetails.CallUnary(ctx, req)
 }
 
@@ -262,7 +262,7 @@ type AuthServiceHandler interface {
 	Logout(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error)
 	GetAuthCustomizations(context.Context, *connect.Request[auth.GetAuthCustomizationsRequest]) (*connect.Response[auth.GetAuthCustomizationsResponse], error)
 	GetAuthFeatures(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[auth.GetAuthFeaturesResponse], error)
-	UpdateLoginUserDetails(context.Context, *connect.Request[auth.UpdateLoginUserDetailsRequest]) (*connect.Response[emptypb.Empty], error)
+	UpdateLoginUserDetails(context.Context, *connect.Request[auth.UpdateLoginUserDetailsRequest]) (*connect.Response[auth.UpdateLoginUserDetailsResponse], error)
 }
 
 // NewAuthServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -423,6 +423,6 @@ func (UnimplementedAuthServiceHandler) GetAuthFeatures(context.Context, *connect
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.auth.AuthService.GetAuthFeatures is not implemented"))
 }
 
-func (UnimplementedAuthServiceHandler) UpdateLoginUserDetails(context.Context, *connect.Request[auth.UpdateLoginUserDetailsRequest]) (*connect.Response[emptypb.Empty], error) {
+func (UnimplementedAuthServiceHandler) UpdateLoginUserDetails(context.Context, *connect.Request[auth.UpdateLoginUserDetailsRequest]) (*connect.Response[auth.UpdateLoginUserDetailsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.auth.AuthService.UpdateLoginUserDetails is not implemented"))
 }

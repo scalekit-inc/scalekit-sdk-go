@@ -2,10 +2,12 @@ package test
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	scalekit "github.com/scalekit-inc/scalekit-sdk-go/v2"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAuthServiceUpdateLoginUserDetailsValidation(t *testing.T) {
@@ -38,8 +40,32 @@ func TestAuthServiceUpdateLoginUserDetailsValidation(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			err := authService.UpdateLoginUserDetails(ctx, tc.req)
+			_, err := authService.UpdateLoginUserDetails(ctx, tc.req)
 			assert.Error(t, err)
 		})
 	}
+}
+
+// TestAuthServiceUpdateLoginUserDetailsLive exercises the happy path when a real
+// connection id and login request id are supplied via the environment, and
+// asserts the typed response carries the auth request id. Skipped otherwise.
+func TestAuthServiceUpdateLoginUserDetailsLive(t *testing.T) {
+	connectionId := os.Getenv("SCALEKIT_TEST_CONNECTION_ID")
+	loginRequestId := os.Getenv("SCALEKIT_TEST_LOGIN_REQUEST_ID")
+	if connectionId == "" || loginRequestId == "" {
+		t.Skip("set SCALEKIT_TEST_CONNECTION_ID and SCALEKIT_TEST_LOGIN_REQUEST_ID to run this test")
+	}
+
+	ctx := context.Background()
+	resp, err := client.Auth().UpdateLoginUserDetails(ctx, &scalekit.UpdateLoginUserDetailsRequest{
+		ConnectionId:   connectionId,
+		LoginRequestId: loginRequestId,
+		User: &scalekit.LoggedInUserDetails{
+			Sub:   "sub",
+			Email: "user@example.com",
+		},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	assert.NotEmpty(t, resp.GetAuthRequestId())
 }
