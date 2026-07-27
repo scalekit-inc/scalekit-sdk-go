@@ -46,6 +46,9 @@ func (e *eventsService) ListEventsPaginated(ctx context.Context, options ListEve
 		Filter:    options.Filter,
 		PageToken: options.PageToken,
 	}
+	if options.PageSize < 0 {
+		return nil, ErrInvalidPageSize
+	}
 	if options.PageSize > 0 {
 		if uint64(options.PageSize) > math.MaxUint32 {
 			return nil, ErrInvalidPageSize

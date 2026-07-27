@@ -22,15 +22,28 @@ func TestListEventsPaginated(t *testing.T) {
 	assert.GreaterOrEqual(t, len(resp.GetEvents()), 0)
 }
 
-// TestListEventsPaginatedRejectsOversizePageSize verifies that a page size
-// beyond the uint32 range is rejected with the ErrInvalidPageSize sentinel
-// before any RPC is made, rather than silently wrapping to a small value.
-func TestListEventsPaginatedRejectsOversizePageSize(t *testing.T) {
+// TestListEventsPaginatedRejectsInvalidPageSize verifies that out-of-range page
+// sizes are rejected with the ErrInvalidPageSize sentinel before any RPC is
+// made: values beyond the uint32 range (which would otherwise wrap) and
+// negative values (which must not silently fall through to a default page).
+func TestListEventsPaginatedRejectsInvalidPageSize(t *testing.T) {
 	ctx := context.Background()
 
-	resp, err := client.Events().ListEventsPaginated(ctx, scalekit.ListEventsOptions{
-		PageSize: math.MaxUint32 + 1,
-	})
-	assert.Nil(t, resp)
-	assert.ErrorIs(t, err, scalekit.ErrInvalidPageSize)
+	cases := []struct {
+		name     string
+		pageSize int
+	}{
+		{name: "above uint32 max", pageSize: math.MaxUint32 + 1},
+		{name: "negative", pageSize: -1},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			resp, err := client.Events().ListEventsPaginated(ctx, scalekit.ListEventsOptions{
+				PageSize: tc.pageSize,
+			})
+			assert.Nil(t, resp)
+			assert.ErrorIs(t, err, scalekit.ErrInvalidPageSize)
+		})
+	}
 }
