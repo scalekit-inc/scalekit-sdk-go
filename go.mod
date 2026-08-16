@@ -5,14 +5,14 @@ go 1.25.0
 toolchain go1.25.12
 
 require (
-	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.34.2-20240717164558-a6c49f84cc0f.2
+	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.11-20260415201107-50325440f8f2.1
 	connectrpc.com/connect v1.16.2
 	github.com/go-jose/go-jose/v4 v4.1.4
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.23.0
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/sync v0.19.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20241021214115-324edc3d5d38
-	google.golang.org/protobuf v1.35.2
+	google.golang.org/protobuf v1.36.11
 )
 
 require (
