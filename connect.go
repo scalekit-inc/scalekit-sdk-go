@@ -25,13 +25,13 @@ type connectExecuter[TRequest interface{}, TResponse interface{}] struct {
 func newConnectClient[T interface{}](
 	c *coreClient,
 	fn func(
-	httpClient connect.HTTPClient,
-	baseURL string,
-	opts ...connect.ClientOption,
-) T,
+		httpClient connect.HTTPClient,
+		baseURL string,
+		opts ...connect.ClientOption,
+	) T,
 ) T {
 	return fn(
-		http.DefaultClient,
+		c.grpcHTTPClient,
 		c.envUrl,
 		connect.WithGRPC(),
 		connect.WithInterceptors(newHeaderInterceptor(c)),
@@ -67,7 +67,7 @@ func newConnectExecuter[TRequest interface{}, TResponse interface{}](
 	return &connectExecuter[TRequest, TResponse]{
 		coreClient: coreClient,
 		data:       data,
-		maxRetries:   1,
+		maxRetries: 1,
 		fn:         fn,
 	}
 }

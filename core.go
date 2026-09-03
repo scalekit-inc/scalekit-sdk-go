@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/go-jose/go-jose/v4"
+	"golang.org/x/net/http2"
 	"golang.org/x/sync/singleflight"
 )
 
@@ -24,6 +25,31 @@ const (
 	sdkVersion         = "Scalekit-Go/" + sdkVersionNumber
 	defaultHTTPTimeout = 10 * time.Second
 	maxErrorBodyBytes  = 8 * 1024
+
+	// grpcReadIdleTimeout/grpcPingTimeout mirror the keepalive settings the Java
+	// and Python SDKs use on the same gRPC channel (ManagedChannelBuilder.keepAliveTime /
+	// grpc.keepalive_time_ms): once no frame has been read for grpcReadIdleTimeout,
+	// the transport sends an HTTP/2 PING to verify the connection, whether or not a
+	// stream is open — this is how a connection silently killed by a network
+	// intermediary (LB, NAT, proxy) gets detected and replaced instead of being
+	// written to and failing with a raw transport error.
+	//
+	// 60s clears the backend's EnforcementPolicy.MinTime (30s, scalekit's
+	// cmd/grpc.go) with the same margin Java and Python use. A value close to
+	// 30s risks ordinary timing jitter tripping the server's ping-abuse
+	// detector and getting GOAWAY'd — the exact bug this setting avoids.
+	grpcReadIdleTimeout = 60 * time.Second
+	grpcPingTimeout     = 10 * time.Second
+
+	// grpcIdleConnTimeout must stay below GCP's fixed 600s HTTPS load balancer
+	// backend idle timeout that fronts the Scalekit API, so a fully idle
+	// connection is closed by this client before the LB silently drops it.
+	// 5 minutes matches the margin the backend server uses for the same reason
+	// (grpcKeepaliveMaxConnectionIdle in scalekit's cmd/grpc.go). Using a bare
+	// *http2.Transport directly (see newGrpcHTTPClient) opts out of
+	// http.Transport's own IdleConnTimeout default, so this must be set
+	// explicitly or idle connections would never close on their own.
+	grpcIdleConnTimeout = 5 * time.Minute
 )
 
 // withDefaultTimeout attaches a defaultHTTPTimeout deadline to ctx if it has
@@ -52,6 +78,12 @@ type coreClient struct {
 	jsonWebKeySet atomic.Pointer[jose.JSONWebKeySet]
 
 	httpClient *http.Client
+	// grpcHTTPClient backs every connect-go RPC service client built via
+	// newConnectClient. Built once here and shared across all of them (see
+	// newConnectClient), the same way http.DefaultClient used to be shared —
+	// except scoped to this coreClient instead of the whole process, and with
+	// keepalive settings tuned for the backend's enforcement policy.
+	grpcHTTPClient *http.Client
 }
 
 type authenticationResponse struct {
@@ -115,8 +147,43 @@ func newCoreClient(envUrl, clientId, clientSecret string) *coreClient {
 			client: client,
 		},
 	}
+	client.grpcHTTPClient, _ = newGrpcHTTPClient()
 
 	return client
+}
+
+// newGrpcHTTPClient returns a dedicated *http.Client for the gRPC connect-go
+// clients, instead of the shared http.DefaultClient/http.DefaultTransport
+// singleton other packages in the same process may reconfigure. It also
+// returns the *http2.Transport handle backing that client, purely so tests can
+// assert on the timeout values below without duplicating them.
+//
+// It configures HTTP/2 onto a private *http.Transport (http2.ConfigureTransports)
+// rather than using a bare *http2.Transport directly, for two reasons:
+//   - A bare *http2.Transport has no Proxy field at all, silently ignoring
+//     HTTPS_PROXY/NO_PROXY for customers behind a corporate proxy — proxy
+//     support lives on *http.Transport, which is what ConfigureTransports
+//     upgrades in place while returning the *http2.Transport handle used below
+//     only to set the timeouts.
+//   - The returned *http.Transport still handles a plain "http://" envUrl over
+//     HTTP/1.1 itself (its normal behavior for a non-TLS request), which is
+//     exactly what our own tests use (httptest.NewServer, not NewTLSServer) to
+//     exercise the connect-go client without a real backend — a bare
+//     *http2.Transport rejects that scheme outright ("http2: unencrypted
+//     HTTP/2 not enabled") since AllowHTTP defaults false and it has no
+//     cleartext dial override.
+func newGrpcHTTPClient() (*http.Client, *http2.Transport) {
+	t1 := &http.Transport{Proxy: http.ProxyFromEnvironment}
+	t2, err := http2.ConfigureTransports(t1)
+	if err != nil {
+		// Can only fail if t1 were already HTTP/2-enabled, which a freshly
+		// constructed *http.Transport never is.
+		panic(fmt.Sprintf("scalekit: unreachable: configuring HTTP/2 on a fresh transport failed: %v", err))
+	}
+	t2.ReadIdleTimeout = grpcReadIdleTimeout
+	t2.PingTimeout = grpcPingTimeout
+	t2.IdleConnTimeout = grpcIdleConnTimeout
+	return &http.Client{Transport: t1}, t2
 }
 
 func (c *coreClient) authenticateClient(ctx context.Context) error {
