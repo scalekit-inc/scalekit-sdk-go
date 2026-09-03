@@ -147,37 +147,43 @@ func newCoreClient(envUrl, clientId, clientSecret string) *coreClient {
 			client: client,
 		},
 	}
-	client.grpcHTTPClient = newGrpcHTTPClient(envUrl)
+	client.grpcHTTPClient, _ = newGrpcHTTPClient()
 
 	return client
 }
 
 // newGrpcHTTPClient returns a dedicated *http.Client for the gRPC connect-go
-// clients, backed by its own *http2.Transport rather than the shared
-// http.DefaultClient/http.DefaultTransport singleton other packages in the same
-// process may reconfigure.
+// clients, instead of the shared http.DefaultClient/http.DefaultTransport
+// singleton other packages in the same process may reconfigure. It also
+// returns the *http2.Transport handle backing that client, purely so tests can
+// assert on the timeout values below without duplicating them.
 //
-// Every real Scalekit environment is HTTPS, where this tuned *http2.Transport
-// applies. It requires TLS (AllowHTTP is false) and has no dial override, so it
-// cannot reach a plain "http://" endpoint at all — which is exactly what our own
-// tests use (httptest.NewServer, not NewTLSServer) to exercise the connect-go
-// client without a real backend. Rather than teach the production transport to
-// also speak cleartext HTTP/2 (which would mean hand-rolling the TLS dial
-// override and carrying that risk into the path real traffic uses), a non-https
-// envUrl falls back to http.DefaultTransport's own automatic negotiation
-// (HTTP/2-over-TLS, HTTP/1.1 over plain), matching this SDK's behavior before
-// this transport was introduced.
-func newGrpcHTTPClient(envUrl string) *http.Client {
-	if !strings.HasPrefix(envUrl, "https://") {
-		return &http.Client{Transport: http.DefaultTransport}
+// It configures HTTP/2 onto a private *http.Transport (http2.ConfigureTransports)
+// rather than using a bare *http2.Transport directly, for two reasons:
+//   - A bare *http2.Transport has no Proxy field at all, silently ignoring
+//     HTTPS_PROXY/NO_PROXY for customers behind a corporate proxy — proxy
+//     support lives on *http.Transport, which is what ConfigureTransports
+//     upgrades in place while returning the *http2.Transport handle used below
+//     only to set the timeouts.
+//   - The returned *http.Transport still handles a plain "http://" envUrl over
+//     HTTP/1.1 itself (its normal behavior for a non-TLS request), which is
+//     exactly what our own tests use (httptest.NewServer, not NewTLSServer) to
+//     exercise the connect-go client without a real backend — a bare
+//     *http2.Transport rejects that scheme outright ("http2: unencrypted
+//     HTTP/2 not enabled") since AllowHTTP defaults false and it has no
+//     cleartext dial override.
+func newGrpcHTTPClient() (*http.Client, *http2.Transport) {
+	t1 := &http.Transport{Proxy: http.ProxyFromEnvironment}
+	t2, err := http2.ConfigureTransports(t1)
+	if err != nil {
+		// Can only fail if t1 were already HTTP/2-enabled, which a freshly
+		// constructed *http.Transport never is.
+		panic(fmt.Sprintf("scalekit: unreachable: configuring HTTP/2 on a fresh transport failed: %v", err))
 	}
-	return &http.Client{
-		Transport: &http2.Transport{
-			ReadIdleTimeout: grpcReadIdleTimeout,
-			PingTimeout:     grpcPingTimeout,
-			IdleConnTimeout: grpcIdleConnTimeout,
-		},
-	}
+	t2.ReadIdleTimeout = grpcReadIdleTimeout
+	t2.PingTimeout = grpcPingTimeout
+	t2.IdleConnTimeout = grpcIdleConnTimeout
+	return &http.Client{Transport: t1}, t2
 }
 
 func (c *coreClient) authenticateClient(ctx context.Context) error {

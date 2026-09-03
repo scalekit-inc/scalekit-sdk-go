@@ -1,12 +1,14 @@
 package scalekit
 
 import (
+	"net/http"
+	"net/http/httptest"
+	"net/url"
 	"testing"
 	"time"
 
 	"connectrpc.com/connect"
 	"github.com/stretchr/testify/require"
-	"golang.org/x/net/http2"
 )
 
 // backendKeepaliveMinTime is the backend's gRPC keepalive
@@ -24,9 +26,9 @@ const backendKeepaliveMinTime = 30 * time.Second
 // client side.
 const gcpLoadBalancerBackendIdleTimeout = 600 * time.Second
 
+// Not run in parallel: one case uses t.Setenv (HTTPS_PROXY), which Go's
+// testing package forbids once any test in the tree has called t.Parallel.
 func TestGrpcKeepaliveInvariants(t *testing.T) {
-	t.Parallel()
-
 	tests := []struct {
 		name string
 		run  func(t *testing.T)
@@ -38,9 +40,7 @@ func TestGrpcKeepaliveInvariants(t *testing.T) {
 			// can trip the server's ping-abuse detector.
 			name: "ReadIdleTimeout clears the backend MinTime with real margin",
 			run: func(t *testing.T) {
-				client := newGrpcHTTPClient("https://example.scalekit.dev")
-				transport, ok := client.Transport.(*http2.Transport)
-				require.True(t, ok, "gRPC http.Client must be backed by *http2.Transport to support ReadIdleTimeout/PingTimeout")
+				_, transport := newGrpcHTTPClient()
 
 				require.Greater(t, transport.ReadIdleTimeout, backendKeepaliveMinTime,
 					"ReadIdleTimeout must stay above the backend's MinTime, or the server will treat this health-check ping as abuse")
@@ -53,8 +53,7 @@ func TestGrpcKeepaliveInvariants(t *testing.T) {
 		{
 			name: "PingTimeout is a positive, bounded wait",
 			run: func(t *testing.T) {
-				client := newGrpcHTTPClient("https://example.scalekit.dev")
-				transport := client.Transport.(*http2.Transport)
+				_, transport := newGrpcHTTPClient()
 
 				require.Greater(t, transport.PingTimeout, time.Duration(0))
 				require.Less(t, transport.PingTimeout, transport.ReadIdleTimeout,
@@ -62,17 +61,16 @@ func TestGrpcKeepaliveInvariants(t *testing.T) {
 			},
 		},
 		{
-			// IdleConnTimeout must be set explicitly: a bare *http2.Transport
-			// (unlike http.DefaultTransport) defaults this to 0, meaning no
-			// limit, so a fully idle connection would never be closed
-			// client-side and could be reused stale after GCP's LB drops it.
+			// IdleConnTimeout must be set explicitly: http2.ConfigureTransports
+			// leaves it at zero (no limit) unless told otherwise, so a fully
+			// idle connection would never be closed client-side and could be
+			// reused stale after GCP's LB drops it.
 			name: "IdleConnTimeout is a finite bound below the GCP load balancer idle window",
 			run: func(t *testing.T) {
-				client := newGrpcHTTPClient("https://example.scalekit.dev")
-				transport := client.Transport.(*http2.Transport)
+				_, transport := newGrpcHTTPClient()
 
 				require.Greater(t, transport.IdleConnTimeout, time.Duration(0),
-					"IdleConnTimeout must be a finite bound; zero means no limit on a bare *http2.Transport")
+					"IdleConnTimeout must be a finite bound; zero means no limit")
 				require.Less(t, transport.IdleConnTimeout, gcpLoadBalancerBackendIdleTimeout,
 					"IdleConnTimeout must stay below GCP's fixed LB backend idle timeout, or the LB drops the connection first")
 
@@ -82,20 +80,48 @@ func TestGrpcKeepaliveInvariants(t *testing.T) {
 			},
 		},
 		{
-			// The tuned *http2.Transport requires TLS (AllowHTTP is false) and
-			// has no cleartext dial override, so it cannot reach a plain
-			// "http://" endpoint at all — which is exactly what this SDK's own
-			// tests use (httptest.NewServer) to exercise the connect-go client
-			// without a real backend. A non-https envUrl must fall back to a
-			// transport that still works against those, or every test hitting
-			// a local plain-HTTP server breaks with "http2: unencrypted HTTP/2
-			// not enabled" (as happened once already, see git history).
-			name: "non-https envUrl falls back to a transport that still reaches plain HTTP",
+			// A bare *http2.Transport has no Proxy field at all and silently
+			// ignores HTTPS_PROXY/NO_PROXY, breaking any customer behind a
+			// corporate proxy. newGrpcHTTPClient must configure HTTP/2 onto a
+			// real *http.Transport (via http2.ConfigureTransports) rather than
+			// using a bare *http2.Transport directly, so proxy env vars still
+			// apply to gRPC traffic.
+			name: "gRPC client honors HTTPS_PROXY/NO_PROXY via the underlying http.Transport",
 			run: func(t *testing.T) {
-				client := newGrpcHTTPClient("http://127.0.0.1:0")
-				_, isTunedHTTP2 := client.Transport.(*http2.Transport)
-				require.False(t, isTunedHTTP2,
-					"a non-https envUrl must not get the TLS-only tuned *http2.Transport, or it can never reach a plain-HTTP endpoint")
+				client, _ := newGrpcHTTPClient()
+				transport, ok := client.Transport.(*http.Transport)
+				require.True(t, ok, "gRPC http.Client must be backed by *http.Transport (configured for HTTP/2 via http2.ConfigureTransports), not a bare *http2.Transport, or it loses proxy support")
+				require.NotNil(t, transport.Proxy, "Transport.Proxy must be set (e.g. http.ProxyFromEnvironment) so HTTPS_PROXY/NO_PROXY are honored")
+
+				req, err := http.NewRequest(http.MethodGet, "https://example.scalekit.dev", nil)
+				require.NoError(t, err)
+				t.Setenv("HTTPS_PROXY", "http://proxy.internal.example:8080")
+				proxyURL, err := transport.Proxy(req)
+				require.NoError(t, err)
+				require.Equal(t, &url.URL{Scheme: "http", Host: "proxy.internal.example:8080"}, proxyURL,
+					"Transport.Proxy must actually route through HTTPS_PROXY when it is set")
+			},
+		},
+		{
+			// The returned *http.Transport must still reach a plain "http://"
+			// endpoint over HTTP/1.1 itself (its normal behavior for a
+			// non-TLS request) — which is exactly what this SDK's own tests
+			// use (httptest.NewServer, not NewTLSServer) to exercise the
+			// connect-go client without a real backend. A bare *http2.Transport
+			// rejects that scheme outright ("http2: unencrypted HTTP/2 not
+			// enabled"), which broke CI once already (see git history).
+			name: "gRPC client still reaches a plain HTTP test server",
+			run: func(t *testing.T) {
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					w.WriteHeader(http.StatusNoContent)
+				}))
+				defer server.Close()
+
+				client, _ := newGrpcHTTPClient()
+				resp, err := client.Get(server.URL)
+				require.NoError(t, err)
+				defer resp.Body.Close()
+				require.Equal(t, http.StatusNoContent, resp.StatusCode)
 			},
 		},
 		{
@@ -130,7 +156,6 @@ func TestGrpcKeepaliveInvariants(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
 			tt.run(t)
 		})
 	}
