@@ -38,7 +38,7 @@ func TestGrpcKeepaliveInvariants(t *testing.T) {
 			// can trip the server's ping-abuse detector.
 			name: "ReadIdleTimeout clears the backend MinTime with real margin",
 			run: func(t *testing.T) {
-				client := newGrpcHTTPClient()
+				client := newGrpcHTTPClient("https://example.scalekit.dev")
 				transport, ok := client.Transport.(*http2.Transport)
 				require.True(t, ok, "gRPC http.Client must be backed by *http2.Transport to support ReadIdleTimeout/PingTimeout")
 
@@ -53,7 +53,7 @@ func TestGrpcKeepaliveInvariants(t *testing.T) {
 		{
 			name: "PingTimeout is a positive, bounded wait",
 			run: func(t *testing.T) {
-				client := newGrpcHTTPClient()
+				client := newGrpcHTTPClient("https://example.scalekit.dev")
 				transport := client.Transport.(*http2.Transport)
 
 				require.Greater(t, transport.PingTimeout, time.Duration(0))
@@ -68,7 +68,7 @@ func TestGrpcKeepaliveInvariants(t *testing.T) {
 			// client-side and could be reused stale after GCP's LB drops it.
 			name: "IdleConnTimeout is a finite bound below the GCP load balancer idle window",
 			run: func(t *testing.T) {
-				client := newGrpcHTTPClient()
+				client := newGrpcHTTPClient("https://example.scalekit.dev")
 				transport := client.Transport.(*http2.Transport)
 
 				require.Greater(t, transport.IdleConnTimeout, time.Duration(0),
@@ -79,6 +79,23 @@ func TestGrpcKeepaliveInvariants(t *testing.T) {
 				const minMargin = 2 * time.Minute
 				require.LessOrEqual(t, transport.IdleConnTimeout, gcpLoadBalancerBackendIdleTimeout-minMargin,
 					"IdleConnTimeout should clear the LB's window with real margin, not just barely")
+			},
+		},
+		{
+			// The tuned *http2.Transport requires TLS (AllowHTTP is false) and
+			// has no cleartext dial override, so it cannot reach a plain
+			// "http://" endpoint at all — which is exactly what this SDK's own
+			// tests use (httptest.NewServer) to exercise the connect-go client
+			// without a real backend. A non-https envUrl must fall back to a
+			// transport that still works against those, or every test hitting
+			// a local plain-HTTP server breaks with "http2: unencrypted HTTP/2
+			// not enabled" (as happened once already, see git history).
+			name: "non-https envUrl falls back to a transport that still reaches plain HTTP",
+			run: func(t *testing.T) {
+				client := newGrpcHTTPClient("http://127.0.0.1:0")
+				_, isTunedHTTP2 := client.Transport.(*http2.Transport)
+				require.False(t, isTunedHTTP2,
+					"a non-https envUrl must not get the TLS-only tuned *http2.Transport, or it can never reach a plain-HTTP endpoint")
 			},
 		},
 		{

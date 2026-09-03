@@ -147,7 +147,7 @@ func newCoreClient(envUrl, clientId, clientSecret string) *coreClient {
 			client: client,
 		},
 	}
-	client.grpcHTTPClient = newGrpcHTTPClient()
+	client.grpcHTTPClient = newGrpcHTTPClient(envUrl)
 
 	return client
 }
@@ -155,9 +155,22 @@ func newCoreClient(envUrl, clientId, clientSecret string) *coreClient {
 // newGrpcHTTPClient returns a dedicated *http.Client for the gRPC connect-go
 // clients, backed by its own *http2.Transport rather than the shared
 // http.DefaultClient/http.DefaultTransport singleton other packages in the same
-// process may reconfigure. gRPC always requires HTTP/2, so there is no need for
-// the HTTP/1.1 fallback http.DefaultTransport provides.
-func newGrpcHTTPClient() *http.Client {
+// process may reconfigure.
+//
+// Every real Scalekit environment is HTTPS, where this tuned *http2.Transport
+// applies. It requires TLS (AllowHTTP is false) and has no dial override, so it
+// cannot reach a plain "http://" endpoint at all — which is exactly what our own
+// tests use (httptest.NewServer, not NewTLSServer) to exercise the connect-go
+// client without a real backend. Rather than teach the production transport to
+// also speak cleartext HTTP/2 (which would mean hand-rolling the TLS dial
+// override and carrying that risk into the path real traffic uses), a non-https
+// envUrl falls back to http.DefaultTransport's own automatic negotiation
+// (HTTP/2-over-TLS, HTTP/1.1 over plain), matching this SDK's behavior before
+// this transport was introduced.
+func newGrpcHTTPClient(envUrl string) *http.Client {
+	if !strings.HasPrefix(envUrl, "https://") {
+		return &http.Client{Transport: http.DefaultTransport}
+	}
 	return &http.Client{
 		Transport: &http2.Transport{
 			ReadIdleTimeout: grpcReadIdleTimeout,
