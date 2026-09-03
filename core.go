@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/go-jose/go-jose/v4"
+	"golang.org/x/net/http2"
 	"golang.org/x/sync/singleflight"
 )
 
@@ -24,6 +25,31 @@ const (
 	sdkVersion         = "Scalekit-Go/" + sdkVersionNumber
 	defaultHTTPTimeout = 10 * time.Second
 	maxErrorBodyBytes  = 8 * 1024
+
+	// grpcReadIdleTimeout/grpcPingTimeout mirror the keepalive settings the Java
+	// and Python SDKs use on the same gRPC channel (ManagedChannelBuilder.keepAliveTime /
+	// grpc.keepalive_time_ms): once no frame has been read for grpcReadIdleTimeout,
+	// the transport sends an HTTP/2 PING to verify the connection, whether or not a
+	// stream is open — this is how a connection silently killed by a network
+	// intermediary (LB, NAT, proxy) gets detected and replaced instead of being
+	// written to and failing with a raw transport error.
+	//
+	// 60s clears the backend's EnforcementPolicy.MinTime (30s, scalekit's
+	// cmd/grpc.go) with the same margin Java and Python use. A value close to
+	// 30s risks ordinary timing jitter tripping the server's ping-abuse
+	// detector and getting GOAWAY'd — the exact bug this setting avoids.
+	grpcReadIdleTimeout = 60 * time.Second
+	grpcPingTimeout     = 10 * time.Second
+
+	// grpcIdleConnTimeout must stay below GCP's fixed 600s HTTPS load balancer
+	// backend idle timeout that fronts the Scalekit API, so a fully idle
+	// connection is closed by this client before the LB silently drops it.
+	// 5 minutes matches the margin the backend server uses for the same reason
+	// (grpcKeepaliveMaxConnectionIdle in scalekit's cmd/grpc.go). Using a bare
+	// *http2.Transport directly (see newGrpcHTTPClient) opts out of
+	// http.Transport's own IdleConnTimeout default, so this must be set
+	// explicitly or idle connections would never close on their own.
+	grpcIdleConnTimeout = 5 * time.Minute
 )
 
 // withDefaultTimeout attaches a defaultHTTPTimeout deadline to ctx if it has
@@ -52,6 +78,12 @@ type coreClient struct {
 	jsonWebKeySet atomic.Pointer[jose.JSONWebKeySet]
 
 	httpClient *http.Client
+	// grpcHTTPClient backs every connect-go RPC service client built via
+	// newConnectClient. Built once here and shared across all of them (see
+	// newConnectClient), the same way http.DefaultClient used to be shared —
+	// except scoped to this coreClient instead of the whole process, and with
+	// keepalive settings tuned for the backend's enforcement policy.
+	grpcHTTPClient *http.Client
 }
 
 type authenticationResponse struct {
@@ -115,8 +147,24 @@ func newCoreClient(envUrl, clientId, clientSecret string) *coreClient {
 			client: client,
 		},
 	}
+	client.grpcHTTPClient = newGrpcHTTPClient()
 
 	return client
+}
+
+// newGrpcHTTPClient returns a dedicated *http.Client for the gRPC connect-go
+// clients, backed by its own *http2.Transport rather than the shared
+// http.DefaultClient/http.DefaultTransport singleton other packages in the same
+// process may reconfigure. gRPC always requires HTTP/2, so there is no need for
+// the HTTP/1.1 fallback http.DefaultTransport provides.
+func newGrpcHTTPClient() *http.Client {
+	return &http.Client{
+		Transport: &http2.Transport{
+			ReadIdleTimeout: grpcReadIdleTimeout,
+			PingTimeout:     grpcPingTimeout,
+			IdleConnTimeout: grpcIdleConnTimeout,
+		},
+	}
 }
 
 func (c *coreClient) authenticateClient(ctx context.Context) error {
