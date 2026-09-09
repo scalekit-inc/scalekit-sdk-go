@@ -76,7 +76,7 @@ type AuthServiceClient interface {
 	ListAuthMethods(context.Context, *connect.Request[auth.ListAuthMethodsRequest]) (*connect.Response[auth.ListAuthMethodsResponse], error)
 	DiscoveryAuthMethod(context.Context, *connect.Request[auth.DiscoveryAuthMethodRequest]) (*connect.Response[auth.DiscoveryAuthMethodResponse], error)
 	VerifyPasswordLessOtp(context.Context, *connect.Request[auth.VerifyPasswordLessOtpRequest]) (*connect.Response[auth.VerifyPasswordLessOtpResponse], error)
-	ResendPasswordless(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error)
+	ResendPasswordless(context.Context, *connect.Request[auth.ResendPasswordlessRequest]) (*connect.Response[emptypb.Empty], error)
 	ListUserOrganizations(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[auth.ListUserOrganizationsResponse], error)
 	SignupOrganization(context.Context, *connect.Request[auth.SignupOrganizationRequest]) (*connect.Response[auth.SignupOrganizationResponse], error)
 	GetAuthState(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[auth.GetAuthStateResponse], error)
@@ -116,7 +116,7 @@ func NewAuthServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(authServiceMethods.ByName("VerifyPasswordLessOtp")),
 			connect.WithClientOptions(opts...),
 		),
-		resendPasswordless: connect.NewClient[emptypb.Empty, emptypb.Empty](
+		resendPasswordless: connect.NewClient[auth.ResendPasswordlessRequest, emptypb.Empty](
 			httpClient,
 			baseURL+AuthServiceResendPasswordlessProcedure,
 			connect.WithSchema(authServiceMethods.ByName("ResendPasswordless")),
@@ -178,7 +178,7 @@ type authServiceClient struct {
 	listAuthMethods        *connect.Client[auth.ListAuthMethodsRequest, auth.ListAuthMethodsResponse]
 	discoveryAuthMethod    *connect.Client[auth.DiscoveryAuthMethodRequest, auth.DiscoveryAuthMethodResponse]
 	verifyPasswordLessOtp  *connect.Client[auth.VerifyPasswordLessOtpRequest, auth.VerifyPasswordLessOtpResponse]
-	resendPasswordless     *connect.Client[emptypb.Empty, emptypb.Empty]
+	resendPasswordless     *connect.Client[auth.ResendPasswordlessRequest, emptypb.Empty]
 	listUserOrganizations  *connect.Client[emptypb.Empty, auth.ListUserOrganizationsResponse]
 	signupOrganization     *connect.Client[auth.SignupOrganizationRequest, auth.SignupOrganizationResponse]
 	getAuthState           *connect.Client[emptypb.Empty, auth.GetAuthStateResponse]
@@ -205,7 +205,7 @@ func (c *authServiceClient) VerifyPasswordLessOtp(ctx context.Context, req *conn
 }
 
 // ResendPasswordless calls scalekit.v1.auth.AuthService.ResendPasswordless.
-func (c *authServiceClient) ResendPasswordless(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error) {
+func (c *authServiceClient) ResendPasswordless(ctx context.Context, req *connect.Request[auth.ResendPasswordlessRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.resendPasswordless.CallUnary(ctx, req)
 }
 
@@ -254,7 +254,7 @@ type AuthServiceHandler interface {
 	ListAuthMethods(context.Context, *connect.Request[auth.ListAuthMethodsRequest]) (*connect.Response[auth.ListAuthMethodsResponse], error)
 	DiscoveryAuthMethod(context.Context, *connect.Request[auth.DiscoveryAuthMethodRequest]) (*connect.Response[auth.DiscoveryAuthMethodResponse], error)
 	VerifyPasswordLessOtp(context.Context, *connect.Request[auth.VerifyPasswordLessOtpRequest]) (*connect.Response[auth.VerifyPasswordLessOtpResponse], error)
-	ResendPasswordless(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error)
+	ResendPasswordless(context.Context, *connect.Request[auth.ResendPasswordlessRequest]) (*connect.Response[emptypb.Empty], error)
 	ListUserOrganizations(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[auth.ListUserOrganizationsResponse], error)
 	SignupOrganization(context.Context, *connect.Request[auth.SignupOrganizationRequest]) (*connect.Response[auth.SignupOrganizationResponse], error)
 	GetAuthState(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[auth.GetAuthStateResponse], error)
@@ -391,7 +391,7 @@ func (UnimplementedAuthServiceHandler) VerifyPasswordLessOtp(context.Context, *c
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.auth.AuthService.VerifyPasswordLessOtp is not implemented"))
 }
 
-func (UnimplementedAuthServiceHandler) ResendPasswordless(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error) {
+func (UnimplementedAuthServiceHandler) ResendPasswordless(context.Context, *connect.Request[auth.ResendPasswordlessRequest]) (*connect.Response[emptypb.Empty], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.auth.AuthService.ResendPasswordless is not implemented"))
 }
 

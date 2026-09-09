@@ -1918,7 +1918,7 @@ Lists the end-user consents granted against a resource, such as an MCP server, w
 
 A consent records that one end user allowed a specific API client to act on their behalf. Each returned consent carries `Id`, `ExternalUserId`, `ClientId`, `ClientName`, `Scopes` and `GrantedAt`; the response also carries `TotalSize` plus `NextPageToken` and `PrevPageToken` cursors.
 
-`ExternalUserId` is the identifier your application supplied for the user when the consent was granted. Use `options.Search` for a case-insensitive substring match on it.
+`ExternalUserId` is the identifier your application supplied for the user when the consent was granted. Set `options.UserIds` to match it exactly and case-sensitively (maximum 25 values, combined with OR), or `options.Search` for a case-insensitive substring match. When both are set, `UserIds` wins and `Search` is ignored.
 </dd>
 </dl>
 </dd>
@@ -1935,7 +1935,7 @@ A consent records that one end user allowed a specific API client to act on thei
 ```go
 consents, err := client.Resources().ListUserConsents(ctx, "res_142145647087190278", scalekit.ListUserConsentsOptions{
   PageSize: 10,
-  Search:   "usr_",
+  UserIds:  []string{"usr_42", "usr_43"},
 })
 if err != nil {
   // handle
@@ -1974,7 +1974,7 @@ for _, consent := range consents.GetConsents() {
 <dl>
 <dd>
 
-**options:** `ListUserConsentsOptions` — `Search` (case-insensitive substring match on external user IDs), `PageSize` (max 30), `PageToken`.
+**options:** `ListUserConsentsOptions` — `Search` (case-insensitive substring match on external user IDs), `PageSize` (max 30), `PageToken`, `UserIds` (exact match, max 25; takes precedence over `Search`).
 
 </dd>
 </dl>

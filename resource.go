@@ -16,11 +16,15 @@ type RevokeUserConsentResponse = clientsv1.RevokeUserConsentResponse
 // listing the end-user consents granted against a resource.
 type ListUserConsentsOptions struct {
 	// Search is a case-insensitive substring match on external user IDs.
+	// Ignored when UserIds is set.
 	Search string
 	// PageSize is the number of consents to return per page (max 30).
 	PageSize uint32
 	// PageToken is the pagination cursor.
 	PageToken string
+	// UserIds matches external user IDs exactly and case-sensitively, combining
+	// the values with OR (max 25). Takes precedence over Search.
+	UserIds []string
 }
 
 // ResourceService defines the interface for reading and revoking the end-user
@@ -53,8 +57,9 @@ func newResourceService(coreClient *coreClient) ResourceService {
 // Scopes and GrantedAt. The response also carries TotalSize plus NextPageToken
 // and PrevPageToken cursors.
 //
-// Set options.Search for a case-insensitive substring match on external user
-// IDs.
+// Set options.UserIds to match specific users exactly, or options.Search for a
+// case-insensitive substring match. When both are set, UserIds wins and Search
+// is ignored.
 func (r *resourceService) ListUserConsents(ctx context.Context, resourceId string, options ListUserConsentsOptions) (*ListResourceUserConsentsResponse, error) {
 	if resourceId == "" {
 		return nil, ErrResourceIdRequired
@@ -70,6 +75,14 @@ func (r *resourceService) ListUserConsents(ctx context.Context, resourceId strin
 	}
 	if options.PageToken != "" {
 		request.PageToken = options.PageToken
+	}
+	// The filter takes precedence over search server-side, so only attach it when
+	// the caller actually supplied user IDs — an empty filter would otherwise
+	// suppress a search the caller did supply.
+	if len(options.UserIds) > 0 {
+		request.Filter = &clientsv1.ResourceUserConsentFilter{
+			ExternalUserId: options.UserIds,
+		}
 	}
 	return newConnectExecuter(
 		r.coreClient,

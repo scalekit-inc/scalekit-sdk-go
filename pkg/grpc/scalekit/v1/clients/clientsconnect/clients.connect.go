@@ -45,6 +45,15 @@ const (
 	// ClientServiceUpdateClientProcedure is the fully-qualified name of the ClientService's
 	// UpdateClient RPC.
 	ClientServiceUpdateClientProcedure = "/scalekit.v1.clients.ClientService/UpdateClient"
+	// ClientServiceAddEnvironmentRedirectUriProcedure is the fully-qualified name of the
+	// ClientService's AddEnvironmentRedirectUri RPC.
+	ClientServiceAddEnvironmentRedirectUriProcedure = "/scalekit.v1.clients.ClientService/AddEnvironmentRedirectUri"
+	// ClientServiceRemoveEnvironmentRedirectUriProcedure is the fully-qualified name of the
+	// ClientService's RemoveEnvironmentRedirectUri RPC.
+	ClientServiceRemoveEnvironmentRedirectUriProcedure = "/scalekit.v1.clients.ClientService/RemoveEnvironmentRedirectUri"
+	// ClientServiceSetEnvironmentInitiateLoginUriProcedure is the fully-qualified name of the
+	// ClientService's SetEnvironmentInitiateLoginUri RPC.
+	ClientServiceSetEnvironmentInitiateLoginUriProcedure = "/scalekit.v1.clients.ClientService/SetEnvironmentInitiateLoginUri"
 	// ClientServiceDeleteClientProcedure is the fully-qualified name of the ClientService's
 	// DeleteClient RPC.
 	ClientServiceDeleteClientProcedure = "/scalekit.v1.clients.ClientService/DeleteClient"
@@ -152,6 +161,29 @@ type ClientServiceClient interface {
 	CreateClient(context.Context, *connect.Request[clients.CreateClientRequest]) (*connect.Response[clients.CreateClientResponse], error)
 	GetClient(context.Context, *connect.Request[clients.GetClientRequest]) (*connect.Response[clients.GetClientResponse], error)
 	UpdateClient(context.Context, *connect.Request[clients.UpdateClientRequest]) (*connect.Response[clients.UpdateClientResponse], error)
+	// Delta operations on the ENVIRONMENT client's login URIs — the single OIDC client
+	// every environment is provisioned with, which is what the dashboard's "Redirect URIs"
+	// settings and the support agent's `list_redirect_uris` tool both read.
+	//
+	// WHY THESE EXIST rather than an (agent_tool) annotation on UpdateClient, because it
+	// reads as duplication otherwise. Two independent reasons, and either alone is enough:
+	//
+	//  1. The approval card. A gated write's summary must name every value the model chose
+	//     (protoc-gen-agenttool's checkWriteSummaryCoversRequest), and UpdateClient's
+	//     request carries a whole Client message plus a FieldMask — a message and a
+	//     repeated field, neither of which has a one-line rendering on a card. Hiding both
+	//     leaves a tool that can set nothing. A request that is one URI is the only shape
+	//     the gate can describe honestly.
+	//  2. Read-modify-write belongs on the server. UpdateClient REPLACES post_login_uris
+	//     wholesale, so "add one URI" through it means the caller reads the list, appends,
+	//     and writes it back — and any concurrent edit between the read and the write is
+	//     silently discarded. Here the list is read and written inside one call.
+	//
+	// PREVIEW because they are dashboard/agent conveniences over UpdateClient, not a new
+	// public API surface: the public way to set these remains UpdateClient.
+	AddEnvironmentRedirectUri(context.Context, *connect.Request[clients.AddEnvironmentRedirectUriRequest]) (*connect.Response[clients.EnvironmentLoginUrisResponse], error)
+	RemoveEnvironmentRedirectUri(context.Context, *connect.Request[clients.RemoveEnvironmentRedirectUriRequest]) (*connect.Response[clients.EnvironmentLoginUrisResponse], error)
+	SetEnvironmentInitiateLoginUri(context.Context, *connect.Request[clients.SetEnvironmentInitiateLoginUriRequest]) (*connect.Response[clients.EnvironmentLoginUrisResponse], error)
 	DeleteClient(context.Context, *connect.Request[clients.DeleteClientRequest]) (*connect.Response[emptypb.Empty], error)
 	CreateClientSecret(context.Context, *connect.Request[clients.CreateClientSecretRequest]) (*connect.Response[clients.CreateClientSecretResponse], error)
 	UpdateClientSecret(context.Context, *connect.Request[clients.UpdateClientSecretRequest]) (*connect.Response[clients.UpdateClientSecretResponse], error)
@@ -237,6 +269,24 @@ func NewClientServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			httpClient,
 			baseURL+ClientServiceUpdateClientProcedure,
 			connect.WithSchema(clientServiceMethods.ByName("UpdateClient")),
+			connect.WithClientOptions(opts...),
+		),
+		addEnvironmentRedirectUri: connect.NewClient[clients.AddEnvironmentRedirectUriRequest, clients.EnvironmentLoginUrisResponse](
+			httpClient,
+			baseURL+ClientServiceAddEnvironmentRedirectUriProcedure,
+			connect.WithSchema(clientServiceMethods.ByName("AddEnvironmentRedirectUri")),
+			connect.WithClientOptions(opts...),
+		),
+		removeEnvironmentRedirectUri: connect.NewClient[clients.RemoveEnvironmentRedirectUriRequest, clients.EnvironmentLoginUrisResponse](
+			httpClient,
+			baseURL+ClientServiceRemoveEnvironmentRedirectUriProcedure,
+			connect.WithSchema(clientServiceMethods.ByName("RemoveEnvironmentRedirectUri")),
+			connect.WithClientOptions(opts...),
+		),
+		setEnvironmentInitiateLoginUri: connect.NewClient[clients.SetEnvironmentInitiateLoginUriRequest, clients.EnvironmentLoginUrisResponse](
+			httpClient,
+			baseURL+ClientServiceSetEnvironmentInitiateLoginUriProcedure,
+			connect.WithSchema(clientServiceMethods.ByName("SetEnvironmentInitiateLoginUri")),
 			connect.WithClientOptions(opts...),
 		),
 		deleteClient: connect.NewClient[clients.DeleteClientRequest, emptypb.Empty](
@@ -446,6 +496,9 @@ type clientServiceClient struct {
 	createClient                   *connect.Client[clients.CreateClientRequest, clients.CreateClientResponse]
 	getClient                      *connect.Client[clients.GetClientRequest, clients.GetClientResponse]
 	updateClient                   *connect.Client[clients.UpdateClientRequest, clients.UpdateClientResponse]
+	addEnvironmentRedirectUri      *connect.Client[clients.AddEnvironmentRedirectUriRequest, clients.EnvironmentLoginUrisResponse]
+	removeEnvironmentRedirectUri   *connect.Client[clients.RemoveEnvironmentRedirectUriRequest, clients.EnvironmentLoginUrisResponse]
+	setEnvironmentInitiateLoginUri *connect.Client[clients.SetEnvironmentInitiateLoginUriRequest, clients.EnvironmentLoginUrisResponse]
 	deleteClient                   *connect.Client[clients.DeleteClientRequest, emptypb.Empty]
 	createClientSecret             *connect.Client[clients.CreateClientSecretRequest, clients.CreateClientSecretResponse]
 	updateClientSecret             *connect.Client[clients.UpdateClientSecretRequest, clients.UpdateClientSecretResponse]
@@ -499,6 +552,23 @@ func (c *clientServiceClient) GetClient(ctx context.Context, req *connect.Reques
 // UpdateClient calls scalekit.v1.clients.ClientService.UpdateClient.
 func (c *clientServiceClient) UpdateClient(ctx context.Context, req *connect.Request[clients.UpdateClientRequest]) (*connect.Response[clients.UpdateClientResponse], error) {
 	return c.updateClient.CallUnary(ctx, req)
+}
+
+// AddEnvironmentRedirectUri calls scalekit.v1.clients.ClientService.AddEnvironmentRedirectUri.
+func (c *clientServiceClient) AddEnvironmentRedirectUri(ctx context.Context, req *connect.Request[clients.AddEnvironmentRedirectUriRequest]) (*connect.Response[clients.EnvironmentLoginUrisResponse], error) {
+	return c.addEnvironmentRedirectUri.CallUnary(ctx, req)
+}
+
+// RemoveEnvironmentRedirectUri calls
+// scalekit.v1.clients.ClientService.RemoveEnvironmentRedirectUri.
+func (c *clientServiceClient) RemoveEnvironmentRedirectUri(ctx context.Context, req *connect.Request[clients.RemoveEnvironmentRedirectUriRequest]) (*connect.Response[clients.EnvironmentLoginUrisResponse], error) {
+	return c.removeEnvironmentRedirectUri.CallUnary(ctx, req)
+}
+
+// SetEnvironmentInitiateLoginUri calls
+// scalekit.v1.clients.ClientService.SetEnvironmentInitiateLoginUri.
+func (c *clientServiceClient) SetEnvironmentInitiateLoginUri(ctx context.Context, req *connect.Request[clients.SetEnvironmentInitiateLoginUriRequest]) (*connect.Response[clients.EnvironmentLoginUrisResponse], error) {
+	return c.setEnvironmentInitiateLoginUri.CallUnary(ctx, req)
 }
 
 // DeleteClient calls scalekit.v1.clients.ClientService.DeleteClient.
@@ -680,6 +750,29 @@ type ClientServiceHandler interface {
 	CreateClient(context.Context, *connect.Request[clients.CreateClientRequest]) (*connect.Response[clients.CreateClientResponse], error)
 	GetClient(context.Context, *connect.Request[clients.GetClientRequest]) (*connect.Response[clients.GetClientResponse], error)
 	UpdateClient(context.Context, *connect.Request[clients.UpdateClientRequest]) (*connect.Response[clients.UpdateClientResponse], error)
+	// Delta operations on the ENVIRONMENT client's login URIs — the single OIDC client
+	// every environment is provisioned with, which is what the dashboard's "Redirect URIs"
+	// settings and the support agent's `list_redirect_uris` tool both read.
+	//
+	// WHY THESE EXIST rather than an (agent_tool) annotation on UpdateClient, because it
+	// reads as duplication otherwise. Two independent reasons, and either alone is enough:
+	//
+	//  1. The approval card. A gated write's summary must name every value the model chose
+	//     (protoc-gen-agenttool's checkWriteSummaryCoversRequest), and UpdateClient's
+	//     request carries a whole Client message plus a FieldMask — a message and a
+	//     repeated field, neither of which has a one-line rendering on a card. Hiding both
+	//     leaves a tool that can set nothing. A request that is one URI is the only shape
+	//     the gate can describe honestly.
+	//  2. Read-modify-write belongs on the server. UpdateClient REPLACES post_login_uris
+	//     wholesale, so "add one URI" through it means the caller reads the list, appends,
+	//     and writes it back — and any concurrent edit between the read and the write is
+	//     silently discarded. Here the list is read and written inside one call.
+	//
+	// PREVIEW because they are dashboard/agent conveniences over UpdateClient, not a new
+	// public API surface: the public way to set these remains UpdateClient.
+	AddEnvironmentRedirectUri(context.Context, *connect.Request[clients.AddEnvironmentRedirectUriRequest]) (*connect.Response[clients.EnvironmentLoginUrisResponse], error)
+	RemoveEnvironmentRedirectUri(context.Context, *connect.Request[clients.RemoveEnvironmentRedirectUriRequest]) (*connect.Response[clients.EnvironmentLoginUrisResponse], error)
+	SetEnvironmentInitiateLoginUri(context.Context, *connect.Request[clients.SetEnvironmentInitiateLoginUriRequest]) (*connect.Response[clients.EnvironmentLoginUrisResponse], error)
 	DeleteClient(context.Context, *connect.Request[clients.DeleteClientRequest]) (*connect.Response[emptypb.Empty], error)
 	CreateClientSecret(context.Context, *connect.Request[clients.CreateClientSecretRequest]) (*connect.Response[clients.CreateClientSecretResponse], error)
 	UpdateClientSecret(context.Context, *connect.Request[clients.UpdateClientSecretRequest]) (*connect.Response[clients.UpdateClientSecretResponse], error)
@@ -761,6 +854,24 @@ func NewClientServiceHandler(svc ClientServiceHandler, opts ...connect.HandlerOp
 		ClientServiceUpdateClientProcedure,
 		svc.UpdateClient,
 		connect.WithSchema(clientServiceMethods.ByName("UpdateClient")),
+		connect.WithHandlerOptions(opts...),
+	)
+	clientServiceAddEnvironmentRedirectUriHandler := connect.NewUnaryHandler(
+		ClientServiceAddEnvironmentRedirectUriProcedure,
+		svc.AddEnvironmentRedirectUri,
+		connect.WithSchema(clientServiceMethods.ByName("AddEnvironmentRedirectUri")),
+		connect.WithHandlerOptions(opts...),
+	)
+	clientServiceRemoveEnvironmentRedirectUriHandler := connect.NewUnaryHandler(
+		ClientServiceRemoveEnvironmentRedirectUriProcedure,
+		svc.RemoveEnvironmentRedirectUri,
+		connect.WithSchema(clientServiceMethods.ByName("RemoveEnvironmentRedirectUri")),
+		connect.WithHandlerOptions(opts...),
+	)
+	clientServiceSetEnvironmentInitiateLoginUriHandler := connect.NewUnaryHandler(
+		ClientServiceSetEnvironmentInitiateLoginUriProcedure,
+		svc.SetEnvironmentInitiateLoginUri,
+		connect.WithSchema(clientServiceMethods.ByName("SetEnvironmentInitiateLoginUri")),
 		connect.WithHandlerOptions(opts...),
 	)
 	clientServiceDeleteClientHandler := connect.NewUnaryHandler(
@@ -971,6 +1082,12 @@ func NewClientServiceHandler(svc ClientServiceHandler, opts ...connect.HandlerOp
 			clientServiceGetClientHandler.ServeHTTP(w, r)
 		case ClientServiceUpdateClientProcedure:
 			clientServiceUpdateClientHandler.ServeHTTP(w, r)
+		case ClientServiceAddEnvironmentRedirectUriProcedure:
+			clientServiceAddEnvironmentRedirectUriHandler.ServeHTTP(w, r)
+		case ClientServiceRemoveEnvironmentRedirectUriProcedure:
+			clientServiceRemoveEnvironmentRedirectUriHandler.ServeHTTP(w, r)
+		case ClientServiceSetEnvironmentInitiateLoginUriProcedure:
+			clientServiceSetEnvironmentInitiateLoginUriHandler.ServeHTTP(w, r)
 		case ClientServiceDeleteClientProcedure:
 			clientServiceDeleteClientHandler.ServeHTTP(w, r)
 		case ClientServiceCreateClientSecretProcedure:
@@ -1060,6 +1177,18 @@ func (UnimplementedClientServiceHandler) GetClient(context.Context, *connect.Req
 
 func (UnimplementedClientServiceHandler) UpdateClient(context.Context, *connect.Request[clients.UpdateClientRequest]) (*connect.Response[clients.UpdateClientResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.clients.ClientService.UpdateClient is not implemented"))
+}
+
+func (UnimplementedClientServiceHandler) AddEnvironmentRedirectUri(context.Context, *connect.Request[clients.AddEnvironmentRedirectUriRequest]) (*connect.Response[clients.EnvironmentLoginUrisResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.clients.ClientService.AddEnvironmentRedirectUri is not implemented"))
+}
+
+func (UnimplementedClientServiceHandler) RemoveEnvironmentRedirectUri(context.Context, *connect.Request[clients.RemoveEnvironmentRedirectUriRequest]) (*connect.Response[clients.EnvironmentLoginUrisResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.clients.ClientService.RemoveEnvironmentRedirectUri is not implemented"))
+}
+
+func (UnimplementedClientServiceHandler) SetEnvironmentInitiateLoginUri(context.Context, *connect.Request[clients.SetEnvironmentInitiateLoginUriRequest]) (*connect.Response[clients.EnvironmentLoginUrisResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.clients.ClientService.SetEnvironmentInitiateLoginUri is not implemented"))
 }
 
 func (UnimplementedClientServiceHandler) DeleteClient(context.Context, *connect.Request[clients.DeleteClientRequest]) (*connect.Response[emptypb.Empty], error) {

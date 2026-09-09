@@ -2,8 +2,10 @@ package test
 
 import (
 	"context"
+	"strconv"
 	"testing"
 
+	"connectrpc.com/connect"
 	scalekit "github.com/scalekit-inc/scalekit-sdk-go/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -13,6 +15,14 @@ import (
 // consents, which is fine — these tests assert the call shape and the
 // pagination envelope, never the consent contents.
 const testResourceId = "res_142145647087190278"
+
+func buildUserIds(n int) []string {
+	userIds := make([]string, 0, n)
+	for i := 0; i < n; i++ {
+		userIds = append(userIds, "usr_"+strconv.Itoa(i))
+	}
+	return userIds
+}
 
 func TestResourceServiceListUserConsentsValidation(t *testing.T) {
 	resourceService := client.Resources()
@@ -58,6 +68,11 @@ func TestResourceServiceListUserConsents(t *testing.T) {
 		{name: "no options", options: scalekit.ListUserConsentsOptions{}},
 		{name: "with page size", options: scalekit.ListUserConsentsOptions{PageSize: 10}},
 		{name: "with search", options: scalekit.ListUserConsentsOptions{Search: "usr_"}},
+		{name: "with user ids", options: scalekit.ListUserConsentsOptions{UserIds: []string{"usr_does_not_exist"}}},
+		// The filter wins over search server-side; both together must still be a
+		// valid request rather than a 400.
+		{name: "with user ids and search", options: scalekit.ListUserConsentsOptions{UserIds: []string{"usr_does_not_exist"}, Search: "usr_"}},
+		{name: "with 25 user ids", options: scalekit.ListUserConsentsOptions{UserIds: buildUserIds(25)}},
 	}
 
 	for _, tt := range tests {
@@ -71,6 +86,20 @@ func TestResourceServiceListUserConsents(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestResourceServiceListUserConsentsRejectsMoreThan25UserIds asserts the
+// server-side cap on the filter, so a caller batching user IDs learns about the
+// limit instead of silently getting a truncated result.
+func TestResourceServiceListUserConsentsRejectsMoreThan25UserIds(t *testing.T) {
+	resourceService := client.Resources()
+	ctx := context.Background()
+
+	_, err := resourceService.ListUserConsents(ctx, testResourceId, scalekit.ListUserConsentsOptions{
+		UserIds: buildUserIds(26),
+	})
+	require.Error(t, err)
+	assert.Equal(t, connect.CodeInvalidArgument, connect.CodeOf(err))
 }
 
 // TestResourceServiceListUserConsentsUnknownResource asserts that an unknown
