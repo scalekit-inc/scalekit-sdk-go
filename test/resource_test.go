@@ -80,9 +80,19 @@ func TestResourceServiceListUserConsents(t *testing.T) {
 			response, err := resourceService.ListUserConsents(ctx, testResourceId, tt.options)
 			require.NoError(t, err)
 			require.NotNil(t, response)
-			assert.NotNil(t, response.GetConsents())
+			// GetConsents() is nil, not empty, when the resource has no matching
+			// consents, so assert what actually has to hold rather than non-nilness.
+			consents := response.GetConsents()
+			assert.LessOrEqual(t, len(consents), int(response.GetTotalSize()))
 			if tt.options.PageSize != 0 {
-				assert.LessOrEqual(t, uint32(len(response.GetConsents())), tt.options.PageSize)
+				assert.LessOrEqual(t, uint32(len(consents)), tt.options.PageSize)
+			}
+			// Every returned consent must belong to one of the requested users —
+			// this is the filter's contract, and it holds however many rows exist.
+			if len(tt.options.UserIds) > 0 {
+				for _, consent := range consents {
+					assert.Contains(t, tt.options.UserIds, consent.GetExternalUserId())
+				}
 			}
 		})
 	}
