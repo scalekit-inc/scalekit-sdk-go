@@ -19,13 +19,14 @@ setup:
 	GOTOOLCHAIN="$(GO_TOOLCHAIN)" GOBIN="$(TOOLS_BIN)" $(GO) install google.golang.org/protobuf/cmd/protoc-gen-go@v1.33.0
 	GOTOOLCHAIN="$(GO_TOOLCHAIN)" GOBIN="$(TOOLS_BIN)" $(GO) install connectrpc.com/connect/cmd/protoc-gen-connect-go@v1.19.1
 	GOTOOLCHAIN="$(GO_TOOLCHAIN)" GOBIN="$(TOOLS_BIN)" $(GO) install github.com/bufbuild/buf/cmd/buf@v1.50.1
-	# govulncheck is deliberately not pinned to $(GO_TOOLCHAIN). It tracks @latest,
-	# and x/vuln raises its own go directive faster than this repo moves its
-	# toolchain (v1.8.0 requires go >= 1.26.0). Pinning GOTOOLCHAIN disables
-	# toolchain switching, which turns that into a hard `make setup` failure;
-	# leaving it unset lets the go command fetch whatever toolchain the scanner
-	# needs, for this install only. The repo's own build toolchain is unaffected.
-	GOBIN="$(TOOLS_BIN)" $(GO) install golang.org/x/vuln/cmd/govulncheck@latest
+	# govulncheck is version-pinned like every other tool here, and must stay that
+	# way. It used to track @latest, which broke `make setup` the moment x/vuln
+	# v1.8.0 raised its own go directive to 1.26.0 past this repo's toolchain.
+	# Unsetting GOTOOLCHAIN does not help in CI: actions/setup-go exports
+	# GOTOOLCHAIN=local whenever go-version-file is used, so toolchain switching
+	# is already disabled by the environment. v1.7.0 is the last release whose go
+	# directive is 1.25.x. Raise it only alongside GO_TOOLCHAIN.
+	GOTOOLCHAIN="$(GO_TOOLCHAIN)" GOBIN="$(TOOLS_BIN)" $(GO) install golang.org/x/vuln/cmd/govulncheck@v1.7.0
 	GOTOOLCHAIN="$(GO_TOOLCHAIN)" GOBIN="$(TOOLS_BIN)" $(GO) install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
 
 tools-check:
