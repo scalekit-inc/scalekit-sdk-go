@@ -40,7 +40,7 @@ func TestGrpcKeepaliveInvariants(t *testing.T) {
 			// can trip the server's ping-abuse detector.
 			name: "ReadIdleTimeout clears the backend MinTime with real margin",
 			run: func(t *testing.T) {
-				_, transport := newGrpcHTTPClient()
+				_, transport := newGrpcHTTPClient(grpcReadIdleTimeout, grpcPingTimeout)
 
 				require.Greater(t, transport.ReadIdleTimeout, backendKeepaliveMinTime,
 					"ReadIdleTimeout must stay above the backend's MinTime, or the server will treat this health-check ping as abuse")
@@ -53,7 +53,7 @@ func TestGrpcKeepaliveInvariants(t *testing.T) {
 		{
 			name: "PingTimeout is a positive, bounded wait",
 			run: func(t *testing.T) {
-				_, transport := newGrpcHTTPClient()
+				_, transport := newGrpcHTTPClient(grpcReadIdleTimeout, grpcPingTimeout)
 
 				require.Greater(t, transport.PingTimeout, time.Duration(0))
 				require.Less(t, transport.PingTimeout, transport.ReadIdleTimeout,
@@ -67,7 +67,7 @@ func TestGrpcKeepaliveInvariants(t *testing.T) {
 			// reused stale after GCP's LB drops it.
 			name: "IdleConnTimeout is a finite bound below the GCP load balancer idle window",
 			run: func(t *testing.T) {
-				_, transport := newGrpcHTTPClient()
+				_, transport := newGrpcHTTPClient(grpcReadIdleTimeout, grpcPingTimeout)
 
 				require.Greater(t, transport.IdleConnTimeout, time.Duration(0),
 					"IdleConnTimeout must be a finite bound; zero means no limit")
@@ -88,7 +88,7 @@ func TestGrpcKeepaliveInvariants(t *testing.T) {
 			// apply to gRPC traffic.
 			name: "gRPC client honors HTTPS_PROXY/NO_PROXY via the underlying http.Transport",
 			run: func(t *testing.T) {
-				client, _ := newGrpcHTTPClient()
+				client, _ := newGrpcHTTPClient(grpcReadIdleTimeout, grpcPingTimeout)
 				transport, ok := client.Transport.(*http.Transport)
 				require.True(t, ok, "gRPC http.Client must be backed by *http.Transport (configured for HTTP/2 via http2.ConfigureTransports), not a bare *http2.Transport, or it loses proxy support")
 				require.NotNil(t, transport.Proxy, "Transport.Proxy must be set (e.g. http.ProxyFromEnvironment) so HTTPS_PROXY/NO_PROXY are honored")
@@ -117,7 +117,7 @@ func TestGrpcKeepaliveInvariants(t *testing.T) {
 				}))
 				defer server.Close()
 
-				client, _ := newGrpcHTTPClient()
+				client, _ := newGrpcHTTPClient(grpcReadIdleTimeout, grpcPingTimeout)
 				resp, err := client.Get(server.URL)
 				require.NoError(t, err)
 				defer resp.Body.Close()
@@ -129,7 +129,7 @@ func TestGrpcKeepaliveInvariants(t *testing.T) {
 			// share one coreClient's grpcHTTPClient, so they multiplex over
 			// one pooled HTTP/2 connection instead of each opening their own.
 			// A regression that has newConnectClient build a fresh client per
-			// call (e.g. calling newGrpcHTTPClient() directly instead of
+			// call (e.g. calling newGrpcHTTPClient(grpcReadIdleTimeout, grpcPingTimeout) directly instead of
 			// reading c.grpcHTTPClient) would silently multiply live
 			// connections to the backend by the number of RPC services.
 			name: "newConnectClient reuses coreClient.grpcHTTPClient, not a fresh one per call",

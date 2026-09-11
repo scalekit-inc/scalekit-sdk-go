@@ -241,10 +241,58 @@ type LogoutUrlOptions struct {
 	State                 string
 }
 
+// ClientOption configures optional, tunable behavior on a Scalekit client —
+// see WithKeepAlive and WithCallTimeout. Pass one or more as trailing opts to
+// NewScalekitClient, alongside (or instead of) the legacy positional
+// client-secret string.
+type ClientOption interface {
+	apply(*coreClient)
+}
+
+type clientOptionFunc func(*coreClient)
+
+func (f clientOptionFunc) apply(c *coreClient) { f(c) }
+
+// WithKeepAlive overrides the gRPC transport's keepalive ping interval and
+// timeout (defaults: 60s / 10s — see grpcReadIdleTimeout/grpcPingTimeout).
+// Most callers never need this. Pass pingInterval: 0 to disable keepalive
+// entirely (also disables the proactive idle-connection close derived from
+// it — see idleConnTimeoutFor) — an escape hatch for a network path that
+// rejects this client's ping pattern, mirroring the Python SDK's
+// keepalive_time_ms=0 and the Node SDK's pingIntervalMs=0.
+//
+// Panics if pingInterval is a non-zero value below grpcMinPingInterval (60s),
+// or if pingTimeout is not strictly less than pingInterval — see
+// validateKeepAlive. These are startup-configuration mistakes, not runtime
+// data errors.
+func WithKeepAlive(pingInterval, pingTimeout time.Duration) ClientOption {
+	return clientOptionFunc(func(c *coreClient) {
+		validateKeepAlive(pingInterval, pingTimeout)
+		c.pingInterval = pingInterval
+		c.pingTimeout = pingTimeout
+		c.grpcHTTPClient, _ = newGrpcHTTPClient(pingInterval, pingTimeout)
+	})
+}
+
+// WithCallTimeout overrides the deadline applied to every call (REST
+// token/JWKS calls and every gRPC RPC) whose context doesn't already carry
+// its own deadline. Defaults to 20s (defaultCallTimeout), matching the Python
+// and Node SDKs. Panics if d is not positive.
+func WithCallTimeout(d time.Duration) ClientOption {
+	return clientOptionFunc(func(c *coreClient) {
+		if d <= 0 {
+			panic(fmt.Sprintf("scalekit: WithCallTimeout: duration must be positive, got %s", d))
+		}
+		c.callTimeout = d
+	})
+}
+
 // NewScalekitClient creates a new Scalekit client.
 //
 // For backward compatibility, when a value is provided in opts and opts[0] is a
-// string, it is treated as client_secret.
+// string, it is treated as client_secret. Any ClientOption values in opts
+// (in any position) are applied after construction — see WithKeepAlive and
+// WithCallTimeout.
 func NewScalekitClient(envUrl, clientId string, opts ...any) Scalekit {
 	clientSecret := ""
 	if len(opts) > 0 {
@@ -252,7 +300,13 @@ func NewScalekitClient(envUrl, clientId string, opts ...any) Scalekit {
 			clientSecret = secret
 		}
 	}
-	return newScalekitClient(newCoreClient(envUrl, clientId, clientSecret))
+	core := newCoreClient(envUrl, clientId, clientSecret)
+	for _, opt := range opts {
+		if clientOpt, ok := opt.(ClientOption); ok {
+			clientOpt.apply(core)
+		}
+	}
+	return newScalekitClient(core)
 }
 
 func newScalekitClient(coreClient *coreClient) *scalekitClient {
@@ -281,6 +335,14 @@ func (s *scalekitClient) WithSecret(clientSecret string) Scalekit {
 	core.sdkVersion = s.coreClient.sdkVersion
 	core.apiVersion = s.coreClient.apiVersion
 	core.userAgent = s.coreClient.userAgent
+	// Carry forward any WithKeepAlive/WithCallTimeout overrides from the
+	// original client instead of silently resetting them to defaults.
+	core.callTimeout = s.coreClient.callTimeout
+	if core.pingInterval != s.coreClient.pingInterval || core.pingTimeout != s.coreClient.pingTimeout {
+		core.pingInterval = s.coreClient.pingInterval
+		core.pingTimeout = s.coreClient.pingTimeout
+		core.grpcHTTPClient, _ = newGrpcHTTPClient(core.pingInterval, core.pingTimeout)
+	}
 	return newScalekitClient(core)
 }
 

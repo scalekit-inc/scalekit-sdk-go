@@ -19,12 +19,22 @@ import (
 )
 
 const (
-	tokenEndpoint      = "oauth/token"
-	jwksEndpoint       = "keys"
-	sdkVersionNumber   = "2.8.0"
-	sdkVersion         = "Scalekit-Go/" + sdkVersionNumber
-	defaultHTTPTimeout = 10 * time.Second
-	maxErrorBodyBytes  = 8 * 1024
+	tokenEndpoint     = "oauth/token"
+	jwksEndpoint      = "keys"
+	sdkVersionNumber  = "2.8.0"
+	sdkVersion        = "Scalekit-Go/" + sdkVersionNumber
+	maxErrorBodyBytes = 8 * 1024
+
+	// defaultCallTimeout bounds every call (REST token/JWKS calls and every
+	// gRPC RPC) that doesn't already carry its own context deadline — without
+	// it, a call can block forever on a connection that looks fine to the
+	// client but is silently dead. Matches the Python SDK's call_timeout_s and
+	// the Node SDK's timeoutMs default (both 20s) exactly. Override per
+	// instance with WithCallTimeout, or per call by passing a context that
+	// already has a deadline (checked first, see withDefaultTimeout) — Go
+	// callers have that idiom natively; Python/Node don't, which is why their
+	// only lever is the constructor-level default.
+	defaultCallTimeout = 20 * time.Second
 
 	// grpcReadIdleTimeout/grpcPingTimeout mirror the keepalive settings the Java
 	// and Python SDKs use on the same gRPC channel (ManagedChannelBuilder.keepAliveTime /
@@ -38,29 +48,92 @@ const (
 	// cmd/grpc.go) with the same margin Java and Python use. A value close to
 	// 30s risks ordinary timing jitter tripping the server's ping-abuse
 	// detector and getting GOAWAY'd — the exact bug this setting avoids.
+	// These are the DEFAULTS; override per instance with WithKeepAlive.
 	grpcReadIdleTimeout = 60 * time.Second
 	grpcPingTimeout     = 10 * time.Second
 
-	// grpcIdleConnTimeout must stay below GCP's fixed 600s HTTPS load balancer
-	// backend idle timeout that fronts the Scalekit API, so a fully idle
-	// connection is closed by this client before the LB silently drops it.
-	// 5 minutes matches the margin the backend server uses for the same reason
-	// (grpcKeepaliveMaxConnectionIdle in scalekit's cmd/grpc.go). Using a bare
-	// *http2.Transport directly (see newGrpcHTTPClient) opts out of
-	// http.Transport's own IdleConnTimeout default, so this must be set
-	// explicitly or idle connections would never close on their own.
-	grpcIdleConnTimeout = 5 * time.Minute
+	// grpcMinPingInterval is the floor WithKeepAlive enforces on a
+	// caller-supplied ping interval (0 is separately allowed as the "disabled"
+	// escape hatch — see validateKeepAlive). Matches the Python SDK's
+	// MIN_KEEPALIVE_TIME_MS and the Node SDK's MIN_PING_INTERVAL_MS exactly,
+	// for the identical reason: a value below this leaves too little margin
+	// over the backend's 30s MinTime, and ordinary timing jitter trips the
+	// server's ping-abuse detector.
+	grpcMinPingInterval = 60 * time.Second
+
+	// grpcIdleConnCeiling bounds how long a fully idle gRPC connection is kept
+	// before this client proactively closes it (see idleConnTimeoutFor). Must
+	// stay strictly BELOW the backend's own grpcKeepaliveMaxConnectionIdle
+	// (5 min, scalekit's cmd/grpc.go), not equal to it: landing exactly on the
+	// backend's bound is a race — whichever side's timer fires first wins, and
+	// the loser is a request written into a socket the other side just closed.
+	// This must also clear GCP's fixed 600s HTTPS load balancer backend idle
+	// timeout that fronts the Scalekit API (trivially true at 4 min). Mirrors
+	// the Node SDK's IDLE_CONNECTION_TIMEOUT_CEILING_MS (connect.ts) for the
+	// same reason — staying below means the client always closes an idle
+	// connection first.
+	grpcIdleConnCeiling = 4 * time.Minute
+
+	// grpcIdleConnPingCycles is the multiplier idleConnTimeoutFor applies to a
+	// caller-supplied ping interval before clamping to grpcIdleConnCeiling —
+	// see that function's comment. Matches the Node SDK's
+	// IDLE_PING_CYCLES_BEFORE_CLOSE exactly.
+	grpcIdleConnPingCycles = 5
 )
 
-// withDefaultTimeout attaches a defaultHTTPTimeout deadline to ctx if it has
-// no deadline yet, returning the wrapped context and its cancel function.
-// If ctx already has a deadline it is returned unchanged alongside a no-op
-// cancel, so callers can always safely defer cancel() in both cases.
-func withDefaultTimeout(ctx context.Context) (context.Context, context.CancelFunc) {
+// withDefaultTimeout attaches c.callTimeout as a deadline to ctx if it has no
+// deadline yet, returning the wrapped context and its cancel function. If ctx
+// already has a deadline it is returned unchanged alongside a no-op cancel,
+// so callers can always safely defer cancel() in both cases.
+func (c *coreClient) withDefaultTimeout(ctx context.Context) (context.Context, context.CancelFunc) {
 	if _, ok := ctx.Deadline(); ok {
 		return ctx, func() {}
 	}
-	return context.WithTimeout(ctx, defaultHTTPTimeout)
+	return context.WithTimeout(ctx, c.callTimeout)
+}
+
+// idleConnTimeoutFor derives the proactive idle-connection-close timeout from
+// a ping interval, exactly mirroring the Node SDK's
+// idleConnectionTimeoutMsFor (connect.ts): pingInterval * grpcIdleConnPingCycles,
+// clamped to grpcIdleConnCeiling. The multiplier is intentionally superseded
+// by the ceiling for every currently-valid non-zero ping interval —
+// grpcMinPingInterval (60s) * 5 = 300s already exceeds the 4-min ceiling — but
+// stays in the formula (rather than being dropped for a bare constant) so
+// this still scales down correctly should the floor on ping interval itself
+// ever be lowered.
+func idleConnTimeoutFor(pingInterval time.Duration) time.Duration {
+	scaled := pingInterval * grpcIdleConnPingCycles
+	if scaled <= 0 || scaled > grpcIdleConnCeiling {
+		return grpcIdleConnCeiling
+	}
+	return scaled
+}
+
+// validateKeepAlive panics if pingInterval/pingTimeout is an invalid
+// combination — see WithKeepAlive. Mirrors the Python SDK's keepalive
+// validation (grpc silently clamps sub-10s values instead of rejecting them,
+// which is exactly the silent-misconfiguration failure mode this guards
+// against) and the Node SDK's assertValidPingInterval/assertValidTimeout.
+func validateKeepAlive(pingInterval, pingTimeout time.Duration) {
+	if pingInterval == 0 {
+		return // the deliberate "disabled" escape hatch; pingTimeout is unused in this state.
+	}
+	if pingInterval < grpcMinPingInterval {
+		panic(fmt.Sprintf(
+			"scalekit: WithKeepAlive: pingInterval must be 0 (disabled) or >= %s; got %s. "+
+				"A value below the default leaves too little margin over the Scalekit server's "+
+				"30s keepalive MinTime — early pings are struck as abusive, and enough strikes "+
+				"GOAWAYs the connection mid-call.", grpcMinPingInterval, pingInterval))
+	}
+	if pingTimeout <= 0 {
+		panic(fmt.Sprintf("scalekit: WithKeepAlive: pingTimeout must be positive, got %s", pingTimeout))
+	}
+	if pingTimeout >= pingInterval {
+		panic(fmt.Sprintf(
+			"scalekit: WithKeepAlive: pingTimeout (%s) must be less than pingInterval (%s), or the "+
+				"interval timer can fire again before a hung ping would ever be detected as hung.",
+			pingTimeout, pingInterval))
+	}
 }
 
 type coreClient struct {
@@ -84,6 +157,19 @@ type coreClient struct {
 	// except scoped to this coreClient instead of the whole process, and with
 	// keepalive settings tuned for the backend's enforcement policy.
 	grpcHTTPClient *http.Client
+
+	// pingInterval/pingTimeout are the values grpcHTTPClient's transport was
+	// last built with — kept here (rather than only inside the *http2.Transport)
+	// so WithSecret can carry them forward onto a new coreClient instead of
+	// silently resetting a caller's WithKeepAlive override back to the
+	// defaults. Set via WithKeepAlive; default to grpcReadIdleTimeout/
+	// grpcPingTimeout.
+	pingInterval time.Duration
+	pingTimeout  time.Duration
+
+	// callTimeout is the deadline withDefaultTimeout applies to a call whose
+	// context has none. Set via WithCallTimeout; defaults to defaultCallTimeout.
+	callTimeout time.Duration
 }
 
 type authenticationResponse struct {
@@ -120,7 +206,7 @@ func (h *headerInterceptor) RoundTrip(r *http.Request) (*http.Response, error) {
 		r.Header.Add("Authorization", fmt.Sprintf("Bearer %s", *token))
 	}
 
-	ctx, cancel := withDefaultTimeout(r.Context())
+	ctx, cancel := h.client.withDefaultTimeout(r.Context())
 	resp, err := h.t.RoundTrip(r.WithContext(ctx))
 	if err != nil {
 		cancel()
@@ -140,14 +226,26 @@ func newCoreClient(envUrl, clientId, clientSecret string) *coreClient {
 		envUrl:       envUrl,
 		clientId:     clientId,
 		clientSecret: clientSecret,
+		pingInterval: grpcReadIdleTimeout,
+		pingTimeout:  grpcPingTimeout,
+		callTimeout:  defaultCallTimeout,
 	}
 	client.httpClient = &http.Client{
 		Transport: &headerInterceptor{
-			t:      http.DefaultTransport,
+			// A dedicated *http.Transport, not the shared http.DefaultTransport
+			// singleton — the same process-global isolation concern
+			// newGrpcHTTPClient already addresses for the gRPC client. Unrelated
+			// code elsewhere in the same process reconfiguring/replacing
+			// http.DefaultTransport (a real thing customers do, e.g. to inject
+			// instrumentation) would otherwise silently affect every Scalekit
+			// REST call (token exchange, JWKS) too. Proxy: http.ProxyFromEnvironment
+			// preserves the HTTPS_PROXY/NO_PROXY support http.DefaultTransport
+			// provided.
+			t:      &http.Transport{Proxy: http.ProxyFromEnvironment},
 			client: client,
 		},
 	}
-	client.grpcHTTPClient, _ = newGrpcHTTPClient()
+	client.grpcHTTPClient, _ = newGrpcHTTPClient(client.pingInterval, client.pingTimeout)
 
 	return client
 }
@@ -157,6 +255,15 @@ func newCoreClient(envUrl, clientId, clientSecret string) *coreClient {
 // singleton other packages in the same process may reconfigure. It also
 // returns the *http2.Transport handle backing that client, purely so tests can
 // assert on the timeout values below without duplicating them.
+//
+// pingInterval/pingTimeout come from WithKeepAlive (or its defaults,
+// grpcReadIdleTimeout/grpcPingTimeout) and must already be validated — see
+// validateKeepAlive. pingInterval == 0 is the deliberate "disabled" escape
+// hatch: ReadIdleTimeout/PingTimeout/IdleConnTimeout are all left at their Go
+// zero values (no health-check ping, no proactive idle close), matching
+// connect-node's own untuned defaults — for a network path that rejects our
+// probing pattern entirely, mirroring the Python SDK's keepalive_time_ms=0
+// and the Node SDK's pingIntervalMs=0.
 //
 // It configures HTTP/2 onto a private *http.Transport (http2.ConfigureTransports)
 // rather than using a bare *http2.Transport directly, for two reasons:
@@ -172,7 +279,7 @@ func newCoreClient(envUrl, clientId, clientSecret string) *coreClient {
 //     *http2.Transport rejects that scheme outright ("http2: unencrypted
 //     HTTP/2 not enabled") since AllowHTTP defaults false and it has no
 //     cleartext dial override.
-func newGrpcHTTPClient() (*http.Client, *http2.Transport) {
+func newGrpcHTTPClient(pingInterval, pingTimeout time.Duration) (*http.Client, *http2.Transport) {
 	t1 := &http.Transport{Proxy: http.ProxyFromEnvironment}
 	t2, err := http2.ConfigureTransports(t1)
 	if err != nil {
@@ -180,9 +287,11 @@ func newGrpcHTTPClient() (*http.Client, *http2.Transport) {
 		// constructed *http.Transport never is.
 		panic(fmt.Sprintf("scalekit: unreachable: configuring HTTP/2 on a fresh transport failed: %v", err))
 	}
-	t2.ReadIdleTimeout = grpcReadIdleTimeout
-	t2.PingTimeout = grpcPingTimeout
-	t2.IdleConnTimeout = grpcIdleConnTimeout
+	if pingInterval != 0 {
+		t2.ReadIdleTimeout = pingInterval
+		t2.PingTimeout = pingTimeout
+		t2.IdleConnTimeout = idleConnTimeoutFor(pingInterval)
+	}
 	return &http.Client{Transport: t1}, t2
 }
 
