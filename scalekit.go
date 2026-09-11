@@ -253,13 +253,17 @@ type clientOptionFunc func(*coreClient)
 
 func (f clientOptionFunc) apply(c *coreClient) { f(c) }
 
-// WithKeepAlive overrides the gRPC transport's keepalive ping interval and
-// timeout (defaults: 60s / 10s — see grpcReadIdleTimeout/grpcPingTimeout).
-// Most callers never need this. Pass pingInterval: 0 to disable keepalive
-// entirely (also disables the proactive idle-connection close derived from
-// it — see idleConnTimeoutFor) — an escape hatch for a network path that
-// rejects this client's ping pattern, mirroring the Python SDK's
-// keepalive_time_ms=0 and the Node SDK's pingIntervalMs=0.
+// WithKeepAlive overrides the gRPC transport's active health-check ping
+// interval and timeout (defaults: 60s / 10s — see
+// grpcReadIdleTimeout/grpcPingTimeout). Most callers never need this. Pass
+// pingInterval: 0 to disable the active ping entirely — an escape hatch for a
+// network path that rejects this client's probing pattern, mirroring the
+// Python SDK's keepalive_time_ms=0 and the Node SDK's pingIntervalMs=0. This
+// does NOT also disable the proactive idle-connection-close timeout (see
+// idleConnTimeoutFor): that timer sends nothing over the wire, so a
+// customer's reason for disabling the active ping doesn't apply to it, and
+// leaving a fully-idle connection pooled forever would just reintroduce the
+// stale-connection problem this whole fix exists to solve.
 //
 // Panics if pingInterval is a non-zero value below grpcMinPingInterval (60s),
 // or if pingTimeout is not strictly less than pingInterval — see

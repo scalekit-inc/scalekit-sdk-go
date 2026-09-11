@@ -198,7 +198,31 @@ func retryBackoff(attempt int) time.Duration {
 
 // exec runs the Connect RPC. Errors (including validation/CodeInvalidArgument) are returned
 // as-is; use errors.As(err, &connectErr) with *connect.Error to inspect Code() and Details().
+//
+// Bounds the ENTIRE call — every retry attempt and every backoff wait — with
+// one deadline, matching WithCallTimeout's documented "bounds every call"
+// contract; without this, each retry got its own fresh callTimeout and the
+// backoff waits were unbounded, so one exec() call could run to roughly
+// (retries+1)*callTimeout instead of callTimeout. This only takes effect on
+// the outermost invocation: once withDefaultTimeout attaches a deadline here,
+// every per-attempt wrap further down (this function's own recursive
+// re-entry on retry, newHeaderInterceptor's wrap around the gRPC attempt
+// itself) sees ctx already has one and is a no-op.
+//
+// One deliberate exception: authenticateClient uses context.WithoutCancel
+// internally (so one caller's cancellation can't fail an in-flight auth
+// request other callers are sharing via singleflight — see core.go). That
+// strips this deadline, so a slow initial authentication (the
+// !hasAccessToken() call below, or the re-auth on a 401 retry) is NOT bounded
+// by it and can consume part of the budget before the actual RPC attempt
+// even starts. Accepted as consistent with "bound the whole call": if
+// authentication itself is slow, the overall call should still fail within
+// its documented budget rather than silently running long, not receive a
+// separate unbounded allowance.
 func (r *connectExecuter[TRequest, TResponse]) exec(ctx context.Context) (*TResponse, error) {
+	ctx, cancel := r.coreClient.withDefaultTimeout(ctx)
+	defer cancel()
+
 	if r.coreClient.clientSecret == "" {
 		return nil, ErrClientSecretRequired
 	}

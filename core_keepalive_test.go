@@ -3,7 +3,7 @@ package scalekit
 import (
 	"net/http"
 	"net/http/httptest"
-	"net/url"
+	"reflect"
 	"testing"
 	"time"
 
@@ -91,15 +91,19 @@ func TestGrpcKeepaliveInvariants(t *testing.T) {
 				client, _ := newGrpcHTTPClient(grpcReadIdleTimeout, grpcPingTimeout)
 				transport, ok := client.Transport.(*http.Transport)
 				require.True(t, ok, "gRPC http.Client must be backed by *http.Transport (configured for HTTP/2 via http2.ConfigureTransports), not a bare *http2.Transport, or it loses proxy support")
-				require.NotNil(t, transport.Proxy, "Transport.Proxy must be set (e.g. http.ProxyFromEnvironment) so HTTPS_PROXY/NO_PROXY are honored")
 
-				req, err := http.NewRequest(http.MethodGet, "https://example.scalekit.dev", nil)
-				require.NoError(t, err)
-				t.Setenv("HTTPS_PROXY", "http://proxy.internal.example:8080")
-				proxyURL, err := transport.Proxy(req)
-				require.NoError(t, err)
-				require.Equal(t, &url.URL{Scheme: "http", Host: "proxy.internal.example:8080"}, proxyURL,
-					"Transport.Proxy must actually route through HTTPS_PROXY when it is set")
+				// A function-pointer identity check, not a resolved-URL
+				// check: http.ProxyFromEnvironment memoizes its result
+				// behind a process-wide sync.Once, so a resolved-URL
+				// assertion here could pass on a stale cached value from an
+				// earlier test (or fail depending on execution order)
+				// without actually verifying this transport is wired to the
+				// right function at all.
+				require.Equal(t,
+					reflect.ValueOf(http.ProxyFromEnvironment).Pointer(),
+					reflect.ValueOf(transport.Proxy).Pointer(),
+					"Transport.Proxy must be http.ProxyFromEnvironment so HTTPS_PROXY/NO_PROXY are honored",
+				)
 			},
 		},
 		{

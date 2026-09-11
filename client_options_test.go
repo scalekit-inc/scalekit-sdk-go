@@ -2,7 +2,7 @@ package scalekit
 
 import (
 	"net/http"
-	"net/url"
+	"reflect"
 	"testing"
 	"time"
 
@@ -55,6 +55,16 @@ func TestNewScalekitClientWithKeepAliveDisabled(t *testing.T) {
 
 	require.Equal(t, time.Duration(0), c.coreClient.pingInterval)
 	require.Equal(t, time.Duration(0), c.coreClient.pingTimeout)
+
+	// Disabling the active health-check ping must NOT also disable the
+	// proactive idle-close timer: IdleConnTimeout doesn't send anything over
+	// the wire (unlike ReadIdleTimeout/PingTimeout), so there's no reason a
+	// network path that rejects our PING pattern should also leave idle
+	// connections completely unbounded.
+	_, transport := newGrpcHTTPClient(c.coreClient.pingInterval, c.coreClient.pingTimeout)
+	require.Equal(t, time.Duration(0), transport.ReadIdleTimeout)
+	require.Equal(t, time.Duration(0), transport.PingTimeout)
+	require.Equal(t, grpcIdleConnCeiling, transport.IdleConnTimeout)
 }
 
 func TestNewScalekitClientWithCallTimeout(t *testing.T) {
@@ -135,10 +145,16 @@ func TestHTTPClientHonorsHTTPSProxy(t *testing.T) {
 	interceptor := c.httpClient.Transport.(*headerInterceptor)
 	transport := interceptor.t.(*http.Transport)
 
-	req, err := http.NewRequest(http.MethodGet, "https://example.scalekit.dev", nil)
-	require.NoError(t, err)
-	t.Setenv("HTTPS_PROXY", "http://proxy.internal.example:8080")
-	proxyURL, err := transport.Proxy(req)
-	require.NoError(t, err)
-	require.Equal(t, &url.URL{Scheme: "http", Host: "proxy.internal.example:8080"}, proxyURL)
+	// A function-pointer identity check, not a resolved-URL check:
+	// http.ProxyFromEnvironment memoizes its result behind a process-wide
+	// sync.Once, so if anything else in this test binary already called it
+	// before this test's t.Setenv took effect, a resolved-URL assertion here
+	// could silently pass on a stale cached value (or fail depending on test
+	// execution order) without actually verifying this transport is wired to
+	// the right function at all.
+	require.Equal(t,
+		reflect.ValueOf(http.ProxyFromEnvironment).Pointer(),
+		reflect.ValueOf(transport.Proxy).Pointer(),
+		"Transport.Proxy must be http.ProxyFromEnvironment so HTTPS_PROXY/NO_PROXY are honored",
+	)
 }

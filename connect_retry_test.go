@@ -3,12 +3,14 @@ package scalekit
 import (
 	"context"
 	"errors"
-	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
 	"connectrpc.com/connect"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 // backendKeepaliveMaxConnectionIdle is the backend's own gRPC keepalive
@@ -65,7 +67,14 @@ func fakeUnavailable() error {
 // in the fault-injection run this fix came from. See
 // isZeroMessageCardinalityViolation.
 func fakeCardinalityViolation() error {
-	return connect.NewError(connect.CodeUnimplemented, fmt.Errorf("unary %s has zero messages", "response"))
+	// Built from the shared constant, not re-derived — if connect-go's actual
+	// wording (zeroMessageCardinalityViolation) ever changes, this fake
+	// should change with it rather than silently keep passing against a
+	// string that no longer matches reality. See also
+	// TestIsZeroMessageCardinalityViolationAgainstRealConnectGo, which
+	// doesn't use this fake at all and instead triggers the real
+	// receiveUnaryMessage code path.
+	return connect.NewError(connect.CodeUnimplemented, errors.New(zeroMessageCardinalityViolation))
 }
 
 // fakeGenuinelyUnimplemented returns a *connect.Error shaped like what a
@@ -180,4 +189,102 @@ func TestExecDoesNotRetryGenuineUnimplemented(t *testing.T) {
 	_, err := exec.exec(context.Background())
 	require.Error(t, err)
 	require.Equal(t, 1, *calls, "a genuine Unimplemented must fail immediately, never retried")
+}
+
+// TestExecBoundsEntireCallIncludingBackoff is the regression test for the PR
+// #89 review finding: exec() previously applied callTimeout fresh to every
+// individual attempt (via newHeaderInterceptor), and the backoff waits
+// between retries were unbounded entirely — so with a persistently failing
+// call, an exec() invocation could run to roughly (retries+1)*callTimeout
+// instead of callTimeout, contradicting WithCallTimeout's documented "bounds
+// every call" contract. With a short callTimeout and a fn that always fails
+// transiently, the very first backoff wait (averaging ~0.75s at the default
+// jitter) must blow through the deadline and exec() must fail with
+// ctx.Err() well before exhausting the retry budget.
+func TestExecBoundsEntireCallIncludingBackoff(t *testing.T) {
+	exec, calls := newTestExecuterWithFailure(defaultMaxUnavailableRetries+5, fakeUnavailable)
+	exec.coreClient.callTimeout = 50 * time.Millisecond
+
+	start := time.Now()
+	_, err := exec.exec(context.Background())
+	elapsed := time.Since(start)
+
+	require.Error(t, err)
+	require.ErrorIs(t, err, context.DeadlineExceeded)
+	require.Less(t, elapsed, 500*time.Millisecond,
+		"must fail within roughly callTimeout, not run through the full backoff/retry sequence")
+	require.LessOrEqual(t, *calls, 2,
+		"should fail during the first backoff wait, not exhaust all retry attempts")
+}
+
+// TestExecStillHonorsCallerSuppliedDeadline confirms exec()'s new deadline
+// wrap is a no-op when the caller's context already has one — withDefaultTimeout
+// only attaches callTimeout when ctx has no deadline of its own, so a caller
+// that wants a different (shorter) bound than the client-wide default isn't
+// silently overridden by it.
+func TestExecStillHonorsCallerSuppliedDeadline(t *testing.T) {
+	calls := 0
+	fn := func(ctx context.Context, _ *connect.Request[string]) (*connect.Response[string], error) {
+		calls++
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+		return connect.NewResponse(new(string)), nil
+	}
+	c := newCoreClient("https://example.scalekit.dev", "client-id", "client-secret")
+	c.callTimeout = 20 * time.Second // must NOT be what actually fires below
+	token := "test-token"
+	c.accessToken.Store(&token)
+	req := ""
+	exec := newConnectExecuter[string, string](c, fn, &req)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
+	defer cancel()
+	time.Sleep(15 * time.Millisecond) // let the caller-supplied (short) deadline actually pass
+
+	_, err := exec.exec(ctx)
+	require.Error(t, err)
+	require.ErrorIs(t, err, context.DeadlineExceeded)
+	require.Equal(t, 1, calls,
+		"the already-expired caller deadline must surface from the call itself, not from a 20s callTimeout override")
+}
+
+// TestIsZeroMessageCardinalityViolationAgainstRealConnectGo drives an actual
+// connect-go gRPC unary call against a real (test) server that responds with
+// a clean, successful (grpc-status: 0) stream end but zero messages — the
+// same well-formed-but-cardinality-violating shape a toxiproxy `timeout`
+// toxic produces (verified live against production in the fault-injection
+// pass this fix came from). Unlike fakeCardinalityViolation (which
+// constructs the *connect.Error by hand), this exercises connect-go's real
+// receiveUnaryMessage code path directly, so a future connectrpc.com/connect
+// upgrade that reworks this error shape gets caught by this test failing,
+// not by isZeroMessageCardinalityViolation silently going stale.
+func TestIsZeroMessageCardinalityViolationAgainstRealConnectGo(t *testing.T) {
+	server := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/grpc")
+		w.Header().Set("Trailer", "Grpc-Status")
+		w.WriteHeader(http.StatusOK)
+		// Deliberately zero bytes of body — no gRPC data frame at all — then
+		// a trailer signaling a clean, successful end of stream. A unary
+		// call requires exactly one message; ending cleanly with none is
+		// exactly the cardinality violation isZeroMessageCardinalityViolation
+		// exists to catch.
+		w.Header().Set("Grpc-Status", "0")
+	}))
+	server.EnableHTTP2 = true
+	server.StartTLS()
+	defer server.Close()
+
+	client := connect.NewClient[wrapperspb.StringValue, wrapperspb.StringValue](
+		server.Client(),
+		server.URL+"/scalekit.v1.test.TestService/TestMethod",
+		connect.WithGRPC(),
+	)
+	_, err := client.CallUnary(context.Background(), connect.NewRequest(&wrapperspb.StringValue{}))
+
+	require.Error(t, err)
+	require.True(t, isZeroMessageCardinalityViolation(err),
+		"a real connect-go unary call ending with zero messages must be recognized as a cardinality violation")
+	require.False(t, isUnavailable(err),
+		"this specific shape must not also be classified as CodeUnavailable")
 }

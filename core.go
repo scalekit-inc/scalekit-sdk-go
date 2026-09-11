@@ -290,8 +290,14 @@ func newGrpcHTTPClient(pingInterval, pingTimeout time.Duration) (*http.Client, *
 	if pingInterval != 0 {
 		t2.ReadIdleTimeout = pingInterval
 		t2.PingTimeout = pingTimeout
-		t2.IdleConnTimeout = idleConnTimeoutFor(pingInterval)
 	}
+	// Independent of pingInterval: unlike ReadIdleTimeout/PingTimeout, this
+	// doesn't send anything over the wire — it's a purely local pool-hygiene
+	// timer — so disabling the active health-check ping (pingInterval == 0,
+	// for a network path that rejects that probing pattern) is no reason to
+	// also leave idle connections completely unbounded. idleConnTimeoutFor(0)
+	// already resolves to grpcIdleConnCeiling.
+	t2.IdleConnTimeout = idleConnTimeoutFor(pingInterval)
 	return &http.Client{Transport: t1}, t2
 }
 
