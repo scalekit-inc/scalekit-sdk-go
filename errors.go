@@ -109,6 +109,18 @@ var (
 	// ErrInvalidPageSize is returned when a requested page size is negative or
 	// exceeds the uint32 range accepted by the API.
 	ErrInvalidPageSize = errors.New("page size is out of range")
+
+	// ErrResourceIdRequired is returned when a resourceId argument is required but was empty.
+	ErrResourceIdRequired = errors.New("resourceId is required")
+
+	// ErrConsentIdRequired is returned when a consentId argument is required but was empty.
+	ErrConsentIdRequired = errors.New("consentId is required")
+
+	// ErrClientNotInResource is returned by DeleteResourceClient when the given
+	// clientId does not belong to the given resourceId. The error wraps this
+	// sentinel, so callers can match it with errors.Is while the message still
+	// carries the actual client and resource ids.
+	ErrClientNotInResource = errors.New("client does not belong to resource")
 )
 
 // errorCore holds the common fields for SDK errors. Unexported so HTTPError can embed it without
