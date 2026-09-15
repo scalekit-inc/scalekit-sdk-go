@@ -1878,6 +1878,560 @@ if err := client.Client().DeleteClientSecret(ctx, "client_123", "secret_456"); e
 </dl>
 </details>
 
+## Resources
+
+<details><summary><code>client.Resource().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">CreateResourceClient</a>(ctx, resourceId, client) -> (*CreateResourceClientResponse, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a new API client scoped to a resource. The response's `PlainSecret`
+is the plaintext client secret, only available at creation time. `Audience`
+is ignored for MCP_SERVER/MCP_GATEWAY resources, which get their audience
+from the resource itself.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+import (
+  clients "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/clients"
+)
+
+created, err := client.Resource().CreateResourceClient(ctx, "res_123", &clients.ResourceClient{
+  Name:        "My Resource Client",
+  Description: "Client for my MCP server",
+  Scopes:      []string{"read:data"},
+})
+if err != nil {
+  // handle
+}
+_ = created.Client
+_ = created.PlainSecret
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**resourceId:** `string` - The resource to create the client for (format: res_xxxxx)
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**client:** `*clients.ResourceClient` (package `pkg/grpc/scalekit/v1/clients`)
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Resource().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">GetResourceClient</a>(ctx, resourceId, clientId) -> (*GetResourceClientResponse, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieves a single API client scoped to a resource, along with the end-users
+who have granted it consent.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+got, err := client.Resource().GetResourceClient(ctx, "res_123", "m2m_456")
+if err != nil {
+  // handle
+}
+_ = got.Client
+_ = got.ConsentedUsers
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**resourceId:** `string` - The resource the client must belong to (format: res_xxxxx)
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**clientId:** `string` - The client ID (format: m2m_xxxxx)
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Resource().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">ListResourceClients</a>(ctx, resourceId) -> (*ListResourceClientsResponse, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists every API client scoped to a resource.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+list, err := client.Resource().ListResourceClients(ctx, "res_123")
+if err != nil {
+  // handle
+}
+for _, c := range list.Clients {
+  _ = c
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**resourceId:** `string` - The resource whose clients to list (format: res_xxxxx)
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Resource().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">UpdateResourceClient</a>(ctx, resourceId, clientId, client, mask) -> (*UpdateResourceClientResponse, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Updates an existing API client scoped to a resource. `mask` lists which
+fields of `client` to change. Verified against a live environment: the
+server only actually honors the mask for `scopes`, `custom_claims` and
+`redirect_uris` — include one of those paths with an empty value (e.g.
+`Scopes: []string{}`) to clear it. `Name`/`Description` are applied whenever
+non-empty regardless of mask (an empty string is a no-op, not a clear).
+`Audience` cannot be changed here at all — a resource client's audience is
+fixed to the resource it belongs to, by design, not something this call can
+widen or repoint.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+import (
+  clients "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/clients"
+  "google.golang.org/protobuf/types/known/fieldmaskpb"
+)
+
+updated, err := client.Resource().UpdateResourceClient(ctx, "res_123", "m2m_456", &clients.ResourceClient{
+  Scopes: []string{"read:data", "write:data"},
+}, &fieldmaskpb.FieldMask{
+  Paths: []string{"scopes"},
+})
+if err != nil {
+  // handle
+}
+_ = updated.Client
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**resourceId:** `string` - The resource the client must belong to (format: res_xxxxx)
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**clientId:** `string` - The client ID to update
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**client:** `*clients.ResourceClient`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**mask:** `*fieldmaskpb.FieldMask` - Field mask specifying which fields to update
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Resource().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">DeleteResourceClient</a>(ctx, resourceId, clientId) -> error</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Permanently deletes an API client scoped to a resource.
+
+`DeleteResourceClient` shares its underlying delete path with client
+deletion in general, so nothing forces the given `clientId` to actually
+belong to `resourceId` — but this method lives under `client.Resource()`, so
+callers reasonably expect it to only ever touch clients within that
+resource. This fetches the client first and verifies its own `resourceId`
+matches before deleting, and refuses (wrapping `scalekit.ErrClientNotInResource`)
+instead of trusting the id pair blindly.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+err := client.Resource().DeleteResourceClient(ctx, "res_123", "m2m_456")
+if err != nil {
+  // handle
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**resourceId:** `string` - The resource the client must belong to (format: res_xxxxx)
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**clientId:** `string` - The client ID to delete
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Resource().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">ListUserConsents</a>(ctx, resourceId, options) -> (*ListResourceUserConsentsResponse, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists the end-user consents granted against a resource, with pagination.
+Each returned consent carries `ConsentId`, `ExternalUserId` and `Scopes`.
+The response also carries `TotalSize` plus `NextPageToken`/`PrevPageToken`
+cursors.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+list, err := client.Resource().ListUserConsents(ctx, "res_123", scalekit.ListUserConsentsOptions{
+  PageSize: 10,
+})
+if err != nil {
+  // handle
+}
+for _, c := range list.Consents {
+  _ = c
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**resourceId:** `string` - The resource whose consents to list (format: res_xxxxx)
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**options:** `scalekit.ListUserConsentsOptions`
+- `Search string` - Case-insensitive substring match on external user IDs
+- `PageSize uint32` - Max 30
+- `PageToken string` - Pagination cursor
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Resource().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">RevokeUserConsent</a>(ctx, clientId, consentId) -> error</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Revokes a single end-user consent held by an API client. Deletes the
+consent, so the client is prompted for consent again on its next
+authorization attempt, and revokes every active refresh token issued to
+that client for the same user. Access tokens already issued stay valid
+until they expire. Note that `clientId` is the API client that holds the
+consent (format: m2m_xxxxx), not the resource id.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+err := client.Resource().RevokeUserConsent(ctx, "m2m_456", "usrcnst_789")
+if err != nil {
+  // handle
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**clientId:** `string` - The client holding the consent (format: m2m_xxxxx)
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**consentId:** `string` - The consent to revoke (format: usrcnst_xxxxx)
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
 ## Organizations
 
 <details><summary><code>client.Organization().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/organization.go">CreateOrganization</a>(ctx, name, options) -> (*CreateOrganizationResponse, error)</code></summary>
