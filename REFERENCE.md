@@ -2317,7 +2317,7 @@ for _, s := range resource.Resource.Scopes {
 }
 
 updated, err := client.Resource().UpdateResourceClient(ctx, "res_123", "m2m_456", &clients.ResourceClient{
-  Scopes: []string{allowedScopes[0]},
+  Scopes: allowedScopes,
 }, &fieldmaskpb.FieldMask{
   Paths: []string{"scopes"},
 })
