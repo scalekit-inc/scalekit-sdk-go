@@ -1919,10 +1919,13 @@ on that flag to get the actual allowlist.
 <dd>
 
 ```go
+import "fmt"
+
 got, err := client.Resource().GetResource(ctx, "res_123")
 if err != nil {
   // handle
 }
+fmt.Println(got.Resource)
 var allowedScopes []string
 for _, s := range got.Resource.Scopes {
   if s.Enabled {
@@ -2050,12 +2053,8 @@ for _, res := range list.Resources {
 <dl>
 <dd>
 
-Creates a new API client scoped to a resource. The response's `PlainSecret`
+Creates a resource client. The response's `PlainSecret`
 is the plaintext client secret, only available at creation time.
-
-`Audience` cannot be set through this SDK — it is always server-determined,
-for any resource type. A non-empty `client.Audience` returns
-`ErrAudienceNotSettable` rather than being silently forwarded.
 </dd>
 </dl>
 </dd>
@@ -2076,8 +2075,21 @@ import (
   clients "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/clients"
 )
 
+resource, err := client.Resource().GetResource(ctx, "res_123")
+if err != nil {
+  // handle
+}
+var allowedScopes []string
+for _, s := range resource.Resource.Scopes {
+  if s.Enabled {
+    allowedScopes = append(allowedScopes, s.Name)
+  }
+}
+fmt.Println(allowedScopes)
+
 created, err := client.Resource().CreateResourceClient(ctx, "res_123", &clients.ResourceClient{
-  Name: "My Resource Client",
+  Name:   "My Resource Client",
+  Scopes: allowedScopes,
 })
 if err != nil {
   // handle
@@ -2133,7 +2145,7 @@ fmt.Println(created.Client.ClientId, created.PlainSecret)
 <dl>
 <dd>
 
-Retrieves a single API client scoped to a resource, along with the end-users
+Fetches a single resource client, along with the end-users
 who have granted it consent.
 </dd>
 </dl>
@@ -2154,7 +2166,6 @@ if err != nil {
   // handle
 }
 _ = got.Client
-_ = got.ConsentedUsers
 ```
 </dd>
 </dl>
@@ -2205,7 +2216,7 @@ _ = got.ConsentedUsers
 <dl>
 <dd>
 
-Lists every API client scoped to a resource.
+Lists resource clients.
 </dd>
 </dl>
 </dd>
@@ -2269,17 +2280,12 @@ for _, c := range list.Clients {
 <dl>
 <dd>
 
-Updates an existing API client scoped to a resource. `mask` lists which
+Updates a resource client. `mask` lists which
 fields of `client` to change. Verified against a live environment: the
 server only actually honors the mask for `scopes`, `custom_claims` and
 `redirect_uris` — include one of those paths with an empty value (e.g.
 `Scopes: []string{}`) to clear it. `Name`/`Description` are applied whenever
 non-empty regardless of mask (an empty string is a no-op, not a clear).
-
-`"audience"` is not a supported mask path — audience cannot be set through
-this SDK at all, on create or update, for any resource type, so this
-returns `ErrAudienceNotSettable` rather than silently accepting a path
-that can never take effect.
 </dd>
 </dl>
 </dd>
@@ -2299,8 +2305,19 @@ import (
   "google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
+resource, err := client.Resource().GetResource(ctx, "res_123")
+if err != nil {
+  // handle
+}
+var allowedScopes []string
+for _, s := range resource.Resource.Scopes {
+  if s.Enabled {
+    allowedScopes = append(allowedScopes, s.Name)
+  }
+}
+
 updated, err := client.Resource().UpdateResourceClient(ctx, "res_123", "m2m_456", &clients.ResourceClient{
-  Scopes: []string{"read:data", "write:data"},
+  Scopes: []string{allowedScopes[0]},
 }, &fieldmaskpb.FieldMask{
   Paths: []string{"scopes"},
 })
@@ -2338,7 +2355,7 @@ _ = updated.Client
 <dl>
 <dd>
 
-**clientId:** `string` - The client ID to update
+**clientId:** `string` - The client ID to update (format: m2m_xxxxx)
 
 </dd>
 </dl>
@@ -2374,7 +2391,7 @@ _ = updated.Client
 <dl>
 <dd>
 
-Permanently deletes the API client if it belongs to this resource. Returns an error if the client is missing or scoped to a different resource.
+Deletes resource clients. Returns an error if the client is missing or scoped to a different resource.
 </dd>
 </dl>
 </dd>
@@ -2423,7 +2440,7 @@ if err != nil {
 <dl>
 <dd>
 
-**clientId:** `string` - The client ID to delete
+**clientId:** `string` - The client ID to delete (format: m2m_xxxxx)
 
 </dd>
 </dl>
@@ -2443,21 +2460,9 @@ if err != nil {
 <dl>
 <dd>
 
-Creates a new secret for an API client scoped to a resource. The
-underlying secret-creation call is keyed by clientId alone — it has no
-notion of a resource — so this fetches the client first and verifies it
-belongs to resourceId before creating a secret for it, the same
-ownership check `DeleteResourceClient` applies.
+Creates a new secret for resource client. Only 2 client secrets are recommended to exist at a given point in time. If need for more secret creation arises, please use `DeleteResourceClientSecret` to delete an existing secret first.
 
-The backend caps how many secrets a client can hold at once (a
-configurable limit — 5 in Scalekit's own dev environment, verified live;
-treat the exact number as environment-specific, not a fixed constant).
-Exceeding it fails (the server rejects it as `INVALID_ARGUMENT`, "only N
-secrets are allowed") — delete an existing secret first via
-`DeleteResourceClientSecret`. The dashboard itself is more conservative
-than the server limit: it only shows an "Add new secret" action while a
-client has fewer than 2 secrets. Match whichever threshold — the actual
-server limit or the dashboard's stricter 2 — fits your own UX.
+The plaintext client secret, only available at creation time.
 </dd>
 </dl>
 </dd>
@@ -2507,7 +2512,7 @@ _ = created.PlainSecret
 <dl>
 <dd>
 
-**clientId:** `string` - The client ID to create a secret for
+**clientId:** `string` - The client ID to create a secret for (format: m2m_xxxxx)
 
 </dd>
 </dl>
@@ -2527,15 +2532,7 @@ _ = created.PlainSecret
 <dl>
 <dd>
 
-Permanently deletes a secret from an API client scoped to a resource.
-Like `CreateResourceClientSecret`, the underlying delete call is keyed by
-clientId alone, so this verifies the client belongs to resourceId first
-rather than trusting the id pair blindly.
-
-A client must always keep at least 1 secret. Calling this on a client's
-last remaining secret fails (the server rejects it as `INVALID_ARGUMENT`,
-"at least one secret is required"). Mirror the dashboard's own UX: only
-offer a "Revoke" action on a secret while the client has more than 1.
+Permanently deletes a secret from resource client. A client must always keep at least 1 secret. Calling this on a client's last remaining secret returns an error.
 </dd>
 </dl>
 </dd>
@@ -2584,7 +2581,7 @@ if err != nil {
 <dl>
 <dd>
 
-**clientId:** `string` - The client ID the secret belongs to
+**clientId:** `string` - The client ID the secret belongs to (format: m2m_xxxxx)
 
 </dd>
 </dl>
@@ -2592,7 +2589,7 @@ if err != nil {
 <dl>
 <dd>
 
-**secretId:** `string` - The secret ID to delete
+**secretId:** `string` - The secret ID to delete (format: sks_xxxxx)
 
 </dd>
 </dl>
