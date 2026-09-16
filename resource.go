@@ -3,6 +3,7 @@ package scalekit
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	clientsv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/clients"
 	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/clients/clientsconnect"
@@ -99,14 +100,12 @@ type ResourceService interface {
 	// custom_claims and redirect_uris — include one of those paths with an
 	// empty value (e.g. Scopes: []string{}) to clear it. Name/Description are
 	// applied whenever non-empty regardless of mask (an empty string is a
-	// no-op, not a clear). Audience cannot be changed via update for any
-	// resource type — this call never touches it, so whatever value the
-	// client received at creation stays fixed for its lifetime. For
-	// MCP_SERVER/MCP_GATEWAY resources that value is always the resource's
-	// own audience (CreateResourceClient ignores caller-supplied audience
-	// for those types); for other resource types it's whichever value
-	// create used — the caller-supplied audience, or the resource's own id
-	// if none was supplied.
+	// no-op, not a clear).
+	//
+	// "audience" is not a supported mask path — a resource client's audience
+	// is fixed at creation and can never be changed via update, for any
+	// resource type, so this returns ErrAudienceNotUpdatable rather than
+	// silently accepting a path that can never take effect.
 	UpdateResourceClient(ctx context.Context, resourceId string, clientId string, client *clientsv1.ResourceClient, mask *fieldmaskpb.FieldMask) (*UpdateResourceClientResponse, error)
 
 	// DeleteResourceClient permanently deletes an API client scoped to a resource.
@@ -261,6 +260,9 @@ func (r *resourceService) UpdateResourceClient(ctx context.Context, resourceId s
 	}
 	if clientId == "" {
 		return nil, ErrClientIdRequired
+	}
+	if mask != nil && slices.Contains(mask.GetPaths(), "audience") {
+		return nil, ErrAudienceNotUpdatable
 	}
 	return newConnectExecuter(
 		r.coreClient,

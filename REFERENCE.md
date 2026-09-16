@@ -2263,13 +2263,11 @@ server only actually honors the mask for `scopes`, `custom_claims` and
 `redirect_uris` — include one of those paths with an empty value (e.g.
 `Scopes: []string{}`) to clear it. `Name`/`Description` are applied whenever
 non-empty regardless of mask (an empty string is a no-op, not a clear).
-`Audience` cannot be changed via update for any resource type — this call
-never touches it, so whatever value the client received at creation stays
-fixed for its lifetime. For MCP_SERVER/MCP_GATEWAY resources that value is
-always the resource's own audience (`CreateResourceClient` ignores
-caller-supplied audience for those types); for other resource types it's
-whichever value create used — the caller-supplied audience, or the
-resource's own id if none was supplied.
+
+`"audience"` is not a supported mask path — a resource client's audience is
+fixed at creation and can never be changed via update, for any resource
+type, so this returns `ErrAudienceNotUpdatable` rather than silently
+accepting a path that can never take effect.
 </dd>
 </dl>
 </dd>

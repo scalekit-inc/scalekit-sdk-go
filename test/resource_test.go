@@ -495,9 +495,10 @@ func TestUpdateResourceClientEmptyStringIsNoOp(t *testing.T) {
 	assert.Equal(t, "keep this description", updated.Client.Description)
 }
 
-// TestUpdateResourceClientAudienceImmutable confirms audience can't be
-// changed via update, by design, even with its path in the mask.
-func TestUpdateResourceClientAudienceImmutable(t *testing.T) {
+// TestUpdateResourceClientRejectsAudienceInMask confirms audience can't be
+// changed via update, by design — the SDK rejects an "audience" mask path
+// outright, rather than sending a request that the server would just ignore.
+func TestUpdateResourceClientRejectsAudienceInMask(t *testing.T) {
 	resourceId := testResourceId(t)
 	ctx := context.Background()
 
@@ -509,11 +510,14 @@ func TestUpdateResourceClientAudienceImmutable(t *testing.T) {
 		_ = client.Resource().DeleteResourceClient(ctx, resourceId, clientId)
 	})
 
-	updated, err := client.Resource().UpdateResourceClient(ctx, resourceId, clientId, &clients.ResourceClient{
+	_, err = client.Resource().UpdateResourceClient(ctx, resourceId, clientId, &clients.ResourceClient{
 		Audience: []string{"https://example.com/should-not-apply"},
 	}, &fieldmaskpb.FieldMask{Paths: []string{"audience"}})
+	require.ErrorIs(t, err, scalekit.ErrAudienceNotUpdatable)
+
+	fetched, err := client.Resource().GetResourceClient(ctx, resourceId, clientId)
 	require.NoError(t, err)
-	assert.Equal(t, originalAudience, updated.Client.Audience)
+	assert.Equal(t, originalAudience, fetched.Client.Audience)
 }
 
 // TestUpdateResourceClientClearsListFields confirms scopes/customClaims/

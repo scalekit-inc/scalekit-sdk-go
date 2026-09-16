@@ -121,6 +121,13 @@ var (
 	// sentinel, so callers can match it with errors.Is while the message still
 	// carries the actual client and resource ids.
 	ErrClientNotInResource = errors.New("client does not belong to resource")
+
+	// ErrAudienceNotUpdatable is returned by UpdateResourceClient when the
+	// caller includes "audience" in the update mask. A resource client's
+	// audience is fixed at creation and can never be changed via update, for
+	// any resource type, so this is rejected outright rather than silently
+	// accepted and ignored.
+	ErrAudienceNotUpdatable = errors.New("audience cannot be changed via update; it is fixed at creation")
 )
 
 // errorCore holds the common fields for SDK errors. Unexported so HTTPError can embed it without
