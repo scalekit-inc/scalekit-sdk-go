@@ -122,6 +122,17 @@ type ResourceService interface {
 	// has no notion of a resource — so this fetches the client first and
 	// verifies it belongs to resourceId before creating a secret for it,
 	// the same ownership check DeleteResourceClient applies.
+	//
+	// The backend caps how many secrets a client can hold at once (a
+	// configurable limit — 5 in Scalekit's own dev environment, verified
+	// live; treat the exact number as environment-specific, not a fixed
+	// constant). Exceeding it fails (the server rejects it as
+	// INVALID_ARGUMENT, "only N secrets are allowed") — delete an existing
+	// secret first via DeleteResourceClientSecret. The dashboard itself is
+	// more conservative than the server limit: it only shows an "Add new
+	// secret" action while a client has fewer than 2 secrets. Match
+	// whichever threshold — the actual server limit or the dashboard's
+	// stricter 2 — fits your own UX.
 	CreateResourceClientSecret(ctx context.Context, resourceId string, clientId string) (*CreateClientSecretResponse, error)
 
 	// DeleteResourceClientSecret permanently deletes a secret from an API
@@ -130,6 +141,12 @@ type ResourceService interface {
 	// Like CreateResourceClientSecret, the underlying delete call is keyed
 	// by clientId alone, so this verifies the client belongs to resourceId
 	// first rather than trusting the id pair blindly.
+	//
+	// A client must always keep at least 1 secret. Calling this on a
+	// client's last remaining secret fails (the server rejects it as
+	// INVALID_ARGUMENT, "at least one secret is required"). Mirror the
+	// dashboard's own UX: only offer a "Revoke" action on a secret while the
+	// client has more than 1.
 	DeleteResourceClientSecret(ctx context.Context, resourceId string, clientId string, secretId string) error
 
 	// ListUserConsents lists the end-user consents granted against a
