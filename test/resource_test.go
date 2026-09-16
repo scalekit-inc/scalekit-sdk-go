@@ -305,6 +305,62 @@ func TestCreateResourceClientSecretRefusesWrongResource(t *testing.T) {
 	require.Error(t, err)
 }
 
+// TestDeleteResourceClientSecretRefusesWhenLastRemaining proves the server
+// requires a resource client to always keep at least one secret: deleting
+// the lone secret a client is created with is refused.
+func TestDeleteResourceClientSecretRefusesWhenLastRemaining(t *testing.T) {
+	resourceId := testResourceId(t)
+	ctx := context.Background()
+
+	created, err := client.Resource().CreateResourceClient(ctx, resourceId, &clients.ResourceClient{
+		Name: "Go SDK Min Secret Limit Client",
+	})
+	require.NoError(t, err)
+	require.NotNil(t, created.Client)
+	clientId := created.Client.ClientId
+	t.Cleanup(func() {
+		_ = client.Resource().DeleteResourceClient(ctx, resourceId, clientId)
+	})
+
+	fetched, err := client.Resource().GetResourceClient(ctx, resourceId, clientId)
+	require.NoError(t, err)
+	require.NotEmpty(t, fetched.Client.GetSecrets())
+	onlySecretId := fetched.Client.GetSecrets()[0].GetId()
+
+	err = client.Resource().DeleteResourceClientSecret(ctx, resourceId, clientId, onlySecretId)
+	require.Error(t, err)
+}
+
+// TestCreateResourceClientSecretRefusesPastLimit proves the server caps how
+// many secrets a client can hold at once. The exact limit is
+// environment-configurable (verified live: 5 in Scalekit's own dev
+// environment, not the dashboard's stricter UI-only threshold of 2), so this
+// probes until the server actually refuses rather than asserting a specific
+// count.
+func TestCreateResourceClientSecretRefusesPastLimit(t *testing.T) {
+	resourceId := testResourceId(t)
+	ctx := context.Background()
+
+	created, err := client.Resource().CreateResourceClient(ctx, resourceId, &clients.ResourceClient{
+		Name: "Go SDK Max Secret Limit Client",
+	})
+	require.NoError(t, err)
+	require.NotNil(t, created.Client)
+	clientId := created.Client.ClientId
+	t.Cleanup(func() {
+		_ = client.Resource().DeleteResourceClient(ctx, resourceId, clientId)
+	})
+
+	limitHit := false
+	for i := 0; i < 20; i++ {
+		if _, err := client.Resource().CreateResourceClientSecret(ctx, resourceId, clientId); err != nil {
+			limitHit = true
+			break
+		}
+	}
+	assert.True(t, limitHit, "expected the server to eventually refuse creating another secret")
+}
+
 // TestGetResourceAndListResources exercises the two read-only resource
 // methods against a real MCP_SERVER resource in the test environment:
 // GetResource returns the resource itself (including its scopes allowlist),
