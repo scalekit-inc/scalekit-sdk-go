@@ -122,12 +122,13 @@ var (
 	// carries the actual client and resource ids.
 	ErrClientNotInResource = errors.New("client does not belong to resource")
 
-	// ErrAudienceNotUpdatable is returned by UpdateResourceClient when the
-	// caller includes "audience" in the update mask. A resource client's
-	// audience is fixed at creation and can never be changed via update, for
-	// any resource type, so this is rejected outright rather than silently
-	// accepted and ignored.
-	ErrAudienceNotUpdatable = errors.New("audience cannot be changed via update; it is fixed at creation")
+	// ErrAudienceNotSettable is returned by CreateResourceClient when the
+	// caller supplies a non-empty Audience, and by UpdateResourceClient when
+	// the caller includes "audience" in the update mask. Audience cannot be
+	// set through this SDK at all, on create or update, for any resource
+	// type — it is always server-determined — so both are rejected outright
+	// rather than silently accepted and ignored.
+	ErrAudienceNotSettable = errors.New("audience cannot be set via the SDK; it is always server-determined")
 )
 
 // errorCore holds the common fields for SDK errors. Unexported so HTTPError can embed it without

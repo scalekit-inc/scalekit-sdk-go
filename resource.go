@@ -87,8 +87,11 @@ type ResourceService interface {
 	// CreateResourceClient creates a new API client scoped to a resource.
 	//
 	// The response's PlainSecret is the plaintext client secret, only
-	// available at creation time. Audience is ignored for MCP_SERVER/
-	// MCP_GATEWAY resources, which get their audience from the resource itself.
+	// available at creation time.
+	//
+	// Audience cannot be set through this SDK — it is always
+	// server-determined, for any resource type. A non-empty client.Audience
+	// returns ErrAudienceNotSettable rather than being silently forwarded.
 	CreateResourceClient(ctx context.Context, resourceId string, client *clientsv1.ResourceClient) (*CreateResourceClientResponse, error)
 
 	// GetResourceClient retrieves a single API client scoped to a resource,
@@ -108,10 +111,10 @@ type ResourceService interface {
 	// applied whenever non-empty regardless of mask (an empty string is a
 	// no-op, not a clear).
 	//
-	// "audience" is not a supported mask path — a resource client's audience
-	// is fixed at creation and can never be changed via update, for any
-	// resource type, so this returns ErrAudienceNotUpdatable rather than
-	// silently accepting a path that can never take effect.
+	// "audience" is not a supported mask path — audience cannot be set
+	// through this SDK at all, on create or update, for any resource type,
+	// so this returns ErrAudienceNotSettable rather than silently accepting
+	// a path that can never take effect.
 	UpdateResourceClient(ctx context.Context, resourceId string, clientId string, client *clientsv1.ResourceClient, mask *fieldmaskpb.FieldMask) (*UpdateResourceClientResponse, error)
 
 	// DeleteResourceClient permanently deletes an API client scoped to a resource.
@@ -220,6 +223,9 @@ func (r *resourceService) CreateResourceClient(ctx context.Context, resourceId s
 	if resourceId == "" {
 		return nil, ErrResourceIdRequired
 	}
+	if client != nil && len(client.GetAudience()) > 0 {
+		return nil, ErrAudienceNotSettable
+	}
 	return newConnectExecuter(
 		r.coreClient,
 		r.client.CreateResourceClient,
@@ -268,7 +274,7 @@ func (r *resourceService) UpdateResourceClient(ctx context.Context, resourceId s
 		return nil, ErrClientIdRequired
 	}
 	if mask != nil && slices.Contains(mask.GetPaths(), "audience") {
-		return nil, ErrAudienceNotUpdatable
+		return nil, ErrAudienceNotSettable
 	}
 	return newConnectExecuter(
 		r.coreClient,

@@ -2051,9 +2051,11 @@ for _, res := range list.Resources {
 <dd>
 
 Creates a new API client scoped to a resource. The response's `PlainSecret`
-is the plaintext client secret, only available at creation time. `Audience`
-is ignored for MCP_SERVER/MCP_GATEWAY resources, which get their audience
-from the resource itself.
+is the plaintext client secret, only available at creation time.
+
+`Audience` cannot be set through this SDK — it is always server-determined,
+for any resource type. A non-empty `client.Audience` returns
+`ErrAudienceNotSettable` rather than being silently forwarded.
 </dd>
 </dl>
 </dd>
@@ -2274,10 +2276,10 @@ server only actually honors the mask for `scopes`, `custom_claims` and
 `Scopes: []string{}`) to clear it. `Name`/`Description` are applied whenever
 non-empty regardless of mask (an empty string is a no-op, not a clear).
 
-`"audience"` is not a supported mask path — a resource client's audience is
-fixed at creation and can never be changed via update, for any resource
-type, so this returns `ErrAudienceNotUpdatable` rather than silently
-accepting a path that can never take effect.
+`"audience"` is not a supported mask path — audience cannot be set through
+this SDK at all, on create or update, for any resource type, so this
+returns `ErrAudienceNotSettable` rather than silently accepting a path
+that can never take effect.
 </dd>
 </dl>
 </dd>

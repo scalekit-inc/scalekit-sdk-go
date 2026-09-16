@@ -412,11 +412,9 @@ func TestListUserConsents(t *testing.T) {
 	require.NotNil(t, list)
 }
 
-// TestCreateResourceClientAllFields exercises every field on create. Verified
-// against a live environment: Audience is ignored on create too (not just
-// update) for an MCP_SERVER/MCP_GATEWAY resource, which gets its audience
-// from the resource itself — so it comes back empty here even though a value
-// was supplied, matching the documented update-time behavior.
+// TestCreateResourceClientAllFields exercises every settable field on create.
+// Audience is deliberately excluded — it's not settable at all (see
+// TestCreateResourceClientRejectsAudience).
 func TestCreateResourceClientAllFields(t *testing.T) {
 	resourceId := testResourceId(t)
 	ctx := context.Background()
@@ -425,7 +423,6 @@ func TestCreateResourceClientAllFields(t *testing.T) {
 		Name:         "Go SDK All Fields Client",
 		Description:  "exercises every field",
 		Scopes:       []string{"test:e2e_resource_scope"},
-		Audience:     []string{"https://example.com/should-be-ignored"},
 		CustomClaims: []*clients.CustomClaim{{Key: "team", Value: "sdk"}},
 		Expiry:       3600,
 		RedirectUris: []string{"https://example.com/callback"},
@@ -438,12 +435,26 @@ func TestCreateResourceClientAllFields(t *testing.T) {
 	})
 
 	assert.Equal(t, []string{"test:e2e_resource_scope"}, created.Client.Scopes)
-	assert.Empty(t, created.Client.Audience, "audience is ignored on create for an MCP_SERVER resource")
 	require.Len(t, created.Client.CustomClaims, 1)
 	assert.Equal(t, "team", created.Client.CustomClaims[0].Key)
 	assert.Equal(t, "sdk", created.Client.CustomClaims[0].Value)
 	assert.Equal(t, int64(3600), created.Client.Expiry)
 	assert.Equal(t, []string{"https://example.com/callback"}, created.Client.RedirectUris)
+}
+
+// TestCreateResourceClientRejectsAudience confirms audience can't be set via
+// create, by design — the SDK rejects a non-empty Audience outright, rather
+// than sending a request that used to be honored server-side for non-MCP
+// resource types.
+func TestCreateResourceClientRejectsAudience(t *testing.T) {
+	resourceId := testResourceId(t)
+	ctx := context.Background()
+
+	_, err := client.Resource().CreateResourceClient(ctx, resourceId, &clients.ResourceClient{
+		Name:     "Audience Reject Test",
+		Audience: []string{"https://example.com/should-not-apply"},
+	})
+	require.ErrorIs(t, err, scalekit.ErrAudienceNotSettable)
 }
 
 // TestUpdateResourceClientNameDescriptionAppliedRegardlessOfMask confirms
@@ -513,7 +524,7 @@ func TestUpdateResourceClientRejectsAudienceInMask(t *testing.T) {
 	_, err = client.Resource().UpdateResourceClient(ctx, resourceId, clientId, &clients.ResourceClient{
 		Audience: []string{"https://example.com/should-not-apply"},
 	}, &fieldmaskpb.FieldMask{Paths: []string{"audience"}})
-	require.ErrorIs(t, err, scalekit.ErrAudienceNotUpdatable)
+	require.ErrorIs(t, err, scalekit.ErrAudienceNotSettable)
 
 	fetched, err := client.Resource().GetResourceClient(ctx, resourceId, clientId)
 	require.NoError(t, err)
