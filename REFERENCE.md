@@ -2280,12 +2280,7 @@ for _, c := range list.Clients {
 <dl>
 <dd>
 
-Updates a resource client. `mask` lists which
-fields of `client` to change. Verified against a live environment: the
-server only actually honors the mask for `scopes`, `custom_claims` and
-`redirect_uris` — include one of those paths with an empty value (e.g.
-`Scopes: []string{}`) to clear it. `Name`/`Description` are applied whenever
-non-empty regardless of mask (an empty string is a no-op, not a clear).
+Updates a resource client.
 </dd>
 </dl>
 </dd>
