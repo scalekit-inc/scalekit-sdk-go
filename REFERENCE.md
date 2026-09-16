@@ -1880,6 +1880,154 @@ if err := client.Client().DeleteClientSecret(ctx, "client_123", "secret_456"); e
 
 ## Resources
 
+<details><summary><code>client.Resource().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">GetResource</a>(ctx, resourceId) -> (*GetResourceResponse, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieves a single resource by id.
+
+A resource client's `Scopes` are only actually granted in an issued token
+when they also appear in the resource's own `Scopes` allowlist (the server
+intersects requested scopes against the environment's permissions, the
+resource's allowed scopes, and the client's own scopes) — call this first to
+see what the resource actually allows before creating or updating a resource
+client with `Scopes`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+got, err := client.Resource().GetResource(ctx, "res_123")
+if err != nil {
+  // handle
+}
+_ = got.Resource.Scopes
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**resourceId:** `string` - The resource to fetch (format: res_xxxxx)
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Resource().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">ListResources</a>(ctx, resourceType, options) -> (*ListResourcesResponse, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists resources of a given type in the environment, with pagination.
+
+`resourceType` is required by the underlying API — there is no way to list
+every type in one call; list each type separately if needed.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+list, err := client.Resource().ListResources(ctx, scalekit.ResourceTypeMcpServer, scalekit.ListResourcesOptions{
+  PageSize: 20,
+})
+if err != nil {
+  // handle
+}
+for _, res := range list.Resources {
+  _ = res
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**resourceType:** `scalekit.ResourceType` - The resource type to filter by (e.g. `scalekit.ResourceTypeMcpServer`)
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**options:** `scalekit.ListResourcesOptions`
+- `PageSize uint32` - Max 30
+- `PageToken string` - Pagination cursor
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.Resource().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">CreateResourceClient</a>(ctx, resourceId, client) -> (*CreateResourceClientResponse, error)</code></summary>
 <dl>
 <dd>

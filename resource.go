@@ -16,6 +16,21 @@ type GetResourceClientResponse = clientsv1.GetResourceClientResponse
 type UpdateResourceClientResponse = clientsv1.UpdateResourceClientResponse
 type ListResourceClientsResponse = clientsv1.ListResourceClientsResponse
 type ListResourceUserConsentsResponse = clientsv1.ListResourceUserConsentsResponse
+type GetResourceResponse = clientsv1.GetResourceResponse
+type ListResourcesResponse = clientsv1.ListResourcesResponse
+
+// ResourceType identifies the kind of resource a client belongs to.
+type ResourceType = clientsv1.ResourceType
+
+// Enum constants for ResourceType.
+const (
+	ResourceTypeUnspecified = clientsv1.ResourceType_RESOURCE_TYPE_UNSPECIFIED
+	ResourceTypeWeb         = clientsv1.ResourceType_WEB
+	ResourceTypeMobile      = clientsv1.ResourceType_MOBILE
+	ResourceTypeDesktop     = clientsv1.ResourceType_DESKTOP
+	ResourceTypeServer      = clientsv1.ResourceType_SERVER
+	ResourceTypeMcpServer   = clientsv1.ResourceType_MCP_SERVER
+)
 
 // ListUserConsentsOptions holds pagination and search parameters for listing
 // end-user consents granted against a resource.
@@ -28,14 +43,40 @@ type ListUserConsentsOptions struct {
 	PageToken string
 }
 
-// ResourceService manages the API clients scoped to a resource, and reads and
-// revokes end-user consents granted against one.
+// ListResourcesOptions holds pagination parameters for listing resources.
+type ListResourcesOptions struct {
+	// PageSize is the page size for pagination (max 30).
+	PageSize uint32
+	// PageToken is the pagination cursor.
+	PageToken string
+}
+
+// ResourceService is a client for reading resources, managing the API
+// clients scoped to a resource, and reading and revoking end-user consents
+// granted against one.
 //
 // A resource (for example an MCP server) can have one or more API clients
 // registered against it, each using the client_credentials OAuth flow scoped
 // to that resource. A consent records that one of your end users allowed a
 // specific client to act on their behalf against the resource.
 type ResourceService interface {
+	// GetResource retrieves a single resource by id.
+	//
+	// A resource client's scopes are only actually granted in an issued
+	// token when they also appear in the resource's own scopes allowlist
+	// (the server intersects requested scopes against the environment's
+	// permissions, the resource's allowed scopes, and the client's own
+	// scopes) — call this first to see what the resource actually allows
+	// before creating or updating a resource client with scopes.
+	GetResource(ctx context.Context, resourceId string) (*GetResourceResponse, error)
+
+	// ListResources lists resources of a given type in the environment,
+	// with pagination.
+	//
+	// resourceType is required by the underlying API — there is no way to
+	// list every type in one call; list each type separately if needed.
+	ListResources(ctx context.Context, resourceType ResourceType, options ListResourcesOptions) (*ListResourcesResponse, error)
+
 	// CreateResourceClient creates a new API client scoped to a resource.
 	//
 	// The response's PlainSecret is the plaintext client secret, only
@@ -104,6 +145,31 @@ func newResourceService(coreClient *coreClient) ResourceService {
 		coreClient: coreClient,
 		client:     newConnectClient(coreClient, clientsconnect.NewClientServiceClient),
 	}
+}
+
+func (r *resourceService) GetResource(ctx context.Context, resourceId string) (*GetResourceResponse, error) {
+	if resourceId == "" {
+		return nil, ErrResourceIdRequired
+	}
+	return newConnectExecuter(
+		r.coreClient,
+		r.client.GetResource,
+		&clientsv1.GetResourceRequest{
+			ResourceId: resourceId,
+		},
+	).exec(ctx)
+}
+
+func (r *resourceService) ListResources(ctx context.Context, resourceType ResourceType, options ListResourcesOptions) (*ListResourcesResponse, error) {
+	return newConnectExecuter(
+		r.coreClient,
+		r.client.ListResources,
+		&clientsv1.ListResourcesRequest{
+			ResourceType: resourceType,
+			PageSize:     options.PageSize,
+			PageToken:    options.PageToken,
+		},
+	).exec(ctx)
 }
 
 func (r *resourceService) CreateResourceClient(ctx context.Context, resourceId string, client *clientsv1.ResourceClient) (*CreateResourceClientResponse, error) {

@@ -31,6 +31,14 @@ func testResourceId(t *testing.T) string {
 	return resourceId
 }
 
+func TestGetResourceRequiresResourceId(t *testing.T) {
+	ctx := context.Background()
+
+	_, err := client.Resource().GetResource(ctx, "")
+	require.Error(t, err)
+	assert.ErrorIs(t, err, scalekit.ErrResourceIdRequired)
+}
+
 func TestCreateResourceClientRequiresResourceId(t *testing.T) {
 	ctx := context.Background()
 
@@ -203,6 +211,46 @@ func TestDeleteResourceClientRefusesWrongResource(t *testing.T) {
 	stillThere, err := client.Resource().GetResourceClient(ctx, resourceId, clientId)
 	require.NoError(t, err)
 	assert.Equal(t, clientId, stillThere.Client.ClientId)
+}
+
+// TestGetResourceAndListResources exercises the two read-only resource
+// methods against a real MCP_SERVER resource in the test environment:
+// GetResource returns the resource itself (including its scopes allowlist),
+// and ListResources, filtered by that same resource type, includes it.
+func TestGetResourceAndListResources(t *testing.T) {
+	resourceId := testResourceId(t)
+	ctx := context.Background()
+
+	got, err := client.Resource().GetResource(ctx, resourceId)
+	require.NoError(t, err)
+	require.NotNil(t, got.Resource)
+	assert.Equal(t, resourceId, got.Resource.Id)
+	assert.Equal(t, scalekit.ResourceTypeMcpServer, got.Resource.ResourceType)
+
+	list, err := client.Resource().ListResources(ctx, scalekit.ResourceTypeMcpServer, scalekit.ListResourcesOptions{
+		PageSize: 30,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, list)
+	found := false
+	for _, res := range list.Resources {
+		if res.Id == resourceId {
+			found = true
+			break
+		}
+	}
+	assert.True(t, found, "test resource should appear in ListResources")
+}
+
+// TestListResourcesRejectsUnspecifiedType confirms the server rejects
+// RESOURCE_TYPE_UNSPECIFIED rather than treating it as "list every type" —
+// resource_type is marked required at the proto level.
+func TestListResourcesRejectsUnspecifiedType(t *testing.T) {
+	testResourceId(t) // ensure the live test environment is configured
+	ctx := context.Background()
+
+	_, err := client.Resource().ListResources(ctx, scalekit.ResourceTypeUnspecified, scalekit.ListResourcesOptions{})
+	assert.Error(t, err)
 }
 
 func TestListUserConsents(t *testing.T) {
