@@ -2059,19 +2059,18 @@ from the resource itself.
 
 ```go
 import (
+  "fmt"
+
   clients "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/clients"
 )
 
 created, err := client.Resource().CreateResourceClient(ctx, "res_123", &clients.ResourceClient{
-  Name:        "My Resource Client",
-  Description: "Client for my MCP server",
-  Scopes:      []string{"read:data"},
+  Name: "My Resource Client",
 })
 if err != nil {
   // handle
 }
-_ = created.Client
-_ = created.PlainSecret
+fmt.Println(created.Client.ClientId, created.PlainSecret)
 ```
 </dd>
 </dl>
@@ -2361,15 +2360,7 @@ _ = updated.Client
 <dl>
 <dd>
 
-Permanently deletes an API client scoped to a resource.
-
-`DeleteResourceClient` shares its underlying delete path with client
-deletion in general, so nothing forces the given `clientId` to actually
-belong to `resourceId` — but this method lives under `client.Resource()`, so
-callers reasonably expect it to only ever touch clients within that
-resource. This fetches the client first and verifies its own `resourceId`
-matches before deleting, and refuses (wrapping `scalekit.ErrClientNotInResource`)
-instead of trusting the id pair blindly.
+Permanently deletes the API client if it belongs to this resource. Returns an error if the client is missing or scoped to a different resource.
 </dd>
 </dl>
 </dd>
