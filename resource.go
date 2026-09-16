@@ -69,6 +69,12 @@ type ResourceService interface {
 	// permissions, the resource's allowed scopes, and the client's own
 	// scopes) — call this first to see what the resource actually allows
 	// before creating or updating a resource client with scopes.
+	//
+	// The returned Resource.Scopes is every scope defined in the
+	// environment, not just the ones this resource allows — each entry
+	// carries an Enabled flag, and only the ones with Enabled: true are
+	// actually usable on this resource. Filter on that flag to get the
+	// actual allowlist.
 	GetResource(ctx context.Context, resourceId string) (*GetResourceResponse, error)
 
 	// ListResources lists resources of a given type in the environment,

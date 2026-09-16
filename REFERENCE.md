@@ -1900,6 +1900,11 @@ intersects requested scopes against the environment's permissions, the
 resource's allowed scopes, and the client's own scopes) — call this first to
 see what the resource actually allows before creating or updating a resource
 client with `Scopes`.
+
+`Resource.Scopes` is every scope defined in the environment, not just the
+ones this resource allows — each entry carries an `Enabled` flag, and only
+the ones with `Enabled: true` are actually usable on this resource. Filter
+on that flag to get the actual allowlist.
 </dd>
 </dl>
 </dd>
@@ -1918,7 +1923,12 @@ got, err := client.Resource().GetResource(ctx, "res_123")
 if err != nil {
   // handle
 }
-_ = got.Resource.Scopes
+var allowedScopes []string
+for _, s := range got.Resource.Scopes {
+  if s.Enabled {
+    allowedScopes = append(allowedScopes, s.Name)
+  }
+}
 ```
 </dd>
 </dl>
