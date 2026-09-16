@@ -215,3 +215,192 @@ func TestListUserConsents(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, list)
 }
+
+// TestCreateResourceClientAllFields exercises every field on create. Verified
+// against a live environment: Audience is ignored on create too (not just
+// update) for an MCP_SERVER/MCP_GATEWAY resource, which gets its audience
+// from the resource itself — so it comes back empty here even though a value
+// was supplied, matching the documented update-time behavior.
+func TestCreateResourceClientAllFields(t *testing.T) {
+	resourceId := testResourceId(t)
+	ctx := context.Background()
+
+	created, err := client.Resource().CreateResourceClient(ctx, resourceId, &clients.ResourceClient{
+		Name:         "Go SDK All Fields Client",
+		Description:  "exercises every field",
+		Scopes:       []string{"test:e2e_resource_scope"},
+		Audience:     []string{"https://example.com/should-be-ignored"},
+		CustomClaims: []*clients.CustomClaim{{Key: "team", Value: "sdk"}},
+		Expiry:       3600,
+		RedirectUris: []string{"https://example.com/callback"},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, created.Client)
+	clientId := created.Client.ClientId
+	t.Cleanup(func() {
+		_ = client.Resource().DeleteResourceClient(ctx, resourceId, clientId)
+	})
+
+	assert.Equal(t, []string{"test:e2e_resource_scope"}, created.Client.Scopes)
+	assert.Empty(t, created.Client.Audience, "audience is ignored on create for an MCP_SERVER resource")
+	require.Len(t, created.Client.CustomClaims, 1)
+	assert.Equal(t, "team", created.Client.CustomClaims[0].Key)
+	assert.Equal(t, "sdk", created.Client.CustomClaims[0].Value)
+	assert.Equal(t, int64(3600), created.Client.Expiry)
+	assert.Equal(t, []string{"https://example.com/callback"}, created.Client.RedirectUris)
+}
+
+// TestUpdateResourceClientNameDescriptionAppliedRegardlessOfMask confirms
+// name/description are truthy-gated, not mask-gated: a non-empty value
+// applies even when its path isn't in the mask.
+func TestUpdateResourceClientNameDescriptionAppliedRegardlessOfMask(t *testing.T) {
+	resourceId := testResourceId(t)
+	ctx := context.Background()
+
+	created, err := client.Resource().CreateResourceClient(ctx, resourceId, &clients.ResourceClient{Name: "Original Name"})
+	require.NoError(t, err)
+	clientId := created.Client.ClientId
+	t.Cleanup(func() {
+		_ = client.Resource().DeleteResourceClient(ctx, resourceId, clientId)
+	})
+
+	updated, err := client.Resource().UpdateResourceClient(ctx, resourceId, clientId, &clients.ResourceClient{
+		Name:        "Applied Despite Missing From Mask",
+		Description: "also applied",
+	}, &fieldmaskpb.FieldMask{Paths: []string{"description"}}) // "name" deliberately left out of the mask
+	require.NoError(t, err)
+	assert.Equal(t, "Applied Despite Missing From Mask", updated.Client.Name)
+	assert.Equal(t, "also applied", updated.Client.Description)
+}
+
+// TestUpdateResourceClientEmptyStringIsNoOp confirms an empty name/description
+// does not clear the field, even when its path is in the mask — there is
+// currently no way to clear either field via update.
+func TestUpdateResourceClientEmptyStringIsNoOp(t *testing.T) {
+	resourceId := testResourceId(t)
+	ctx := context.Background()
+
+	created, err := client.Resource().CreateResourceClient(ctx, resourceId, &clients.ResourceClient{
+		Name:        "Keep This Name",
+		Description: "keep this description",
+	})
+	require.NoError(t, err)
+	clientId := created.Client.ClientId
+	t.Cleanup(func() {
+		_ = client.Resource().DeleteResourceClient(ctx, resourceId, clientId)
+	})
+
+	updated, err := client.Resource().UpdateResourceClient(ctx, resourceId, clientId, &clients.ResourceClient{
+		Name:        "",
+		Description: "",
+	}, &fieldmaskpb.FieldMask{Paths: []string{"name", "description"}})
+	require.NoError(t, err)
+	assert.Equal(t, "Keep This Name", updated.Client.Name)
+	assert.Equal(t, "keep this description", updated.Client.Description)
+}
+
+// TestUpdateResourceClientAudienceImmutable confirms audience can't be
+// changed via update, by design, even with its path in the mask.
+func TestUpdateResourceClientAudienceImmutable(t *testing.T) {
+	resourceId := testResourceId(t)
+	ctx := context.Background()
+
+	created, err := client.Resource().CreateResourceClient(ctx, resourceId, &clients.ResourceClient{Name: "Audience Immutable Test"})
+	require.NoError(t, err)
+	clientId := created.Client.ClientId
+	originalAudience := created.Client.Audience
+	t.Cleanup(func() {
+		_ = client.Resource().DeleteResourceClient(ctx, resourceId, clientId)
+	})
+
+	updated, err := client.Resource().UpdateResourceClient(ctx, resourceId, clientId, &clients.ResourceClient{
+		Audience: []string{"https://example.com/should-not-apply"},
+	}, &fieldmaskpb.FieldMask{Paths: []string{"audience"}})
+	require.NoError(t, err)
+	assert.Equal(t, originalAudience, updated.Client.Audience)
+}
+
+// TestUpdateResourceClientClearsListFields confirms scopes/customClaims/
+// redirectUris — the three fields the mask actually governs — can be cleared
+// by passing an empty value with the path included in the mask.
+func TestUpdateResourceClientClearsListFields(t *testing.T) {
+	resourceId := testResourceId(t)
+	ctx := context.Background()
+
+	created, err := client.Resource().CreateResourceClient(ctx, resourceId, &clients.ResourceClient{
+		Name:         "Clear Fields Test",
+		Scopes:       []string{"test:e2e_resource_scope"},
+		CustomClaims: []*clients.CustomClaim{{Key: "k", Value: "v"}},
+		RedirectUris: []string{"https://example.com/callback"},
+	})
+	require.NoError(t, err)
+	clientId := created.Client.ClientId
+	t.Cleanup(func() {
+		_ = client.Resource().DeleteResourceClient(ctx, resourceId, clientId)
+	})
+	require.NotEmpty(t, created.Client.Scopes)
+	require.NotEmpty(t, created.Client.CustomClaims)
+	require.NotEmpty(t, created.Client.RedirectUris)
+
+	updated, err := client.Resource().UpdateResourceClient(ctx, resourceId, clientId, &clients.ResourceClient{
+		Scopes:       []string{},
+		CustomClaims: []*clients.CustomClaim{},
+		RedirectUris: []string{},
+	}, &fieldmaskpb.FieldMask{Paths: []string{"scopes", "custom_claims", "redirect_uris"}})
+	require.NoError(t, err)
+	assert.Empty(t, updated.Client.Scopes)
+	assert.Empty(t, updated.Client.CustomClaims)
+	assert.Empty(t, updated.Client.RedirectUris)
+}
+
+// TestCreateResourceClientRejectsJavascriptRedirectUri and the schemeless
+// case below document the server's actual redirect URI validation, verified
+// live: a javascript: scheme and a URI with no scheme at all are both
+// rejected; a plain (non-TLS) http:// URI, perhaps surprisingly, is not.
+func TestCreateResourceClientRejectsJavascriptRedirectUri(t *testing.T) {
+	resourceId := testResourceId(t)
+	ctx := context.Background()
+
+	_, err := client.Resource().CreateResourceClient(ctx, resourceId, &clients.ResourceClient{
+		Name:         "Bad Redirect",
+		RedirectUris: []string{"javascript:alert(1)"},
+	})
+	require.Error(t, err)
+}
+
+func TestCreateResourceClientRejectsSchemelessRedirectUri(t *testing.T) {
+	resourceId := testResourceId(t)
+	ctx := context.Background()
+
+	_, err := client.Resource().CreateResourceClient(ctx, resourceId, &clients.ResourceClient{
+		Name:         "Bad Redirect",
+		RedirectUris: []string{"not-a-uri"},
+	})
+	require.Error(t, err)
+}
+
+// TestDoubleDeleteResourceClient confirms a second delete on an
+// already-deleted client fails rather than silently no-op-ing.
+func TestDoubleDeleteResourceClient(t *testing.T) {
+	resourceId := testResourceId(t)
+	ctx := context.Background()
+
+	created, err := client.Resource().CreateResourceClient(ctx, resourceId, &clients.ResourceClient{Name: "Double Delete Test"})
+	require.NoError(t, err)
+	clientId := created.Client.ClientId
+
+	require.NoError(t, client.Resource().DeleteResourceClient(ctx, resourceId, clientId))
+	err = client.Resource().DeleteResourceClient(ctx, resourceId, clientId)
+	assert.Error(t, err)
+}
+
+// TestGetResourceClientRejectsMalformedClientId confirms a syntactically
+// invalid client id is rejected by the server rather than treated as a
+// not-found.
+func TestGetResourceClientRejectsMalformedClientId(t *testing.T) {
+	resourceId := testResourceId(t)
+	ctx := context.Background()
+
+	_, err := client.Resource().GetResourceClient(ctx, resourceId, "not-a-real-client-id")
+	assert.Error(t, err)
+}
