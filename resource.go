@@ -115,6 +115,23 @@ type ResourceService interface {
 	// pair blindly.
 	DeleteResourceClient(ctx context.Context, resourceId string, clientId string) error
 
+	// CreateResourceClientSecret creates a new secret for an API client
+	// scoped to a resource.
+	//
+	// The underlying secret-creation call is keyed by clientId alone — it
+	// has no notion of a resource — so this fetches the client first and
+	// verifies it belongs to resourceId before creating a secret for it,
+	// the same ownership check DeleteResourceClient applies.
+	CreateResourceClientSecret(ctx context.Context, resourceId string, clientId string) (*CreateClientSecretResponse, error)
+
+	// DeleteResourceClientSecret permanently deletes a secret from an API
+	// client scoped to a resource.
+	//
+	// Like CreateResourceClientSecret, the underlying delete call is keyed
+	// by clientId alone, so this verifies the client belongs to resourceId
+	// first rather than trusting the id pair blindly.
+	DeleteResourceClientSecret(ctx context.Context, resourceId string, clientId string, secretId string) error
+
 	// ListUserConsents lists the end-user consents granted against a
 	// resource, with pagination.
 	//
@@ -257,6 +274,61 @@ func (r *resourceService) DeleteResourceClient(ctx context.Context, resourceId s
 		&clientsv1.DeleteResourceClientRequest{
 			ResourceId: resourceId,
 			ClientId:   clientId,
+		},
+	).exec(ctx)
+	return err
+}
+
+func (r *resourceService) CreateResourceClientSecret(ctx context.Context, resourceId string, clientId string) (*CreateClientSecretResponse, error) {
+	if resourceId == "" {
+		return nil, ErrResourceIdRequired
+	}
+	if clientId == "" {
+		return nil, ErrClientIdRequired
+	}
+
+	fetched, err := r.GetResourceClient(ctx, resourceId, clientId)
+	if err != nil {
+		return nil, err
+	}
+	if fetched.Client == nil || fetched.Client.ResourceId != resourceId {
+		return nil, fmt.Errorf("%w: client %q does not belong to resource %q", ErrClientNotInResource, clientId, resourceId)
+	}
+
+	return newConnectExecuter(
+		r.coreClient,
+		r.client.CreateClientSecret,
+		&clientsv1.CreateClientSecretRequest{
+			ClientId: clientId,
+		},
+	).exec(ctx)
+}
+
+func (r *resourceService) DeleteResourceClientSecret(ctx context.Context, resourceId string, clientId string, secretId string) error {
+	if resourceId == "" {
+		return ErrResourceIdRequired
+	}
+	if clientId == "" {
+		return ErrClientIdRequired
+	}
+	if secretId == "" {
+		return ErrSecretIdRequired
+	}
+
+	fetched, err := r.GetResourceClient(ctx, resourceId, clientId)
+	if err != nil {
+		return err
+	}
+	if fetched.Client == nil || fetched.Client.ResourceId != resourceId {
+		return fmt.Errorf("%w: client %q does not belong to resource %q", ErrClientNotInResource, clientId, resourceId)
+	}
+
+	_, err = newConnectExecuter(
+		r.coreClient,
+		r.client.DeleteClientSecret,
+		&clientsv1.DeleteClientSecretRequest{
+			ClientId: clientId,
+			SecretId: secretId,
 		},
 	).exec(ctx)
 	return err

@@ -103,6 +103,46 @@ func TestDeleteResourceClientRequiresClientId(t *testing.T) {
 	assert.ErrorIs(t, err, scalekit.ErrClientIdRequired)
 }
 
+func TestCreateResourceClientSecretRequiresResourceId(t *testing.T) {
+	ctx := context.Background()
+
+	_, err := client.Resource().CreateResourceClientSecret(ctx, "", "m2m_dummy")
+	require.Error(t, err)
+	assert.ErrorIs(t, err, scalekit.ErrResourceIdRequired)
+}
+
+func TestCreateResourceClientSecretRequiresClientId(t *testing.T) {
+	ctx := context.Background()
+
+	_, err := client.Resource().CreateResourceClientSecret(ctx, "res_dummy", "")
+	require.Error(t, err)
+	assert.ErrorIs(t, err, scalekit.ErrClientIdRequired)
+}
+
+func TestDeleteResourceClientSecretRequiresResourceId(t *testing.T) {
+	ctx := context.Background()
+
+	err := client.Resource().DeleteResourceClientSecret(ctx, "", "m2m_dummy", "secret_dummy")
+	require.Error(t, err)
+	assert.ErrorIs(t, err, scalekit.ErrResourceIdRequired)
+}
+
+func TestDeleteResourceClientSecretRequiresClientId(t *testing.T) {
+	ctx := context.Background()
+
+	err := client.Resource().DeleteResourceClientSecret(ctx, "res_dummy", "", "secret_dummy")
+	require.Error(t, err)
+	assert.ErrorIs(t, err, scalekit.ErrClientIdRequired)
+}
+
+func TestDeleteResourceClientSecretRequiresSecretId(t *testing.T) {
+	ctx := context.Background()
+
+	err := client.Resource().DeleteResourceClientSecret(ctx, "res_dummy", "m2m_dummy", "")
+	require.Error(t, err)
+	assert.ErrorIs(t, err, scalekit.ErrSecretIdRequired)
+}
+
 func TestListUserConsentsRequiresResourceId(t *testing.T) {
 	ctx := context.Background()
 
@@ -211,6 +251,58 @@ func TestDeleteResourceClientRefusesWrongResource(t *testing.T) {
 	stillThere, err := client.Resource().GetResourceClient(ctx, resourceId, clientId)
 	require.NoError(t, err)
 	assert.Equal(t, clientId, stillThere.Client.ClientId)
+}
+
+// TestCreateDeleteResourceClientSecret exercises the full lifecycle of a
+// secret on a resource-scoped client: create a client, add a secret via
+// CreateResourceClientSecret, verify the plaintext and the persisted secret
+// record both come back, then remove that secret with
+// DeleteResourceClientSecret.
+func TestCreateDeleteResourceClientSecret(t *testing.T) {
+	resourceId := testResourceId(t)
+	ctx := context.Background()
+
+	created, err := client.Resource().CreateResourceClient(ctx, resourceId, &clients.ResourceClient{
+		Name: "Go SDK Secret Lifecycle Client",
+	})
+	require.NoError(t, err)
+	require.NotNil(t, created.Client)
+	clientId := created.Client.ClientId
+	t.Cleanup(func() {
+		_ = client.Resource().DeleteResourceClient(ctx, resourceId, clientId)
+	})
+
+	secretResp, err := client.Resource().CreateResourceClientSecret(ctx, resourceId, clientId)
+	require.NoError(t, err)
+	require.NotNil(t, secretResp)
+	assert.NotEmpty(t, secretResp.GetPlainSecret())
+	require.NotNil(t, secretResp.GetSecret())
+	assert.NotEmpty(t, secretResp.GetSecret().GetId())
+
+	err = client.Resource().DeleteResourceClientSecret(ctx, resourceId, clientId, secretResp.GetSecret().GetId())
+	require.NoError(t, err)
+}
+
+// TestCreateResourceClientSecretRefusesWrongResource proves the ownership
+// check applies to secret creation too: a client created under the real test
+// resource can't have a secret created for it via a nonexistent OTHER
+// resource id.
+func TestCreateResourceClientSecretRefusesWrongResource(t *testing.T) {
+	resourceId := testResourceId(t)
+	ctx := context.Background()
+
+	created, err := client.Resource().CreateResourceClient(ctx, resourceId, &clients.ResourceClient{
+		Name: "Go SDK Secret Ownership Test Client",
+	})
+	require.NoError(t, err)
+	require.NotNil(t, created.Client)
+	clientId := created.Client.ClientId
+	t.Cleanup(func() {
+		_ = client.Resource().DeleteResourceClient(ctx, resourceId, clientId)
+	})
+
+	_, err = client.Resource().CreateResourceClientSecret(ctx, OtherResourceId, clientId)
+	require.Error(t, err)
 }
 
 // TestGetResourceAndListResources exercises the two read-only resource

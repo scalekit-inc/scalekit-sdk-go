@@ -2417,6 +2417,160 @@ if err != nil {
 </dl>
 </details>
 
+<details><summary><code>client.Resource().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">CreateResourceClientSecret</a>(ctx, resourceId, clientId) -> (*CreateClientSecretResponse, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a new secret for an API client scoped to a resource. The
+underlying secret-creation call is keyed by clientId alone — it has no
+notion of a resource — so this fetches the client first and verifies it
+belongs to resourceId before creating a secret for it, the same
+ownership check `DeleteResourceClient` applies.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+created, err := client.Resource().CreateResourceClientSecret(ctx, "res_123", "m2m_456")
+if err != nil {
+  // handle
+}
+_ = created.PlainSecret
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**resourceId:** `string` - The resource the client must belong to (format: res_xxxxx)
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**clientId:** `string` - The client ID to create a secret for
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Resource().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">DeleteResourceClientSecret</a>(ctx, resourceId, clientId, secretId) -> error</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Permanently deletes a secret from an API client scoped to a resource.
+Like `CreateResourceClientSecret`, the underlying delete call is keyed by
+clientId alone, so this verifies the client belongs to resourceId first
+rather than trusting the id pair blindly.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+err := client.Resource().DeleteResourceClientSecret(ctx, "res_123", "m2m_456", "sec_789")
+if err != nil {
+  // handle
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**resourceId:** `string` - The resource the client must belong to (format: res_xxxxx)
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**clientId:** `string` - The client ID the secret belongs to
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**secretId:** `string` - The secret ID to delete
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.Resource().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">ListUserConsents</a>(ctx, resourceId, options) -> (*ListResourceUserConsentsResponse, error)</code></summary>
 <dl>
 <dd>
