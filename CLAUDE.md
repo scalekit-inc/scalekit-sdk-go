@@ -59,7 +59,7 @@ This is a Go SDK for Scalekit — a B2B authentication/authorization platform. T
 
 ### Key patterns
 
-- Every service method body follows: `newConnectExecuter(client, method).exec(ctx, req)`
+- Every service method body follows: `newConnectExecuter(client, method, req).exec(ctx)`
 - Token validation uses a generic `ValidateToken[T]` function in `scalekit.go` for typed claim unmarshaling.
 - Errors in `errors.go` use sentinel values (`errors.New`) with `errors.Is` for matching. Some errors are joined for backward-compatible error trees.
 
