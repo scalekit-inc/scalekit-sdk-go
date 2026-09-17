@@ -2,7 +2,7 @@ SHELL := /bin/bash
 
 GO := go
 TOOLS_BIN := $(CURDIR)/.tools/bin
-GO_TOOLCHAIN := go1.25.12
+GO_TOOLCHAIN := go1.25.14
 
 PROTO_REPO_URL := https://github.com/scalekit-inc/scalekit.git
 PROTO_REF := v0.1.139.2
@@ -19,7 +19,7 @@ setup:
 	GOTOOLCHAIN="$(GO_TOOLCHAIN)" GOBIN="$(TOOLS_BIN)" $(GO) install google.golang.org/protobuf/cmd/protoc-gen-go@v1.33.0
 	GOTOOLCHAIN="$(GO_TOOLCHAIN)" GOBIN="$(TOOLS_BIN)" $(GO) install connectrpc.com/connect/cmd/protoc-gen-connect-go@v1.19.1
 	GOTOOLCHAIN="$(GO_TOOLCHAIN)" GOBIN="$(TOOLS_BIN)" $(GO) install github.com/bufbuild/buf/cmd/buf@v1.50.1
-	GOTOOLCHAIN="$(GO_TOOLCHAIN)" GOBIN="$(TOOLS_BIN)" $(GO) install golang.org/x/vuln/cmd/govulncheck@latest
+	GOTOOLCHAIN="$(GO_TOOLCHAIN)" GOBIN="$(TOOLS_BIN)" $(GO) install golang.org/x/vuln/cmd/govulncheck@v1.7.0
 	GOTOOLCHAIN="$(GO_TOOLCHAIN)" GOBIN="$(TOOLS_BIN)" $(GO) install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
 
 tools-check:
