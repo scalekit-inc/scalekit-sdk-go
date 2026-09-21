@@ -7,23 +7,12 @@ managed:
       - buf.build/googleapis/googleapis
       - buf.build/grpc-ecosystem/grpc-gateway
       - buf.build/bufbuild/protovalidate
-  # scalekit/v1/auth/auth.proto and scalekit/v1/auth/passwordless.proto share a
-  # directory but are distinct Protobuf packages, and since proto v0.1.141.0 both
-  # declare a ResendPasswordlessRequest message with different fields. Managed
-  # mode derives go_package from the file's directory, so by default both
-  # generate into one Go package (pkg/grpc/scalekit/v1/auth) and the message is
-  # redeclared, which fails to compile. Pin passwordless to its own Go package —
-  # this only takes effect because the plugins below use module= rather than
-  # paths=source_relative, so the output path follows go_package.
-  override:
-    GO_PACKAGE:
-      scalekit/v1/auth/passwordless.proto: "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/auth/passwordless"
 plugins:
   - plugin: go
-    opt: module=github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc
+    opt: paths=source_relative
     out: pkg/grpc
   - plugin: connect-go
-    opt: module=github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc
+    opt: paths=source_relative
     out: pkg/grpc
     
 types:

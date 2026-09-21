@@ -3,31 +3,31 @@ package scalekit
 import (
 	"context"
 
-	passwordlessv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/auth/passwordless"
-	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/auth/passwordless/passwordlessconnect"
+	authv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/auth"
+	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/auth/authconnect"
 )
 
 // Type aliases for response types
-type SendPasswordlessResponse = passwordlessv1.SendPasswordlessResponse
-type VerifyPasswordLessResponse = passwordlessv1.VerifyPasswordLessResponse
+type SendPasswordlessResponse = authv1.SendPasswordlessResponse
+type VerifyPasswordLessResponse = authv1.VerifyPasswordLessResponse
 
 // Type aliases for enum types
-type TemplateType = passwordlessv1.TemplateType
-type PasswordlessType = passwordlessv1.PasswordlessType
+type TemplateType = authv1.TemplateType
+type PasswordlessType = authv1.PasswordlessType
 
 // Enum constants for TemplateType
 const (
-	TemplateTypeUnspecified = passwordlessv1.TemplateType_UNSPECIFIED
-	TemplateTypeSignin      = passwordlessv1.TemplateType_SIGNIN
-	TemplateTypeSignup      = passwordlessv1.TemplateType_SIGNUP
+	TemplateTypeUnspecified = authv1.TemplateType_UNSPECIFIED
+	TemplateTypeSignin      = authv1.TemplateType_SIGNIN
+	TemplateTypeSignup      = authv1.TemplateType_SIGNUP
 )
 
 // Enum constants for PasswordlessType
 const (
-	PasswordlessTypeUnspecified = passwordlessv1.PasswordlessType_PASSWORDLESS_TYPE_UNSPECIFIED
-	PasswordlessTypeOtp         = passwordlessv1.PasswordlessType_OTP
-	PasswordlessTypeLink        = passwordlessv1.PasswordlessType_LINK
-	PasswordlessTypeLinkOtp     = passwordlessv1.PasswordlessType_LINK_OTP
+	PasswordlessTypeUnspecified = authv1.PasswordlessType_PASSWORDLESS_TYPE_UNSPECIFIED
+	PasswordlessTypeOtp         = authv1.PasswordlessType_OTP
+	PasswordlessTypeLink        = authv1.PasswordlessType_LINK
+	PasswordlessTypeLinkOtp     = authv1.PasswordlessType_LINK_OTP
 )
 
 // SendPasswordlessOptions represents optional parameters for sending passwordless authentication
@@ -55,20 +55,20 @@ type PasswordlessService interface {
 
 type passwordlessService struct {
 	coreClient *coreClient
-	client     passwordlessconnect.PasswordlessServiceClient
+	client     authconnect.PasswordlessServiceClient
 }
 
 // newPasswordlessClient creates a new passwordless client
 func newPasswordlessClient(coreClient *coreClient) PasswordlessService {
 	return &passwordlessService{
 		coreClient: coreClient,
-		client:     newConnectClient(coreClient, passwordlessconnect.NewPasswordlessServiceClient),
+		client:     newConnectClient(coreClient, authconnect.NewPasswordlessServiceClient),
 	}
 }
 
 // SendPasswordlessEmail sends a passwordless authentication email
 func (p *passwordlessService) SendPasswordlessEmail(ctx context.Context, email string, options *SendPasswordlessOptions) (*SendPasswordlessResponse, error) {
-	request := &passwordlessv1.SendPasswordlessRequest{
+	request := &authv1.SendPasswordlessRequest{
 		Email: email,
 	}
 
@@ -102,14 +102,14 @@ func (p *passwordlessService) VerifyPasswordlessEmail(ctx context.Context, optio
 		return nil, ErrCodeOrLinkTokenRequired
 	}
 
-	request := &passwordlessv1.VerifyPasswordLessRequest{}
+	request := &authv1.VerifyPasswordLessRequest{}
 
 	if options.Code != "" {
-		request.AuthCredential = &passwordlessv1.VerifyPasswordLessRequest_Code{
+		request.AuthCredential = &authv1.VerifyPasswordLessRequest_Code{
 			Code: options.Code,
 		}
 	} else if options.LinkToken != "" {
-		request.AuthCredential = &passwordlessv1.VerifyPasswordLessRequest_LinkToken{
+		request.AuthCredential = &authv1.VerifyPasswordLessRequest_LinkToken{
 			LinkToken: options.LinkToken,
 		}
 	}
@@ -130,7 +130,7 @@ func (p *passwordlessService) ResendPasswordlessEmail(ctx context.Context, authR
 		return nil, ErrAuthRequestIdRequired
 	}
 
-	request := &passwordlessv1.ResendPasswordlessRequest{
+	request := &authv1.ResendPasswordlessRequest{
 		AuthRequestId: authRequestId,
 	}
 

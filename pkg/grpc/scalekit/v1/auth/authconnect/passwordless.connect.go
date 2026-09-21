@@ -2,13 +2,13 @@
 //
 // Source: scalekit/v1/auth/passwordless.proto
 
-package passwordlessconnect
+package authconnect
 
 import (
 	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	passwordless "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/auth/passwordless"
+	auth "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/auth"
 	http "net/http"
 	strings "strings"
 )
@@ -47,9 +47,9 @@ const (
 // PasswordlessServiceClient is a client for the scalekit.v1.auth.passwordless.PasswordlessService
 // service.
 type PasswordlessServiceClient interface {
-	SendPasswordlessEmail(context.Context, *connect.Request[passwordless.SendPasswordlessRequest]) (*connect.Response[passwordless.SendPasswordlessResponse], error)
-	VerifyPasswordlessEmail(context.Context, *connect.Request[passwordless.VerifyPasswordLessRequest]) (*connect.Response[passwordless.VerifyPasswordLessResponse], error)
-	ResendPasswordlessEmail(context.Context, *connect.Request[passwordless.ResendPasswordlessRequest]) (*connect.Response[passwordless.SendPasswordlessResponse], error)
+	SendPasswordlessEmail(context.Context, *connect.Request[auth.SendPasswordlessRequest]) (*connect.Response[auth.SendPasswordlessResponse], error)
+	VerifyPasswordlessEmail(context.Context, *connect.Request[auth.VerifyPasswordLessRequest]) (*connect.Response[auth.VerifyPasswordLessResponse], error)
+	ResendPasswordlessEmail(context.Context, *connect.Request[auth.ResendPasswordlessRequest]) (*connect.Response[auth.SendPasswordlessResponse], error)
 }
 
 // NewPasswordlessServiceClient constructs a client for the
@@ -62,21 +62,21 @@ type PasswordlessServiceClient interface {
 // http://api.acme.com or https://acme.com/grpc).
 func NewPasswordlessServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) PasswordlessServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
-	passwordlessServiceMethods := passwordless.File_scalekit_v1_auth_passwordless_proto.Services().ByName("PasswordlessService").Methods()
+	passwordlessServiceMethods := auth.File_scalekit_v1_auth_passwordless_proto.Services().ByName("PasswordlessService").Methods()
 	return &passwordlessServiceClient{
-		sendPasswordlessEmail: connect.NewClient[passwordless.SendPasswordlessRequest, passwordless.SendPasswordlessResponse](
+		sendPasswordlessEmail: connect.NewClient[auth.SendPasswordlessRequest, auth.SendPasswordlessResponse](
 			httpClient,
 			baseURL+PasswordlessServiceSendPasswordlessEmailProcedure,
 			connect.WithSchema(passwordlessServiceMethods.ByName("SendPasswordlessEmail")),
 			connect.WithClientOptions(opts...),
 		),
-		verifyPasswordlessEmail: connect.NewClient[passwordless.VerifyPasswordLessRequest, passwordless.VerifyPasswordLessResponse](
+		verifyPasswordlessEmail: connect.NewClient[auth.VerifyPasswordLessRequest, auth.VerifyPasswordLessResponse](
 			httpClient,
 			baseURL+PasswordlessServiceVerifyPasswordlessEmailProcedure,
 			connect.WithSchema(passwordlessServiceMethods.ByName("VerifyPasswordlessEmail")),
 			connect.WithClientOptions(opts...),
 		),
-		resendPasswordlessEmail: connect.NewClient[passwordless.ResendPasswordlessRequest, passwordless.SendPasswordlessResponse](
+		resendPasswordlessEmail: connect.NewClient[auth.ResendPasswordlessRequest, auth.SendPasswordlessResponse](
 			httpClient,
 			baseURL+PasswordlessServiceResendPasswordlessEmailProcedure,
 			connect.WithSchema(passwordlessServiceMethods.ByName("ResendPasswordlessEmail")),
@@ -87,35 +87,35 @@ func NewPasswordlessServiceClient(httpClient connect.HTTPClient, baseURL string,
 
 // passwordlessServiceClient implements PasswordlessServiceClient.
 type passwordlessServiceClient struct {
-	sendPasswordlessEmail   *connect.Client[passwordless.SendPasswordlessRequest, passwordless.SendPasswordlessResponse]
-	verifyPasswordlessEmail *connect.Client[passwordless.VerifyPasswordLessRequest, passwordless.VerifyPasswordLessResponse]
-	resendPasswordlessEmail *connect.Client[passwordless.ResendPasswordlessRequest, passwordless.SendPasswordlessResponse]
+	sendPasswordlessEmail   *connect.Client[auth.SendPasswordlessRequest, auth.SendPasswordlessResponse]
+	verifyPasswordlessEmail *connect.Client[auth.VerifyPasswordLessRequest, auth.VerifyPasswordLessResponse]
+	resendPasswordlessEmail *connect.Client[auth.ResendPasswordlessRequest, auth.SendPasswordlessResponse]
 }
 
 // SendPasswordlessEmail calls
 // scalekit.v1.auth.passwordless.PasswordlessService.SendPasswordlessEmail.
-func (c *passwordlessServiceClient) SendPasswordlessEmail(ctx context.Context, req *connect.Request[passwordless.SendPasswordlessRequest]) (*connect.Response[passwordless.SendPasswordlessResponse], error) {
+func (c *passwordlessServiceClient) SendPasswordlessEmail(ctx context.Context, req *connect.Request[auth.SendPasswordlessRequest]) (*connect.Response[auth.SendPasswordlessResponse], error) {
 	return c.sendPasswordlessEmail.CallUnary(ctx, req)
 }
 
 // VerifyPasswordlessEmail calls
 // scalekit.v1.auth.passwordless.PasswordlessService.VerifyPasswordlessEmail.
-func (c *passwordlessServiceClient) VerifyPasswordlessEmail(ctx context.Context, req *connect.Request[passwordless.VerifyPasswordLessRequest]) (*connect.Response[passwordless.VerifyPasswordLessResponse], error) {
+func (c *passwordlessServiceClient) VerifyPasswordlessEmail(ctx context.Context, req *connect.Request[auth.VerifyPasswordLessRequest]) (*connect.Response[auth.VerifyPasswordLessResponse], error) {
 	return c.verifyPasswordlessEmail.CallUnary(ctx, req)
 }
 
 // ResendPasswordlessEmail calls
 // scalekit.v1.auth.passwordless.PasswordlessService.ResendPasswordlessEmail.
-func (c *passwordlessServiceClient) ResendPasswordlessEmail(ctx context.Context, req *connect.Request[passwordless.ResendPasswordlessRequest]) (*connect.Response[passwordless.SendPasswordlessResponse], error) {
+func (c *passwordlessServiceClient) ResendPasswordlessEmail(ctx context.Context, req *connect.Request[auth.ResendPasswordlessRequest]) (*connect.Response[auth.SendPasswordlessResponse], error) {
 	return c.resendPasswordlessEmail.CallUnary(ctx, req)
 }
 
 // PasswordlessServiceHandler is an implementation of the
 // scalekit.v1.auth.passwordless.PasswordlessService service.
 type PasswordlessServiceHandler interface {
-	SendPasswordlessEmail(context.Context, *connect.Request[passwordless.SendPasswordlessRequest]) (*connect.Response[passwordless.SendPasswordlessResponse], error)
-	VerifyPasswordlessEmail(context.Context, *connect.Request[passwordless.VerifyPasswordLessRequest]) (*connect.Response[passwordless.VerifyPasswordLessResponse], error)
-	ResendPasswordlessEmail(context.Context, *connect.Request[passwordless.ResendPasswordlessRequest]) (*connect.Response[passwordless.SendPasswordlessResponse], error)
+	SendPasswordlessEmail(context.Context, *connect.Request[auth.SendPasswordlessRequest]) (*connect.Response[auth.SendPasswordlessResponse], error)
+	VerifyPasswordlessEmail(context.Context, *connect.Request[auth.VerifyPasswordLessRequest]) (*connect.Response[auth.VerifyPasswordLessResponse], error)
+	ResendPasswordlessEmail(context.Context, *connect.Request[auth.ResendPasswordlessRequest]) (*connect.Response[auth.SendPasswordlessResponse], error)
 }
 
 // NewPasswordlessServiceHandler builds an HTTP handler from the service implementation. It returns
@@ -124,7 +124,7 @@ type PasswordlessServiceHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewPasswordlessServiceHandler(svc PasswordlessServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
-	passwordlessServiceMethods := passwordless.File_scalekit_v1_auth_passwordless_proto.Services().ByName("PasswordlessService").Methods()
+	passwordlessServiceMethods := auth.File_scalekit_v1_auth_passwordless_proto.Services().ByName("PasswordlessService").Methods()
 	passwordlessServiceSendPasswordlessEmailHandler := connect.NewUnaryHandler(
 		PasswordlessServiceSendPasswordlessEmailProcedure,
 		svc.SendPasswordlessEmail,
@@ -160,14 +160,14 @@ func NewPasswordlessServiceHandler(svc PasswordlessServiceHandler, opts ...conne
 // UnimplementedPasswordlessServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedPasswordlessServiceHandler struct{}
 
-func (UnimplementedPasswordlessServiceHandler) SendPasswordlessEmail(context.Context, *connect.Request[passwordless.SendPasswordlessRequest]) (*connect.Response[passwordless.SendPasswordlessResponse], error) {
+func (UnimplementedPasswordlessServiceHandler) SendPasswordlessEmail(context.Context, *connect.Request[auth.SendPasswordlessRequest]) (*connect.Response[auth.SendPasswordlessResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.auth.passwordless.PasswordlessService.SendPasswordlessEmail is not implemented"))
 }
 
-func (UnimplementedPasswordlessServiceHandler) VerifyPasswordlessEmail(context.Context, *connect.Request[passwordless.VerifyPasswordLessRequest]) (*connect.Response[passwordless.VerifyPasswordLessResponse], error) {
+func (UnimplementedPasswordlessServiceHandler) VerifyPasswordlessEmail(context.Context, *connect.Request[auth.VerifyPasswordLessRequest]) (*connect.Response[auth.VerifyPasswordLessResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.auth.passwordless.PasswordlessService.VerifyPasswordlessEmail is not implemented"))
 }
 
-func (UnimplementedPasswordlessServiceHandler) ResendPasswordlessEmail(context.Context, *connect.Request[passwordless.ResendPasswordlessRequest]) (*connect.Response[passwordless.SendPasswordlessResponse], error) {
+func (UnimplementedPasswordlessServiceHandler) ResendPasswordlessEmail(context.Context, *connect.Request[auth.ResendPasswordlessRequest]) (*connect.Response[auth.SendPasswordlessResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.auth.passwordless.PasswordlessService.ResendPasswordlessEmail is not implemented"))
 }
