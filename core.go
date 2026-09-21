@@ -36,18 +36,29 @@ const (
 	// only lever is the constructor-level default.
 	defaultCallTimeout = 20 * time.Second
 
-	// grpcReadIdleTimeout/grpcPingTimeout mirror the keepalive settings the Java
-	// and Python SDKs use on the same gRPC channel (ManagedChannelBuilder.keepAliveTime /
-	// grpc.keepalive_time_ms): once no frame has been read for grpcReadIdleTimeout,
-	// the transport sends an HTTP/2 PING to verify the connection, whether or not a
-	// stream is open — this is how a connection silently killed by a network
-	// intermediary (LB, NAT, proxy) gets detected and replaced instead of being
-	// written to and failing with a raw transport error.
+	// grpcReadIdleTimeout/grpcPingTimeout are this client's active
+	// connection-liveness check: once no frame has been read for
+	// grpcReadIdleTimeout, the transport sends an HTTP/2 PING to verify the
+	// connection, whether or not a stream is open — this is how a connection
+	// silently killed by a network intermediary (LB, NAT, proxy) gets detected
+	// and replaced instead of being written to and failing with a raw
+	// transport error. Mirrors the keepalive settings the Java and Python
+	// SDKs use on the same gRPC channel (ManagedChannelBuilder.keepAliveTime /
+	// grpc.keepalive_time_ms).
 	//
-	// 60s clears the backend's EnforcementPolicy.MinTime (30s, scalekit's
-	// cmd/grpc.go) with the same margin Java and Python use. A value close to
-	// 30s risks ordinary timing jitter tripping the server's ping-abuse
-	// detector and getting GOAWAY'd — the exact bug this setting avoids.
+	// 60s was originally chosen to clear the backend's EnforcementPolicy.MinTime
+	// (30s, scalekit's cmd/grpc.go) with margin. That policy turned out to be
+	// inert in production: the backend serves all traffic through
+	// grpc.Server.ServeHTTP, and grpc-go's handler-transport for ServeHTTP
+	// does not accept or apply KeepaliveEnforcementPolicy/KeepaliveParams at
+	// all (verified against grpc-go's vendored source — NewServerHandlerTransport's
+	// signature takes no keepalive arguments, and internal/transport/handler_server.go
+	// has no reference to enforcement or idle handling). See scalekit's
+	// cmd/server.go IdleTimeout comment for the investigation that surfaced
+	// this. The VALUE is kept unchanged regardless: 60s remains a reasonable,
+	// conservative liveness-ping cadence on its own terms, independent of
+	// whether the backend penalizes faster ones, and stays consistent across
+	// all four SDKs.
 	// These are the DEFAULTS; override per instance with WithKeepAlive.
 	grpcReadIdleTimeout = 60 * time.Second
 	grpcPingTimeout     = 10 * time.Second
@@ -55,23 +66,34 @@ const (
 	// grpcMinPingInterval is the floor WithKeepAlive enforces on a
 	// caller-supplied ping interval (0 is separately allowed as the "disabled"
 	// escape hatch — see validateKeepAlive). Matches the Python SDK's
-	// MIN_KEEPALIVE_TIME_MS and the Node SDK's MIN_PING_INTERVAL_MS exactly,
-	// for the identical reason: a value below this leaves too little margin
-	// over the backend's 30s MinTime, and ordinary timing jitter trips the
-	// server's ping-abuse detector.
+	// MIN_KEEPALIVE_TIME_MS and the Node SDK's MIN_PING_INTERVAL_MS exactly.
+	// Originally floored to clear the backend's 30s EnforcementPolicy.MinTime
+	// with margin — see grpcReadIdleTimeout's comment above for why that
+	// specific enforcement turned out to be inert in production. The floor is
+	// kept regardless, as a sane minimum independent of backend enforcement.
 	grpcMinPingInterval = 60 * time.Second
 
 	// grpcIdleConnCeiling bounds how long a fully idle gRPC connection is kept
-	// before this client proactively closes it (see idleConnTimeoutFor). Must
-	// stay strictly BELOW the backend's own grpcKeepaliveMaxConnectionIdle
-	// (5 min, scalekit's cmd/grpc.go), not equal to it: landing exactly on the
-	// backend's bound is a race — whichever side's timer fires first wins, and
-	// the loser is a request written into a socket the other side just closed.
-	// This must also clear GCP's fixed 600s HTTPS load balancer backend idle
-	// timeout that fronts the Scalekit API (trivially true at 4 min). Mirrors
-	// the Node SDK's IDLE_CONNECTION_TIMEOUT_CEILING_MS (connect.ts) for the
-	// same reason — staying below means the client always closes an idle
-	// connection first.
+	// before this client proactively closes it (see idleConnTimeoutFor).
+	//
+	// This client never connects to the Scalekit backend directly — GCLB
+	// terminates and re-originates the connection, so this setting governs
+	// only the SDK<->GCLB leg, never the GCLB<->pod leg. The real constraint
+	// on THIS leg is GCLB's client-facing (GFE) keepalive timeout: 610s by
+	// default (confirmed as the live, unmodified value on the Scalekit API's
+	// production target-https-proxy — httpKeepAliveTimeoutSec is unset),
+	// configurable up to 1200s. Staying below it means this client always
+	// closes an idle connection first, so it is never blindsided by GCLB
+	// silently retiring a connection this client still considers valid.
+	//
+	// (An earlier revision of this comment instead cited the backend's own
+	// grpcKeepaliveMaxConnectionIdle, cmd/grpc.go. That setting governs a
+	// DIFFERENT connection — GCLB<->pod, which this client never touches —
+	// and is additionally inert in production regardless of leg; see
+	// grpcReadIdleTimeout's comment above.)
+	//
+	// 4 minutes clears GCLB's 610s default with a comfortable margin. Mirrors
+	// the Node SDK's IDLE_CONNECTION_TIMEOUT_CEILING_MS (connect.ts) exactly.
 	grpcIdleConnCeiling = 4 * time.Minute
 
 	// grpcIdleConnPingCycles is the multiplier idleConnTimeoutFor applies to a
