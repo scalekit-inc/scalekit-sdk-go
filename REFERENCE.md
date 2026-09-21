@@ -1001,6 +1001,28 @@ Returns the Client service (`client.Client()`), used to manage OIDC application 
 </dl>
 </details>
 
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">Resources</a>() -> scalekit.ResourceService</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the Resource service (`client.Resources()`), used to list and revoke the end-user consents granted against a resource, such as an MCP server.
+</dd>
+</dl>
+</dd>
+</dl>
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">Token</a>() -> scalekit.TokenService</code></summary>
 <dl>
 <dd>
@@ -1871,6 +1893,160 @@ if err := client.Client().DeleteClientSecret(ctx, "client_123", "secret_456"); e
 <dd>
 
 **secretId:** `string`
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+## Resources
+
+<details><summary><code>client.Resources().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">ListUserConsents</a>(ctx, resourceId, options) -> (*ListResourceUserConsentsResponse, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists the end-user consents granted against a resource, such as an MCP server, with pagination.
+
+A consent records that one end user allowed a specific API client to act on their behalf. Each returned consent carries `Id`, `ExternalUserId`, `ClientId`, `ClientName`, `Scopes` and `GrantedAt`; the response also carries `TotalSize` plus `NextPageToken` and `PrevPageToken` cursors.
+
+`ExternalUserId` is the identifier your application supplied for the user when the consent was granted. Set `options.UserIds` to match it exactly and case-sensitively (maximum 25 values, combined with OR), or `options.Search` for a case-insensitive substring match. When both are set, `UserIds` wins and `Search` is ignored.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+consents, err := client.Resources().ListUserConsents(ctx, "res_142145647087190278", scalekit.ListUserConsentsOptions{
+  PageSize: 10,
+  UserIds:  []string{"usr_42", "usr_43"},
+})
+if err != nil {
+  // handle
+}
+
+for _, consent := range consents.GetConsents() {
+  fmt.Println(consent.GetId(), consent.GetExternalUserId(), consent.GetClientName())
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**resourceId:** `string` — the resource to list consents for (format: `res_xxxxx`). Required.
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**options:** `ListUserConsentsOptions` — `Search` (case-insensitive substring match on external user IDs), `PageSize` (max 30), `PageToken`, `UserIds` (exact match, max 25; takes precedence over `Search`).
+
+</dd>
+</dl>
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.Resources().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">RevokeUserConsent</a>(ctx, clientId, consentId) -> (*RevokeUserConsentResponse, error)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Revokes a single end-user consent held by an API client.
+
+Deletes the consent, so the client is prompted for consent again on its next authorization attempt, and revokes every active refresh token issued to that client for the same user. Access tokens already issued stay valid until they expire.
+
+Note that `clientId` is the API client that holds the consent (`m2m_` prefix), not the resource id.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```go
+if _, err := client.Resources().RevokeUserConsent(ctx, "m2m_142145647087190278", "usrcnst_142145647087190278"); err != nil {
+  // handle
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**ctx:** `context.Context`
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**clientId:** `string` — the API client holding the consent (format: `m2m_xxxxx`). Required.
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**consentId:** `string` — the consent to revoke (format: `usrcnst_xxxxx`). Required.
 
 </dd>
 </dl>
