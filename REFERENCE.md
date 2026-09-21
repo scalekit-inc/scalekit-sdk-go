@@ -1880,6 +1880,10 @@ if err := client.Client().DeleteClientSecret(ctx, "client_123", "secret_456"); e
 
 ## Resources
 
+Manage the API clients scoped to a resource (such as an MCP server), and access the consents your end users grant against one. A consent records that one end user allowed a specific API client to act on their behalf. Each consent identifies the user by `ExternalUserId` — the identifier your application supplied when the consent was granted.
+
+Access via `client.Resource()`.
+
 <details><summary><code>client.Resource().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">GetResource</a>(ctx, resourceId) -> (*GetResourceResponse, error)</code></summary>
 <dl>
 <dd>
@@ -1992,6 +1996,8 @@ every type in one call; list each type separately if needed.
 <dd>
 
 ```go
+import "fmt"
+
 list, err := client.Resource().ListResources(ctx, scalekit.ResourceTypeMcpServer, scalekit.ListResourcesOptions{
   PageSize: 20,
 })
@@ -1999,7 +2005,7 @@ if err != nil {
   // handle
 }
 for _, res := range list.Resources {
-  _ = res
+  fmt.Println(res.Id, res.Scopes)
 }
 ```
 </dd>
@@ -2031,8 +2037,8 @@ for _, res := range list.Resources {
 <dl>
 <dd>
 
-**options:** `scalekit.ListResourcesOptions`
-- `PageSize uint32` - Max 30
+**options:** `scalekit.ListResourcesOptions` - Optional pagination
+- `PageSize uint32` - Page size, max 30
 - `PageToken string` - Pagination cursor
 
 </dd>
@@ -2053,8 +2059,11 @@ for _, res := range list.Resources {
 <dl>
 <dd>
 
-Creates a resource client. The response's `PlainSecret`
-is the plaintext client secret, only available at creation time.
+Creates a resource client.
+
+Returns the created `Client` and a `PlainSecret` — the plaintext client secret, only available at creation time.
+
+Audience cannot be set through this SDK — it is always server-determined, for any resource type. A non-empty `Audience` on `client` returns `ErrAudienceNotSettable` rather than being silently forwarded.
 </dd>
 </dl>
 </dd>
@@ -2096,6 +2105,8 @@ if err != nil {
 }
 fmt.Println(created.Client.ClientId, created.PlainSecret)
 ```
+
+`client` also accepts `Description`, `CustomClaims`, `Expiry` and `RedirectUris` — see Parameters below.
 </dd>
 </dl>
 </dd>
@@ -2125,7 +2136,14 @@ fmt.Println(created.Client.ClientId, created.PlainSecret)
 <dl>
 <dd>
 
-**client:** `*clients.ResourceClient` (package `pkg/grpc/scalekit/v1/clients`)
+**client:** `*clients.ResourceClient` (package `pkg/grpc/scalekit/v1/clients`) - Client properties
+- `Name string` - Human-readable name for the client. Defaults to "Resource Client" if omitted.
+- `Description string` - Optional description
+- `Scopes []string` - Scopes to grant. These scopes should be the same or subset of the scopes available for the resource.
+- `Audience []string` - Not settable through this SDK. Audience is always server-determined; a non-empty value returns `ErrAudienceNotSettable`.
+- `CustomClaims []*clients.CustomClaim` - Custom claims to embed in access tokens, as `{Key, Value}` pairs.
+- `Expiry int64` - Access token lifetime in seconds. Defaults to the resource's configured expiry, or one day.
+- `RedirectUris []string` - Allowed redirect URIs, for a pre-registered (non-DCR) client
 
 </dd>
 </dl>
@@ -2161,11 +2179,13 @@ who have granted it consent.
 <dd>
 
 ```go
+import "fmt"
+
 got, err := client.Resource().GetResourceClient(ctx, "res_123", "m2m_456")
 if err != nil {
   // handle
 }
-_ = got.Client
+fmt.Println(got.Client.Name)
 ```
 </dd>
 </dl>
@@ -2231,12 +2251,15 @@ Lists resource clients.
 <dd>
 
 ```go
+import "fmt"
+
 list, err := client.Resource().ListResourceClients(ctx, "res_123")
 if err != nil {
   // handle
 }
+fmt.Println(list.TotalDcrClients, list.TotalStaticClients)
 for _, c := range list.Clients {
-  _ = c
+  fmt.Println(c.ClientId, c.Name)
 }
 ```
 </dd>
@@ -2281,6 +2304,10 @@ for _, c := range list.Clients {
 <dd>
 
 Updates a resource client.
+
+`mask` lists which fields of `client` to change. The server only actually honors the mask for `Scopes`, `CustomClaims` and `RedirectUris` — include one of those paths with an empty value (e.g. `Scopes: []string{}`) to clear it. `Name`/`Description` are applied whenever non-empty regardless of mask (an empty string is a no-op, not a clear).
+
+`"audience"` is not a supported mask path — audience cannot be set through this SDK at all, on create or update, for any resource type.
 </dd>
 </dl>
 </dd>
@@ -2296,6 +2323,8 @@ Updates a resource client.
 
 ```go
 import (
+  "fmt"
+
   clients "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/clients"
   "google.golang.org/protobuf/types/known/fieldmaskpb"
 )
@@ -2310,8 +2339,10 @@ for _, s := range resource.Resource.Scopes {
     allowedScopes = append(allowedScopes, s.Name)
   }
 }
+fmt.Println(allowedScopes)
 
 updated, err := client.Resource().UpdateResourceClient(ctx, "res_123", "m2m_456", &clients.ResourceClient{
+  Name:   "Updated Name",
   Scopes: allowedScopes,
 }, &fieldmaskpb.FieldMask{
   Paths: []string{"scopes"},
@@ -2319,7 +2350,7 @@ updated, err := client.Resource().UpdateResourceClient(ctx, "res_123", "m2m_456"
 if err != nil {
   // handle
 }
-_ = updated.Client
+fmt.Println(updated.Client.Name, updated.Client.Scopes)
 ```
 </dd>
 </dl>
@@ -2358,7 +2389,14 @@ _ = updated.Client
 <dl>
 <dd>
 
-**client:** `*clients.ResourceClient`
+**client:** `*clients.ResourceClient` (package `pkg/grpc/scalekit/v1/clients`) - Fields to update
+- `Name string` - Updated name. An empty string is a no-op server-side, not a clear.
+- `Description string` - Updated description. An empty string is a no-op server-side, not a clear.
+- `Scopes []string` - Updated scopes (replaces existing; pass an empty slice to clear). These scopes should be the same or subset of the scopes available for the resource.
+- `Audience []string` - Not settable through this SDK; always server-determined. A non-empty value returns `ErrAudienceNotSettable`.
+- `CustomClaims []*clients.CustomClaim` - Custom claims to set (replaces existing; pass an empty slice to clear), as `{Key, Value}` pairs.
+- `Expiry int64` - Updated access token lifetime in seconds
+- `RedirectUris []string` - Updated redirect URIs (replaces existing; pass an empty slice to clear)
 
 </dd>
 </dl>
@@ -2366,7 +2404,7 @@ _ = updated.Client
 <dl>
 <dd>
 
-**mask:** `*fieldmaskpb.FieldMask` - Field mask specifying which fields to update
+**mask:** `*fieldmaskpb.FieldMask` - Field mask specifying which fields of `client` to change (e.g. `&fieldmaskpb.FieldMask{Paths: []string{"scopes"}}`)
 
 </dd>
 </dl>
@@ -2605,9 +2643,8 @@ if err != nil {
 <dd>
 
 Lists the end-user consents granted against a resource, with pagination.
-Each returned consent carries `ConsentId`, `ExternalUserId` and `Scopes`.
-The response also carries `TotalSize` plus `NextPageToken`/`PrevPageToken`
-cursors.
+
+Each returned consent carries `Id`, `ExternalUserId`, `ClientId`, `ClientName`, `Scopes` and `GrantedAt`. The response also carries `TotalSize` plus `NextPageToken`/`PrevPageToken` cursors.
 </dd>
 </dl>
 </dd>
@@ -2622,14 +2659,18 @@ cursors.
 <dd>
 
 ```go
+import "fmt"
+
 list, err := client.Resource().ListUserConsents(ctx, "res_123", scalekit.ListUserConsentsOptions{
-  PageSize: 10,
+  Search:   "<OPTIONAL_SEARCH>",
+  PageSize: 20,
 })
 if err != nil {
   // handle
 }
+fmt.Println(list.TotalSize, list.NextPageToken)
 for _, c := range list.Consents {
-  _ = c
+  fmt.Println(c.Id, c.ExternalUserId, c.ClientId, c.Scopes)
 }
 ```
 </dd>
@@ -2661,10 +2702,10 @@ for _, c := range list.Consents {
 <dl>
 <dd>
 
-**options:** `scalekit.ListUserConsentsOptions`
+**options:** `scalekit.ListUserConsentsOptions` - Optional filter, search and pagination options
 - `Search string` - Case-insensitive substring match on external user IDs
-- `PageSize uint32` - Max 30
-- `PageToken string` - Pagination cursor
+- `PageSize uint32` - Page size, max 30
+- `PageToken string` - Pagination cursor from a previous response (`NextPageToken`/`PrevPageToken`)
 
 </dd>
 </dl>
@@ -2684,12 +2725,11 @@ for _, c := range list.Consents {
 <dl>
 <dd>
 
-Revokes a single end-user consent held by an API client. Deletes the
-consent, so the client is prompted for consent again on its next
-authorization attempt, and revokes every active refresh token issued to
-that client for the same user. Access tokens already issued stay valid
-until they expire. Note that `clientId` is the API client that holds the
-consent (format: m2m_xxxxx), not the resource id.
+Revokes a single end-user consent held by an API client.
+
+Deletes the consent, so the client is prompted for consent again on its next authorization attempt, and revokes every active refresh token issued to that client for the same user. Access tokens already issued stay valid until they expire.
+
+Note that `clientId` is the API client that holds the consent (format: m2m_xxxxx), not the resource id. This matches the underlying route `DELETE /clients/{client_id}/consents/{consent_id}`.
 </dd>
 </dl>
 </dd>
