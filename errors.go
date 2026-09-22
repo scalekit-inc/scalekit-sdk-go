@@ -48,6 +48,12 @@ var (
 	// ErrSecretIdRequired is returned when a secretId argument is required but was empty.
 	ErrSecretIdRequired = errors.New("secretId is required")
 
+	// ErrResourceIdRequired is returned when a resourceId argument is required but was empty.
+	ErrResourceIdRequired = errors.New("resourceId is required")
+
+	// ErrConsentIdRequired is returned when a consentId argument is required but was empty.
+	ErrConsentIdRequired = errors.New("consentId is required")
+
 	// ErrRoleNameRequired is returned when a roleName argument is required but was empty.
 	ErrRoleNameRequired = errors.New("roleName is required")
 
