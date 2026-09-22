@@ -124,7 +124,7 @@ func TestGrpcKeepaliveInvariants(t *testing.T) {
 				client, _ := newGrpcHTTPClient(grpcReadIdleTimeout, grpcPingTimeout)
 				resp, err := client.Get(server.URL)
 				require.NoError(t, err)
-				defer resp.Body.Close()
+				defer func() { _ = resp.Body.Close() }()
 				require.Equal(t, http.StatusNoContent, resp.StatusCode)
 			},
 		},
