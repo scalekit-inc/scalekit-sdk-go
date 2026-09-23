@@ -1001,6 +1001,28 @@ Returns the Client service (`client.Client()`), used to manage OIDC application 
 </dl>
 </details>
 
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">Resources</a>() -> scalekit.ResourceService</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the Resource service (`client.Resources()`), used to list and revoke the end-user consents granted against a resource, such as an MCP server.
+</dd>
+</dl>
+</dd>
+</dl>
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/scalekit.go">Token</a>() -> scalekit.TokenService</code></summary>
 <dl>
 <dd>
@@ -1882,9 +1904,9 @@ if err := client.Client().DeleteClientSecret(ctx, "client_123", "secret_456"); e
 
 Manage the API clients scoped to a resource (such as an MCP server), and access the consents your end users grant against one. A consent records that one end user allowed a specific API client to act on their behalf. Each consent identifies the user by `ExternalUserId` — the identifier your application supplied when the consent was granted.
 
-Access via `client.Resource()`.
+Access via `client.Resources()`.
 
-<details><summary><code>client.Resource().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">GetResource</a>(ctx, resourceId) -> (*GetResourceResponse, error)</code></summary>
+<details><summary><code>client.Resources().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">GetResource</a>(ctx, resourceId) -> (*GetResourceResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -1925,7 +1947,7 @@ on that flag to get the actual allowlist.
 ```go
 import "fmt"
 
-got, err := client.Resource().GetResource(ctx, "res_123")
+got, err := client.Resources().GetResource(ctx, "res_123")
 if err != nil {
   // handle
 }
@@ -1966,7 +1988,7 @@ for _, s := range got.Resource.Scopes {
 </dl>
 </details>
 
-<details><summary><code>client.Resource().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">ListResources</a>(ctx, resourceType, options) -> (*ListResourcesResponse, error)</code></summary>
+<details><summary><code>client.Resources().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">ListResources</a>(ctx, resourceType, options) -> (*ListResourcesResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -1998,7 +2020,7 @@ every type in one call; list each type separately if needed.
 ```go
 import "fmt"
 
-list, err := client.Resource().ListResources(ctx, scalekit.ResourceTypeMcpServer, scalekit.ListResourcesOptions{
+list, err := client.Resources().ListResources(ctx, scalekit.ResourceTypeMcpServer, scalekit.ListResourcesOptions{
   PageSize: 20,
 })
 if err != nil {
@@ -2047,7 +2069,7 @@ for _, res := range list.Resources {
 </dl>
 </details>
 
-<details><summary><code>client.Resource().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">CreateResourceClient</a>(ctx, resourceId, client) -> (*CreateResourceClientResponse, error)</code></summary>
+<details><summary><code>client.Resources().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">CreateResourceClient</a>(ctx, resourceId, client) -> (*CreateResourceClientResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -2084,7 +2106,7 @@ import (
   clients "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/clients"
 )
 
-resource, err := client.Resource().GetResource(ctx, "res_123")
+resource, err := client.Resources().GetResource(ctx, "res_123")
 if err != nil {
   // handle
 }
@@ -2096,7 +2118,7 @@ for _, s := range resource.Resource.Scopes {
 }
 fmt.Println(allowedScopes)
 
-created, err := client.Resource().CreateResourceClient(ctx, "res_123", &clients.ResourceClient{
+created, err := client.Resources().CreateResourceClient(ctx, "res_123", &clients.ResourceClient{
   Name:   "My Resource Client",
   Scopes: allowedScopes,
 })
@@ -2151,7 +2173,7 @@ fmt.Println(created.Client.ClientId, created.PlainSecret)
 </dl>
 </details>
 
-<details><summary><code>client.Resource().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">GetResourceClient</a>(ctx, resourceId, clientId) -> (*GetResourceClientResponse, error)</code></summary>
+<details><summary><code>client.Resources().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">GetResourceClient</a>(ctx, resourceId, clientId) -> (*GetResourceClientResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -2181,7 +2203,7 @@ who have granted it consent.
 ```go
 import "fmt"
 
-got, err := client.Resource().GetResourceClient(ctx, "res_123", "m2m_456")
+got, err := client.Resources().GetResourceClient(ctx, "res_123", "m2m_456")
 if err != nil {
   // handle
 }
@@ -2224,7 +2246,7 @@ fmt.Println(got.Client.Name)
 </dl>
 </details>
 
-<details><summary><code>client.Resource().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">ListResourceClients</a>(ctx, resourceId) -> (*ListResourceClientsResponse, error)</code></summary>
+<details><summary><code>client.Resources().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">ListResourceClients</a>(ctx, resourceId) -> (*ListResourceClientsResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -2253,7 +2275,7 @@ Lists resource clients.
 ```go
 import "fmt"
 
-list, err := client.Resource().ListResourceClients(ctx, "res_123")
+list, err := client.Resources().ListResourceClients(ctx, "res_123")
 if err != nil {
   // handle
 }
@@ -2291,7 +2313,7 @@ for _, c := range list.Clients {
 </dl>
 </details>
 
-<details><summary><code>client.Resource().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">UpdateResourceClient</a>(ctx, resourceId, clientId, client, mask) -> (*UpdateResourceClientResponse, error)</code></summary>
+<details><summary><code>client.Resources().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">UpdateResourceClient</a>(ctx, resourceId, clientId, client, mask) -> (*UpdateResourceClientResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -2329,7 +2351,7 @@ import (
   "google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-resource, err := client.Resource().GetResource(ctx, "res_123")
+resource, err := client.Resources().GetResource(ctx, "res_123")
 if err != nil {
   // handle
 }
@@ -2341,7 +2363,7 @@ for _, s := range resource.Resource.Scopes {
 }
 fmt.Println(allowedScopes)
 
-updated, err := client.Resource().UpdateResourceClient(ctx, "res_123", "m2m_456", &clients.ResourceClient{
+updated, err := client.Resources().UpdateResourceClient(ctx, "res_123", "m2m_456", &clients.ResourceClient{
   Name:   "Updated Name",
   Scopes: allowedScopes,
 }, &fieldmaskpb.FieldMask{
@@ -2412,7 +2434,7 @@ fmt.Println(updated.Client.Name, updated.Client.Scopes)
 </dl>
 </details>
 
-<details><summary><code>client.Resource().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">DeleteResourceClient</a>(ctx, resourceId, clientId) -> error</code></summary>
+<details><summary><code>client.Resources().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">DeleteResourceClient</a>(ctx, resourceId, clientId) -> error</code></summary>
 <dl>
 <dd>
 
@@ -2439,7 +2461,7 @@ Deletes resource clients. Returns an error if the client is missing or scoped to
 <dd>
 
 ```go
-err := client.Resource().DeleteResourceClient(ctx, "res_123", "m2m_456")
+err := client.Resources().DeleteResourceClient(ctx, "res_123", "m2m_456")
 if err != nil {
   // handle
 }
@@ -2481,7 +2503,7 @@ if err != nil {
 </dl>
 </details>
 
-<details><summary><code>client.Resource().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">CreateResourceClientSecret</a>(ctx, resourceId, clientId) -> (*CreateClientSecretResponse, error)</code></summary>
+<details><summary><code>client.Resources().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">CreateResourceClientSecret</a>(ctx, resourceId, clientId) -> (*CreateClientSecretResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -2510,7 +2532,7 @@ The plaintext client secret, only available at creation time.
 <dd>
 
 ```go
-created, err := client.Resource().CreateResourceClientSecret(ctx, "res_123", "m2m_456")
+created, err := client.Resources().CreateResourceClientSecret(ctx, "res_123", "m2m_456")
 if err != nil {
   // handle
 }
@@ -2553,7 +2575,7 @@ _ = created.PlainSecret
 </dl>
 </details>
 
-<details><summary><code>client.Resource().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">DeleteResourceClientSecret</a>(ctx, resourceId, clientId, secretId) -> error</code></summary>
+<details><summary><code>client.Resources().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">DeleteResourceClientSecret</a>(ctx, resourceId, clientId, secretId) -> error</code></summary>
 <dl>
 <dd>
 
@@ -2580,7 +2602,7 @@ Permanently deletes a secret from resource client. A client must always keep at 
 <dd>
 
 ```go
-err := client.Resource().DeleteResourceClientSecret(ctx, "res_123", "m2m_456", "sec_789")
+err := client.Resources().DeleteResourceClientSecret(ctx, "res_123", "m2m_456", "sec_789")
 if err != nil {
   // handle
 }
@@ -2630,7 +2652,7 @@ if err != nil {
 </dl>
 </details>
 
-<details><summary><code>client.Resource().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">ListUserConsents</a>(ctx, resourceId, options) -> (*ListResourceUserConsentsResponse, error)</code></summary>
+<details><summary><code>client.Resources().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">ListUserConsents</a>(ctx, resourceId, options) -> (*ListResourceUserConsentsResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -2642,9 +2664,11 @@ if err != nil {
 <dl>
 <dd>
 
-Lists the end-user consents granted against a resource, with pagination.
+Lists the end-user consents granted against a resource, such as an MCP server, with pagination.
 
-Each returned consent carries `Id`, `ExternalUserId`, `ClientId`, `ClientName`, `Scopes` and `GrantedAt`. The response also carries `TotalSize` plus `NextPageToken`/`PrevPageToken` cursors.
+A consent records that one end user allowed a specific API client to act on their behalf. Each returned consent carries `Id`, `ExternalUserId`, `ClientId`, `ClientName`, `Scopes` and `GrantedAt`; the response also carries `TotalSize` plus `NextPageToken` and `PrevPageToken` cursors.
+
+`ExternalUserId` is the identifier your application supplied for the user when the consent was granted. Set `options.UserIds` to match it exactly and case-sensitively (maximum 25 values, combined with OR), or `options.Search` for a case-insensitive substring match. When both are set, `UserIds` wins and `Search` is ignored.
 </dd>
 </dl>
 </dd>
@@ -2659,18 +2683,16 @@ Each returned consent carries `Id`, `ExternalUserId`, `ClientId`, `ClientName`, 
 <dd>
 
 ```go
-import "fmt"
-
-list, err := client.Resource().ListUserConsents(ctx, "res_123", scalekit.ListUserConsentsOptions{
-  Search:   "<OPTIONAL_SEARCH>",
-  PageSize: 20,
+consents, err := client.Resources().ListUserConsents(ctx, "res_142145647087190278", scalekit.ListUserConsentsOptions{
+  PageSize: 10,
+  UserIds:  []string{"usr_42", "usr_43"},
 })
 if err != nil {
   // handle
 }
-fmt.Println(list.TotalSize, list.NextPageToken)
-for _, c := range list.Consents {
-  fmt.Println(c.Id, c.ExternalUserId, c.ClientId, c.Scopes)
+
+for _, consent := range consents.GetConsents() {
+  fmt.Println(consent.GetId(), consent.GetExternalUserId(), consent.GetClientName())
 }
 ```
 </dd>
@@ -2694,7 +2716,7 @@ for _, c := range list.Consents {
 <dl>
 <dd>
 
-**resourceId:** `string` - The resource whose consents to list (format: res_xxxxx)
+**resourceId:** `string` — the resource to list consents for (format: `res_xxxxx`). Required.
 
 </dd>
 </dl>
@@ -2702,10 +2724,7 @@ for _, c := range list.Consents {
 <dl>
 <dd>
 
-**options:** `scalekit.ListUserConsentsOptions` - Optional filter, search and pagination options
-- `Search string` - Case-insensitive substring match on external user IDs
-- `PageSize uint32` - Page size, max 30
-- `PageToken string` - Pagination cursor from a previous response (`NextPageToken`/`PrevPageToken`)
+**options:** `ListUserConsentsOptions` — `Search` (case-insensitive substring match on external user IDs), `PageSize` (max 30), `PageToken`, `UserIds` (exact match, max 25; takes precedence over `Search`).
 
 </dd>
 </dl>
@@ -2713,7 +2732,7 @@ for _, c := range list.Consents {
 </dl>
 </details>
 
-<details><summary><code>client.Resource().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">RevokeUserConsent</a>(ctx, clientId, consentId) -> error</code></summary>
+<details><summary><code>client.Resources().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">RevokeUserConsent</a>(ctx, clientId, consentId) -> (*RevokeUserConsentResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -2729,7 +2748,7 @@ Revokes a single end-user consent held by an API client.
 
 Deletes the consent, so the client is prompted for consent again on its next authorization attempt, and revokes every active refresh token issued to that client for the same user. Access tokens already issued stay valid until they expire.
 
-Note that `clientId` is the API client that holds the consent (format: m2m_xxxxx), not the resource id. This matches the underlying route `DELETE /clients/{client_id}/consents/{consent_id}`.
+Note that `clientId` is the API client that holds the consent (`m2m_` prefix), not the resource id.
 </dd>
 </dl>
 </dd>
@@ -2744,8 +2763,7 @@ Note that `clientId` is the API client that holds the consent (format: m2m_xxxxx
 <dd>
 
 ```go
-err := client.Resource().RevokeUserConsent(ctx, "m2m_456", "usrcnst_789")
-if err != nil {
+if _, err := client.Resources().RevokeUserConsent(ctx, "m2m_142145647087190278", "usrcnst_142145647087190278"); err != nil {
   // handle
 }
 ```
@@ -2770,7 +2788,7 @@ if err != nil {
 <dl>
 <dd>
 
-**clientId:** `string` - The client holding the consent (format: m2m_xxxxx)
+**clientId:** `string` — the API client holding the consent (format: `m2m_xxxxx`). Required.
 
 </dd>
 </dl>
@@ -2778,7 +2796,7 @@ if err != nil {
 <dl>
 <dd>
 
-**consentId:** `string` - The consent to revoke (format: usrcnst_xxxxx)
+**consentId:** `string` — the consent to revoke (format: `usrcnst_xxxxx`). Required.
 
 </dd>
 </dl>

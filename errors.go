@@ -48,6 +48,12 @@ var (
 	// ErrSecretIdRequired is returned when a secretId argument is required but was empty.
 	ErrSecretIdRequired = errors.New("secretId is required")
 
+	// ErrResourceIdRequired is returned when a resourceId argument is required but was empty.
+	ErrResourceIdRequired = errors.New("resourceId is required")
+
+	// ErrConsentIdRequired is returned when a consentId argument is required but was empty.
+	ErrConsentIdRequired = errors.New("consentId is required")
+
 	// ErrRoleNameRequired is returned when a roleName argument is required but was empty.
 	ErrRoleNameRequired = errors.New("roleName is required")
 
@@ -109,12 +115,6 @@ var (
 	// ErrInvalidPageSize is returned when a requested page size is negative or
 	// exceeds the uint32 range accepted by the API.
 	ErrInvalidPageSize = errors.New("page size is out of range")
-
-	// ErrResourceIdRequired is returned when a resourceId argument is required but was empty.
-	ErrResourceIdRequired = errors.New("resourceId is required")
-
-	// ErrConsentIdRequired is returned when a consentId argument is required but was empty.
-	ErrConsentIdRequired = errors.New("consentId is required")
 
 	// ErrClientNotInResource is returned by DeleteResourceClient when the given
 	// clientId does not belong to the given resourceId. The error wraps this

@@ -84,5 +84,9 @@ jobs:
 
       - name: Run Go vulnerability check
         run: |
+          # Pinned, not @latest: setup-go exports GOTOOLCHAIN=local, so toolchain
+          # switching is disabled here and a scanner whose go directive outruns
+          # go.mod's toolchain cannot be installed. v1.7.0 is the last release on
+          # go 1.25.x. Raise it together with the go.mod toolchain directive.
           go install golang.org/x/vuln/cmd/govulncheck@v1.7.0
           govulncheck ./...

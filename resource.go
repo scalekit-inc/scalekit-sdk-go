@@ -16,7 +16,9 @@ type CreateResourceClientResponse = clientsv1.CreateResourceClientResponse
 type GetResourceClientResponse = clientsv1.GetResourceClientResponse
 type UpdateResourceClientResponse = clientsv1.UpdateResourceClientResponse
 type ListResourceClientsResponse = clientsv1.ListResourceClientsResponse
+type ResourceUserConsent = clientsv1.ResourceUserConsent
 type ListResourceUserConsentsResponse = clientsv1.ListResourceUserConsentsResponse
+type RevokeUserConsentResponse = clientsv1.RevokeUserConsentResponse
 type GetResourceResponse = clientsv1.GetResourceResponse
 type ListResourcesResponse = clientsv1.ListResourcesResponse
 
@@ -33,15 +35,19 @@ const (
 	ResourceTypeMcpServer   = clientsv1.ResourceType_MCP_SERVER
 )
 
-// ListUserConsentsOptions holds pagination and search parameters for listing
-// end-user consents granted against a resource.
+// ListUserConsentsOptions holds the filter and pagination parameters for
+// listing the end-user consents granted against a resource.
 type ListUserConsentsOptions struct {
 	// Search is a case-insensitive substring match on external user IDs.
+	// Ignored when UserIds is set.
 	Search string
-	// PageSize is the page size for pagination (max 30).
+	// PageSize is the number of consents to return per page (max 30).
 	PageSize uint32
 	// PageToken is the pagination cursor.
 	PageToken string
+	// UserIds matches external user IDs exactly and case-sensitively, combining
+	// the values with OR (max 25). Takes precedence over Search.
+	UserIds []string
 }
 
 // ListResourcesOptions holds pagination parameters for listing resources.
@@ -59,7 +65,9 @@ type ListResourcesOptions struct {
 // A resource (for example an MCP server) can have one or more API clients
 // registered against it, each using the client_credentials OAuth flow scoped
 // to that resource. A consent records that one of your end users allowed a
-// specific client to act on their behalf against the resource.
+// specific client to act on their behalf against the resource, identified by
+// ExternalUserId — the identifier your application supplied when the consent
+// was granted.
 type ResourceService interface {
 	// GetResource retrieves a single resource by id.
 	//
@@ -165,21 +173,25 @@ type ResourceService interface {
 	// ListUserConsents lists the end-user consents granted against a
 	// resource, with pagination.
 	//
-	// Each returned consent carries ConsentId, ExternalUserId, and Scopes.
-	// The response also carries TotalSize plus NextPageToken/PrevPageToken
-	// cursors.
+	// Each returned consent carries Id, ExternalUserId, ClientId, ClientName,
+	// Scopes and GrantedAt. The response also carries TotalSize plus
+	// NextPageToken and PrevPageToken cursors.
+	//
+	// Set options.UserIds to match specific users exactly, or options.Search
+	// for a case-insensitive substring match. When both are set, UserIds
+	// wins and Search is ignored.
 	ListUserConsents(ctx context.Context, resourceId string, options ListUserConsentsOptions) (*ListResourceUserConsentsResponse, error)
 
 	// RevokeUserConsent revokes a single end-user consent held by an API client.
 	//
-	// Deletes the consent, so the client is prompted for consent again on
+	// It deletes the consent, so the client is prompted for consent again on
 	// its next authorization attempt, and revokes every active refresh token
 	// issued to that client for the same user. Access tokens already issued
 	// stay valid until they expire.
 	//
-	// Note that clientId is the API client that holds the consent, not the
-	// resource id.
-	RevokeUserConsent(ctx context.Context, clientId string, consentId string) error
+	// Note that clientId is the API client that holds the consent (m2m_
+	// prefix), not the resource id.
+	RevokeUserConsent(ctx context.Context, clientId string, consentId string) (*RevokeUserConsentResponse, error)
 }
 
 type resourceService struct {
@@ -370,30 +382,64 @@ func (r *resourceService) DeleteResourceClientSecret(ctx context.Context, resour
 	return err
 }
 
+// ListUserConsents lists the end-user consents granted against a resource,
+// with pagination.
+//
+// Each returned consent carries Id, ExternalUserId, ClientId, ClientName,
+// Scopes and GrantedAt. The response also carries TotalSize plus NextPageToken
+// and PrevPageToken cursors.
+//
+// Set options.UserIds to match specific users exactly, or options.Search for a
+// case-insensitive substring match. When both are set, UserIds wins and Search
+// is ignored.
 func (r *resourceService) ListUserConsents(ctx context.Context, resourceId string, options ListUserConsentsOptions) (*ListResourceUserConsentsResponse, error) {
 	if resourceId == "" {
 		return nil, ErrResourceIdRequired
 	}
+	request := &clientsv1.ListResourceUserConsentsRequest{
+		ResourceId: resourceId,
+	}
+	if options.Search != "" {
+		request.Search = options.Search
+	}
+	if options.PageSize != 0 {
+		request.PageSize = options.PageSize
+	}
+	if options.PageToken != "" {
+		request.PageToken = options.PageToken
+	}
+	// The filter takes precedence over search server-side, so only attach it when
+	// the caller actually supplied user IDs — an empty filter would otherwise
+	// suppress a search the caller did supply.
+	if len(options.UserIds) > 0 {
+		request.Filter = &clientsv1.ResourceUserConsentFilter{
+			ExternalUserId: options.UserIds,
+		}
+	}
 	return newConnectExecuter(
 		r.coreClient,
 		r.client.ListResourceUserConsents,
-		&clientsv1.ListResourceUserConsentsRequest{
-			ResourceId: resourceId,
-			Search:     options.Search,
-			PageSize:   options.PageSize,
-			PageToken:  options.PageToken,
-		},
+		request,
 	).exec(ctx)
 }
 
-func (r *resourceService) RevokeUserConsent(ctx context.Context, clientId string, consentId string) error {
+// RevokeUserConsent revokes a single end-user consent held by an API client.
+//
+// It deletes the consent, so the client is prompted for consent again on its
+// next authorization attempt, and revokes every active refresh token issued to
+// that client for the same user. Access tokens already issued stay valid until
+// they expire.
+//
+// Note that clientId is the API client that holds the consent (m2m_ prefix),
+// not the resource id.
+func (r *resourceService) RevokeUserConsent(ctx context.Context, clientId string, consentId string) (*RevokeUserConsentResponse, error) {
 	if clientId == "" {
-		return ErrClientIdRequired
+		return nil, ErrClientIdRequired
 	}
 	if consentId == "" {
-		return ErrConsentIdRequired
+		return nil, ErrConsentIdRequired
 	}
-	_, err := newConnectExecuter(
+	return newConnectExecuter(
 		r.coreClient,
 		r.client.RevokeUserConsent,
 		&clientsv1.RevokeUserConsentRequest{
@@ -401,5 +447,4 @@ func (r *resourceService) RevokeUserConsent(ctx context.Context, clientId string
 			ConsentId: consentId,
 		},
 	).exec(ctx)
-	return err
 }
