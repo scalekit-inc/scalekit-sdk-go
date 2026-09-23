@@ -539,10 +539,43 @@ func (s *scalekitClient) VerifyPayloadSignature(
 	for k, v := range headers {
 		normalizedHeaders[strings.ToLower(k)] = v
 	}
-	webhookId := normalizedHeaders["webhook-id"]
-	webhookTimestamp := normalizedHeaders["webhook-timestamp"]
-	webhookSignature := normalizedHeaders["webhook-signature"]
-	if webhookId == "" || webhookTimestamp == "" || webhookSignature == "" {
+	return verifySignature(
+		secret,
+		normalizedHeaders["webhook-id"],
+		normalizedHeaders["webhook-timestamp"],
+		normalizedHeaders["webhook-signature"],
+		payload,
+	)
+}
+
+func (s *scalekitClient) VerifyInterceptorPayload(
+	secret string,
+	headers map[string]string,
+	payload []byte,
+) (bool, error) {
+	normalizedHeaders := make(map[string]string, len(headers))
+	for k, v := range headers {
+		normalizedHeaders[strings.ToLower(k)] = v
+	}
+	interceptorId := normalizedHeaders["interceptor-id"]
+	if interceptorId == "" {
+		interceptorId = normalizedHeaders["webhook-id"]
+	}
+	interceptorTimestamp := normalizedHeaders["interceptor-timestamp"]
+	if interceptorTimestamp == "" {
+		interceptorTimestamp = normalizedHeaders["webhook-timestamp"]
+	}
+	interceptorSignature := normalizedHeaders["interceptor-signature"]
+	if interceptorSignature == "" {
+		interceptorSignature = normalizedHeaders["webhook-signature"]
+	}
+	return verifySignature(secret, interceptorId, interceptorTimestamp, interceptorSignature, payload)
+}
+
+// verifySignature is the shared HMAC-SHA256 verification logic behind
+// VerifyWebhookPayload/VerifyPayloadSignature and VerifyInterceptorPayload.
+func verifySignature(secret, id, timestamp, signature string, payload []byte) (bool, error) {
+	if id == "" || timestamp == "" || signature == "" {
 		return false, ErrMissingRequiredHeaders
 	}
 	secretParts := strings.Split(secret, "_")
@@ -553,37 +586,29 @@ func (s *scalekitClient) VerifyPayloadSignature(
 	if err != nil {
 		return false, err
 	}
-	timestamp, err := verifyTimestamp(webhookTimestamp)
+	verifiedTimestamp, err := verifyTimestamp(timestamp)
 	if err != nil {
 		return false, err
 	}
-	data := fmt.Sprintf("%s.%d.%s", webhookId, timestamp.Unix(), payload)
+	data := fmt.Sprintf("%s.%d.%s", id, verifiedTimestamp.Unix(), payload)
 	computedSignature := computeSignature(secretBytes, data)
-	receivedSignatures := strings.Split(webhookSignature, " ")
+	receivedSignatures := strings.Split(signature, " ")
 	for _, versionedSignature := range receivedSignatures {
 		signatureParts := strings.Split(versionedSignature, ",")
 		if len(signatureParts) < 2 {
 			continue
 		}
 		version := signatureParts[0]
-		signature := signatureParts[1]
+		sig := signatureParts[1]
 		if version != webhookSignatureVersion {
 			continue
 		}
-		if hmac.Equal([]byte(signature), []byte(computedSignature)) {
+		if hmac.Equal([]byte(sig), []byte(computedSignature)) {
 			return true, nil
 		}
 	}
 
 	return false, ErrInvalidSignature
-}
-
-func (s *scalekitClient) VerifyInterceptorPayload(
-	secret string,
-	headers map[string]string,
-	payload []byte,
-) (bool, error) {
-	return s.VerifyPayloadSignature(secret, headers, payload)
 }
 
 func verifyTimestamp(timestampStr string) (*time.Time, error) {
