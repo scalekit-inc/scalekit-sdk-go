@@ -3,7 +3,6 @@ package scalekit
 import (
 	"context"
 	"fmt"
-	"slices"
 
 	clientsv1 "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/clients"
 	"github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/clients/clientsconnect"
@@ -56,6 +55,30 @@ type ListResourcesOptions struct {
 	PageSize uint32
 	// PageToken is the pagination cursor.
 	PageToken string
+}
+
+// UpdateResourceClientOptions holds the fields to change on an existing
+// resource client. Only the fields set here (non-nil) are sent to the
+// server — there is no separate field mask to build; UpdateResourceClient
+// derives it from whichever options are set.
+type UpdateResourceClientOptions struct {
+	// Name, if set, replaces the client's name. The server applies it only
+	// when non-empty — an empty string is a no-op, not a clear.
+	Name *string
+	// Description, if set, replaces the client's description. The server
+	// applies it only when non-empty — an empty string is a no-op, not a clear.
+	Description *string
+	// Scopes, if set, replaces the client's scopes. Set to an empty (non-nil)
+	// slice to clear them.
+	Scopes *[]string
+	// CustomClaims, if set, replaces the client's custom claims. Set to an
+	// empty (non-nil) slice to clear them.
+	CustomClaims *[]*clientsv1.CustomClaim
+	// Expiry, if set, replaces the access token lifetime in seconds.
+	Expiry *int64
+	// RedirectUris, if set, replaces the client's redirect URIs. Set to an
+	// empty (non-nil) slice to clear them.
+	RedirectUris *[]string
 }
 
 // ResourceService is a client for reading resources, managing the API
@@ -111,19 +134,18 @@ type ResourceService interface {
 
 	// UpdateResourceClient updates an existing API client scoped to a resource.
 	//
-	// mask lists which fields of client to change (e.g. &fieldmaskpb.FieldMask{
-	// Paths: []string{"scopes", "custom_claims"}}). Verified against a live
-	// environment: the server only actually honors the mask for scopes,
-	// custom_claims and redirect_uris — include one of those paths with an
-	// empty value (e.g. Scopes: []string{}) to clear it. Name/Description are
-	// applied whenever non-empty regardless of mask (an empty string is a
-	// no-op, not a clear).
+	// Only the fields set on options are changed — set a field to update it,
+	// leave it nil to leave it alone. There is no field mask to build
+	// yourself; it's derived internally from whichever options are set.
+	// Verified against a live environment: the server only actually honors
+	// this for Scopes, CustomClaims and RedirectUris — set one to an empty
+	// (non-nil) slice to clear it. Name/Description are applied whenever
+	// non-empty regardless (an empty string is a no-op, not a clear).
 	//
-	// "audience" is not a supported mask path — audience cannot be set
-	// through this SDK at all, on create or update, for any resource type,
-	// so this returns ErrAudienceNotSettable rather than silently accepting
-	// a path that can never take effect.
-	UpdateResourceClient(ctx context.Context, resourceId string, clientId string, client *clientsv1.ResourceClient, mask *fieldmaskpb.FieldMask) (*UpdateResourceClientResponse, error)
+	// There is no Audience option — audience is always server-determined and
+	// can never be set through this SDK, on create or update, for any
+	// resource type.
+	UpdateResourceClient(ctx context.Context, resourceId string, clientId string, options UpdateResourceClientOptions) (*UpdateResourceClientResponse, error)
 
 	// DeleteResourceClient permanently deletes an API client scoped to a resource.
 	//
@@ -278,16 +300,46 @@ func (r *resourceService) ListResourceClients(ctx context.Context, resourceId st
 	).exec(ctx)
 }
 
-func (r *resourceService) UpdateResourceClient(ctx context.Context, resourceId string, clientId string, client *clientsv1.ResourceClient, mask *fieldmaskpb.FieldMask) (*UpdateResourceClientResponse, error) {
+func (r *resourceService) UpdateResourceClient(ctx context.Context, resourceId string, clientId string, options UpdateResourceClientOptions) (*UpdateResourceClientResponse, error) {
 	if resourceId == "" {
 		return nil, ErrResourceIdRequired
 	}
 	if clientId == "" {
 		return nil, ErrClientIdRequired
 	}
-	if mask != nil && slices.Contains(mask.GetPaths(), "audience") {
-		return nil, ErrAudienceNotSettable
+
+	var paths []string
+	client := &clientsv1.ResourceClient{}
+	if options.Name != nil {
+		client.Name = *options.Name
+		paths = append(paths, "name")
 	}
+	if options.Description != nil {
+		client.Description = *options.Description
+		paths = append(paths, "description")
+	}
+	if options.Scopes != nil {
+		client.Scopes = *options.Scopes
+		paths = append(paths, "scopes")
+	}
+	if options.CustomClaims != nil {
+		client.CustomClaims = *options.CustomClaims
+		paths = append(paths, "custom_claims")
+	}
+	if options.Expiry != nil {
+		client.Expiry = *options.Expiry
+		paths = append(paths, "expiry")
+	}
+	if options.RedirectUris != nil {
+		client.RedirectUris = *options.RedirectUris
+		paths = append(paths, "redirect_uris")
+	}
+
+	var mask *fieldmaskpb.FieldMask
+	if len(paths) > 0 {
+		mask = &fieldmaskpb.FieldMask{Paths: paths}
+	}
+
 	return newConnectExecuter(
 		r.coreClient,
 		r.client.UpdateResourceClient,

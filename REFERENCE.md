@@ -2313,7 +2313,7 @@ for _, c := range list.Clients {
 </dl>
 </details>
 
-<details><summary><code>client.Resources().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">UpdateResourceClient</a>(ctx, resourceId, clientId, client, mask) -> (*UpdateResourceClientResponse, error)</code></summary>
+<details><summary><code>client.Resources().<a href="https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/resource.go">UpdateResourceClient</a>(ctx, resourceId, clientId, options) -> (*UpdateResourceClientResponse, error)</code></summary>
 <dl>
 <dd>
 
@@ -2327,9 +2327,9 @@ for _, c := range list.Clients {
 
 Updates a resource client.
 
-`mask` lists which fields of `client` to change. The server only actually honors the mask for `Scopes`, `CustomClaims` and `RedirectUris` — include one of those paths with an empty value (e.g. `Scopes: []string{}`) to clear it. `Name`/`Description` are applied whenever non-empty regardless of mask (an empty string is a no-op, not a clear).
+Only the fields set on `options` are changed — set a field to update it, leave it `nil` to leave it alone. There is no field mask to build yourself; it's derived internally from whichever options are set. The server only actually honors this for `Scopes`, `CustomClaims` and `RedirectUris` — set one to an empty (non-nil) slice to clear it. `Name`/`Description` are applied whenever non-empty regardless (an empty string is a no-op, not a clear).
 
-`"audience"` is not a supported mask path — audience cannot be set through this SDK at all, on create or update, for any resource type.
+There is no `Audience` option — audience is always server-determined and can never be set through this SDK, on create or update, for any resource type.
 </dd>
 </dl>
 </dd>
@@ -2344,12 +2344,7 @@ Updates a resource client.
 <dd>
 
 ```go
-import (
-  "fmt"
-
-  clients "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/clients"
-  "google.golang.org/protobuf/types/known/fieldmaskpb"
-)
+import "fmt"
 
 resource, err := client.Resources().GetResource(ctx, "res_123")
 if err != nil {
@@ -2363,11 +2358,10 @@ for _, s := range resource.Resource.Scopes {
 }
 fmt.Println(allowedScopes)
 
-updated, err := client.Resources().UpdateResourceClient(ctx, "res_123", "m2m_456", &clients.ResourceClient{
-  Name:   "Updated Name",
-  Scopes: allowedScopes,
-}, &fieldmaskpb.FieldMask{
-  Paths: []string{"scopes"},
+newName := "Updated Name"
+updated, err := client.Resources().UpdateResourceClient(ctx, "res_123", "m2m_456", scalekit.UpdateResourceClientOptions{
+  Name:   &newName,
+  Scopes: &allowedScopes,
 })
 if err != nil {
   // handle
@@ -2411,22 +2405,13 @@ fmt.Println(updated.Client.Name, updated.Client.Scopes)
 <dl>
 <dd>
 
-**client:** `*clients.ResourceClient` (package `pkg/grpc/scalekit/v1/clients`) - Fields to update
-- `Name string` - Updated name. An empty string is a no-op server-side, not a clear.
-- `Description string` - Updated description. An empty string is a no-op server-side, not a clear.
-- `Scopes []string` - Updated scopes (replaces existing; pass an empty slice to clear). These scopes should be the same or subset of the scopes available for the resource.
-- `Audience []string` - Not settable through this SDK; always server-determined. A non-empty value returns `ErrAudienceNotSettable`.
-- `CustomClaims []*clients.CustomClaim` - Custom claims to set (replaces existing; pass an empty slice to clear), as `{Key, Value}` pairs.
-- `Expiry int64` - Updated access token lifetime in seconds
-- `RedirectUris []string` - Updated redirect URIs (replaces existing; pass an empty slice to clear)
-
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**mask:** `*fieldmaskpb.FieldMask` - Field mask specifying which fields of `client` to change (e.g. `&fieldmaskpb.FieldMask{Paths: []string{"scopes"}}`)
+**options:** `scalekit.UpdateResourceClientOptions` - Fields to change; a `nil` field is left alone
+- `Name *string` - Updated name. An empty string is a no-op server-side, not a clear.
+- `Description *string` - Updated description. An empty string is a no-op server-side, not a clear.
+- `Scopes *[]string` - Updated scopes (replaces existing; set to an empty, non-nil slice to clear). These scopes should be the same or subset of the scopes available for the resource.
+- `CustomClaims *[]*clients.CustomClaim` - Custom claims to set (replaces existing; set to an empty, non-nil slice to clear), as `{Key, Value}` pairs.
+- `Expiry *int64` - Updated access token lifetime in seconds
+- `RedirectUris *[]string` - Updated redirect URIs (replaces existing; set to an empty, non-nil slice to clear)
 
 </dd>
 </dl>

@@ -11,7 +11,6 @@ import (
 	clients "github.com/scalekit-inc/scalekit-sdk-go/v2/pkg/grpc/scalekit/v1/clients"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
 // OtherResourceId is a syntactically valid but non-existent resource id, used
@@ -98,7 +97,8 @@ func TestListResourceClientsRequiresResourceId(t *testing.T) {
 func TestUpdateResourceClientRequiresResourceId(t *testing.T) {
 	ctx := context.Background()
 
-	_, err := client.Resources().UpdateResourceClient(ctx, "", "m2m_dummy", &clients.ResourceClient{Name: "Test"}, nil)
+	name := "Test"
+	_, err := client.Resources().UpdateResourceClient(ctx, "", "m2m_dummy", scalekit.UpdateResourceClientOptions{Name: &name})
 	require.Error(t, err)
 	assert.ErrorIs(t, err, scalekit.ErrResourceIdRequired)
 }
@@ -106,7 +106,8 @@ func TestUpdateResourceClientRequiresResourceId(t *testing.T) {
 func TestUpdateResourceClientRequiresClientId(t *testing.T) {
 	ctx := context.Background()
 
-	_, err := client.Resources().UpdateResourceClient(ctx, "res_dummy", "", &clients.ResourceClient{Name: "Test"}, nil)
+	name := "Test"
+	_, err := client.Resources().UpdateResourceClient(ctx, "res_dummy", "", scalekit.UpdateResourceClientOptions{Name: &name})
 	require.Error(t, err)
 	assert.ErrorIs(t, err, scalekit.ErrClientIdRequired)
 }
@@ -232,9 +233,10 @@ func TestCreateGetUpdateDeleteResourceClient(t *testing.T) {
 	}
 	assert.True(t, found, "created client should appear in list")
 
-	updated, err := client.Resources().UpdateResourceClient(ctx, resourceId, clientId, &clients.ResourceClient{
-		Name: "Go SDK Test Client Updated",
-	}, &fieldmaskpb.FieldMask{Paths: []string{"name"}})
+	updatedName := "Go SDK Test Client Updated"
+	updated, err := client.Resources().UpdateResourceClient(ctx, resourceId, clientId, scalekit.UpdateResourceClientOptions{
+		Name: &updatedName,
+	})
 	require.NoError(t, err)
 	require.NotNil(t, updated.Client)
 	assert.Equal(t, "Go SDK Test Client Updated", updated.Client.Name)
@@ -481,10 +483,10 @@ func TestCreateResourceClientRejectsAudience(t *testing.T) {
 	require.ErrorIs(t, err, scalekit.ErrAudienceNotSettable)
 }
 
-// TestUpdateResourceClientNameDescriptionAppliedRegardlessOfMask confirms
-// name/description are truthy-gated, not mask-gated: a non-empty value
-// applies even when its path isn't in the mask.
-func TestUpdateResourceClientNameDescriptionAppliedRegardlessOfMask(t *testing.T) {
+// TestUpdateResourceClientNameAndDescription confirms both fields can be
+// updated together in one call, each independently included by simply
+// setting it on the options.
+func TestUpdateResourceClientNameAndDescription(t *testing.T) {
 	resourceId := envResourceId(t)
 	ctx := context.Background()
 
@@ -495,12 +497,14 @@ func TestUpdateResourceClientNameDescriptionAppliedRegardlessOfMask(t *testing.T
 		_ = client.Resources().DeleteResourceClient(ctx, resourceId, clientId)
 	})
 
-	updated, err := client.Resources().UpdateResourceClient(ctx, resourceId, clientId, &clients.ResourceClient{
-		Name:        "Applied Despite Missing From Mask",
-		Description: "also applied",
-	}, &fieldmaskpb.FieldMask{Paths: []string{"description"}}) // "name" deliberately left out of the mask
+	newName := "Applied Name"
+	newDescription := "also applied"
+	updated, err := client.Resources().UpdateResourceClient(ctx, resourceId, clientId, scalekit.UpdateResourceClientOptions{
+		Name:        &newName,
+		Description: &newDescription,
+	})
 	require.NoError(t, err)
-	assert.Equal(t, "Applied Despite Missing From Mask", updated.Client.Name)
+	assert.Equal(t, "Applied Name", updated.Client.Name)
 	assert.Equal(t, "also applied", updated.Client.Description)
 }
 
@@ -521,39 +525,23 @@ func TestUpdateResourceClientEmptyStringIsNoOp(t *testing.T) {
 		_ = client.Resources().DeleteResourceClient(ctx, resourceId, clientId)
 	})
 
-	updated, err := client.Resources().UpdateResourceClient(ctx, resourceId, clientId, &clients.ResourceClient{
-		Name:        "",
-		Description: "",
-	}, &fieldmaskpb.FieldMask{Paths: []string{"name", "description"}})
+	emptyName := ""
+	emptyDescription := ""
+	updated, err := client.Resources().UpdateResourceClient(ctx, resourceId, clientId, scalekit.UpdateResourceClientOptions{
+		Name:        &emptyName,
+		Description: &emptyDescription,
+	})
 	require.NoError(t, err)
 	assert.Equal(t, "Keep This Name", updated.Client.Name)
 	assert.Equal(t, "keep this description", updated.Client.Description)
 }
 
-// TestUpdateResourceClientRejectsAudienceInMask confirms audience can't be
-// changed via update, by design — the SDK rejects an "audience" mask path
-// outright, rather than sending a request that the server would just ignore.
-func TestUpdateResourceClientRejectsAudienceInMask(t *testing.T) {
-	resourceId := envResourceId(t)
-	ctx := context.Background()
-
-	created, err := client.Resources().CreateResourceClient(ctx, resourceId, &clients.ResourceClient{Name: "Audience Immutable Test"})
-	require.NoError(t, err)
-	clientId := created.Client.ClientId
-	originalAudience := created.Client.Audience
-	t.Cleanup(func() {
-		_ = client.Resources().DeleteResourceClient(ctx, resourceId, clientId)
-	})
-
-	_, err = client.Resources().UpdateResourceClient(ctx, resourceId, clientId, &clients.ResourceClient{
-		Audience: []string{"https://example.com/should-not-apply"},
-	}, &fieldmaskpb.FieldMask{Paths: []string{"audience"}})
-	require.ErrorIs(t, err, scalekit.ErrAudienceNotSettable)
-
-	fetched, err := client.Resources().GetResourceClient(ctx, resourceId, clientId)
-	require.NoError(t, err)
-	assert.Equal(t, originalAudience, fetched.Client.Audience)
-}
+// Audience immutability on update is now a compile-time guarantee rather
+// than a runtime rejection: UpdateResourceClientOptions has no Audience
+// field at all, so there is no way to even attempt setting it through this
+// method (unlike CreateResourceClient, which still takes the raw proto
+// message and rejects a non-empty Audience at runtime — see
+// TestCreateResourceClientRejectsAudience).
 
 // TestUpdateResourceClientClearsListFields confirms scopes/customClaims/
 // redirectUris — the three fields the mask actually governs — can be cleared
@@ -577,11 +565,14 @@ func TestUpdateResourceClientClearsListFields(t *testing.T) {
 	require.NotEmpty(t, created.Client.CustomClaims)
 	require.NotEmpty(t, created.Client.RedirectUris)
 
-	updated, err := client.Resources().UpdateResourceClient(ctx, resourceId, clientId, &clients.ResourceClient{
-		Scopes:       []string{},
-		CustomClaims: []*clients.CustomClaim{},
-		RedirectUris: []string{},
-	}, &fieldmaskpb.FieldMask{Paths: []string{"scopes", "custom_claims", "redirect_uris"}})
+	emptyScopes := []string{}
+	emptyCustomClaims := []*clients.CustomClaim{}
+	emptyRedirectUris := []string{}
+	updated, err := client.Resources().UpdateResourceClient(ctx, resourceId, clientId, scalekit.UpdateResourceClientOptions{
+		Scopes:       &emptyScopes,
+		CustomClaims: &emptyCustomClaims,
+		RedirectUris: &emptyRedirectUris,
+	})
 	require.NoError(t, err)
 	assert.Empty(t, updated.Client.Scopes)
 	assert.Empty(t, updated.Client.CustomClaims)
