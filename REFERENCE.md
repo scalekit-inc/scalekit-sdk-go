@@ -1919,18 +1919,6 @@ Access via `client.Resources()`.
 <dd>
 
 Retrieves a single resource by id.
-
-A resource client's `Scopes` are only actually granted in an issued token
-when they also appear in the resource's own `Scopes` allowlist (the server
-intersects requested scopes against the environment's permissions, the
-resource's allowed scopes, and the client's own scopes) — call this first to
-see what the resource actually allows before creating or updating a resource
-client with `Scopes`.
-
-`Resource.Scopes` is every scope defined in the environment, not just the
-ones this resource allows — each entry carries an `Enabled` flag, and only
-the ones with `Enabled: true` are actually usable on this resource. Filter
-on that flag to get the actual allowlist.
 </dd>
 </dl>
 </dd>
@@ -2001,9 +1989,6 @@ for _, s := range got.Resource.Scopes {
 <dd>
 
 Lists resources of a given type in the environment, with pagination.
-
-`resourceType` is required by the underlying API — there is no way to list
-every type in one call; list each type separately if needed.
 </dd>
 </dl>
 </dd>
@@ -2084,8 +2069,6 @@ for _, res := range list.Resources {
 Creates a resource client.
 
 Returns the created `Client` and a `PlainSecret` — the plaintext client secret, only available at creation time.
-
-Audience cannot be set through this SDK — it is always server-determined, for any resource type. A non-empty `Audience` on `client` returns `ErrAudienceNotSettable` rather than being silently forwarded.
 </dd>
 </dl>
 </dd>
@@ -2326,10 +2309,6 @@ for _, c := range list.Clients {
 <dd>
 
 Updates a resource client.
-
-Only the fields set on `options` are changed — set a field to update it, leave it `nil` to leave it alone. There is no field mask to build yourself; it's derived internally from whichever options are set. The server only actually honors this for `Scopes`, `CustomClaims` and `RedirectUris` — set one to an empty (non-nil) slice to clear it. `Name`/`Description` are applied whenever non-empty regardless (an empty string is a no-op, not a clear).
-
-There is no `Audience` option — audience is always server-determined and can never be set through this SDK, on create or update, for any resource type.
 </dd>
 </dl>
 </dd>
@@ -2649,11 +2628,11 @@ if err != nil {
 <dl>
 <dd>
 
-Lists the end-user consents granted against a resource, such as an MCP server, with pagination.
+Lists the end-user consents granted against a resource, with pagination. Use this to audit who authorized a client, and to find the `consentId` you need before revoking.
 
-A consent records that one end user allowed a specific API client to act on their behalf. Each returned consent carries `Id`, `ExternalUserId`, `ClientId`, `ClientName`, `Scopes` and `GrantedAt`; the response also carries `TotalSize` plus `NextPageToken` and `PrevPageToken` cursors.
+Filter by user in one of two ways. Pass `UserIds` to match external user IDs exactly and case-sensitively. Pass `Search` for a case-insensitive substring match. When you give both, `UserIds` wins and `Search` is ignored.
 
-`ExternalUserId` is the identifier your application supplied for the user when the consent was granted. Set `options.UserIds` to match it exactly and case-sensitively (maximum 25 values, combined with OR), or `options.Search` for a case-insensitive substring match. When both are set, `UserIds` wins and `Search` is ignored.
+Consents with `Id`, `ExternalUserId`, `ClientId`, `ClientName`, `Scopes`, and `GrantedAt`, plus `TotalSize` and the `NextPageToken` / `PrevPageToken` cursors.
 </dd>
 </dl>
 </dd>
@@ -2729,11 +2708,9 @@ for _, consent := range consents.GetConsents() {
 <dl>
 <dd>
 
-Revokes a single end-user consent held by an API client.
+Revokes a single end-user consent held by an API client. The client is prompted for consent again on its next authorization attempt, and every active refresh token issued to that client for the same user is revoked.
 
-Deletes the consent, so the client is prompted for consent again on its next authorization attempt, and revokes every active refresh token issued to that client for the same user. Access tokens already issued stay valid until they expire.
-
-Note that `clientId` is the API client that holds the consent (`m2m_` prefix), not the resource id.
+Access tokens that Scalekit already issued stay valid until they expire. See [How revocation affects active access tokens](https://docs.scalekit.com/authenticate/mcp/managing-mcp-clients/#how-revocation-affects-active-access-tokens) for ways to shorten that window.
 </dd>
 </dl>
 </dd>
