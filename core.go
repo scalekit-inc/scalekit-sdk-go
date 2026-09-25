@@ -305,9 +305,21 @@ func newGrpcHTTPClient(pingInterval, pingTimeout time.Duration) (*http.Client, *
 	t1 := &http.Transport{Proxy: http.ProxyFromEnvironment}
 	t2, err := http2.ConfigureTransports(t1)
 	if err != nil {
-		// Can only fail if t1 were already HTTP/2-enabled, which a freshly
-		// constructed *http.Transport never is.
-		panic(fmt.Sprintf("scalekit: unreachable: configuring HTTP/2 on a fresh transport failed: %v", err))
+		// t1 is a fresh *http.Transport literal constructed immediately above,
+		// so this specific failure (t1 already HTTP/2-configured) can't happen
+		// today — but this function is reachable from WithSecret, a public
+		// Scalekit method customers may call per request/per tenant, not just
+		// once at startup from NewScalekitClient. Panicking here would crash
+		// that request (or the whole process, outside a panic-recovering
+		// server) for a failure entirely internal to this SDK, with nothing
+		// the caller could have done differently — worse than degrading. Both
+		// call sites already discard this function's *http2.Transport return
+		// value in production (only tests use it), so falling back to t1
+		// as-is (still functional over HTTP/1.1, or HTTP/2 via Go's own
+		// automatic ALPN negotiation, just without the ReadIdleTimeout/
+		// PingTimeout/IdleConnTimeout tuning below) costs nothing production
+		// code relies on today.
+		return &http.Client{Transport: t1}, nil
 	}
 	if pingInterval != 0 {
 		t2.ReadIdleTimeout = pingInterval
