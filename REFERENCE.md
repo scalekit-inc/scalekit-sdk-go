@@ -1902,7 +1902,7 @@ if err := client.Client().DeleteClientSecret(ctx, "client_123", "secret_456"); e
 
 ## Resources
 
-Manage the API clients scoped to a resource (such as an MCP server), and access the consents your end users grant against one. A consent records that one end user allowed a specific API client to act on their behalf. Each consent identifies the user by `ExternalUserId` — the identifier your application supplied when the consent was granted.
+Manage the resource clients scoped to a resource (such as an MCP server), and access the consents your end users grant against one. A consent records that one end user allowed a specific resource client to act on their behalf. Each consent identifies the user by `ExternalUserId` — the identifier your application supplied when the consent was granted.
 
 Access via `client.Resources()`.
 
