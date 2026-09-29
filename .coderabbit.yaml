@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# Only path filters and review instructions are set here. Everything else uses
+# CodeRabbit's defaults.
+reviews:
+  path_filters:
+    # Generated protobuf/gRPC stubs (`make generate`). Never hand-edited.
+    - "!pkg/**"
+  path_instructions:
+    - path: "**"
+      instructions: |
+        Do not comment on generated code (`pkg/**`). It is regenerated from the proto repo, so any fix belongs upstream.
+    - path: "**/*.go"
+      instructions: |
+        House conventions. Do not flag these:
+        - Adding a method to the `Scalekit` interface or a sub-service interface. It ships as a minor release with a release-note callout. You may mention it in the summary, but do not request changes or call it a breaking change.
+        - No FieldMask on `UpdateOrganizationClientRequest`.
