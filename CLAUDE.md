@@ -74,3 +74,9 @@ client := scalekit.NewScalekitClient(envUrl, clientId).WithSecret(clientSecret)
 ### Code generation
 
 Protobuf definitions live in a separate private repo (`github.com/scalekit-inc/scalekit`, ref pinned in `buf.gen.yaml`). Generated code is checked in under `pkg/grpc/`. To regenerate, `PAT_TOKEN` must be set with access to the proto repo.
+
+## Commits and changelog
+
+PR titles must be Conventional Commits with the Linear ticket at the end (`feat(users): add search_users (SK-2101)`), never a `[SK-####] ` prefix. PRs are squash-merged, so the title becomes the commit on `main` that the changelog is built from.
+
+To generate the changelog section for a release, run `../scalekit-sdks-wrapper/scripts/changelog/generate.sh go <version>` from this repo's root if the wrapper repo is checked out next to this one, or `../../scripts/changelog/generate.sh go <version>` if this repo is the wrapper's `sdks/go` submodule.
