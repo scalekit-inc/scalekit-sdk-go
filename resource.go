@@ -81,16 +81,16 @@ type UpdateResourceClientOptions struct {
 	RedirectUris *[]string
 }
 
-// ResourceService is a client for reading resources, managing the API
+// ResourceService is a client for reading resources, managing the resource
 // clients scoped to a resource, and reading and revoking end-user consents
 // granted against one.
 //
-// A resource (for example an MCP server) can have one or more API clients
-// registered against it, each using the client_credentials OAuth flow scoped
-// to that resource. A consent records that one of your end users allowed a
-// specific client to act on their behalf against the resource, identified by
-// ExternalUserId — the identifier your application supplied when the consent
-// was granted.
+// A resource (for example an MCP server) can have one or more resource
+// clients registered against it, each using the client_credentials OAuth flow
+// scoped to that resource. A consent records that one of your end users
+// allowed a specific resource client to act on their behalf against the
+// resource, identified by ExternalUserId — the identifier your application
+// supplied when the consent was granted.
 type ResourceService interface {
 	// GetResource retrieves a single resource by id.
 	//
@@ -115,7 +115,7 @@ type ResourceService interface {
 	// list every type in one call; list each type separately if needed.
 	ListResources(ctx context.Context, resourceType ResourceType, options ListResourcesOptions) (*ListResourcesResponse, error)
 
-	// CreateResourceClient creates a new API client scoped to a resource.
+	// CreateResourceClient creates a new resource client.
 	//
 	// The response's PlainSecret is the plaintext client secret, only
 	// available at creation time.
@@ -125,14 +125,14 @@ type ResourceService interface {
 	// returns ErrAudienceNotSettable rather than being silently forwarded.
 	CreateResourceClient(ctx context.Context, resourceId string, client *clientsv1.ResourceClient) (*CreateResourceClientResponse, error)
 
-	// GetResourceClient retrieves a single API client scoped to a resource,
+	// GetResourceClient retrieves a single resource client,
 	// along with the end-users who have granted it consent.
 	GetResourceClient(ctx context.Context, resourceId string, clientId string) (*GetResourceClientResponse, error)
 
-	// ListResourceClients lists every API client scoped to a resource.
+	// ListResourceClients lists every resource client.
 	ListResourceClients(ctx context.Context, resourceId string) (*ListResourceClientsResponse, error)
 
-	// UpdateResourceClient updates an existing API client scoped to a resource.
+	// UpdateResourceClient updates an existing resource client.
 	//
 	// Only the fields set on options are changed — set a field to update it,
 	// leave it nil to leave it alone. There is no field mask to build
@@ -147,7 +147,7 @@ type ResourceService interface {
 	// resource type.
 	UpdateResourceClient(ctx context.Context, resourceId string, clientId string, options UpdateResourceClientOptions) (*UpdateResourceClientResponse, error)
 
-	// DeleteResourceClient permanently deletes an API client scoped to a resource.
+	// DeleteResourceClient permanently deletes a resource client.
 	//
 	// DeleteResourceClient shares its underlying delete path with client
 	// deletion in general, so nothing forces the given clientId to actually
@@ -158,8 +158,7 @@ type ResourceService interface {
 	// pair blindly.
 	DeleteResourceClient(ctx context.Context, resourceId string, clientId string) error
 
-	// CreateResourceClientSecret creates a new secret for an API client
-	// scoped to a resource.
+	// CreateResourceClientSecret creates a new secret for a resource client.
 	//
 	// The underlying secret-creation call is keyed by clientId alone — it
 	// has no notion of a resource — so this fetches the client first and
@@ -178,8 +177,8 @@ type ResourceService interface {
 	// stricter 2 — fits your own UX.
 	CreateResourceClientSecret(ctx context.Context, resourceId string, clientId string) (*CreateClientSecretResponse, error)
 
-	// DeleteResourceClientSecret permanently deletes a secret from an API
-	// client scoped to a resource.
+	// DeleteResourceClientSecret permanently deletes a secret from a
+	// resource client.
 	//
 	// Like CreateResourceClientSecret, the underlying delete call is keyed
 	// by clientId alone, so this verifies the client belongs to resourceId
