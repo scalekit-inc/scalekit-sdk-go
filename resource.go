@@ -203,14 +203,14 @@ type ResourceService interface {
 	// wins and Search is ignored.
 	ListUserConsents(ctx context.Context, resourceId string, options ListUserConsentsOptions) (*ListResourceUserConsentsResponse, error)
 
-	// RevokeUserConsent revokes a single end-user consent held by an API client.
+	// RevokeUserConsent revokes a single end-user consent held by a resource client.
 	//
 	// It deletes the consent, so the client is prompted for consent again on
 	// its next authorization attempt, and revokes every active refresh token
 	// issued to that client for the same user. Access tokens already issued
 	// stay valid until they expire.
 	//
-	// Note that clientId is the API client that holds the consent (m2m_
+	// Note that clientId is the resource client that holds the consent (m2m_
 	// prefix), not the resource id.
 	RevokeUserConsent(ctx context.Context, clientId string, consentId string) (*RevokeUserConsentResponse, error)
 }
@@ -474,14 +474,14 @@ func (r *resourceService) ListUserConsents(ctx context.Context, resourceId strin
 	).exec(ctx)
 }
 
-// RevokeUserConsent revokes a single end-user consent held by an API client.
+// RevokeUserConsent revokes a single end-user consent held by a resource client.
 //
 // It deletes the consent, so the client is prompted for consent again on its
 // next authorization attempt, and revokes every active refresh token issued to
 // that client for the same user. Access tokens already issued stay valid until
 // they expire.
 //
-// Note that clientId is the API client that holds the consent (m2m_ prefix),
+// Note that clientId is the resource client that holds the consent (m2m_ prefix),
 // not the resource id.
 func (r *resourceService) RevokeUserConsent(ctx context.Context, clientId string, consentId string) (*RevokeUserConsentResponse, error) {
 	if clientId == "" {
