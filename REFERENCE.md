@@ -2746,7 +2746,7 @@ if _, err := client.Resources().RevokeUserConsent(ctx, "m2m_142145647087190278",
 <dl>
 <dd>
 
-**clientId:** `string` — the API client holding the consent (format: `m2m_xxxxx`). Required.
+**clientId:** `string` — the resource client holding the consent (format: `m2m_xxxxx`). Required.
 
 </dd>
 </dl>
