@@ -1057,7 +1057,7 @@ Returns the API token service (`client.Token()`), used to create, validate, list
 <dl>
 <dd>
 
-Validates a signed JWT (access token or ID token) and enforces optional checks such as audience and scope validation.
+Validates a signed JWT (access token or ID token) and enforces optional checks such as issuer, audience and scope validation. The token is valid for the issuer check if its `iss` claim exactly equals **any** accepted issuer (`Issuer` and/or any entry of `Issuers`; no trailing-slash normalization).
 </dd>
 </dl>
 </dd>
@@ -1075,6 +1075,11 @@ Validates a signed JWT (access token or ID token) and enforces optional checks s
 valid, err := client.ValidateTokenWithOptions(ctx, accessToken, &scalekit.ValidateTokenOptions{
   Audience: []string{"my-api"},
   Scopes:   []string{"read", "write"},
+  // Trust both the base issuer and a resource-bound issuer
+  Issuers: []string{
+    "https://your-env.scalekit.dev",
+    "https://your-env.scalekit.dev/resources/res_123",
+  },
 })
 if err != nil {
   // handle
@@ -1114,6 +1119,7 @@ _ = valid
 - `Audience []string` - Optional set of accepted aud claim values
 - `Scopes []string` - Optional set of scopes that must be present in the token
 - `Issuer string` - Optional expected issuer; when non-empty, validation fails unless it matches the token's iss claim
+- `Issuers []string` - Optional set of accepted issuers; the token is valid if its iss claim exactly equals any entry. Combined with `Issuer`, the accepted set is both. Leaving both unset (or `Issuers` empty with `Issuer` empty) skips the issuer check; a non-empty `Issuers` is always enforced, even if its entries are blank, so configuration built from unset values fails closed. A token with no iss claim never matches
 
 </dd>
 </dl>

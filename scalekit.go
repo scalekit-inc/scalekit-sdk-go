@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -120,6 +121,17 @@ type ValidateTokenOptions struct {
 	// Issuer is the optional expected issuer. When non-empty, validation fails
 	// unless it matches the token's iss claim.
 	Issuer string
+
+	// Issuers is the optional set of accepted issuers. Validation succeeds when
+	// the token's iss claim exactly equals any entry (no trailing-slash
+	// normalization). It combines with Issuer: the accepted set is Issuer (when
+	// non-empty) plus every entry of Issuers.
+	//
+	// The issuer check is skipped only when Issuer is empty and Issuers is empty
+	// or nil. A non-empty Issuers is always enforced, even if its entries are
+	// blank, so configuration built from unset values fails closed instead of
+	// silently skipping validation. A token with no iss claim never matches.
+	Issuers []string
 }
 
 type AuthenticationResponse struct {
@@ -491,8 +503,8 @@ func (s *scalekitClient) ValidateTokenWithOptions(ctx context.Context, token str
 		}
 	}
 
-	if options.Issuer != "" && options.Issuer != claims.Iss {
-		return false, fmt.Errorf("%w: token issuer %q does not match expected issuer %q", ErrIssuerMismatch, claims.Iss, options.Issuer)
+	if err := validateIssuer(claims.Iss, options); err != nil {
+		return false, err
 	}
 
 	if len(options.Scopes) == 0 {
@@ -649,6 +661,30 @@ func ValidateToken[T interface{}](ctx context.Context, token string, jwksFn func
 	}
 
 	return &claims, nil
+}
+
+// validateIssuer returns nil when the issuer check is skipped or the token's iss
+// claim exactly equals one of the accepted issuers (options.Issuer plus
+// options.Issuers). Otherwise it returns an error wrapping ErrIssuerMismatch.
+func validateIssuer(iss string, options *ValidateTokenOptions) error {
+	if options.Issuer == "" && len(options.Issuers) == 0 {
+		return nil
+	}
+
+	allowed := make([]string, 0, len(options.Issuers)+1)
+	if options.Issuer != "" {
+		allowed = append(allowed, options.Issuer)
+	}
+	allowed = append(allowed, options.Issuers...)
+
+	// An empty iss (missing claim) must never match a blank configured entry.
+	if iss != "" && slices.Contains(allowed, iss) {
+		return nil
+	}
+	if len(allowed) == 1 {
+		return fmt.Errorf("%w: token issuer %q does not match expected issuer %q", ErrIssuerMismatch, iss, allowed[0])
+	}
+	return fmt.Errorf("%w: token issuer %q does not match any expected issuer %q", ErrIssuerMismatch, iss, allowed)
 }
 
 func computeSignature(secret []byte, data string) string {
