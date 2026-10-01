@@ -115,6 +115,20 @@ var (
 	// ErrInvalidPageSize is returned when a requested page size is negative or
 	// exceeds the uint32 range accepted by the API.
 	ErrInvalidPageSize = errors.New("page size is out of range")
+
+	// ErrClientNotInResource is returned by DeleteResourceClient when the given
+	// clientId does not belong to the given resourceId. The error wraps this
+	// sentinel, so callers can match it with errors.Is while the message still
+	// carries the actual client and resource ids.
+	ErrClientNotInResource = errors.New("client does not belong to resource")
+
+	// ErrAudienceNotSettable is returned by CreateResourceClient when the
+	// caller supplies a non-empty Audience, and by UpdateResourceClient when
+	// the caller includes "audience" in the update mask. Audience cannot be
+	// set through this SDK at all, on create or update, for any resource
+	// type — it is always server-determined — so both are rejected outright
+	// rather than silently accepted and ignored.
+	ErrAudienceNotSettable = errors.New("audience cannot be set via the SDK; it is always server-determined")
 )
 
 // errorCore holds the common fields for SDK errors. Unexported so HTTPError can embed it without
