@@ -26,7 +26,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.branch }}
+          ref: ${{ github.sha }}
           fetch-depth: 0
 
       - name: Set up Go
@@ -35,7 +35,7 @@ jobs:
           go-version-file: "go.mod"
 
       - name: Enforce dry run for non-main branches
-        if: ${{ inputs.branch != 'main' && !inputs.dry_run }}
+        if: ${{ github.ref != 'refs/heads/main' && !inputs.dry_run }}
         run: |
           echo "Real releases can only be made from main. Set dry_run=true to test on a non-main branch."
           exit 1
@@ -140,7 +140,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.branch }}
+          ref: ${{ github.sha }}
           fetch-depth: 0
 
       - name: Create and push tag
