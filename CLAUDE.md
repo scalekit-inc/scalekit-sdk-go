@@ -74,3 +74,21 @@ client := scalekit.NewScalekitClient(envUrl, clientId).WithSecret(clientSecret)
 ### Code generation
 
 Protobuf definitions live in a separate private repo (`github.com/scalekit-inc/scalekit`, ref pinned in `buf.gen.yaml`). Generated code is checked in under `pkg/grpc/`. To regenerate, `PAT_TOKEN` must be set with access to the proto repo.
+
+## Release notes and releases
+
+- Every PR that changes shipped code adds a release-notes fragment:
+  `python3 scripts/release/release.py new --kind <added|changed|deprecated|removed|fixed|security> --ticket SK-1234 --body "..."`
+  (or `changie new`). Write it for the developer upgrading; rules are in
+  scalekit-sdks-wrapper `standards/release-notes.md`.
+- Label every PR `release` or `skip-release` (`no-changelog` only when nothing shipped
+  changes). The `release-notes` check enforces the label, the version and CHANGELOG rules.
+- Never hand-edit the SDK version or `CHANGELOG.md`. A releasing PR runs
+  `python3 scripts/release/release.py prepare`, which computes the version from the
+  fragments, bumps every location in `release.toml` and renders the section.
+- Merging a version bump to `main` starts `.github/workflows/release.yml`. It builds and
+  tests, then waits for a human approval on the `release` environment (someone other than
+  the person who merged) before tagging and publishing.
+- Cross-SDK changes and release-only runs: `/sdk` and `/sdk-release` from
+  scalekit-sdks-wrapper. Never edit `scripts/release/` or the release workflows here; they
+  are vendored from that repo.

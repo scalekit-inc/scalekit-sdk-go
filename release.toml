@@ -1,0 +1,19 @@
+# Release configuration read by scripts/release/release.py.
+[project]
+name = "scalekit-sdk-go"
+repo = "scalekit-inc/scalekit-sdk-go"
+language = "go"
+# The module path is .../scalekit-sdk-go/v2. A v3 release needs a new module path and an
+# import-path change for every caller, so the tool refuses to compute or verify one.
+max_major = 2
+
+[[version_files]]
+path = "core.go"
+pattern = '^\s*sdkVersionNumber\s*=\s*"(?P<version>[^"]+)"'
+count = 1
+
+[release]
+install = "go get github.com/scalekit-inc/scalekit-sdk-go/v2@v{version}"
+
+[paths]
+shipped = ["*.go", "go.mod", "go.sum", "pkg/*"]
