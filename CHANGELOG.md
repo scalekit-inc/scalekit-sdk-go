@@ -1,10 +1,20 @@
 # Changelog
 
 All notable changes to this SDK are documented in this file. The format follows
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) with the layout defined in the
-Scalekit release-notes standard, and versions follow [Semantic Versioning](https://semver.org/).
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
+[Semantic Versioning](https://semver.org/).
 
-Sections up to and including 2.8.0 were imported from [GitHub Releases](https://github.com/scalekit-inc/scalekit-sdk-go/releases). They keep their original wording and predate the release-notes standard.
+Sections up to and including 2.9.0 were imported from [GitHub Releases](https://github.com/scalekit-inc/scalekit-sdk-go/releases). They keep their original wording.
+
+## [2.9.0] - 2026-10-05
+
+### Changes
+
+- chore: add saif-at-scalekit to CODEOWNERS ([#91](https://github.com/scalekit-inc/scalekit-sdk-go/pull/91))
+- [SK-1980] Add resources client for listing and revoking user consents ([#90](https://github.com/scalekit-inc/scalekit-sdk-go/pull/90))
+- [SK-2043] chore: update proto to v0.1.150.0 (v2.8.1) ([#94](https://github.com/scalekit-inc/scalekit-sdk-go/pull/94))
+- feat: accept multiple issuers in ValidateTokenWithOptions (SK-2080) ([#95](https://github.com/scalekit-inc/scalekit-sdk-go/pull/95))
+- Add Create/Update/Delete/List/Get to ResourceClient ([#92](https://github.com/scalekit-inc/scalekit-sdk-go/pull/92))
 
 ## [2.8.0] - 2026-07-28
 
@@ -470,6 +480,7 @@ Generate proto files to support given_name and family_name in user object  in ht
 
 - First Release of the official Scalekit Golang SDK
 
+[2.9.0]: https://github.com/scalekit-inc/scalekit-sdk-go/releases/tag/v2.9.0
 [2.8.0]: https://github.com/scalekit-inc/scalekit-sdk-go/releases/tag/v2.8.0
 [2.7.0]: https://github.com/scalekit-inc/scalekit-sdk-go/releases/tag/v2.7.0
 [2.6.0]: https://github.com/scalekit-inc/scalekit-sdk-go/releases/tag/v2.6.0
