@@ -6,10 +6,6 @@ on:
       version:
         description: 'Version to release in x.y.z format (e.g. 2.5.0) — no prefix needed'
         required: true
-      branch:
-        description: 'Branch to release from (default: main)'
-        required: false
-        default: 'main'
       dry_run:
         description: 'Dry run — run all checks but skip tag push and release creation'
         type: boolean
