@@ -264,7 +264,7 @@ allowedEmailDomains, err := client.Domain().ListDomains(ctx, organizationId, &sc
 
 #### 2. Pagination Support
 Added pagination controls to manage large result sets:
-- **PageSize**: Number of domains to return per page (default: 100)
+- **PageSize**: Number of domains to return per page (default: 10 when options are passed without it; 100 when `ListDomains` is called without options)
 - **PageNumber**: Page number to retrieve (1-indexed)
 
 **Usage Example:**
@@ -304,7 +304,7 @@ ListDomains(ctx context.Context, organizationId string, options ...*ListDomainOp
 #### Backward Compatibility
 ✅ **Fully backward compatible** - The API can still be called without options:
 ```go
-// Still works - returns all domains with default page size of 10
+// Still works - returns all domains with default page size of 100
 allDomains, err := client.Domain().ListDomains(ctx, organizationId)
 ```
 
@@ -322,9 +322,9 @@ type ListDomainOptions struct {
 #### Implementation Details
 
 #### Default Behavior
-- When no options are provided, the API returns all domains with a default page size of 10
+- When no options are provided, the SDK requests a page size of 100
 - Domain type filtering is optional and can be omitted
-- Pagination parameters are optional; if not specified, default page size applies
+- Pagination parameters are optional; when options are passed without `PageSize`, the server default of 10 applies
 
 #### Type Conversion
 The SDK automatically converts string domain type constants to the appropriate gRPC enum values:
@@ -456,7 +456,7 @@ Generate proto files to support given_name and family_name in user object  in ht
 ### Changes
 
 - Add Directory Sync Support  https://github.com/scalekit-inc/scalekit-sdk-go/pull/11
-- Fix crypto Vulnerabiliy  https://github.com/scalekit-inc/scalekit-sdk-go/pull/15
+- Fix crypto Vulnerability  https://github.com/scalekit-inc/scalekit-sdk-go/pull/15
 
 ## [1.0.2] - 2024-08-09
 
