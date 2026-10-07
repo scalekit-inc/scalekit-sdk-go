@@ -4,7 +4,7 @@ All notable changes to this SDK are documented in this file. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
-Sections up to and including 2.9.0 were imported from [GitHub Releases](https://github.com/scalekit-inc/scalekit-sdk-go/releases). They keep their original wording.
+Sections up to and including 2.9.0 were imported from [GitHub Releases](https://github.com/scalekit-inc/scalekit-sdk-go/releases). Their wording is kept, with small corrections.
 
 ## [2.9.0] - 2026-10-05
 
@@ -172,7 +172,7 @@ Callers can now use `errors.Is` instead of string matching for common failure mo
 
 #### Internal / Chore
 
-- Added `.github/CODEOWNERS` to enforce required reviews on all PRs (owners: @AkshayParihar33, @dhawani).
+- Added `.github/CODEOWNERS` to enforce required reviews on all PRs.
 - Proto stubs regenerated from source; `ListTokensRequest.UserId` changed to `*string` pointer.
 - `go.mod` updated.
 
