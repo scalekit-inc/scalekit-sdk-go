@@ -18,6 +18,8 @@ jobs:
   validate:
     name: validate
     runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ inputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -39,8 +41,8 @@ jobs:
       - name: Check version matches core.go
         run: |
           CODE_VERSION=$(grep -oP 'sdkVersionNumber\s*=\s*"\K[0-9]+\.[0-9]+\.[0-9]+' core.go)
-          if [ "${{ inputs.version }}" != "$CODE_VERSION" ]; then
-            echo "Input version ${{ inputs.version }} does not match sdkVersionNumber $CODE_VERSION in core.go"
+          if [ "$VERSION" != "$CODE_VERSION" ]; then
+            echo "Input version $VERSION does not match sdkVersionNumber $CODE_VERSION in core.go"
             exit 1
           fi
 
@@ -56,7 +58,7 @@ jobs:
             # Strip leading 'v' and any prerelease/metadata suffix (e.g. v2.4.0-beta -> 2.4.0)
             LATEST_TAG=$(echo "$LATEST_RAW" | sed 's/^v//' | sed 's/[-+].*//')
 
-            IFS='.' read -r maj_new min_new pat_new <<< "${{ inputs.version }}"
+            IFS='.' read -r maj_new min_new pat_new <<< "$VERSION"
             IFS='.' read -r maj_cur min_cur pat_cur <<< "$LATEST_TAG"
 
             # Default missing components to 0
@@ -65,7 +67,7 @@ jobs:
             if ! ( [ "$maj_new" -gt "$maj_cur" ] || \
                    ( [ "$maj_new" -eq "$maj_cur" ] && [ "$min_new" -gt "$min_cur" ] ) || \
                    ( [ "$maj_new" -eq "$maj_cur" ] && [ "$min_new" -eq "$min_cur" ] && [ "$pat_new" -gt "$pat_cur" ] ) ); then
-              echo "Input version ${{ inputs.version }} must be greater than latest release $LATEST_TAG"
+              echo "Input version $VERSION must be greater than latest release $LATEST_TAG"
               exit 1
             fi
           fi
@@ -132,6 +134,8 @@ jobs:
     environment: release
     permissions:
       contents: write
+    env:
+      VERSION: ${{ inputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -141,8 +145,8 @@ jobs:
 
       - name: Create and push tag
         run: |
-          git tag "v${{ inputs.version }}"
-          git push origin "v${{ inputs.version }}"
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
