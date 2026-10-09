@@ -19,7 +19,7 @@ Authentication, authorization, and tool-calling for human-in-the-loop and autono
 
 ---
 
-This is the official Go SDK for [Scalekit](https://scalekit.com) . Scalekit provides auth and actions on behalf of users, with 500+ connectors and 20,000+ tools. Build secure AI products faster with authentication for humans (SSO, SCIM, passwordless, full-stack auth) and agents (MCP/APIs, delegated actions, tool-calling), all unified on one platform.
+This is the official Go SDK for [Scalekit](https://scalekit.com). Scalekit provides auth and actions on behalf of users, with 500+ connectors and 20,000+ tools. Build secure AI products faster with authentication for humans (SSO, SCIM, passwordless, full-stack auth) and agents (MCP/APIs, delegated actions, tool-calling), all unified on one platform.
 
 ---
 
