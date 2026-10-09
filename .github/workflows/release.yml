@@ -6,10 +6,6 @@ on:
       version:
         description: 'Version to release in x.y.z format (e.g. 2.5.0) — no prefix needed'
         required: true
-      branch:
-        description: 'Branch to release from (default: main)'
-        required: false
-        default: 'main'
       dry_run:
         description: 'Dry run — run all checks but skip tag push and release creation'
         type: boolean
@@ -22,11 +18,13 @@ jobs:
   validate:
     name: validate
     runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ inputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.branch }}
+          ref: ${{ github.sha }}
           fetch-depth: 0
 
       - name: Set up Go
@@ -35,7 +33,7 @@ jobs:
           go-version-file: "go.mod"
 
       - name: Enforce dry run for non-main branches
-        if: ${{ inputs.branch != 'main' && !inputs.dry_run }}
+        if: ${{ github.ref != 'refs/heads/main' && !inputs.dry_run }}
         run: |
           echo "Real releases can only be made from main. Set dry_run=true to test on a non-main branch."
           exit 1
@@ -43,8 +41,8 @@ jobs:
       - name: Check version matches core.go
         run: |
           CODE_VERSION=$(grep -oP 'sdkVersionNumber\s*=\s*"\K[0-9]+\.[0-9]+\.[0-9]+' core.go)
-          if [ "${{ inputs.version }}" != "$CODE_VERSION" ]; then
-            echo "Input version ${{ inputs.version }} does not match sdkVersionNumber $CODE_VERSION in core.go"
+          if [ "$VERSION" != "$CODE_VERSION" ]; then
+            echo "Input version $VERSION does not match sdkVersionNumber $CODE_VERSION in core.go"
             exit 1
           fi
 
@@ -60,7 +58,7 @@ jobs:
             # Strip leading 'v' and any prerelease/metadata suffix (e.g. v2.4.0-beta -> 2.4.0)
             LATEST_TAG=$(echo "$LATEST_RAW" | sed 's/^v//' | sed 's/[-+].*//')
 
-            IFS='.' read -r maj_new min_new pat_new <<< "${{ inputs.version }}"
+            IFS='.' read -r maj_new min_new pat_new <<< "$VERSION"
             IFS='.' read -r maj_cur min_cur pat_cur <<< "$LATEST_TAG"
 
             # Default missing components to 0
@@ -69,7 +67,7 @@ jobs:
             if ! ( [ "$maj_new" -gt "$maj_cur" ] || \
                    ( [ "$maj_new" -eq "$maj_cur" ] && [ "$min_new" -gt "$min_cur" ] ) || \
                    ( [ "$maj_new" -eq "$maj_cur" ] && [ "$min_new" -eq "$min_cur" ] && [ "$pat_new" -gt "$pat_cur" ] ) ); then
-              echo "Input version ${{ inputs.version }} must be greater than latest release $LATEST_TAG"
+              echo "Input version $VERSION must be greater than latest release $LATEST_TAG"
               exit 1
             fi
           fi
@@ -132,19 +130,23 @@ jobs:
     runs-on: ubuntu-latest
     needs: validate
     if: ${{ !inputs.dry_run }}
+    # Waits for a human approval; the person who started the run cannot approve it.
+    environment: release
     permissions:
       contents: write
+    env:
+      VERSION: ${{ inputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.branch }}
+          ref: ${{ github.sha }}
           fetch-depth: 0
 
       - name: Create and push tag
         run: |
-          git tag "v${{ inputs.version }}"
-          git push origin "v${{ inputs.version }}"
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

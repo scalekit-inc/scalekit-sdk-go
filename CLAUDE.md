@@ -74,3 +74,14 @@ client := scalekit.NewScalekitClient(envUrl, clientId).WithSecret(clientSecret)
 ### Code generation
 
 Protobuf definitions live in a separate private repo (`github.com/scalekit-inc/scalekit`, ref pinned in `buf.gen.yaml`). Generated code is checked in under `pkg/grpc/`. To regenerate, `PAT_TOKEN` must be set with access to the proto repo.
+
+## Release notes and releases
+
+- Module: `github.com/scalekit-inc/scalekit-sdk-go/v2`. Workflow: `.github/workflows/release.yml`.
+- Every change that users can notice adds a release-notes file under `.changes/unreleased/`.
+- Never hand-edit the version (`sdkVersionNumber` in `core.go`) or `CHANGELOG.md` sections:
+  release tooling bumps the version and renders the CHANGELOG section from those files.
+- The release workflow is started with the version after the release PR merges. It releases
+  the commit it was started on; its `release` job waits for an approval on the `release`
+  environment from someone other than the person who started it, then pushes the tag (the Go
+  release) and creates the GitHub Release.
