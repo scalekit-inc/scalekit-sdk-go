@@ -452,6 +452,90 @@ func TestVerifyWebhookPayload(t *testing.T) {
 	}
 }
 
+func TestVerifyInterceptorPayload(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client := scalekit.NewScalekitClient(server.URL, "client_id", "client_secret")
+	createSignature := func(id string, timestamp int64, payload []byte, secretStr string) string {
+		data := fmt.Sprintf("%s.%d.%s", id, timestamp, payload)
+		secretBytes, _ := base64.StdEncoding.DecodeString(secretStr)
+		hash := hmac.New(sha256.New, secretBytes)
+		hash.Write([]byte(data))
+		return base64.StdEncoding.EncodeToString(hash.Sum(nil))
+	}
+
+	tests := []struct {
+		name          string
+		secret        string
+		headers       map[string]string
+		payload       []byte
+		expectedValid bool
+		expectedError string
+	}{
+		{
+			name:    "valid interceptor headers",
+			secret:  "icpsec_dGVzdHNlY3JldA==",
+			payload: []byte(`{"event": "auth.pre_signup"}`),
+			headers: func() map[string]string {
+				timestamp := time.Now().Unix()
+				interceptorID := "interceptor_123"
+				signature := createSignature(interceptorID, timestamp, []byte(`{"event": "auth.pre_signup"}`), "dGVzdHNlY3JldA==")
+				return map[string]string{
+					"interceptor-id":        interceptorID,
+					"interceptor-timestamp": fmt.Sprintf("%d", timestamp),
+					"interceptor-signature": fmt.Sprintf("v1,%s", signature),
+				}
+			}(),
+			expectedValid: true,
+			expectedError: "",
+		},
+		{
+			name:    "falls back to webhook headers",
+			secret:  "icpsec_dGVzdHNlY3JldA==",
+			payload: []byte(`{"event": "auth.pre_signup"}`),
+			headers: func() map[string]string {
+				timestamp := time.Now().Unix()
+				id := "webhook_123"
+				signature := createSignature(id, timestamp, []byte(`{"event": "auth.pre_signup"}`), "dGVzdHNlY3JldA==")
+				return map[string]string{
+					"webhook-id":        id,
+					"webhook-timestamp": fmt.Sprintf("%d", timestamp),
+					"webhook-signature": fmt.Sprintf("v1,%s", signature),
+				}
+			}(),
+			expectedValid: true,
+			expectedError: "",
+		},
+		{
+			name:   "missing headers",
+			secret: "icpsec_dGVzdHNlY3JldA==",
+			headers: map[string]string{
+				"interceptor-id": "interceptor_123",
+			},
+			payload:       []byte("{}"),
+			expectedValid: false,
+			expectedError: "missing required headers",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			valid, err := client.VerifyInterceptorPayload(tt.secret, tt.headers, tt.payload)
+
+			if tt.expectedError != "" {
+				assert.Error(t, err)
+				assert.Equal(t, tt.expectedError, err.Error())
+			} else {
+				assert.NoError(t, err)
+			}
+			assert.Equal(t, tt.expectedValid, valid)
+		})
+	}
+}
+
 // TestValidateTokenViaInterface verifies that ValidateToken is callable directly
 // through the Scalekit interface type, as described in SK-2598.
 func TestValidateTokenViaInterface(t *testing.T) {
