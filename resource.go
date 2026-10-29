@@ -48,7 +48,7 @@ type ListUserConsentsOptions struct {
 	// the values with OR (max 25). Ignored when ConsentIds is set; takes
 	// precedence over Search.
 	UserIds []string
-	// ConsentIds matches consent IDs exactly (format usrcnst_<number>, max 25
+	// ConsentIds matches consent IDs exactly (format usrcnst_xxxxx, max 25
 	// distinct). IDs that do not exist or belong to another resource are omitted
 	// from the result. Takes precedence over UserIds and Search.
 	ConsentIds []string
