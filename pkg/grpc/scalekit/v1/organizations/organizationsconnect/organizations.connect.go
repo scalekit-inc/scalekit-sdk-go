@@ -76,6 +76,12 @@ const (
 	// OrganizationServiceGetOrganizationSessionPolicyProcedure is the fully-qualified name of the
 	// OrganizationService's GetOrganizationSessionPolicy RPC.
 	OrganizationServiceGetOrganizationSessionPolicyProcedure = "/scalekit.v1.organizations.OrganizationService/GetOrganizationSessionPolicy"
+	// OrganizationServiceGetOrganizationBrandingProcedure is the fully-qualified name of the
+	// OrganizationService's GetOrganizationBranding RPC.
+	OrganizationServiceGetOrganizationBrandingProcedure = "/scalekit.v1.organizations.OrganizationService/GetOrganizationBranding"
+	// OrganizationServiceUpdateOrganizationBrandingProcedure is the fully-qualified name of the
+	// OrganizationService's UpdateOrganizationBranding RPC.
+	OrganizationServiceUpdateOrganizationBrandingProcedure = "/scalekit.v1.organizations.OrganizationService/UpdateOrganizationBranding"
 	// OrganizationServiceUpsertUserManagementSettingsProcedure is the fully-qualified name of the
 	// OrganizationService's UpsertUserManagementSettings RPC.
 	OrganizationServiceUpsertUserManagementSettingsProcedure = "/scalekit.v1.organizations.OrganizationService/UpsertUserManagementSettings"
@@ -107,6 +113,8 @@ type OrganizationServiceClient interface {
 	UpdateOrganizationSettings(context.Context, *connect.Request[organizations.UpdateOrganizationSettingsRequest]) (*connect.Response[organizations.GetOrganizationResponse], error)
 	UpdateOrganizationSessionPolicy(context.Context, *connect.Request[organizations.UpdateOrganizationSessionPolicyRequest]) (*connect.Response[organizations.UpdateOrganizationSessionPolicyResponse], error)
 	GetOrganizationSessionPolicy(context.Context, *connect.Request[organizations.GetOrganizationSessionPolicyRequest]) (*connect.Response[organizations.GetOrganizationSessionPolicyResponse], error)
+	GetOrganizationBranding(context.Context, *connect.Request[organizations.GetOrganizationBrandingRequest]) (*connect.Response[organizations.GetOrganizationBrandingResponse], error)
+	UpdateOrganizationBranding(context.Context, *connect.Request[organizations.UpdateOrganizationBrandingRequest]) (*connect.Response[organizations.UpdateOrganizationBrandingResponse], error)
 	// Update user management setting for an organization
 	UpsertUserManagementSettings(context.Context, *connect.Request[organizations.UpsertUserManagementSettingsRequest]) (*connect.Response[organizations.UpsertUserManagementSettingsResponse], error)
 	GetOrganizationUserManagementSetting(context.Context, *connect.Request[organizations.GetOrganizationUserManagementSettingsRequest]) (*connect.Response[organizations.GetOrganizationUserManagementSettingsResponse], error)
@@ -209,6 +217,18 @@ func NewOrganizationServiceClient(httpClient connect.HTTPClient, baseURL string,
 			connect.WithSchema(organizationServiceMethods.ByName("GetOrganizationSessionPolicy")),
 			connect.WithClientOptions(opts...),
 		),
+		getOrganizationBranding: connect.NewClient[organizations.GetOrganizationBrandingRequest, organizations.GetOrganizationBrandingResponse](
+			httpClient,
+			baseURL+OrganizationServiceGetOrganizationBrandingProcedure,
+			connect.WithSchema(organizationServiceMethods.ByName("GetOrganizationBranding")),
+			connect.WithClientOptions(opts...),
+		),
+		updateOrganizationBranding: connect.NewClient[organizations.UpdateOrganizationBrandingRequest, organizations.UpdateOrganizationBrandingResponse](
+			httpClient,
+			baseURL+OrganizationServiceUpdateOrganizationBrandingProcedure,
+			connect.WithSchema(organizationServiceMethods.ByName("UpdateOrganizationBranding")),
+			connect.WithClientOptions(opts...),
+		),
 		upsertUserManagementSettings: connect.NewClient[organizations.UpsertUserManagementSettingsRequest, organizations.UpsertUserManagementSettingsResponse](
 			httpClient,
 			baseURL+OrganizationServiceUpsertUserManagementSettingsProcedure,
@@ -246,6 +266,8 @@ type organizationServiceClient struct {
 	updateOrganizationSettings           *connect.Client[organizations.UpdateOrganizationSettingsRequest, organizations.GetOrganizationResponse]
 	updateOrganizationSessionPolicy      *connect.Client[organizations.UpdateOrganizationSessionPolicyRequest, organizations.UpdateOrganizationSessionPolicyResponse]
 	getOrganizationSessionPolicy         *connect.Client[organizations.GetOrganizationSessionPolicyRequest, organizations.GetOrganizationSessionPolicyResponse]
+	getOrganizationBranding              *connect.Client[organizations.GetOrganizationBrandingRequest, organizations.GetOrganizationBrandingResponse]
+	updateOrganizationBranding           *connect.Client[organizations.UpdateOrganizationBrandingRequest, organizations.UpdateOrganizationBrandingResponse]
 	upsertUserManagementSettings         *connect.Client[organizations.UpsertUserManagementSettingsRequest, organizations.UpsertUserManagementSettingsResponse]
 	getOrganizationUserManagementSetting *connect.Client[organizations.GetOrganizationUserManagementSettingsRequest, organizations.GetOrganizationUserManagementSettingsResponse]
 	getApplicationSessionPolicy          *connect.Client[organizations.GetApplicationSessionPolicyRequest, organizations.GetApplicationSessionPolicyResponse]
@@ -325,6 +347,18 @@ func (c *organizationServiceClient) GetOrganizationSessionPolicy(ctx context.Con
 	return c.getOrganizationSessionPolicy.CallUnary(ctx, req)
 }
 
+// GetOrganizationBranding calls
+// scalekit.v1.organizations.OrganizationService.GetOrganizationBranding.
+func (c *organizationServiceClient) GetOrganizationBranding(ctx context.Context, req *connect.Request[organizations.GetOrganizationBrandingRequest]) (*connect.Response[organizations.GetOrganizationBrandingResponse], error) {
+	return c.getOrganizationBranding.CallUnary(ctx, req)
+}
+
+// UpdateOrganizationBranding calls
+// scalekit.v1.organizations.OrganizationService.UpdateOrganizationBranding.
+func (c *organizationServiceClient) UpdateOrganizationBranding(ctx context.Context, req *connect.Request[organizations.UpdateOrganizationBrandingRequest]) (*connect.Response[organizations.UpdateOrganizationBrandingResponse], error) {
+	return c.updateOrganizationBranding.CallUnary(ctx, req)
+}
+
 // UpsertUserManagementSettings calls
 // scalekit.v1.organizations.OrganizationService.UpsertUserManagementSettings.
 func (c *organizationServiceClient) UpsertUserManagementSettings(ctx context.Context, req *connect.Request[organizations.UpsertUserManagementSettingsRequest]) (*connect.Response[organizations.UpsertUserManagementSettingsResponse], error) {
@@ -363,6 +397,8 @@ type OrganizationServiceHandler interface {
 	UpdateOrganizationSettings(context.Context, *connect.Request[organizations.UpdateOrganizationSettingsRequest]) (*connect.Response[organizations.GetOrganizationResponse], error)
 	UpdateOrganizationSessionPolicy(context.Context, *connect.Request[organizations.UpdateOrganizationSessionPolicyRequest]) (*connect.Response[organizations.UpdateOrganizationSessionPolicyResponse], error)
 	GetOrganizationSessionPolicy(context.Context, *connect.Request[organizations.GetOrganizationSessionPolicyRequest]) (*connect.Response[organizations.GetOrganizationSessionPolicyResponse], error)
+	GetOrganizationBranding(context.Context, *connect.Request[organizations.GetOrganizationBrandingRequest]) (*connect.Response[organizations.GetOrganizationBrandingResponse], error)
+	UpdateOrganizationBranding(context.Context, *connect.Request[organizations.UpdateOrganizationBrandingRequest]) (*connect.Response[organizations.UpdateOrganizationBrandingResponse], error)
 	// Update user management setting for an organization
 	UpsertUserManagementSettings(context.Context, *connect.Request[organizations.UpsertUserManagementSettingsRequest]) (*connect.Response[organizations.UpsertUserManagementSettingsResponse], error)
 	GetOrganizationUserManagementSetting(context.Context, *connect.Request[organizations.GetOrganizationUserManagementSettingsRequest]) (*connect.Response[organizations.GetOrganizationUserManagementSettingsResponse], error)
@@ -460,6 +496,18 @@ func NewOrganizationServiceHandler(svc OrganizationServiceHandler, opts ...conne
 		connect.WithSchema(organizationServiceMethods.ByName("GetOrganizationSessionPolicy")),
 		connect.WithHandlerOptions(opts...),
 	)
+	organizationServiceGetOrganizationBrandingHandler := connect.NewUnaryHandler(
+		OrganizationServiceGetOrganizationBrandingProcedure,
+		svc.GetOrganizationBranding,
+		connect.WithSchema(organizationServiceMethods.ByName("GetOrganizationBranding")),
+		connect.WithHandlerOptions(opts...),
+	)
+	organizationServiceUpdateOrganizationBrandingHandler := connect.NewUnaryHandler(
+		OrganizationServiceUpdateOrganizationBrandingProcedure,
+		svc.UpdateOrganizationBranding,
+		connect.WithSchema(organizationServiceMethods.ByName("UpdateOrganizationBranding")),
+		connect.WithHandlerOptions(opts...),
+	)
 	organizationServiceUpsertUserManagementSettingsHandler := connect.NewUnaryHandler(
 		OrganizationServiceUpsertUserManagementSettingsProcedure,
 		svc.UpsertUserManagementSettings,
@@ -508,6 +556,10 @@ func NewOrganizationServiceHandler(svc OrganizationServiceHandler, opts ...conne
 			organizationServiceUpdateOrganizationSessionPolicyHandler.ServeHTTP(w, r)
 		case OrganizationServiceGetOrganizationSessionPolicyProcedure:
 			organizationServiceGetOrganizationSessionPolicyHandler.ServeHTTP(w, r)
+		case OrganizationServiceGetOrganizationBrandingProcedure:
+			organizationServiceGetOrganizationBrandingHandler.ServeHTTP(w, r)
+		case OrganizationServiceUpdateOrganizationBrandingProcedure:
+			organizationServiceUpdateOrganizationBrandingHandler.ServeHTTP(w, r)
 		case OrganizationServiceUpsertUserManagementSettingsProcedure:
 			organizationServiceUpsertUserManagementSettingsHandler.ServeHTTP(w, r)
 		case OrganizationServiceGetOrganizationUserManagementSettingProcedure:
@@ -577,6 +629,14 @@ func (UnimplementedOrganizationServiceHandler) UpdateOrganizationSessionPolicy(c
 
 func (UnimplementedOrganizationServiceHandler) GetOrganizationSessionPolicy(context.Context, *connect.Request[organizations.GetOrganizationSessionPolicyRequest]) (*connect.Response[organizations.GetOrganizationSessionPolicyResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.organizations.OrganizationService.GetOrganizationSessionPolicy is not implemented"))
+}
+
+func (UnimplementedOrganizationServiceHandler) GetOrganizationBranding(context.Context, *connect.Request[organizations.GetOrganizationBrandingRequest]) (*connect.Response[organizations.GetOrganizationBrandingResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.organizations.OrganizationService.GetOrganizationBranding is not implemented"))
+}
+
+func (UnimplementedOrganizationServiceHandler) UpdateOrganizationBranding(context.Context, *connect.Request[organizations.UpdateOrganizationBrandingRequest]) (*connect.Response[organizations.UpdateOrganizationBrandingResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.organizations.OrganizationService.UpdateOrganizationBranding is not implemented"))
 }
 
 func (UnimplementedOrganizationServiceHandler) UpsertUserManagementSettings(context.Context, *connect.Request[organizations.UpsertUserManagementSettingsRequest]) (*connect.Response[organizations.UpsertUserManagementSettingsResponse], error) {
