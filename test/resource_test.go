@@ -710,6 +710,74 @@ func TestResourceServiceListUserConsentsRejectsMoreThan25UserIds(t *testing.T) {
 	assert.Equal(t, connect.CodeInvalidArgument, connect.CodeOf(err))
 }
 
+// firstConsentId returns the id of the first consent on the test resource, or
+// skips the test when the resource has none.
+func firstConsentId(t *testing.T) string {
+	t.Helper()
+	list, err := client.Resources().ListUserConsents(context.Background(), testResourceId, scalekit.ListUserConsentsOptions{PageSize: 30})
+	require.NoError(t, err)
+	if len(list.GetConsents()) == 0 {
+		t.Skip("the test resource has no consents")
+	}
+	return list.GetConsents()[0].GetId()
+}
+
+func buildConsentIds(n int) []string {
+	consentIds := make([]string, 0, n)
+	for i := 1; i <= n; i++ {
+		consentIds = append(consentIds, "usrcnst_"+strconv.Itoa(i))
+	}
+	return consentIds
+}
+
+func TestResourceServiceListUserConsentsWithConsentIdReturnsOnlyRequested(t *testing.T) {
+	consentId := firstConsentId(t)
+
+	response, err := client.Resources().ListUserConsents(context.Background(), testResourceId, scalekit.ListUserConsentsOptions{
+		ConsentIds: []string{consentId},
+	})
+	require.NoError(t, err)
+	require.Len(t, response.GetConsents(), 1)
+	assert.Equal(t, consentId, response.GetConsents()[0].GetId())
+}
+
+func TestResourceServiceListUserConsentsWithUnknownConsentIdReturnsEmpty(t *testing.T) {
+	response, err := client.Resources().ListUserConsents(context.Background(), testResourceId, scalekit.ListUserConsentsOptions{
+		ConsentIds: []string{"usrcnst_999999999999999999"},
+	})
+	require.NoError(t, err)
+	assert.Empty(t, response.GetConsents())
+}
+
+// TestResourceServiceListUserConsentsConsentIdsOverrideUserIds: UserIds alone
+// would match nothing here, so a non-empty result means ConsentIds was applied.
+func TestResourceServiceListUserConsentsConsentIdsOverrideUserIds(t *testing.T) {
+	consentId := firstConsentId(t)
+
+	response, err := client.Resources().ListUserConsents(context.Background(), testResourceId, scalekit.ListUserConsentsOptions{
+		ConsentIds: []string{consentId},
+		UserIds:    []string{"usr_does_not_exist"},
+	})
+	require.NoError(t, err)
+	require.Len(t, response.GetConsents(), 1)
+}
+
+func TestResourceServiceListUserConsentsRejectsMalformedConsentId(t *testing.T) {
+	_, err := client.Resources().ListUserConsents(context.Background(), testResourceId, scalekit.ListUserConsentsOptions{
+		ConsentIds: []string{"149633942432021190"},
+	})
+	require.Error(t, err)
+	assert.Equal(t, connect.CodeInvalidArgument, connect.CodeOf(err))
+}
+
+func TestResourceServiceListUserConsentsRejectsMoreThan25ConsentIds(t *testing.T) {
+	_, err := client.Resources().ListUserConsents(context.Background(), testResourceId, scalekit.ListUserConsentsOptions{
+		ConsentIds: buildConsentIds(26),
+	})
+	require.Error(t, err)
+	assert.Equal(t, connect.CodeInvalidArgument, connect.CodeOf(err))
+}
+
 // TestResourceServiceListUserConsentsUnknownResource asserts that an unknown
 // resource id surfaces as an error rather than an empty success, so callers can
 // tell "no consents" apart from "no such resource".
