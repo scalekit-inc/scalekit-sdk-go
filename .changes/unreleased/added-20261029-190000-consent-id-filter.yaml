@@ -1,6 +1,6 @@
 kind: added
 body: |
-  `scalekitClient.Resources().ListUserConsents(ctx, resourceId, options)` accepts `ConsentIds` on `ListUserConsentsOptions` to fetch specific consents by ID, for example to find the `ClientId` you need to revoke a consent you already hold the ID of. `ConsentIds` takes up to 25 distinct IDs in the `usrcnst_<positive integer>` format and takes precedence over `UserIds` and `Search`; IDs that do not exist or belong to another resource are omitted from the result. Existing calls are unchanged. [Reference](https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/REFERENCE.md)
+  `scalekitClient.Resources().ListUserConsents(ctx, resourceId, options)` accepts `ConsentIds` on `ListUserConsentsOptions` to fetch specific consents by ID, for example to find the `ClientId` you need to revoke a consent you already hold the ID of. `ConsentIds` takes up to 25 distinct IDs in the `usrcnst_<positive integer>` format and takes precedence over `UserIds` and `Search`; IDs that do not exist or belong to another resource are omitted from the result. An older server ignores `ConsentIds`, so confirm each returned `Id` is one you asked for before revoking. Existing calls are unchanged. [Reference](https://github.com/scalekit-inc/scalekit-sdk-go/blob/main/REFERENCE.md)
 
   ```go
   response, err := scalekitClient.Resources().ListUserConsents(ctx, "res_123456", scalekit.ListUserConsentsOptions{
