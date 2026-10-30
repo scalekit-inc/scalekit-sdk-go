@@ -2630,7 +2630,7 @@ if err != nil {
 
 Lists the end-user consents granted against a resource, with pagination. Use this to audit who authorized a client, and to find the `consentId` you need before revoking.
 
-Filter in one of three ways. Pass `ConsentIds` to fetch specific consents by ID, for example to find the `ClientId` you need to revoke a consent you already hold the ID of. Pass `UserIds` to match external user IDs exactly and case-sensitively. Pass `Search` for a case-insensitive substring match. When you give more than one, the priority is `ConsentIds`, then `UserIds`, then `Search`, and the lower-priority ones are ignored without an error.
+Filter in one of three ways. Pass `ConsentIds` to fetch specific consents by ID, for example to find the `ClientId` you need to revoke a consent you already hold the ID of. Pass `UserIds` to match external user IDs exactly and case-sensitively. Pass `Search` for a case-insensitive substring match. When you give more than one, the priority is `ConsentIds`, then `UserIds`, then `Search`, and the lower-priority ones are ignored without an error. Blank-only `ConsentIds` values are ignored, so the next filter applies instead.
 
 When you filter by `ConsentIds`, check that every returned `Id` is one you asked for before you revoke anything. A server that predates this filter ignores it and returns the unfiltered first page. Do not combine `ConsentIds` with `UserIds` as an ownership check, because `ConsentIds` overrides `UserIds`. Compare `ExternalUserId` on the returned consent instead.
 

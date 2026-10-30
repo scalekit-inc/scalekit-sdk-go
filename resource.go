@@ -49,8 +49,10 @@ type ListUserConsentsOptions struct {
 	// precedence over Search.
 	UserIds []string
 	// ConsentIds matches consent IDs exactly (format usrcnst_xxxxx, max 25
-	// distinct). IDs that do not exist or belong to another resource are omitted
-	// from the result. Takes precedence over UserIds and Search.
+	// distinct). Takes precedence over UserIds and Search; blank-only values are
+	// ignored. IDs that do not exist or belong to another resource are omitted.
+	// An older server ignores this filter, so confirm each returned Id is one you
+	// asked for before revoking.
 	ConsentIds []string
 }
 
@@ -207,6 +209,8 @@ type ResourceService interface {
 	// match specific users exactly, or options.Search for a case-insensitive
 	// substring match. When more than one is set, the priority is ConsentIds,
 	// then UserIds, then Search, and the lower-priority ones are ignored.
+	// Blank-only ConsentIds are ignored. An older server ignores ConsentIds, so
+	// confirm each returned Id is one you asked for before revoking.
 	ListUserConsents(ctx context.Context, resourceId string, options ListUserConsentsOptions) (*ListResourceUserConsentsResponse, error)
 
 	// RevokeUserConsent revokes a single end-user consent held by a resource client.
@@ -449,7 +453,9 @@ func (r *resourceService) DeleteResourceClientSecret(ctx context.Context, resour
 // Set options.ConsentIds to fetch specific consents by ID, options.UserIds to
 // match specific users exactly, or options.Search for a case-insensitive
 // substring match. When more than one is set, the priority is ConsentIds, then
-// UserIds, then Search, and the lower-priority ones are ignored.
+// UserIds, then Search, and the lower-priority ones are ignored. Blank-only
+// ConsentIds are ignored. An older server ignores ConsentIds, so confirm each
+// returned Id is one you asked for before revoking.
 func (r *resourceService) ListUserConsents(ctx context.Context, resourceId string, options ListUserConsentsOptions) (*ListResourceUserConsentsResponse, error) {
 	if resourceId == "" {
 		return nil, ErrResourceIdRequired
