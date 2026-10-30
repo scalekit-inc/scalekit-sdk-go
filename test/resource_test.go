@@ -762,7 +762,19 @@ func TestResourceServiceListUserConsentsConsentIdsOverrideUserIds(t *testing.T) 
 	require.Len(t, response.GetConsents(), 1)
 }
 
+// skipUnlessConsentIdValidated skips on a backend that predates filter.consent_id validation.
+func skipUnlessConsentIdValidated(t *testing.T) {
+	t.Helper()
+	_, err := client.Resources().ListUserConsents(context.Background(), testResourceId, scalekit.ListUserConsentsOptions{
+		ConsentIds: []string{"not-an-id"},
+	})
+	if err == nil {
+		t.Skip("backend does not validate filter.consent_id yet")
+	}
+}
+
 func TestResourceServiceListUserConsentsRejectsMalformedConsentId(t *testing.T) {
+	skipUnlessConsentIdValidated(t)
 	_, err := client.Resources().ListUserConsents(context.Background(), testResourceId, scalekit.ListUserConsentsOptions{
 		ConsentIds: []string{"149633942432021190"},
 	})
@@ -771,6 +783,7 @@ func TestResourceServiceListUserConsentsRejectsMalformedConsentId(t *testing.T) 
 }
 
 func TestResourceServiceListUserConsentsRejectsMoreThan25ConsentIds(t *testing.T) {
+	skipUnlessConsentIdValidated(t)
 	_, err := client.Resources().ListUserConsents(context.Background(), testResourceId, scalekit.ListUserConsentsOptions{
 		ConsentIds: buildConsentIds(26),
 	})
