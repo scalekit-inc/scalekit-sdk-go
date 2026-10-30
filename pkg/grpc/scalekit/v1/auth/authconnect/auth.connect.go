@@ -69,6 +69,9 @@ const (
 	// AuthServiceUpdateLoginUserDetailsProcedure is the fully-qualified name of the AuthService's
 	// UpdateLoginUserDetails RPC.
 	AuthServiceUpdateLoginUserDetailsProcedure = "/scalekit.v1.auth.AuthService/UpdateLoginUserDetails"
+	// AuthServiceGetLoginRequestDetailsProcedure is the fully-qualified name of the AuthService's
+	// GetLoginRequestDetails RPC.
+	AuthServiceGetLoginRequestDetailsProcedure = "/scalekit.v1.auth.AuthService/GetLoginRequestDetails"
 )
 
 // AuthServiceClient is a client for the scalekit.v1.auth.AuthService service.
@@ -79,12 +82,13 @@ type AuthServiceClient interface {
 	ResendAuthPasswordless(context.Context, *connect.Request[auth.ResendAuthPasswordlessRequest]) (*connect.Response[emptypb.Empty], error)
 	ListUserOrganizations(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[auth.ListUserOrganizationsResponse], error)
 	SignupOrganization(context.Context, *connect.Request[auth.SignupOrganizationRequest]) (*connect.Response[auth.SignupOrganizationResponse], error)
-	GetAuthState(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[auth.GetAuthStateResponse], error)
+	GetAuthState(context.Context, *connect.Request[auth.GetAuthStateRequest]) (*connect.Response[auth.GetAuthStateResponse], error)
 	GetAuthError(context.Context, *connect.Request[auth.GetAuthErrorRequest]) (*connect.Response[auth.GetAuthErrorResponse], error)
 	Logout(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error)
 	GetAuthCustomizations(context.Context, *connect.Request[auth.GetAuthCustomizationsRequest]) (*connect.Response[auth.GetAuthCustomizationsResponse], error)
 	GetAuthFeatures(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[auth.GetAuthFeaturesResponse], error)
 	UpdateLoginUserDetails(context.Context, *connect.Request[auth.UpdateLoginUserDetailsRequest]) (*connect.Response[auth.UpdateLoginUserDetailsResponse], error)
+	GetLoginRequestDetails(context.Context, *connect.Request[auth.GetLoginRequestDetailsRequest]) (*connect.Response[auth.GetLoginRequestDetailsResponse], error)
 }
 
 // NewAuthServiceClient constructs a client for the scalekit.v1.auth.AuthService service. By
@@ -134,7 +138,7 @@ func NewAuthServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(authServiceMethods.ByName("SignupOrganization")),
 			connect.WithClientOptions(opts...),
 		),
-		getAuthState: connect.NewClient[emptypb.Empty, auth.GetAuthStateResponse](
+		getAuthState: connect.NewClient[auth.GetAuthStateRequest, auth.GetAuthStateResponse](
 			httpClient,
 			baseURL+AuthServiceGetAuthStateProcedure,
 			connect.WithSchema(authServiceMethods.ByName("GetAuthState")),
@@ -170,6 +174,12 @@ func NewAuthServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(authServiceMethods.ByName("UpdateLoginUserDetails")),
 			connect.WithClientOptions(opts...),
 		),
+		getLoginRequestDetails: connect.NewClient[auth.GetLoginRequestDetailsRequest, auth.GetLoginRequestDetailsResponse](
+			httpClient,
+			baseURL+AuthServiceGetLoginRequestDetailsProcedure,
+			connect.WithSchema(authServiceMethods.ByName("GetLoginRequestDetails")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -181,12 +191,13 @@ type authServiceClient struct {
 	resendAuthPasswordless *connect.Client[auth.ResendAuthPasswordlessRequest, emptypb.Empty]
 	listUserOrganizations  *connect.Client[emptypb.Empty, auth.ListUserOrganizationsResponse]
 	signupOrganization     *connect.Client[auth.SignupOrganizationRequest, auth.SignupOrganizationResponse]
-	getAuthState           *connect.Client[emptypb.Empty, auth.GetAuthStateResponse]
+	getAuthState           *connect.Client[auth.GetAuthStateRequest, auth.GetAuthStateResponse]
 	getAuthError           *connect.Client[auth.GetAuthErrorRequest, auth.GetAuthErrorResponse]
 	logout                 *connect.Client[emptypb.Empty, emptypb.Empty]
 	getAuthCustomizations  *connect.Client[auth.GetAuthCustomizationsRequest, auth.GetAuthCustomizationsResponse]
 	getAuthFeatures        *connect.Client[emptypb.Empty, auth.GetAuthFeaturesResponse]
 	updateLoginUserDetails *connect.Client[auth.UpdateLoginUserDetailsRequest, auth.UpdateLoginUserDetailsResponse]
+	getLoginRequestDetails *connect.Client[auth.GetLoginRequestDetailsRequest, auth.GetLoginRequestDetailsResponse]
 }
 
 // ListAuthMethods calls scalekit.v1.auth.AuthService.ListAuthMethods.
@@ -220,7 +231,7 @@ func (c *authServiceClient) SignupOrganization(ctx context.Context, req *connect
 }
 
 // GetAuthState calls scalekit.v1.auth.AuthService.GetAuthState.
-func (c *authServiceClient) GetAuthState(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[auth.GetAuthStateResponse], error) {
+func (c *authServiceClient) GetAuthState(ctx context.Context, req *connect.Request[auth.GetAuthStateRequest]) (*connect.Response[auth.GetAuthStateResponse], error) {
 	return c.getAuthState.CallUnary(ctx, req)
 }
 
@@ -249,6 +260,11 @@ func (c *authServiceClient) UpdateLoginUserDetails(ctx context.Context, req *con
 	return c.updateLoginUserDetails.CallUnary(ctx, req)
 }
 
+// GetLoginRequestDetails calls scalekit.v1.auth.AuthService.GetLoginRequestDetails.
+func (c *authServiceClient) GetLoginRequestDetails(ctx context.Context, req *connect.Request[auth.GetLoginRequestDetailsRequest]) (*connect.Response[auth.GetLoginRequestDetailsResponse], error) {
+	return c.getLoginRequestDetails.CallUnary(ctx, req)
+}
+
 // AuthServiceHandler is an implementation of the scalekit.v1.auth.AuthService service.
 type AuthServiceHandler interface {
 	ListAuthMethods(context.Context, *connect.Request[auth.ListAuthMethodsRequest]) (*connect.Response[auth.ListAuthMethodsResponse], error)
@@ -257,12 +273,13 @@ type AuthServiceHandler interface {
 	ResendAuthPasswordless(context.Context, *connect.Request[auth.ResendAuthPasswordlessRequest]) (*connect.Response[emptypb.Empty], error)
 	ListUserOrganizations(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[auth.ListUserOrganizationsResponse], error)
 	SignupOrganization(context.Context, *connect.Request[auth.SignupOrganizationRequest]) (*connect.Response[auth.SignupOrganizationResponse], error)
-	GetAuthState(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[auth.GetAuthStateResponse], error)
+	GetAuthState(context.Context, *connect.Request[auth.GetAuthStateRequest]) (*connect.Response[auth.GetAuthStateResponse], error)
 	GetAuthError(context.Context, *connect.Request[auth.GetAuthErrorRequest]) (*connect.Response[auth.GetAuthErrorResponse], error)
 	Logout(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[emptypb.Empty], error)
 	GetAuthCustomizations(context.Context, *connect.Request[auth.GetAuthCustomizationsRequest]) (*connect.Response[auth.GetAuthCustomizationsResponse], error)
 	GetAuthFeatures(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[auth.GetAuthFeaturesResponse], error)
 	UpdateLoginUserDetails(context.Context, *connect.Request[auth.UpdateLoginUserDetailsRequest]) (*connect.Response[auth.UpdateLoginUserDetailsResponse], error)
+	GetLoginRequestDetails(context.Context, *connect.Request[auth.GetLoginRequestDetailsRequest]) (*connect.Response[auth.GetLoginRequestDetailsResponse], error)
 }
 
 // NewAuthServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -344,6 +361,12 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(authServiceMethods.ByName("UpdateLoginUserDetails")),
 		connect.WithHandlerOptions(opts...),
 	)
+	authServiceGetLoginRequestDetailsHandler := connect.NewUnaryHandler(
+		AuthServiceGetLoginRequestDetailsProcedure,
+		svc.GetLoginRequestDetails,
+		connect.WithSchema(authServiceMethods.ByName("GetLoginRequestDetails")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/scalekit.v1.auth.AuthService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case AuthServiceListAuthMethodsProcedure:
@@ -370,6 +393,8 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 			authServiceGetAuthFeaturesHandler.ServeHTTP(w, r)
 		case AuthServiceUpdateLoginUserDetailsProcedure:
 			authServiceUpdateLoginUserDetailsHandler.ServeHTTP(w, r)
+		case AuthServiceGetLoginRequestDetailsProcedure:
+			authServiceGetLoginRequestDetailsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -403,7 +428,7 @@ func (UnimplementedAuthServiceHandler) SignupOrganization(context.Context, *conn
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.auth.AuthService.SignupOrganization is not implemented"))
 }
 
-func (UnimplementedAuthServiceHandler) GetAuthState(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[auth.GetAuthStateResponse], error) {
+func (UnimplementedAuthServiceHandler) GetAuthState(context.Context, *connect.Request[auth.GetAuthStateRequest]) (*connect.Response[auth.GetAuthStateResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.auth.AuthService.GetAuthState is not implemented"))
 }
 
@@ -425,4 +450,8 @@ func (UnimplementedAuthServiceHandler) GetAuthFeatures(context.Context, *connect
 
 func (UnimplementedAuthServiceHandler) UpdateLoginUserDetails(context.Context, *connect.Request[auth.UpdateLoginUserDetailsRequest]) (*connect.Response[auth.UpdateLoginUserDetailsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.auth.AuthService.UpdateLoginUserDetails is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) GetLoginRequestDetails(context.Context, *connect.Request[auth.GetLoginRequestDetailsRequest]) (*connect.Response[auth.GetLoginRequestDetailsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.auth.AuthService.GetLoginRequestDetails is not implemented"))
 }

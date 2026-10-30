@@ -38,15 +38,22 @@ const (
 // listing the end-user consents granted against a resource.
 type ListUserConsentsOptions struct {
 	// Search is a case-insensitive substring match on external user IDs.
-	// Ignored when UserIds is set.
+	// Ignored when ConsentIds or UserIds is set.
 	Search string
 	// PageSize is the number of consents to return per page (max 30).
 	PageSize uint32
 	// PageToken is the pagination cursor.
 	PageToken string
 	// UserIds matches external user IDs exactly and case-sensitively, combining
-	// the values with OR (max 25). Takes precedence over Search.
+	// the values with OR (max 25). Ignored when ConsentIds is set; takes
+	// precedence over Search.
 	UserIds []string
+	// ConsentIds matches consent IDs exactly (format usrcnst_xxxxx, max 25
+	// distinct). Takes precedence over UserIds and Search; blank-only values are
+	// ignored. IDs that do not exist or belong to another resource are omitted.
+	// An older server ignores this filter, so confirm each returned Id is one you
+	// asked for before revoking.
+	ConsentIds []string
 }
 
 // ListResourcesOptions holds pagination parameters for listing resources.
@@ -198,9 +205,12 @@ type ResourceService interface {
 	// Scopes and GrantedAt. The response also carries TotalSize plus
 	// NextPageToken and PrevPageToken cursors.
 	//
-	// Set options.UserIds to match specific users exactly, or options.Search
-	// for a case-insensitive substring match. When both are set, UserIds
-	// wins and Search is ignored.
+	// Set options.ConsentIds to fetch specific consents by ID, options.UserIds to
+	// match specific users exactly, or options.Search for a case-insensitive
+	// substring match. When more than one is set, the priority is ConsentIds,
+	// then UserIds, then Search, and the lower-priority ones are ignored.
+	// Blank-only ConsentIds are ignored. An older server ignores ConsentIds, so
+	// confirm each returned Id is one you asked for before revoking.
 	ListUserConsents(ctx context.Context, resourceId string, options ListUserConsentsOptions) (*ListResourceUserConsentsResponse, error)
 
 	// RevokeUserConsent revokes a single end-user consent held by a resource client.
@@ -440,9 +450,12 @@ func (r *resourceService) DeleteResourceClientSecret(ctx context.Context, resour
 // Scopes and GrantedAt. The response also carries TotalSize plus NextPageToken
 // and PrevPageToken cursors.
 //
-// Set options.UserIds to match specific users exactly, or options.Search for a
-// case-insensitive substring match. When both are set, UserIds wins and Search
-// is ignored.
+// Set options.ConsentIds to fetch specific consents by ID, options.UserIds to
+// match specific users exactly, or options.Search for a case-insensitive
+// substring match. When more than one is set, the priority is ConsentIds, then
+// UserIds, then Search, and the lower-priority ones are ignored. Blank-only
+// ConsentIds are ignored. An older server ignores ConsentIds, so confirm each
+// returned Id is one you asked for before revoking.
 func (r *resourceService) ListUserConsents(ctx context.Context, resourceId string, options ListUserConsentsOptions) (*ListResourceUserConsentsResponse, error) {
 	if resourceId == "" {
 		return nil, ErrResourceIdRequired
@@ -460,11 +473,11 @@ func (r *resourceService) ListUserConsents(ctx context.Context, resourceId strin
 		request.PageToken = options.PageToken
 	}
 	// The filter takes precedence over search server-side, so only attach it when
-	// the caller actually supplied user IDs — an empty filter would otherwise
-	// suppress a search the caller did supply.
-	if len(options.UserIds) > 0 {
+	// the caller supplied IDs; an empty filter would suppress a search.
+	if len(options.UserIds) > 0 || len(options.ConsentIds) > 0 {
 		request.Filter = &clientsv1.ResourceUserConsentFilter{
 			ExternalUserId: options.UserIds,
+			ConsentId:      options.ConsentIds,
 		}
 	}
 	return newConnectExecuter(
