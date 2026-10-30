@@ -762,13 +762,11 @@ func TestResourceServiceListUserConsentsConsentIdsOverrideUserIds(t *testing.T) 
 	require.Len(t, response.GetConsents(), 1)
 }
 
-// skipUnlessConsentIdValidated skips on a backend that predates filter.consent_id validation.
+// skipUnlessConsentIdValidated skips when SCALEKIT_SKIP_CONSENT_ID_VALIDATION_TESTS=true,
+// for a backend that predates filter.consent_id validation.
 func skipUnlessConsentIdValidated(t *testing.T) {
 	t.Helper()
-	_, err := client.Resources().ListUserConsents(context.Background(), testResourceId, scalekit.ListUserConsentsOptions{
-		ConsentIds: []string{"not-an-id"},
-	})
-	if err == nil {
+	if os.Getenv("SCALEKIT_SKIP_CONSENT_ID_VALIDATION_TESTS") == "true" {
 		t.Skip("backend does not validate filter.consent_id yet")
 	}
 }
