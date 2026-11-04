@@ -2630,7 +2630,9 @@ if err != nil {
 
 Lists the end-user consents granted against a resource, with pagination. Use this to audit who authorized a client, and to find the `consentId` you need before revoking.
 
-Filter by user in one of two ways. Pass `UserIds` to match external user IDs exactly and case-sensitively. Pass `Search` for a case-insensitive substring match. When you give both, `UserIds` wins and `Search` is ignored.
+Filter in one of three ways. Pass `ConsentIds` to fetch specific consents by ID, for example to find the `ClientId` you need to revoke a consent you already hold the ID of. Pass `UserIds` to match external user IDs exactly and case-sensitively. Pass `Search` for a case-insensitive substring match. When you give more than one, the priority is `ConsentIds`, then `UserIds`, then `Search`, and the lower-priority ones are ignored without an error. Blank-only `ConsentIds` values are ignored, so the next filter applies instead.
+
+When you filter by `ConsentIds`, check that every returned `Id` is one you asked for before you revoke anything. A server that predates this filter ignores it and returns the unfiltered first page. Do not combine `ConsentIds` with `UserIds` as an ownership check, because `ConsentIds` overrides `UserIds`. Compare `ExternalUserId` on the returned consent instead.
 
 Consents with `Id`, `ExternalUserId`, `ClientId`, `ClientName`, `Scopes`, and `GrantedAt`, plus `TotalSize` and the `NextPageToken` / `PrevPageToken` cursors.
 </dd>
@@ -2648,8 +2650,8 @@ Consents with `Id`, `ExternalUserId`, `ClientId`, `ClientName`, `Scopes`, and `G
 
 ```go
 consents, err := client.Resources().ListUserConsents(ctx, "res_142145647087190278", scalekit.ListUserConsentsOptions{
-  PageSize: 10,
-  UserIds:  []string{"usr_42", "usr_43"},
+  PageSize:   10,
+  ConsentIds: []string{"usrcnst_102709535608668163", "usrcnst_102709535608668164"},
 })
 if err != nil {
   // handle
@@ -2688,7 +2690,7 @@ for _, consent := range consents.GetConsents() {
 <dl>
 <dd>
 
-**options:** `ListUserConsentsOptions` — `Search` (case-insensitive substring match on external user IDs), `PageSize` (max 30), `PageToken`, `UserIds` (exact match, max 25; takes precedence over `Search`).
+**options:** `ListUserConsentsOptions` — `Search` (case-insensitive substring match on external user IDs), `PageSize` (max 30), `PageToken`, `UserIds` (exact match, max 25; ignored when `ConsentIds` is set; takes precedence over `Search`), `ConsentIds` (exact match on consent IDs, format `usrcnst_xxxxx`, max 25 distinct; IDs that do not exist or belong to another resource are omitted; takes precedence over `UserIds` and `Search`).
 
 </dd>
 </dl>

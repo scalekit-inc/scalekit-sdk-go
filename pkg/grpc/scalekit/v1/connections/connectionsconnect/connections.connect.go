@@ -94,6 +94,18 @@ const (
 	// ConnectionServiceUpdateConnectionContextProcedure is the fully-qualified name of the
 	// ConnectionService's UpdateConnectionContext RPC.
 	ConnectionServiceUpdateConnectionContextProcedure = "/scalekit.v1.connections.ConnectionService/UpdateConnectionContext"
+	// ConnectionServiceCreateAppConnectionProcedure is the fully-qualified name of the
+	// ConnectionService's CreateAppConnection RPC.
+	ConnectionServiceCreateAppConnectionProcedure = "/scalekit.v1.connections.ConnectionService/CreateAppConnection"
+	// ConnectionServiceGetAppConnectionProcedure is the fully-qualified name of the ConnectionService's
+	// GetAppConnection RPC.
+	ConnectionServiceGetAppConnectionProcedure = "/scalekit.v1.connections.ConnectionService/GetAppConnection"
+	// ConnectionServiceUpdateAppConnectionProcedure is the fully-qualified name of the
+	// ConnectionService's UpdateAppConnection RPC.
+	ConnectionServiceUpdateAppConnectionProcedure = "/scalekit.v1.connections.ConnectionService/UpdateAppConnection"
+	// ConnectionServiceListAppConnectionSummariesProcedure is the fully-qualified name of the
+	// ConnectionService's ListAppConnectionSummaries RPC.
+	ConnectionServiceListAppConnectionSummariesProcedure = "/scalekit.v1.connections.ConnectionService/ListAppConnectionSummaries"
 )
 
 // ConnectionServiceClient is a client for the scalekit.v1.connections.ConnectionService service.
@@ -118,6 +130,10 @@ type ConnectionServiceClient interface {
 	ListAppConnections(context.Context, *connect.Request[connections.ListAppConnectionsRequest]) (*connect.Response[connections.ListAppConnectionsResponse], error)
 	GetConnectionContext(context.Context, *connect.Request[connections.GetConnectionContextRequest]) (*connect.Response[connections.GetConnectionContextResponse], error)
 	UpdateConnectionContext(context.Context, *connect.Request[connections.UpdateConnectionContextRequest]) (*connect.Response[emptypb.Empty], error)
+	CreateAppConnection(context.Context, *connect.Request[connections.CreateAppConnectionRequest]) (*connect.Response[connections.CreateAppConnectionResponse], error)
+	GetAppConnection(context.Context, *connect.Request[connections.GetAppConnectionRequest]) (*connect.Response[connections.GetAppConnectionResponse], error)
+	UpdateAppConnection(context.Context, *connect.Request[connections.UpdateAppConnectionRequest]) (*connect.Response[connections.UpdateAppConnectionResponse], error)
+	ListAppConnectionSummaries(context.Context, *connect.Request[connections.ListAppConnectionSummariesRequest]) (*connect.Response[connections.ListAppConnectionSummariesResponse], error)
 }
 
 // NewConnectionServiceClient constructs a client for the scalekit.v1.connections.ConnectionService
@@ -251,6 +267,30 @@ func NewConnectionServiceClient(httpClient connect.HTTPClient, baseURL string, o
 			connect.WithSchema(connectionServiceMethods.ByName("UpdateConnectionContext")),
 			connect.WithClientOptions(opts...),
 		),
+		createAppConnection: connect.NewClient[connections.CreateAppConnectionRequest, connections.CreateAppConnectionResponse](
+			httpClient,
+			baseURL+ConnectionServiceCreateAppConnectionProcedure,
+			connect.WithSchema(connectionServiceMethods.ByName("CreateAppConnection")),
+			connect.WithClientOptions(opts...),
+		),
+		getAppConnection: connect.NewClient[connections.GetAppConnectionRequest, connections.GetAppConnectionResponse](
+			httpClient,
+			baseURL+ConnectionServiceGetAppConnectionProcedure,
+			connect.WithSchema(connectionServiceMethods.ByName("GetAppConnection")),
+			connect.WithClientOptions(opts...),
+		),
+		updateAppConnection: connect.NewClient[connections.UpdateAppConnectionRequest, connections.UpdateAppConnectionResponse](
+			httpClient,
+			baseURL+ConnectionServiceUpdateAppConnectionProcedure,
+			connect.WithSchema(connectionServiceMethods.ByName("UpdateAppConnection")),
+			connect.WithClientOptions(opts...),
+		),
+		listAppConnectionSummaries: connect.NewClient[connections.ListAppConnectionSummariesRequest, connections.ListAppConnectionSummariesResponse](
+			httpClient,
+			baseURL+ConnectionServiceListAppConnectionSummariesProcedure,
+			connect.WithSchema(connectionServiceMethods.ByName("ListAppConnectionSummaries")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -276,6 +316,10 @@ type connectionServiceClient struct {
 	listAppConnections            *connect.Client[connections.ListAppConnectionsRequest, connections.ListAppConnectionsResponse]
 	getConnectionContext          *connect.Client[connections.GetConnectionContextRequest, connections.GetConnectionContextResponse]
 	updateConnectionContext       *connect.Client[connections.UpdateConnectionContextRequest, emptypb.Empty]
+	createAppConnection           *connect.Client[connections.CreateAppConnectionRequest, connections.CreateAppConnectionResponse]
+	getAppConnection              *connect.Client[connections.GetAppConnectionRequest, connections.GetAppConnectionResponse]
+	updateAppConnection           *connect.Client[connections.UpdateAppConnectionRequest, connections.UpdateAppConnectionResponse]
+	listAppConnectionSummaries    *connect.Client[connections.ListAppConnectionSummariesRequest, connections.ListAppConnectionSummariesResponse]
 }
 
 // CreateEnvironmentConnection calls
@@ -387,6 +431,27 @@ func (c *connectionServiceClient) UpdateConnectionContext(ctx context.Context, r
 	return c.updateConnectionContext.CallUnary(ctx, req)
 }
 
+// CreateAppConnection calls scalekit.v1.connections.ConnectionService.CreateAppConnection.
+func (c *connectionServiceClient) CreateAppConnection(ctx context.Context, req *connect.Request[connections.CreateAppConnectionRequest]) (*connect.Response[connections.CreateAppConnectionResponse], error) {
+	return c.createAppConnection.CallUnary(ctx, req)
+}
+
+// GetAppConnection calls scalekit.v1.connections.ConnectionService.GetAppConnection.
+func (c *connectionServiceClient) GetAppConnection(ctx context.Context, req *connect.Request[connections.GetAppConnectionRequest]) (*connect.Response[connections.GetAppConnectionResponse], error) {
+	return c.getAppConnection.CallUnary(ctx, req)
+}
+
+// UpdateAppConnection calls scalekit.v1.connections.ConnectionService.UpdateAppConnection.
+func (c *connectionServiceClient) UpdateAppConnection(ctx context.Context, req *connect.Request[connections.UpdateAppConnectionRequest]) (*connect.Response[connections.UpdateAppConnectionResponse], error) {
+	return c.updateAppConnection.CallUnary(ctx, req)
+}
+
+// ListAppConnectionSummaries calls
+// scalekit.v1.connections.ConnectionService.ListAppConnectionSummaries.
+func (c *connectionServiceClient) ListAppConnectionSummaries(ctx context.Context, req *connect.Request[connections.ListAppConnectionSummariesRequest]) (*connect.Response[connections.ListAppConnectionSummariesResponse], error) {
+	return c.listAppConnectionSummaries.CallUnary(ctx, req)
+}
+
 // ConnectionServiceHandler is an implementation of the scalekit.v1.connections.ConnectionService
 // service.
 type ConnectionServiceHandler interface {
@@ -410,6 +475,10 @@ type ConnectionServiceHandler interface {
 	ListAppConnections(context.Context, *connect.Request[connections.ListAppConnectionsRequest]) (*connect.Response[connections.ListAppConnectionsResponse], error)
 	GetConnectionContext(context.Context, *connect.Request[connections.GetConnectionContextRequest]) (*connect.Response[connections.GetConnectionContextResponse], error)
 	UpdateConnectionContext(context.Context, *connect.Request[connections.UpdateConnectionContextRequest]) (*connect.Response[emptypb.Empty], error)
+	CreateAppConnection(context.Context, *connect.Request[connections.CreateAppConnectionRequest]) (*connect.Response[connections.CreateAppConnectionResponse], error)
+	GetAppConnection(context.Context, *connect.Request[connections.GetAppConnectionRequest]) (*connect.Response[connections.GetAppConnectionResponse], error)
+	UpdateAppConnection(context.Context, *connect.Request[connections.UpdateAppConnectionRequest]) (*connect.Response[connections.UpdateAppConnectionResponse], error)
+	ListAppConnectionSummaries(context.Context, *connect.Request[connections.ListAppConnectionSummariesRequest]) (*connect.Response[connections.ListAppConnectionSummariesResponse], error)
 }
 
 // NewConnectionServiceHandler builds an HTTP handler from the service implementation. It returns
@@ -539,6 +608,30 @@ func NewConnectionServiceHandler(svc ConnectionServiceHandler, opts ...connect.H
 		connect.WithSchema(connectionServiceMethods.ByName("UpdateConnectionContext")),
 		connect.WithHandlerOptions(opts...),
 	)
+	connectionServiceCreateAppConnectionHandler := connect.NewUnaryHandler(
+		ConnectionServiceCreateAppConnectionProcedure,
+		svc.CreateAppConnection,
+		connect.WithSchema(connectionServiceMethods.ByName("CreateAppConnection")),
+		connect.WithHandlerOptions(opts...),
+	)
+	connectionServiceGetAppConnectionHandler := connect.NewUnaryHandler(
+		ConnectionServiceGetAppConnectionProcedure,
+		svc.GetAppConnection,
+		connect.WithSchema(connectionServiceMethods.ByName("GetAppConnection")),
+		connect.WithHandlerOptions(opts...),
+	)
+	connectionServiceUpdateAppConnectionHandler := connect.NewUnaryHandler(
+		ConnectionServiceUpdateAppConnectionProcedure,
+		svc.UpdateAppConnection,
+		connect.WithSchema(connectionServiceMethods.ByName("UpdateAppConnection")),
+		connect.WithHandlerOptions(opts...),
+	)
+	connectionServiceListAppConnectionSummariesHandler := connect.NewUnaryHandler(
+		ConnectionServiceListAppConnectionSummariesProcedure,
+		svc.ListAppConnectionSummaries,
+		connect.WithSchema(connectionServiceMethods.ByName("ListAppConnectionSummaries")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/scalekit.v1.connections.ConnectionService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ConnectionServiceCreateEnvironmentConnectionProcedure:
@@ -581,6 +674,14 @@ func NewConnectionServiceHandler(svc ConnectionServiceHandler, opts ...connect.H
 			connectionServiceGetConnectionContextHandler.ServeHTTP(w, r)
 		case ConnectionServiceUpdateConnectionContextProcedure:
 			connectionServiceUpdateConnectionContextHandler.ServeHTTP(w, r)
+		case ConnectionServiceCreateAppConnectionProcedure:
+			connectionServiceCreateAppConnectionHandler.ServeHTTP(w, r)
+		case ConnectionServiceGetAppConnectionProcedure:
+			connectionServiceGetAppConnectionHandler.ServeHTTP(w, r)
+		case ConnectionServiceUpdateAppConnectionProcedure:
+			connectionServiceUpdateAppConnectionHandler.ServeHTTP(w, r)
+		case ConnectionServiceListAppConnectionSummariesProcedure:
+			connectionServiceListAppConnectionSummariesHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -668,4 +769,20 @@ func (UnimplementedConnectionServiceHandler) GetConnectionContext(context.Contex
 
 func (UnimplementedConnectionServiceHandler) UpdateConnectionContext(context.Context, *connect.Request[connections.UpdateConnectionContextRequest]) (*connect.Response[emptypb.Empty], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.UpdateConnectionContext is not implemented"))
+}
+
+func (UnimplementedConnectionServiceHandler) CreateAppConnection(context.Context, *connect.Request[connections.CreateAppConnectionRequest]) (*connect.Response[connections.CreateAppConnectionResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.CreateAppConnection is not implemented"))
+}
+
+func (UnimplementedConnectionServiceHandler) GetAppConnection(context.Context, *connect.Request[connections.GetAppConnectionRequest]) (*connect.Response[connections.GetAppConnectionResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.GetAppConnection is not implemented"))
+}
+
+func (UnimplementedConnectionServiceHandler) UpdateAppConnection(context.Context, *connect.Request[connections.UpdateAppConnectionRequest]) (*connect.Response[connections.UpdateAppConnectionResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.UpdateAppConnection is not implemented"))
+}
+
+func (UnimplementedConnectionServiceHandler) ListAppConnectionSummaries(context.Context, *connect.Request[connections.ListAppConnectionSummariesRequest]) (*connect.Response[connections.ListAppConnectionSummariesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("scalekit.v1.connections.ConnectionService.ListAppConnectionSummaries is not implemented"))
 }
